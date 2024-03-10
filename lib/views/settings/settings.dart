@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:thc/models/local_storage.dart';
 import 'package:thc/models/theme.dart';
 
@@ -31,7 +31,7 @@ class _ThemePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appTheme = Provider.of<AppTheme>(context);
+    final themeMode = context.watch<AppTheme>().state;
     final style = TextStyle(color: context.colorScheme.onBackground);
     return SegmentedButton<ThemeMode>(
       showSelectedIcon: false,
@@ -43,13 +43,13 @@ class _ThemePicker extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Text(
                 value.name,
-                style: appTheme.mode == value ? null : style,
+                style: themeMode == value ? null : style,
               ),
             ),
-          )
+          ),
       ],
-      selected: {appTheme.mode},
-      onSelectionChanged: (selection) => appTheme.mode = selection.first,
+      selected: {themeMode},
+      onSelectionChanged: (selection) => context.read<AppTheme>().newThemeMode(selection.first),
     );
   }
 }

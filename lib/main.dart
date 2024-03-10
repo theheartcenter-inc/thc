@@ -1,25 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:thc/models/local_storage.dart';
 import 'package:thc/models/navigator.dart';
 import 'package:thc/models/theme.dart';
 import 'package:thc/models/user.dart';
-import 'package:thc/views/admin_portal/admin_portal.dart';
 import 'package:thc/views/home/home_screen.dart';
 
 void main() async {
   await loadFromLocalStorage();
-  const App().run();
+  runApp(
+    MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => AppTheme()),
+      ],
+      child: const App(),
+    ),
+  );
 }
 
 class App extends StatelessWidget {
   const App({super.key});
 
-  void run() => runApp(ChangeNotifierProvider(create: (_) => AppTheme(), child: this));
-
   @override
   Widget build(BuildContext context) {
-    final themeMode = Provider.of<AppTheme>(context).mode;
+    final themeMode = context.watch<AppTheme>().state;
 
     return MaterialApp(
       navigatorKey: navKey,
@@ -89,11 +93,7 @@ class UserButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: () {
           userType = type;
-          navigator.pushReplacement(switch (type) {
-            UserType.participant => const ParticipantHomeScreen(),
-            UserType.director => const DirectorHomeScreen(),
-            UserType.admin => const AdminPortal(),
-          });
+          navigator.pushReplacement(const HomeScreen());
         },
         style: buttonStyle,
         child: Padding(

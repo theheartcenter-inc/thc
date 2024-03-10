@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thc/models/user.dart';
 
@@ -49,11 +50,12 @@ enum _StorageKeys {
       };
 }
 
-class AppTheme extends ChangeNotifier {
-  ThemeMode get mode => _StorageKeys.themeMode();
-  set mode(ThemeMode newTheme) {
+class AppTheme extends Cubit<ThemeMode> {
+  AppTheme() : super(_StorageKeys.themeMode());
+
+  void newThemeMode(ThemeMode newTheme) {
     _StorageKeys.themeMode.save(newTheme.index);
-    notifyListeners();
+    emit(newTheme);
   }
 }
 
