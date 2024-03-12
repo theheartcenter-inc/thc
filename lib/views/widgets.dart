@@ -17,6 +17,7 @@ class FunPlaceholder extends StatelessWidget {
       fontFamily: 'Consolas',
       fontFamilyFallback: ['Courier New', 'Courier', 'monospace'],
       fontWeight: FontWeight.bold,
+      fontSize: 32,
       shadows: [
         Shadow(color: colorScheme.background.withOpacity(0.5), blurRadius: 2),
       ],
@@ -30,7 +31,7 @@ class FunPlaceholder extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
         ),
         alignment: Alignment.center,
-        child: Text(label, style: style),
+        child: Text(label, style: style, textAlign: TextAlign.center),
       ),
     );
   }
