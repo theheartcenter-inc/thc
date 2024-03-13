@@ -47,7 +47,7 @@ abstract class Bloc<S> {
 /// ```
 /// Immutable types (usually) won't change unless they're reassigned.
 ///
-/// Mutable types can "mutate" even if they're declared as `final`.
+/// But other types can "mutate" even if they're declared as `final`.
 ///
 /// Example:
 ///
@@ -60,18 +60,6 @@ abstract class Bloc<S> {
 ///
 /// final List list = [1, 2, 3];
 /// list[0] = 5; // works fine
-///
-///
-/// // This class is "immutable" even though its member can change.
-/// @immutable
-/// class ListWrapper {
-///   const Class(this.list);
-///   final List list;
-/// }
-///
-/// class ListCubit extends Claybit<ListWrapper> {
-///   // probably better than Cubit.
-/// }
 /// ```
 abstract class StateBloc<S> extends Bloc<S> {
   @override
