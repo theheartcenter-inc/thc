@@ -99,13 +99,13 @@ class Cubit<S> extends StateBloc<S> {
   }
 }
 
-/// {@template models.bloc.CubitMutable}
+/// {@template models.bloc.Claybit}
 /// Similar to [Cubit], but designed for mutable types.
 ///
 /// Listening widgets are rebuilt each time [emit] is called.
 /// {@endtemplate}
 class Claybit<S> extends StateBloc<S> {
-  /// {@macro models.bloc.CubitMutable}
+  /// {@macro models.bloc.Claybit}
   Claybit(this.state);
 
   /// The claybit's current value.
