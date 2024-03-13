@@ -1,21 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:thc/models/bloc.dart';
 import 'package:thc/models/local_storage.dart';
 import 'package:thc/models/navigator.dart';
 import 'package:thc/models/theme.dart';
 import 'package:thc/models/user.dart';
 import 'package:thc/views/home/home_screen.dart';
+import 'package:thc/views/settings/settings.dart';
 
 void main() async {
   await loadFromLocalStorage();
-  runApp(
-    MultiBlocProvider(
-      providers: [
-        BlocProvider(create: (_) => AppTheme()),
-      ],
-      child: const App(),
-    ),
-  );
+  runApp(const App());
 }
 
 class App extends StatelessWidget {
@@ -23,15 +18,18 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeMode = context.watch<AppTheme>().state;
-
-    return MaterialApp(
-      navigatorKey: navKey,
-      theme: lightTheme,
-      darkTheme: darkTheme,
-      themeMode: themeMode,
-      debugShowCheckedModeBanner: false,
-      home: const ChooseAnyView(),
+    return MultiProvider(
+      providers: [
+        BlocProvider(create: (_) => AppTheme()),
+      ],
+      builder: (context, _) => MaterialApp(
+        navigatorKey: navKey,
+        theme: lightTheme,
+        darkTheme: darkTheme,
+        themeMode: context.watch<AppTheme>().state,
+        debugShowCheckedModeBanner: false,
+        home: const ChooseAnyView(),
+      ),
     );
   }
 }

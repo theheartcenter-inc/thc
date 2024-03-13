@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:thc/models/bloc.dart';
 import 'package:thc/models/local_storage.dart';
 import 'package:thc/models/theme.dart';
 
@@ -23,6 +24,15 @@ class SettingsScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class AppTheme extends Cubit<ThemeMode> {
+  AppTheme() : super(StorageKeys.themeMode());
+
+  void newThemeMode(ThemeMode newTheme) {
+    StorageKeys.themeMode.save(newTheme.index);
+    emit(newTheme);
   }
 }
 
