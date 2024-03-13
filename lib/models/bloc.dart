@@ -19,7 +19,7 @@
 /// The Heart Center is implementing BLoCs using `provider`,
 /// along with some classes borrowed from `flutter_bloc`.
 ///
-/// `provider` a dependency in our pubspec.yaml, and the extra BLoC classes are in this file!
+/// `provider` is a dependency in our pubspec.yaml, and the extra BLoC classes are in this file!
 library;
 
 import 'dart:async';
@@ -31,25 +31,47 @@ import 'package:provider/provider.dart';
 ///
 /// The right BLoC to use depends on the situation:
 /// - [Cubit] for immutable types
-/// - [CubitMutable] for mutable types
-/// - [CustomBloc] for more flexibility
+/// - [Claybit] for mutable types
+/// - [CustomBloc] for the most flexibility
 abstract class Bloc<S> {
   /// BLoCs need a way to emit changes into a widget's build context;
   /// that's what this [StreamController] is for.
   StreamController<S> get _streamController;
 }
 
-/// This class is used in both [Cubit] and [CubitMutable].
+/// This class is used in both [Cubit] and [Claybit].
 ///
-/// A data type is "immutable" if the only way to update it
-/// is by assigning it a new value. Some examples:
 /// ```dart
-/// int, double, bool, String
+/// int, double, bool, String // immutable types
+/// List, Map, Set            // mutable types
 /// ```
+/// Immutable types (usually) won't change unless they're reassigned.
 ///
-/// Mutable types can change without being reassigned.
-/// ```
-/// List, Map, Set
+/// Mutable types can "mutate" even if they're declared as `final`.
+///
+/// Example:
+///
+/// ```dart
+/// String string = 'cat';
+/// string[0] = 'f'; // error, can't change parts of a String
+///
+/// // reassigning the whole string works, since it isn't final
+/// string = 'f${string.substring(1)}'; // string is 'fat' now
+///
+/// final List list = [1, 2, 3];
+/// list[0] = 5; // works fine
+///
+///
+/// // This class is "immutable" even though its member can change.
+/// @immutable
+/// class ListWrapper {
+///   const Class(this.list);
+///   final List list;
+/// }
+///
+/// class ListCubit extends Claybit<ListWrapper> {
+///   // probably better than Cubit.
+/// }
 /// ```
 abstract class StateBloc<S> extends Bloc<S> {
   @override
@@ -68,7 +90,7 @@ abstract class StateBloc<S> extends Bloc<S> {
 /// This class behaves the same way as the `Cubit` class found at
 /// [bloclibrary.dev](https://bloclibrary.dev).
 ///
-/// For mutable types, consider using [CubitMutable].
+/// For mutable types, consider using [Claybit].
 /// {@endtemplate}
 class Cubit<S> extends StateBloc<S> {
   /// {@macro models.bloc.Cubit}
@@ -94,22 +116,26 @@ class Cubit<S> extends StateBloc<S> {
 ///
 /// Listening widgets are rebuilt each time [emit] is called.
 /// {@endtemplate}
-class CubitMutable<S> extends StateBloc<S> {
+class Claybit<S> extends StateBloc<S> {
   /// {@macro models.bloc.CubitMutable}
-  CubitMutable(this.state);
+  Claybit(this.state);
 
+  /// The claybit's current value.
+  ///
+  /// It can be reassigned, or changed in other ways
+  /// (e.g. for a [List], you could do `state.add(5)`).
   S state;
 
   /// Since there isn't an immutable value to compare with,
   /// it's tough to figure out whether changes have been made
   /// and listening widgets should rebuild.
   ///
-  /// So instead, [CubitMutable.emit] triggers a rebuild every time,
+  /// So instead, [Claybit.emit] triggers a rebuild every time,
   /// using the current [state].
   void emit() => _emit(state);
 }
 
-/// The goal of `CustomBloc` is to be as flexible as possible.
+/// [Claybit]s can be molded in many ways, but a `CustomBloc` is even more flexible.
 ///
 /// If you're making a model with a bunch of different values that interact,
 /// instead wrapping everything in a huge class, you can set each value
@@ -118,17 +144,22 @@ class CubitMutable<S> extends StateBloc<S> {
 /// whenever there's an update.
 ///
 /// ```dart
-/// int value = 1; // current value can be accessed by another BLoC if needed
 /// final _valueController = StreamController<int>.broadcast();
+/// int value = 1; // current value can be accessed without a BuildContext,
+///                // but you still need the context to listen for changes
+///
+/// // this function can be called directly from a widget, or from another BLoC!
+/// void doubleIt() => controller.add(value = value * 2);
 ///
 /// class ValueBloc extends CustomBloc<int> {
 ///   @override
 ///   StreamController<int> get controller => _valueController;
-///
-///   void doubleIt() => controller.add(value = value * 2);
 /// }
 /// ```
 abstract class CustomBloc<S> extends Bloc<S> {
+  /// This object can send a value to whatever widgets are listening.
+  ///
+  /// [controller] can be defined inside or outside the class.
   StreamController<S> get controller;
   @override
   StreamController<S> get _streamController => controller;
@@ -152,8 +183,8 @@ class BlocProvider<T extends Bloc> extends InheritedProvider<T> {
   BlocProvider({super.key, required super.create, super.child, super.lazy = true})
       : super(startListening: _startListening, dispose: _dispose);
 
-  static void _dispose(BuildContext _, Bloc bloc) => bloc._streamController.close();
-
   static VoidCallback _startListening(InheritedContext<Bloc?> context, Bloc value) =>
       value._streamController.stream.listen((_) => context.markNeedsNotifyDependents()).cancel;
+
+  static void _dispose(BuildContext _, Bloc bloc) => bloc._streamController.close();
 }
