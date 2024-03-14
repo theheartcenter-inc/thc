@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// {@template models.theme.colorScheme}
-/// The THC app colors are based on the color palette from
-/// [theheartcenter.one](https://theheartcenter.one/).
-///
-/// Names starting with an `_underscore` are private: they can't be accessed
-/// from another file.
-///
-/// Instead, by pulling colors from the `colorScheme`, the color palette can adapt
+/// By pulling colors from the `colorScheme`, the color palette can adapt
 /// based on whether the app is in light or dark mode.
 ///
 /// ```dart
@@ -22,8 +16,11 @@ import 'package:flutter/material.dart';
 ///   );
 /// }
 /// ```
+///
+/// The THC app colors are based on the color palette from
+/// [theheartcenter.one](https://theheartcenter.one/).
 /// {@endtemplate}
-abstract final class _ThcColors {
+abstract final class ThcColors {
   static const green = Color(0xff99cc99);
   static const pink = Color(0xffeecce0);
   static const orange = Color(0xffffa020);
@@ -34,55 +31,81 @@ abstract final class _ThcColors {
   static const darkGreen = Color(0xff003300);
   static const darkMagenta = Color(0xff663366);
   static const paleAzure = Color(0xffddeeff);
-  static const red = Colors.red;
-  static const white = Colors.white;
-  static const black = Colors.black;
+}
+
+const buttonStyle = ButtonStyle(shape: MaterialStatePropertyAll(BeveledRectangleBorder()));
+
+final navigationBarTheme = NavigationBarThemeData(
+  backgroundColor: ThcColors.darkBlue,
+  labelTextStyle: MaterialStateProperty.resolveWith((states) {
+    const style = TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: ThcColors.teal);
+    if (states.contains(MaterialState.selected)) return style;
+    return style.copyWith(color: Colors.white);
+  }),
+  indicatorColor: Colors.transparent,
+  iconTheme: MaterialStateProperty.resolveWith((states) {
+    const data = IconThemeData(size: 32, color: ThcColors.teal);
+    if (states.contains(MaterialState.selected)) return data;
+    return data.copyWith(color: Colors.white);
+  }),
+  labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+);
+
+extension type ThemeScheme.fromData(ThemeData data) implements ThemeData {
+  ThemeScheme(ColorScheme scheme)
+      : this.fromData(ThemeData(
+          colorScheme: scheme,
+          materialTapTargetSize: MaterialTapTargetSize.padded,
+          filledButtonTheme: const FilledButtonThemeData(style: buttonStyle),
+          elevatedButtonTheme: const ElevatedButtonThemeData(style: buttonStyle),
+          navigationBarTheme: navigationBarTheme,
+        ));
 }
 
 /// {@macro models.theme.colorScheme}
-final lightTheme = ThemeData(
-  materialTapTargetSize: MaterialTapTargetSize.padded,
-  colorScheme: const ColorScheme(
+final lightTheme = ThemeScheme(
+  const ColorScheme(
     brightness: Brightness.light,
-    primary: _ThcColors.green,
-    inversePrimary: _ThcColors.darkGreen,
-    onPrimary: _ThcColors.white,
-    secondary: _ThcColors.teal,
-    onSecondary: _ThcColors.white,
-    tertiary: _ThcColors.darkMagenta,
-    onTertiary: _ThcColors.tan,
-    error: _ThcColors.red,
-    onError: _ThcColors.white,
-    errorContainer: _ThcColors.pink,
-    onErrorContainer: _ThcColors.red,
-    background: _ThcColors.paleAzure,
-    onBackground: _ThcColors.black,
-    surface: _ThcColors.dullBlue,
-    onSurface: _ThcColors.white,
-    inverseSurface: _ThcColors.darkBlue,
-    onInverseSurface: _ThcColors.orange,
+    primary: ThcColors.green,
+    inversePrimary: ThcColors.darkGreen,
+    onPrimary: Colors.white,
+    secondary: ThcColors.teal,
+    onSecondary: Colors.white,
+    tertiary: ThcColors.darkMagenta,
+    onTertiary: ThcColors.tan,
+    error: Colors.red,
+    onError: Colors.white,
+    errorContainer: ThcColors.pink,
+    onErrorContainer: Colors.red,
+    background: ThcColors.paleAzure,
+    onBackground: Colors.black,
+    surface: ThcColors.tan,
+    onSurface: Colors.black,
+    surfaceVariant: ThcColors.dullBlue,
+    onSurfaceVariant: Colors.white,
+    inverseSurface: ThcColors.darkBlue,
+    onInverseSurface: ThcColors.orange,
   ),
 );
 
 /// {@macro models.theme.colorScheme}
-final darkTheme = ThemeData(
-  materialTapTargetSize: MaterialTapTargetSize.padded,
-  colorScheme: const ColorScheme(
+final darkTheme = ThemeScheme(
+  const ColorScheme(
     brightness: Brightness.dark,
-    primary: _ThcColors.green,
-    onPrimary: _ThcColors.white,
-    primaryContainer: _ThcColors.darkGreen,
-    onPrimaryContainer: _ThcColors.white,
-    secondary: _ThcColors.teal,
-    onSecondary: _ThcColors.white,
-    tertiary: _ThcColors.tan,
-    onTertiary: _ThcColors.darkMagenta,
-    error: _ThcColors.red,
-    onError: _ThcColors.white,
-    background: _ThcColors.darkBlue,
-    onBackground: _ThcColors.paleAzure,
-    surface: _ThcColors.dullBlue,
-    onSurface: _ThcColors.paleAzure,
+    primary: ThcColors.green,
+    onPrimary: Colors.white,
+    primaryContainer: ThcColors.darkGreen,
+    onPrimaryContainer: Colors.white,
+    secondary: ThcColors.teal,
+    onSecondary: Colors.white,
+    tertiary: ThcColors.tan,
+    onTertiary: ThcColors.darkMagenta,
+    error: Colors.red,
+    onError: Colors.white,
+    background: ThcColors.darkBlue,
+    onBackground: ThcColors.paleAzure,
+    surface: ThcColors.dullBlue,
+    onSurface: ThcColors.paleAzure,
   ),
 );
 

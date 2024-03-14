@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:thc/models/navigator.dart';
-import 'package:thc/models/theme.dart';
 import 'package:thc/views/create_livestream/active_stream.dart';
-import 'package:thc/views/widgets.dart';
 
 class CreateLivestream extends StatefulWidget {
   const CreateLivestream({super.key});
@@ -20,7 +18,7 @@ class _CreateLivestreamState extends State<CreateLivestream> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Text('Scheduled for: $nextStream'),
-          ElevatedButton(
+          FilledButton(
             onPressed: () => navigator.push(const ActiveStream()),
             child: const Text('Go Live'),
           )
