@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thc/models/user.dart';
 
@@ -16,7 +15,7 @@ late final SharedPreferences _storage;
 /// ```
 /// Other types need to be converted in order to save/load.
 /// {@endtemplate}
-enum _StorageKeys {
+enum StorageKeys {
   themeMode,
   userType,
   ;
@@ -50,16 +49,7 @@ enum _StorageKeys {
       };
 }
 
-class AppTheme extends Cubit<ThemeMode> {
-  AppTheme() : super(_StorageKeys.themeMode());
-
-  void newThemeMode(ThemeMode newTheme) {
-    _StorageKeys.themeMode.save(newTheme.index);
-    emit(newTheme);
-  }
-}
-
-UserType get userType => _StorageKeys.userType();
+UserType get userType => StorageKeys.userType();
 set userType(UserType type) {
-  _StorageKeys.userType.save(type.index);
+  StorageKeys.userType.save(type.index);
 }
