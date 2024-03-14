@@ -7,6 +7,7 @@ import 'package:thc/models/user.dart';
 import 'package:thc/views/home/home_screen.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await loadFromLocalStorage();
   runApp(
     MultiBlocProvider(
