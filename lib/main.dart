@@ -10,6 +10,7 @@ import 'package:thc/views/home/home_screen.dart';
 import 'package:thc/views/settings/settings.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   await loadFromLocalStorage();
   runApp(const App());
 }
