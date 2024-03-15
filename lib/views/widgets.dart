@@ -9,8 +9,7 @@ class FunPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
-    final colorScheme = theme.colorScheme;
+    final colorScheme = context.colorScheme;
     final color = this.color ?? colorScheme.primary;
     final style = TextStyle(
       color: color,
@@ -35,5 +34,27 @@ class FunPlaceholder extends StatelessWidget {
         child: Text(label, textAlign: TextAlign.center, style: style),
       ),
     );
+  }
+}
+
+abstract class StateAsync<T extends StatefulWidget> extends State<T> {
+  Future<void> sleep(double seconds) =>
+      Future.delayed(Duration(milliseconds: (seconds * 1000).round()));
+
+  void safeState(VoidCallback fn) => mounted ? setState(fn) : null;
+
+  /// override this
+  void animate() {}
+
+  @override
+  void initState() {
+    super.initState();
+    animate();
+  }
+
+  /// [sleep], then [setState].
+  Future<void> sleepState(double seconds, VoidCallback fn) async {
+    await sleep(seconds);
+    safeState(fn);
   }
 }

@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:thc/models/navigator.dart';
+import 'package:thc/models/bloc.dart';
 import 'package:thc/models/theme.dart';
 import 'package:thc/views/create_livestream/active_stream.dart';
 
@@ -12,16 +12,30 @@ class CreateLivestream extends StatefulWidget {
   State<CreateLivestream> createState() => _CreateLivestreamState();
 }
 
-bool aboutToStart = false;
+bool aboutToStart = true;
 
 class _CreateLivestreamState extends State<CreateLivestream> {
+  DateTime get nextStream => DateTime.now();
+  String get scheduledFor => 'Scheduled for: '
+      '${nextStream.month}/${nextStream.day}/${nextStream.year} '
+      '${nextStream.hour}:${nextStream.minute}';
   int peopleWaiting = Random().nextBool() ? 69 : 420;
   String get people => peopleWaiting == 1 ? 'person' : 'people';
+
+  void startStreaming() {
+    Navigator.of(context).push(PageRouteBuilder(
+      transitionDuration: Durations.long4,
+      pageBuilder: (_, animation, __) {
+        return BlocProvider(
+          create: (_) => StreamOverlayFadeIn(animation),
+          child: const ActiveStream(),
+        );
+      },
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
-    final DateTime nextStream = DateTime.now();
-    final niceFormat =
-        '${nextStream.month}/${nextStream.day}/${nextStream.year} ${nextStream.hour}:${nextStream.minute}';
     return Center(
       child: Column(
         children: [
@@ -39,17 +53,20 @@ class _CreateLivestreamState extends State<CreateLivestream> {
             ),
           ),
           const Spacer(flex: 20),
-          Text('Scheduled for: $niceFormat'),
+          Text(scheduledFor),
           const Spacer(flex: 2),
-          FilledButton(
-            onPressed: aboutToStart ? () => navigator.push(const ActiveStream()) : null,
-            style: FilledButton.styleFrom(
-              backgroundColor: ThcColors.teal,
-              foregroundColor: ThcColors.darkBlue,
-              shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(30)),
-              padding: const EdgeInsets.fromLTRB(30, 15, 30, 18),
+          Hero(
+            tag: 'go live',
+            child: FilledButton(
+              onPressed: aboutToStart ? startStreaming : null,
+              style: FilledButton.styleFrom(
+                backgroundColor: ThcColors.teal,
+                foregroundColor: Colors.black,
+                shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                padding: const EdgeInsets.fromLTRB(30, 15, 30, 18),
+              ),
+              child: const Text('Go Live', style: TextStyle(fontSize: 36)),
             ),
-            child: const Text('Go Live', style: TextStyle(fontSize: 36)),
           ),
           const Spacer(flex: 2),
           Text(
