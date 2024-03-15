@@ -27,87 +27,86 @@ abstract final class ThcColors {
   static const teal = Color(0xff00b0b0);
   static const tan = Color(0xfff8f0e0);
   static const dullBlue = Color(0xff364764);
+  static const gray = Color(0xff4b4f58);
   static const darkBlue = Color(0xff151c28);
   static const darkGreen = Color(0xff003300);
   static const darkMagenta = Color(0xff663366);
   static const paleAzure = Color(0xffddeeff);
 }
 
+/// {@macro models.theme.colorScheme}
+const brightColors = ColorScheme(
+  brightness: Brightness.light,
+  primary: ThcColors.green,
+  inversePrimary: ThcColors.darkGreen,
+  onPrimary: Colors.white,
+  secondary: ThcColors.teal,
+  onSecondary: Colors.white,
+  tertiary: ThcColors.darkMagenta,
+  onTertiary: ThcColors.tan,
+  error: Colors.red,
+  onError: Colors.white,
+  errorContainer: ThcColors.pink,
+  onErrorContainer: Colors.red,
+  background: ThcColors.paleAzure,
+  onBackground: Colors.black,
+  surface: ThcColors.tan,
+  onSurface: Colors.black,
+  surfaceVariant: ThcColors.dullBlue,
+  onSurfaceVariant: Colors.white,
+  inverseSurface: ThcColors.darkBlue,
+  onInverseSurface: ThcColors.orange,
+);
+
+/// {@macro models.theme.colorScheme}
+const darkColors = ColorScheme(
+  brightness: Brightness.dark,
+  primary: ThcColors.green,
+  onPrimary: Colors.white,
+  primaryContainer: ThcColors.darkGreen,
+  onPrimaryContainer: Colors.white,
+  secondary: ThcColors.teal,
+  onSecondary: Colors.white,
+  tertiary: ThcColors.tan,
+  onTertiary: ThcColors.darkMagenta,
+  error: Colors.red,
+  onError: Colors.white,
+  background: ThcColors.darkBlue,
+  onBackground: ThcColors.paleAzure,
+  surface: ThcColors.dullBlue,
+  onSurface: ThcColors.paleAzure,
+);
+
+const iconTheme = IconThemeData(size: 32);
+const labelTextStyle = TextStyle(fontWeight: FontWeight.w600, fontSize: 12);
 const buttonStyle = ButtonStyle(shape: MaterialStatePropertyAll(BeveledRectangleBorder()));
+
+MaterialStateProperty<T> tealWhenSelected<T>(T Function({Color color}) copyWith) =>
+    MaterialStateProperty.resolveWith((states) => states.contains(MaterialState.selected)
+        ? copyWith(color: ThcColors.teal)
+        : copyWith(color: Colors.white));
 
 final navigationBarTheme = NavigationBarThemeData(
   backgroundColor: ThcColors.darkBlue,
-  labelTextStyle: MaterialStateProperty.resolveWith((states) {
-    const style = TextStyle(fontWeight: FontWeight.w600, fontSize: 12, color: ThcColors.teal);
-    if (states.contains(MaterialState.selected)) return style;
-    return style.copyWith(color: Colors.white);
-  }),
   indicatorColor: Colors.transparent,
-  iconTheme: MaterialStateProperty.resolveWith((states) {
-    const data = IconThemeData(size: 32, color: ThcColors.teal);
-    if (states.contains(MaterialState.selected)) return data;
-    return data.copyWith(color: Colors.white);
-  }),
+  iconTheme: tealWhenSelected(iconTheme.copyWith),
+  labelTextStyle: tealWhenSelected(labelTextStyle.copyWith),
   labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
 );
 
-extension type ThemeScheme.fromData(ThemeData data) implements ThemeData {
-  ThemeScheme(ColorScheme scheme)
-      : this.fromData(ThemeData(
-          colorScheme: scheme,
-          materialTapTargetSize: MaterialTapTargetSize.padded,
-          filledButtonTheme: const FilledButtonThemeData(style: buttonStyle),
-          elevatedButtonTheme: const ElevatedButtonThemeData(style: buttonStyle),
-          navigationBarTheme: navigationBarTheme,
-        ));
-}
+ThemeData themeScheme(ColorScheme scheme) => ThemeData(
+      colorScheme: scheme,
+      materialTapTargetSize: MaterialTapTargetSize.padded,
+      filledButtonTheme: const FilledButtonThemeData(style: buttonStyle),
+      elevatedButtonTheme: const ElevatedButtonThemeData(style: buttonStyle),
+      navigationBarTheme: navigationBarTheme,
+    );
 
 /// {@macro models.theme.colorScheme}
-final lightTheme = ThemeScheme(
-  const ColorScheme(
-    brightness: Brightness.light,
-    primary: ThcColors.green,
-    inversePrimary: ThcColors.darkGreen,
-    onPrimary: Colors.white,
-    secondary: ThcColors.teal,
-    onSecondary: Colors.white,
-    tertiary: ThcColors.darkMagenta,
-    onTertiary: ThcColors.tan,
-    error: Colors.red,
-    onError: Colors.white,
-    errorContainer: ThcColors.pink,
-    onErrorContainer: Colors.red,
-    background: ThcColors.paleAzure,
-    onBackground: Colors.black,
-    surface: ThcColors.tan,
-    onSurface: Colors.black,
-    surfaceVariant: ThcColors.dullBlue,
-    onSurfaceVariant: Colors.white,
-    inverseSurface: ThcColors.darkBlue,
-    onInverseSurface: ThcColors.orange,
-  ),
-);
+final lightTheme = themeScheme(brightColors);
 
 /// {@macro models.theme.colorScheme}
-final darkTheme = ThemeScheme(
-  const ColorScheme(
-    brightness: Brightness.dark,
-    primary: ThcColors.green,
-    onPrimary: Colors.white,
-    primaryContainer: ThcColors.darkGreen,
-    onPrimaryContainer: Colors.white,
-    secondary: ThcColors.teal,
-    onSecondary: Colors.white,
-    tertiary: ThcColors.tan,
-    onTertiary: ThcColors.darkMagenta,
-    error: Colors.red,
-    onError: Colors.white,
-    background: ThcColors.darkBlue,
-    onBackground: ThcColors.paleAzure,
-    surface: ThcColors.dullBlue,
-    onSurface: ThcColors.paleAzure,
-  ),
-);
+final darkTheme = themeScheme(darkColors);
 
 /// `extension` lets you add methods to a class, as if you were
 /// doing it inside the class definition.
