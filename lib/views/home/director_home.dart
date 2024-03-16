@@ -26,6 +26,8 @@ class DirectorHomeScreen extends StatelessWidget {
   }
 }
 
+/// We could just use a plain [NavigationBar] for [DirectorBar] below,
+/// but extending the class makes the BLoC implementation a lot cleaner.
 class DirectorIcons extends NavigationBar {
   DirectorIcons({
     super.key,
@@ -61,10 +63,16 @@ class DirectorIcons extends NavigationBar {
 
   @override
   Widget build(BuildContext context) {
-    return Hero(tag: 'Director icons', child: super.build(context));
+    return Hero(tag: 'Director home screen bottom bar', child: super.build(context));
   }
 }
 
+/// Why are we making a BLoC class for the navigation bar?
+///
+/// Literally just so that it slides down when you click "Go Live"
+/// and then smoothly slides back up when the stream is over.
+///
+/// (Technically this shouldn't even be called a `BLoC`, since it's for a UI component.)
 class DirectorBar extends CustomBloc<DirectorIcons> {
   static final _controller = StreamController<DirectorIcons>.broadcast();
   @override
@@ -75,6 +83,13 @@ class DirectorBar extends CustomBloc<DirectorIcons> {
     _ => 0,
   };
 
+  /// Slap this bad boy right into a [Scaffold]—
+  ///
+  /// ```dart
+  /// Scaffold(
+  ///   bottomNavigationBar: context.watch<DirectorBar>().navigationBar,
+  /// )
+  /// ```
   DirectorIcons get navigationBar => DirectorIcons(
         selectedIndex: page,
         onDestinationSelected: (index) {
@@ -83,11 +98,11 @@ class DirectorBar extends CustomBloc<DirectorIcons> {
           controller.add(navigationBar); // ignore: recursive_getters
         },
       );
-  Widget get belowPage {
-    return Container(
-      alignment: Alignment.bottomCenter,
-      transform: Matrix4.translationValues(0, 80, 0.0),
-      child: navigationBar,
-    );
-  }
+
+  /// This guy should probably be at the bottom of a [Stack].
+  Widget get belowPage => Container(
+        alignment: Alignment.bottomCenter,
+        transform: Matrix4.translationValues(0, 80, 0.0),
+        child: navigationBar,
+      );
 }

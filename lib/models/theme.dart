@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// {@template models.theme.colorScheme}
-/// By pulling colors from the `colorScheme`, the color palette can adapt
+/// By pulling colors from the [ColorScheme], the color palette can adapt
 /// based on whether the app is in light or dark mode.
 ///
 /// ```dart
@@ -35,7 +35,7 @@ abstract final class ThcColors {
 }
 
 /// {@macro models.theme.colorScheme}
-const brightColors = ColorScheme(
+const _brightColors = ColorScheme(
   brightness: Brightness.light,
   primary: ThcColors.green,
   inversePrimary: ThcColors.darkGreen,
@@ -59,7 +59,7 @@ const brightColors = ColorScheme(
 );
 
 /// {@macro models.theme.colorScheme}
-const darkColors = ColorScheme(
+const _darkColors = ColorScheme(
   brightness: Brightness.dark,
   primary: ThcColors.green,
   onPrimary: Colors.white,
@@ -77,36 +77,36 @@ const darkColors = ColorScheme(
   onSurface: ThcColors.paleAzure,
 );
 
-const iconTheme = IconThemeData(size: 32);
-const labelTextStyle = TextStyle(fontWeight: FontWeight.w600, fontSize: 12);
-const buttonStyle = ButtonStyle(shape: MaterialStatePropertyAll(BeveledRectangleBorder()));
+const _iconTheme = IconThemeData(size: 32);
+const _labelTextStyle = TextStyle(fontWeight: FontWeight.w600, fontSize: 12);
+const _buttonStyle = ButtonStyle(shape: MaterialStatePropertyAll(BeveledRectangleBorder()));
 
-MaterialStateProperty<T> tealWhenSelected<T>(T Function({Color color}) copyWith) =>
+MaterialStateProperty<T> _tealWhenSelected<T>(T Function({Color color}) copyWith) =>
     MaterialStateProperty.resolveWith((states) => states.contains(MaterialState.selected)
         ? copyWith(color: ThcColors.teal)
         : copyWith(color: Colors.white));
 
-final navigationBarTheme = NavigationBarThemeData(
-  backgroundColor: ThcColors.darkBlue,
-  indicatorColor: Colors.transparent,
-  iconTheme: tealWhenSelected(iconTheme.copyWith),
-  labelTextStyle: tealWhenSelected(labelTextStyle.copyWith),
-  labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-);
+NavigationBarThemeData _navigationBarTheme(bool isDark) => NavigationBarThemeData(
+      backgroundColor: isDark ? Colors.transparent : ThcColors.darkBlue,
+      indicatorColor: Colors.transparent,
+      iconTheme: _tealWhenSelected(_iconTheme.copyWith),
+      labelTextStyle: _tealWhenSelected(_labelTextStyle.copyWith),
+      labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+    );
 
-ThemeData themeScheme(ColorScheme scheme) => ThemeData(
+ThemeData _themeScheme(ColorScheme scheme) => ThemeData(
       colorScheme: scheme,
       materialTapTargetSize: MaterialTapTargetSize.padded,
-      filledButtonTheme: const FilledButtonThemeData(style: buttonStyle),
-      elevatedButtonTheme: const ElevatedButtonThemeData(style: buttonStyle),
-      navigationBarTheme: navigationBarTheme,
+      filledButtonTheme: const FilledButtonThemeData(style: _buttonStyle),
+      elevatedButtonTheme: const ElevatedButtonThemeData(style: _buttonStyle),
+      navigationBarTheme: _navigationBarTheme(scheme.brightness == Brightness.dark),
     );
 
 /// {@macro models.theme.colorScheme}
-final lightTheme = themeScheme(brightColors);
+final lightTheme = _themeScheme(_brightColors);
 
 /// {@macro models.theme.colorScheme}
-final darkTheme = themeScheme(darkColors);
+final darkTheme = _themeScheme(_darkColors);
 
 /// `extension` lets you add methods to a class, as if you were
 /// doing it inside the class definition.
@@ -124,4 +124,11 @@ extension ThemeGetter on BuildContext {
 
   /// {@macro models.theme.ThemeGetter}
   ColorScheme get colorScheme => theme.colorScheme;
+
+  /// The displayed color will be [light] or [dark] based on
+  /// whether we're currently in dark mode.
+  Color lightDark(Color light, Color dark) => switch (theme.brightness) {
+        Brightness.light => light,
+        Brightness.dark => dark,
+      };
 }

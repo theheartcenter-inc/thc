@@ -12,6 +12,7 @@ class CreateLivestream extends StatefulWidget {
   State<CreateLivestream> createState() => _CreateLivestreamState();
 }
 
+/// controls whether "Go Live" button is enabled.
 bool aboutToStart = true;
 
 class _CreateLivestreamState extends State<CreateLivestream> {
@@ -49,7 +50,7 @@ class _CreateLivestreamState extends State<CreateLivestream> {
           const Spacer(flex: 20),
           Text(scheduledFor),
           const Spacer(flex: 2),
-          _StartButton(onPressed: aboutToStart ? startStreaming : null),
+          _GoLive(onPressed: aboutToStart ? startStreaming : null),
           const Spacer(flex: 2),
           Text('$numberInLobby $people waiting', style: semiBold),
           const Spacer(),
@@ -59,46 +60,54 @@ class _CreateLivestreamState extends State<CreateLivestream> {
   }
 }
 
-class _StartButton extends StatelessWidget {
-  const _StartButton({required this.onPressed});
+/// When styling a button, you can use [FilledButton.styleFrom]
+/// (other buttons have equivalent class methods, e.g. [OutlinedButton.styleFrom]),
+/// or you can use the [ButtonStyle] class.
+///
+/// Using [ButtonStyle] usually involves creating a [MaterialPropertyResolver],
+/// whereas the class method is a bit more simple.
+final _buttonStyle = FilledButton.styleFrom(
+  backgroundColor: ThcColors.teal,
+  foregroundColor: Colors.black,
+  shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(30)),
+  padding: const EdgeInsets.fromLTRB(30, 15, 30, 18),
+);
+
+class _GoLive extends StatelessWidget {
+  const _GoLive({required this.onPressed});
   final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
-    final buttonStyle = FilledButton.styleFrom(
-      backgroundColor: ThcColors.teal,
-      foregroundColor: Colors.black,
-      shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(30)),
-      padding: const EdgeInsets.fromLTRB(30, 15, 30, 18),
-    );
-
     return Hero(
       tag: 'go live',
       child: FilledButton(
         onPressed: onPressed,
-        style: buttonStyle,
+        style: _buttonStyle,
         child: const Text('Go Live', style: TextStyle(fontSize: 36)),
       ),
     );
   }
 }
 
+/// Toggles the value of [aboutToStart].
+///
+/// Flip this switch to simulate whether there's an upcoming stream.
 class _StartSwitch extends StatelessWidget {
   const _StartSwitch(this.onChanged);
   final ValueChanged<bool> onChanged;
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: 300,
-      color: switch (context.colorScheme.brightness) {
-        Brightness.light => Colors.white38,
-        Brightness.dark => Colors.black38,
-      },
-      child: SwitchListTile.adaptive(
-        activeTrackColor: ThcColors.teal,
-        title: const Text('stream about to start?'),
-        value: aboutToStart,
-        onChanged: onChanged,
+      child: ColoredBox(
+        color: context.lightDark(Colors.white38, Colors.black38),
+        child: SwitchListTile.adaptive(
+          activeTrackColor: ThcColors.teal,
+          title: const Text('stream about to start?'),
+          value: aboutToStart,
+          onChanged: onChanged,
+        ),
       ),
     );
   }

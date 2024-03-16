@@ -43,10 +43,7 @@ class _ThemePicker extends StatelessWidget {
     return SegmentedButton<ThemeMode>(
       style: SegmentedButton.styleFrom(
         side: const BorderSide(style: BorderStyle.none),
-        backgroundColor: switch (context.colorScheme.brightness) {
-          Brightness.light => Colors.white54,
-          Brightness.dark => Colors.black54,
-        },
+        backgroundColor: context.lightDark(Colors.white54, Colors.black54),
       ),
       showSelectedIcon: false,
       segments: [
