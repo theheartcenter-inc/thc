@@ -12,7 +12,7 @@ class CreateLivestream extends StatefulWidget {
   State<CreateLivestream> createState() => _CreateLivestreamState();
 }
 
-/// controls whether "Go Live" button is enabled.
+/// controls whether the "Go Live" button is enabled.
 bool aboutToStart = true;
 
 class _CreateLivestreamState extends State<CreateLivestream> {

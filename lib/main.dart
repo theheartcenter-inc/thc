@@ -31,7 +31,7 @@ class App extends StatelessWidget {
         darkTheme: darkTheme,
         themeMode: context.watch<AppTheme>().state,
         debugShowCheckedModeBanner: false,
-        home: const DirectorHomeScreen(),
+        home: const ChooseAnyView(),
       ),
     );
   }
