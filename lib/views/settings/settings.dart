@@ -9,8 +9,9 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
+    return Scaffold(
+      appBar: userType.isAdmin ? AppBar() : null,
+      body: const Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

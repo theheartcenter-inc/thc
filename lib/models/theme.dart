@@ -81,6 +81,11 @@ const _iconTheme = IconThemeData(size: 32);
 const _labelTextStyle = TextStyle(fontWeight: FontWeight.w600, fontSize: 12);
 const _buttonStyle = ButtonStyle(shape: MaterialStatePropertyAll(BeveledRectangleBorder()));
 
+AppBarTheme _appBarTheme(bool isDark) => AppBarTheme(
+      backgroundColor: ThcColors.darkBlue,
+      foregroundColor: isDark ? ThcColors.paleAzure : Colors.white,
+    );
+
 MaterialStateProperty<T> _tealWhenSelected<T>(T Function({Color color}) copyWith) =>
     MaterialStateProperty.resolveWith((states) => states.contains(MaterialState.selected)
         ? copyWith(color: ThcColors.teal)
@@ -94,13 +99,17 @@ NavigationBarThemeData _navigationBarTheme(bool isDark) => NavigationBarThemeDat
       labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
     );
 
-ThemeData _themeScheme(ColorScheme scheme) => ThemeData(
-      colorScheme: scheme,
-      materialTapTargetSize: MaterialTapTargetSize.padded,
-      filledButtonTheme: const FilledButtonThemeData(style: _buttonStyle),
-      elevatedButtonTheme: const ElevatedButtonThemeData(style: _buttonStyle),
-      navigationBarTheme: _navigationBarTheme(scheme.brightness == Brightness.dark),
-    );
+ThemeData _themeScheme(ColorScheme scheme) {
+  final bool isDark = scheme.brightness == Brightness.dark;
+  return ThemeData(
+    colorScheme: scheme,
+    materialTapTargetSize: MaterialTapTargetSize.padded,
+    filledButtonTheme: const FilledButtonThemeData(style: _buttonStyle),
+    elevatedButtonTheme: const ElevatedButtonThemeData(style: _buttonStyle),
+    appBarTheme: _appBarTheme(isDark),
+    navigationBarTheme: _navigationBarTheme(isDark),
+  );
+}
 
 /// {@macro models.theme.colorScheme}
 final lightTheme = _themeScheme(_brightColors);
