@@ -67,6 +67,7 @@ abstract class StateAsync<T extends StatefulWidget> extends State<T> {
   Future<void> sleepState(double seconds, VoidCallback fn) =>
       sleep(seconds, then: () => safeState(fn));
 
+  /// {@template views.widgets.StateAsync.animate}
   /// Putting `async` code in the [initState] doesn't work super great.
   ///
   /// So use [animate] instead!
@@ -77,8 +78,10 @@ abstract class StateAsync<T extends StatefulWidget> extends State<T> {
   ///   // ...
   /// }
   /// ```
+  /// {@endtemplate}
   void animate() {}
 
+  /// {@macro views.widgets.StateAsync.animate}
   @override
   void initState() {
     super.initState();
