@@ -86,6 +86,18 @@ AppBarTheme _appBarTheme(bool isDark) => AppBarTheme(
       foregroundColor: isDark ? ThcColors.paleAzure : Colors.white,
     );
 
+/// [MaterialStateProperty] is pretty neat: you can have different styles
+/// based on whatever's going on with the widget.
+///
+/// For example, if a Director clicks on the "stream" button
+/// and then keeps their mouse hovering over it, then
+/// the button's set of Material states would look like this:
+///
+/// ```dart
+/// states = {MaterialState.hovered, MaterialState.selected};
+/// ```
+///
+/// Since we're using this [_tealWhenSelected] function, the color will be [ThcColors.teal].
 MaterialStateProperty<T> _tealWhenSelected<T>(T Function({Color color}) copyWith) =>
     MaterialStateProperty.resolveWith((states) => states.contains(MaterialState.selected)
         ? copyWith(color: ThcColors.teal)
