@@ -1,83 +1,93 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:thc/models/bloc.dart';
 import 'package:thc/models/local_storage.dart';
 import 'package:thc/views/create_livestream/create_livestream.dart';
 import 'package:thc/views/settings/settings.dart';
 import 'package:thc/views/video_library/video_library.dart';
 import 'package:thc/views/watch_live/watch_live.dart';
 
-enum DirectorScreen {
-  watchLive(
-    screen: WatchLive(),
-    icon: Icons.spa,
-    outlined: Icons.spa_outlined,
-  ),
-  stream(
-    screen: CreateLivestream(),
-    icon: Icons.stream,
-  ),
-  library(
-    screen: VideoLibrary(),
-    icon: Icons.movie,
-    outlined: Icons.movie_outlined,
-  ),
-  settings(
-    screen: SettingsScreen(),
-    icon: Icons.settings,
-    outlined: Icons.settings_outlined,
-  );
-
-  const DirectorScreen({required this.screen, required this.icon, this.outlined});
-  final Widget screen;
-  final IconData icon;
-  final IconData? outlined;
-
-  static DirectorScreen? get initial {
-    final fromStorage = StorageKeys.directorScreen();
-    if (fromStorage == null) return /* userType.isAdmin ? null : */ watchLive;
-
-    assert(fromStorage is int);
-    assert(fromStorage >= 0 && fromStorage < values.length);
-    return values[fromStorage];
-  }
-
-  void save() => StorageKeys.directorScreen.save(index);
-
-  // static NavigationDestination get _adminPortalButton => throw UnimplementedError();
-  NavigationDestination get _button => NavigationDestination(
-        icon: Icon(outlined ?? icon),
-        selectedIcon: Icon(icon),
-        label: this == watchLive ? 'watch live' : name,
-        tooltip: '',
-      );
-
-  static List<NavigationDestination> get _buttons => [
-        // if (userType.isAdmin) _adminPortalButton,
-        for (final value in values) value._button,
-      ];
-}
-
-class DirectorHomeScreen extends StatefulWidget {
+class DirectorHomeScreen extends StatelessWidget {
   const DirectorHomeScreen({super.key});
-
-  @override
-  State<DirectorHomeScreen> createState() => _DirectorHomeScreenState();
-}
-
-class _DirectorHomeScreenState extends State<DirectorHomeScreen> {
-  DirectorScreen page = DirectorScreen.initial!;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: NavigationBar(
-        destinations: DirectorScreen._buttons,
-        selectedIndex: page.index,
+      bottomNavigationBar: context.watch<DirectorBar>().navigationBar,
+      body: switch (DirectorBar.page) {
+        0 => const WatchLive(),
+        1 => const CreateLivestream(),
+        2 => const VideoLibrary(),
+        _ => const SettingsScreen(),
+      },
+    );
+  }
+}
+
+class DirectorIcons extends NavigationBar {
+  DirectorIcons({
+    super.key,
+    required super.selectedIndex,
+    required super.onDestinationSelected,
+  }) : super(destinations: _destinations);
+
+  static const _destinations = <Widget>[
+    NavigationDestination(
+      icon: Icon(Icons.spa_outlined),
+      selectedIcon: Icon(Icons.spa),
+      label: 'watch live',
+      tooltip: '',
+    ),
+    NavigationDestination(
+      icon: Icon(Icons.stream),
+      label: 'stream',
+      tooltip: '',
+    ),
+    NavigationDestination(
+      icon: Icon(Icons.movie_outlined),
+      selectedIcon: Icon(Icons.movie),
+      label: 'library',
+      tooltip: '',
+    ),
+    NavigationDestination(
+      icon: Icon(Icons.settings_outlined),
+      selectedIcon: Icon(Icons.settings),
+      label: 'settings',
+      tooltip: '',
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Hero(tag: 'Director icons', child: super.build(context));
+  }
+}
+
+class DirectorBar extends CustomBloc<DirectorIcons> {
+  static final _controller = StreamController<DirectorIcons>.broadcast();
+  @override
+  StreamController<DirectorIcons> get controller => _controller;
+
+  static int page = switch (StorageKeys.directorScreen()) {
+    final int i when i > 0 && i <= DirectorIcons._destinations.length => i,
+    _ => 0,
+  };
+
+  DirectorIcons get navigationBar => DirectorIcons(
+        selectedIndex: page,
         onDestinationSelected: (index) {
-          setState(() => page = DirectorScreen.values[index]);
-          page.save();
+          page = index;
+          StorageKeys.directorScreen.save(index);
+          controller.add(navigationBar); // ignore: recursive_getters
         },
-      ),
-      body: page.screen,
+      );
+  Widget get belowPage {
+    return Container(
+      alignment: Alignment.bottomCenter,
+      transform: Matrix4.translationValues(0, 80, 0.0),
+      child: navigationBar,
     );
   }
 }

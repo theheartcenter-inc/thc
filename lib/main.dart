@@ -23,6 +23,7 @@ class App extends StatelessWidget {
     return MultiProvider(
       providers: [
         BlocProvider(create: (_) => AppTheme()),
+        BlocProvider(create: (_) => DirectorBar()),
       ],
       builder: (context, _) => MaterialApp(
         navigatorKey: navKey,

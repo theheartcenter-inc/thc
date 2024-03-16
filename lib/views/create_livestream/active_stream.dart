@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/models/bloc.dart';
 import 'package:thc/models/navigator.dart';
+import 'package:thc/views/home/director_home.dart';
 import 'package:thc/views/widgets.dart';
 
 class ActiveStream extends StatefulWidget {
@@ -64,6 +65,7 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
               const _Backdrop(),
               StreamOverlay(overlayVisible ? 1.0 : 0.25, child: const _ViewCount()),
               StreamOverlay(overlayVisible ? 1.0 : 0.0, child: const _StreamingCamera()),
+              context.watch<DirectorBar>().belowPage,
             ],
           ),
         ),
@@ -105,7 +107,7 @@ class _StreamingCamera extends StatelessWidget {
   Widget build(BuildContext context) {
     return const Center(
       child: Text(
-        'A very cool Agora stream will be here',
+        "(pretend you're filming a very cool livestream)",
         style: TextStyle(color: Colors.white70),
       ),
     );
