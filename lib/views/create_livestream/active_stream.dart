@@ -28,6 +28,9 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
     );
   }
 
+  @override
+  void animate() => sleep(0.5, then: setTimer);
+
   /// Determines whether [_EndButton] is shown.
   ///
   /// (Also makes [_ViewCount] more opaque.)
