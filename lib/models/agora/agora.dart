@@ -1,7 +1,7 @@
 /// This file imports credentials from a git submodule to configure our Agora settings.
 ///
-/// By using a private submodule, we can be a part of the
-/// [open source initiative](https://opensource.org/) and still maintain security!
+/// By using a private submodule, we can join the [open source initiative](https://opensource.org/)
+/// and still maintain security!
 library;
 
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
