@@ -22,17 +22,20 @@ class _CreateLivestreamState extends State<CreateLivestream> {
   int numberInLobby = Random().nextBool() ? 69 : 420;
   String get people => numberInLobby == 1 ? 'person' : 'people';
 
-  void startStreaming() => Navigator.of(context).push(
-        PageRouteBuilder(
-          transitionDuration: Durations.long2,
-          pageBuilder: (_, animation, __) {
-            return BlocProvider(
-              create: (_) => StreamOverlayFadeIn(animation),
-              child: const ActiveStream(),
-            );
-          },
-        ),
-      );
+  void startStreaming() {
+    setState(() => aboutToStart = false);
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        transitionDuration: Durations.long2,
+        pageBuilder: (_, animation, __) {
+          return BlocProvider(
+            create: (_) => StreamOverlayFadeIn(animation),
+            child: const ActiveStream(),
+          );
+        },
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
