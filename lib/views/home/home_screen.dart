@@ -38,7 +38,6 @@ class ParticipantHomeScreen extends StatelessWidget {
             BottomNavigationBarItem(label: "About Us", icon: Icon(Icons.info))
           ],
         ),
-      ),
     );
   }
 }
