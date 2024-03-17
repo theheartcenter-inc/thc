@@ -11,6 +11,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => switch (userType) {
+        // Please change here, I changed to ProfilesScreen to check
         UserType.participant => const ProfilesScreen(),
         UserType.director => const DirectorHomeScreen(),
         UserType.admin => const AdminPortal(),
