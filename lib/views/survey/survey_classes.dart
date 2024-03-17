@@ -2,90 +2,88 @@ import 'package:flutter/material.dart';
 
 @immutable
 sealed class SurveyQuestion {
-  const SurveyQuestion();
+  const SurveyQuestion({required this.description});
 
-  const factory SurveyQuestion.yesNo({required String description}) = YesNoQuestion;
-
-  const factory SurveyQuestion.textPrompt({required String description}) = TextPromptQuestion;
-
-  const factory SurveyQuestion.multipleChoice({
-    required String description,
-    required List<String> choices,
-  }) = MultipleChoiceQuestion;
-
-  const factory SurveyQuestion.checkboxes({
-    required String description,
-    required List<String> choices,
-  }) = CheckboxQuestion;
-
-  const factory SurveyQuestion.scale({
-    required String description,
-    required List<String> values,
-  }) = ScaleQuestion;
-
-  String get description;
-}
-
-@immutable
-sealed class SurveyAnswer {
-  const SurveyAnswer();
+  final String description;
+  dynamic get initial;
 }
 
 class YesNoQuestion extends SurveyQuestion {
-  const YesNoQuestion({required this.description});
+  const YesNoQuestion({required super.description});
   @override
-  final String description;
-}
-
-class YesNoAnswer extends SurveyAnswer {
-  const YesNoAnswer(this.saidYes);
-  final bool saidYes;
+  bool? get initial => null;
 }
 
 class TextPromptQuestion extends SurveyQuestion {
-  const TextPromptQuestion({required this.description});
+  const TextPromptQuestion({required super.description});
   @override
-  final String description;
-}
-
-class TextPromptAnswer extends SurveyAnswer {
-  const TextPromptAnswer([this.text = '']);
-  final String text;
+  String get initial => '';
 }
 
 class MultipleChoiceQuestion extends SurveyQuestion {
-  const MultipleChoiceQuestion({required this.description, required this.choices});
-  @override
-  final String description;
+  const MultipleChoiceQuestion({required super.description, required this.choices});
   final List<String> choices;
-}
-
-class MultipleChoiceAnswer extends SurveyAnswer {
-  const MultipleChoiceAnswer(this.selected);
-  final int selected;
+  @override
+  int? get initial => null;
 }
 
 class CheckboxQuestion extends SurveyQuestion {
-  const CheckboxQuestion({required this.description, required this.choices});
-  @override
-  final String description;
+  const CheckboxQuestion({required super.description, required this.choices});
   final List<String> choices;
-}
-
-class CheckboxAnswer extends SurveyAnswer {
-  const CheckboxAnswer(this.selected);
-  CheckboxAnswer.initial(int answerCount) : selected = List.filled(answerCount, false);
-  final List<bool> selected;
-}
-
-class ScaleQuestion extends SurveyQuestion {
-  const ScaleQuestion({required this.description, required this.values});
   @override
-  final String description;
-  final List<String> values;
+  List<bool> get initial => List.filled(choices.length, false);
 }
 
-class ScaleAnswer extends SurveyAnswer {
-  const ScaleAnswer([this.value = 0]);
-  final int value;
+abstract class ScaleQuestion extends SurveyQuestion {
+  const ScaleQuestion({required super.description});
+
+  const factory ScaleQuestion.values({
+    required String description,
+    required List<String> values,
+    bool showEndLabels,
+  }) = _NamedValueScale;
+
+  const factory ScaleQuestion.endpoints({
+    required String description,
+    required (String, String) endpoints,
+  }) = _NamedEndpointScale;
+
+  (String, String)? get endpoints;
+  String? operator [](int index);
+  int get length;
+  @override
+  int get initial => 0;
+}
+
+class _NamedValueScale extends ScaleQuestion {
+  const _NamedValueScale({
+    required super.description,
+    required List<String> values,
+    this.showEndLabels = true,
+  }) : _values = values;
+
+  final List<String> _values;
+  final bool showEndLabels;
+
+  @override
+  (String, String)? get endpoints => showEndLabels ? (_values.first, _values.last) : null;
+  @override
+  int get length => _values.length;
+  @override
+  String operator [](int index) => _values[index];
+}
+
+class _NamedEndpointScale extends ScaleQuestion {
+  const _NamedEndpointScale({
+    required super.description,
+    required this.endpoints,
+  });
+
+  @override
+  final (String, String) endpoints;
+
+  @override
+  final length = 5;
+  @override
+  String? operator [](_) => null;
 }
