@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:thc/views/home/home_screen.dart';
 
+// setup the routes
 class App extends StatelessWidget {
   const App({super.key});
 
