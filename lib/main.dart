@@ -8,6 +8,7 @@ import 'package:thc/models/user.dart';
 import 'package:thc/views/home/director_home.dart';
 import 'package:thc/views/home/home_screen.dart';
 import 'package:thc/views/settings/settings.dart';
+import 'package:thc/views/survey/survey_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,7 +32,7 @@ class App extends StatelessWidget {
         darkTheme: darkTheme,
         themeMode: context.watch<AppTheme>().state,
         debugShowCheckedModeBanner: false,
-        home: const ChooseAnyView(),
+        home: const StreamSurvey(),
       ),
     );
   }

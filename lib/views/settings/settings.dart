@@ -42,10 +42,6 @@ class _ThemePicker extends StatelessWidget {
     final themeMode = context.watch<AppTheme>().state;
     final style = TextStyle(color: context.colorScheme.onBackground);
     return SegmentedButton<ThemeMode>(
-      style: SegmentedButton.styleFrom(
-        side: const BorderSide(style: BorderStyle.none),
-        backgroundColor: context.lightDark(Colors.white54, Colors.black54),
-      ),
       showSelectedIcon: false,
       segments: [
         for (final value in ThemeMode.values)

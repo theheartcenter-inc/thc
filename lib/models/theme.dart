@@ -81,6 +81,14 @@ const _iconTheme = IconThemeData(size: 32);
 const _labelTextStyle = TextStyle(fontWeight: FontWeight.w600, fontSize: 12);
 const _buttonStyle = ButtonStyle(shape: MaterialStatePropertyAll(BeveledRectangleBorder()));
 
+SegmentedButtonThemeData _segmentedButtonStyle(bool isDark) => SegmentedButtonThemeData(
+      style: SegmentedButton.styleFrom(
+        side: const BorderSide(style: BorderStyle.none),
+        backgroundColor: isDark ? Colors.black54 : Colors.white54,
+        selectedBackgroundColor: ThcColors.green,
+      ),
+    );
+
 AppBarTheme _appBarTheme(bool isDark) => AppBarTheme(
       backgroundColor: ThcColors.darkBlue,
       foregroundColor: isDark ? ThcColors.paleAzure : Colors.white,
@@ -118,6 +126,7 @@ ThemeData _themeScheme(ColorScheme scheme) {
     materialTapTargetSize: MaterialTapTargetSize.padded,
     filledButtonTheme: const FilledButtonThemeData(style: _buttonStyle),
     elevatedButtonTheme: const ElevatedButtonThemeData(style: _buttonStyle),
+    segmentedButtonTheme: _segmentedButtonStyle(isDark),
     appBarTheme: _appBarTheme(isDark),
     navigationBarTheme: _navigationBarTheme(isDark),
   );
