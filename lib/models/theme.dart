@@ -34,58 +34,6 @@ abstract final class ThcColors {
   static const paleAzure = Color(0xffddeeff);
 }
 
-/// {@macro models.theme.colorScheme}
-const _brightColors = ColorScheme(
-  brightness: Brightness.light,
-  primary: ThcColors.green,
-  inversePrimary: ThcColors.darkGreen,
-  onPrimary: Colors.white,
-  secondary: ThcColors.teal,
-  onSecondary: Colors.white,
-  tertiary: ThcColors.darkMagenta,
-  onTertiary: ThcColors.tan,
-  error: Colors.red,
-  onError: Colors.white,
-  errorContainer: ThcColors.pink,
-  onErrorContainer: Colors.red,
-  background: ThcColors.paleAzure,
-  onBackground: Colors.black,
-  surface: ThcColors.tan,
-  onSurface: Colors.black,
-  surfaceVariant: ThcColors.dullBlue,
-  onSurfaceVariant: Colors.white,
-  inverseSurface: ThcColors.darkBlue,
-  onInverseSurface: ThcColors.orange,
-);
-
-/// {@macro models.theme.colorScheme}
-const _darkColors = ColorScheme(
-  brightness: Brightness.dark,
-  primary: ThcColors.green,
-  onPrimary: Colors.white,
-  primaryContainer: ThcColors.darkGreen,
-  onPrimaryContainer: Colors.white,
-  secondary: ThcColors.teal,
-  onSecondary: Colors.white,
-  tertiary: ThcColors.tan,
-  onTertiary: ThcColors.darkMagenta,
-  error: Colors.red,
-  onError: Colors.white,
-  background: ThcColors.darkBlue,
-  onBackground: ThcColors.paleAzure,
-  surface: ThcColors.dullBlue,
-  onSurface: ThcColors.paleAzure,
-);
-
-const _iconTheme = IconThemeData(size: 32);
-const _labelTextStyle = TextStyle(fontWeight: FontWeight.w600, fontSize: 12);
-const _buttonStyle = ButtonStyle(shape: MaterialStatePropertyAll(BeveledRectangleBorder()));
-
-AppBarTheme _appBarTheme(bool isDark) => AppBarTheme(
-      backgroundColor: ThcColors.darkBlue,
-      foregroundColor: isDark ? ThcColors.paleAzure : Colors.white,
-    );
-
 /// [MaterialStateProperty] is pretty neat: you can have different styles
 /// based on whatever's going on with the widget.
 ///
@@ -103,31 +51,52 @@ MaterialStateProperty<T> _tealWhenSelected<T>(T Function({Color color}) copyWith
         ? copyWith(color: ThcColors.teal)
         : copyWith(color: Colors.white));
 
-NavigationBarThemeData _navigationBarTheme(bool isDark) => NavigationBarThemeData(
-      backgroundColor: isDark ? Colors.transparent : ThcColors.darkBlue,
+const _iconTheme = IconThemeData(size: 32);
+const _labelTextStyle = TextStyle(fontWeight: FontWeight.w600, fontSize: 12);
+
+ThemeData _generateTheme(bool isLight) {
+  return ThemeData(
+    colorScheme: ColorScheme(
+      brightness: isLight ? Brightness.light : Brightness.dark,
+      primary: ThcColors.green,
+      inversePrimary: ThcColors.darkGreen,
+      onPrimary: Colors.white,
+      secondary: ThcColors.teal,
+      onSecondary: Colors.white,
+      tertiary: isLight ? ThcColors.darkMagenta : ThcColors.tan,
+      onTertiary: isLight ? ThcColors.tan : ThcColors.darkMagenta,
+      error: Colors.red,
+      onError: Colors.white,
+      errorContainer: ThcColors.pink,
+      onErrorContainer: Colors.red,
+      background: isLight ? ThcColors.paleAzure : ThcColors.darkBlue,
+      onBackground: isLight ? Colors.black : ThcColors.paleAzure,
+      surface: isLight ? ThcColors.tan : ThcColors.dullBlue,
+      onSurface: isLight ? Colors.black : ThcColors.paleAzure,
+    ),
+    materialTapTargetSize: MaterialTapTargetSize.padded,
+    filledButtonTheme: const FilledButtonThemeData(
+      style: ButtonStyle(shape: MaterialStatePropertyAll(BeveledRectangleBorder())),
+    ),
+    appBarTheme: AppBarTheme(
+      backgroundColor: ThcColors.darkBlue,
+      foregroundColor: isLight ? Colors.white : ThcColors.paleAzure,
+    ),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: isLight ? ThcColors.darkBlue : Colors.transparent,
       indicatorColor: Colors.transparent,
       iconTheme: _tealWhenSelected(_iconTheme.copyWith),
       labelTextStyle: _tealWhenSelected(_labelTextStyle.copyWith),
       labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-    );
-
-ThemeData _themeScheme(ColorScheme scheme) {
-  final bool isDark = scheme.brightness == Brightness.dark;
-  return ThemeData(
-    colorScheme: scheme,
-    materialTapTargetSize: MaterialTapTargetSize.padded,
-    filledButtonTheme: const FilledButtonThemeData(style: _buttonStyle),
-    elevatedButtonTheme: const ElevatedButtonThemeData(style: _buttonStyle),
-    appBarTheme: _appBarTheme(isDark),
-    navigationBarTheme: _navigationBarTheme(isDark),
+    ),
   );
 }
 
 /// {@macro models.theme.colorScheme}
-final lightTheme = _themeScheme(_brightColors);
+final lightTheme = _generateTheme(true);
 
 /// {@macro models.theme.colorScheme}
-final darkTheme = _themeScheme(_darkColors);
+final darkTheme = _generateTheme(false);
 
 /// `extension` lets you add methods to a class, as if you were
 /// doing it inside the class definition.
