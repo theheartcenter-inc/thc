@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/models/bloc.dart';
@@ -14,9 +12,10 @@ class DirectorHomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final navigationBar = DirectorNavBar.of(context);
     return Scaffold(
-      bottomNavigationBar: context.watch<DirectorBar>().navigationBar,
-      body: switch (DirectorBar.page) {
+      bottomNavigationBar: navigationBar,
+      body: switch (navigationBar.selectedIndex) {
         0 => const WatchLive(),
         1 => const CreateLivestream(),
         2 => const VideoLibrary(),
@@ -26,14 +25,31 @@ class DirectorHomeScreen extends StatelessWidget {
   }
 }
 
-/// We could just use a plain [NavigationBar] for [DirectorBar] below,
-/// but extending the class makes the BLoC implementation a lot cleaner.
-class DirectorIcons extends NavigationBar {
-  DirectorIcons({
-    super.key,
-    required super.selectedIndex,
-    required super.onDestinationSelected,
-  }) : super(destinations: _destinations);
+/// {@template views.home.DirectorNavigationBar}
+/// Why are we extending [NavigationBar] and making a BLoC class for state management?
+///
+/// Literally just so that the navigation bar slides down when you click "Go Live"
+/// and then smoothly slides back up when the stream is over.
+/// {@endtemplate}
+class DirectorNavBar extends NavigationBar {
+  /// {@macro views.home.DirectorNavigationBar}
+  DirectorNavBar.of(BuildContext context, {super.key, this.belowPage = false})
+      : super(
+          selectedIndex: context.watch<DirectorNavigation>().state,
+          onDestinationSelected: context.read<DirectorNavigation>().update,
+          destinations: _destinations,
+        );
+
+  /// If [belowPage] is true, then instead of passing this widget
+  /// into the [Scaffold.bottomNavigationBar] slot, [Scaffold.body] should be
+  /// wrapped with a bottom-aligned [Stack] to hold this widget.
+  ///
+  /// If you're using VS Code or a similar IDE,
+  /// click the code action lightbulb (💡) and choose "Wrap with Row".
+  ///
+  /// Then you can change the name "Row" to "Stack"
+  /// and set its alignment to the bottom of the screen.
+  final bool belowPage;
 
   static const _destinations = <Widget>[
     NavigationDestination(
@@ -63,46 +79,32 @@ class DirectorIcons extends NavigationBar {
 
   @override
   Widget build(BuildContext context) {
-    return Hero(tag: 'Director home screen bottom bar', child: super.build(context));
+    final directorBar = Hero(
+      tag: 'Director home screen bottom bar',
+      child: super.build(context),
+    );
+
+    if (!belowPage) return directorBar;
+
+    return Transform(
+      transform: Matrix4.translationValues(0, 80, 0.0),
+      child: directorBar,
+    );
   }
 }
 
-/// Why are we making a BLoC class for the navigation bar?
-///
-/// Literally just so that it slides down when you click "Go Live"
-/// and then smoothly slides back up when the stream is over.
-///
-/// (Technically this shouldn't even be called a `BLoC`, since it's for a UI component.)
-class DirectorBar extends CustomBloc<DirectorIcons> {
-  static final _controller = StreamController<DirectorIcons>.broadcast();
-  @override
-  StreamController<DirectorIcons> get controller => _controller;
+/// {@macro views.home.DirectorNavigationBar}
+class DirectorNavigation extends Cubit<int> {
+  /// {@macro views.home.DirectorNavigationBar}
+  DirectorNavigation() : super(_initial);
 
-  static int page = switch (StorageKeys.directorScreen()) {
-    final int i when i > 0 && i <= DirectorIcons._destinations.length => i,
-    _ => 0,
-  };
+  static int get _initial => switch (StorageKeys.directorScreen()) {
+        final int i when i > 0 && i <= DirectorNavBar._destinations.length => i,
+        _ => 0,
+      };
 
-  /// Slap this bad boy right into a [Scaffold]—
-  ///
-  /// ```dart
-  /// Scaffold(
-  ///   bottomNavigationBar: context.watch<DirectorBar>().navigationBar,
-  /// )
-  /// ```
-  DirectorIcons get navigationBar => DirectorIcons(
-        selectedIndex: page,
-        onDestinationSelected: (index) {
-          page = index;
-          StorageKeys.directorScreen.save(index);
-          controller.add(navigationBar); // ignore: recursive_getters
-        },
-      );
-
-  /// This guy should probably be at the bottom of a [Stack].
-  Widget get belowPage => Container(
-        alignment: Alignment.bottomCenter,
-        transform: Matrix4.translationValues(0, 80, 0.0),
-        child: navigationBar,
-      );
+  void update(int index) {
+    StorageKeys.directorScreen.save(index);
+    emit(index);
+  }
 }

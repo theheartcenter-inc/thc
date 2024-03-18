@@ -74,11 +74,12 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
         child: GestureDetector(
           onTap: onTap,
           child: Stack(
+            alignment: Alignment.bottomRight,
             children: [
               const _Backdrop(),
               StreamOverlay(overlayVisible ? 1.0 : 0.25, child: const _ViewCount()),
               StreamOverlay(overlayVisible ? 1.0 : 0.0, child: const _StreamingCamera()),
-              context.watch<DirectorBar>().belowPage,
+              DirectorNavBar.of(context, belowPage: true),
             ],
           ),
         ),
@@ -148,14 +149,11 @@ class _ViewCount extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Align(
-      alignment: Alignment.bottomRight,
-      child: Padding(
-        padding: const EdgeInsets.all(15),
-        child: Text(
-          '$peopleWatching watching',
-          style: const TextStyle(color: Colors.white),
-        ),
+    return Padding(
+      padding: const EdgeInsets.all(15),
+      child: Text(
+        '$peopleWatching watching',
+        style: const TextStyle(color: Colors.white),
       ),
     );
   }
