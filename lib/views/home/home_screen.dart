@@ -5,7 +5,7 @@ import 'package:thc/models/user.dart';
 import 'package:thc/views/admin_portal/admin_portal.dart';
 import 'package:thc/views/widgets.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
