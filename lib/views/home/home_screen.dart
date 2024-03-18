@@ -30,7 +30,7 @@ class _ParticipantHomeScreenState extends State<ParticipantHomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(_currentIndex == 0 ? 'Home' : 'About Us'),
+          title: Text(_currentIndex == 0 ? "Home" : "About Us"),
           actions: [
             IconButton(
               onPressed: () async {
@@ -43,14 +43,14 @@ class _ParticipantHomeScreenState extends State<ParticipantHomeScreen> {
         ),
         body: IndexedStack(
           index: _currentIndex,
-          children: const [
+          children: [
             //home page (index 0)
             Center(
-              child: Text('Homepage Implementation'),
+              child: Text("Homepage Implementation"),
             ),
             //about us (index 1)
             Center(
-              child: Text('About Us Implementation'),
+              child: Text("About Us Implementation"),
             ),
           ],
         ),
@@ -62,8 +62,8 @@ class _ParticipantHomeScreenState extends State<ParticipantHomeScreen> {
             });
           },
           items: const [
-            BottomNavigationBarItem(label: 'Home', icon: Icon(Icons.home)),
-            BottomNavigationBarItem(label: 'About Us', icon: Icon(Icons.info)),
+            BottomNavigationBarItem(label: "Home", icon: Icon(Icons.home)),
+            BottomNavigationBarItem(label: "About Us", icon: Icon(Icons.info)),
           ],
         ),
     );
