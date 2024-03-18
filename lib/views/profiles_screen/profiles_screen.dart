@@ -1,20 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:thc/views/home/home_screen.dart';
-
-// setup the routes
-class App extends StatelessWidget {
-  const App({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: const HomeScreen(),
-      routes: {
-        '/home': (context) => const HomeScreen(),
-      },
-    );
-  }
-}
 
 class ProfilesScreen extends StatelessWidget {
   const ProfilesScreen({super.key});
@@ -23,15 +7,6 @@ class ProfilesScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Proflies View'),
-        actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.of(context)
-                  .pushNamedAndRemoveUntil('/home', (route) => false);
-            },
-            icon: const Icon(Icons.home),
-          ),
-        ],
       ),
       body: const Stack(
         children: [
