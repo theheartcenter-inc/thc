@@ -7,19 +7,39 @@ import 'package:thc/views/survey/survey_questions.dart';
 import 'package:thc/views/survey/survey_theme.dart';
 import 'package:thc/views/widgets.dart';
 
+/// {@template views.survey.SurveyScreen}
+/// Displays survey questions for the user to answer.
+/// {@endtemplate}
 class SurveyScreen extends StatefulWidget {
+  /// {@macro views.survey.SurveyScreen}
   const SurveyScreen({super.key, required this.questions});
+
+  /// The list of questions to use.
+  ///
+  /// Sample lists can be pulled from [SurveyPresets].
   final List<SurveyQuestion> questions;
 
   @override
   State<SurveyScreen> createState() => _SurveyScreenState();
 }
 
+/// {@macro views.survey.SurveyScreen}
 class _SurveyScreenState extends State<SurveyScreen> {
+  /// {@macro views.survey.AnswerType}
+  ///
+  /// This list is dynamically typed, to account for different answer data types.
   late final List<dynamic> answers;
+
+  /// The number of questions in this survey.
+  ///
+  /// I'm pretty sure that using [count] is more efficient
+  /// than calling `widget.questions.length` each time.
   late final int count;
+
+  /// When you press "submit", [SurveyData.validation] updates this list,
+  /// and if anything is `false`, you'll need to finish answering the questions
+  /// before moving on.
   late List<bool> valid;
-  bool get isValid => !valid.contains(false);
   int get invalidCount => valid.fold(0, (total, item) => total += (item ? 0 : 1));
   void validate() {
     if (FunQuiz.inProgress) {
@@ -29,7 +49,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
     final data = SurveyData.fromLists(widget.questions, answers);
     setState(() => valid = data.validation);
 
-    if (isValid) {
+    if (!valid.contains(false)) {
       navigator.pushReplacement(Submitted(summary: data.surveySummary));
     }
   }
@@ -70,13 +90,28 @@ class _SurveyScreenState extends State<SurveyScreen> {
         child: const Text('Submit'),
       ),
       const SizedBox(height: 8),
-      ValidateMessage(invalidCount),
+      _ValidateMessage(invalidCount),
     ]);
   }
 }
 
+/// {@template views.survey.Submitted}
+/// Shows a big "thank you" and a summary of the user's answers.
+/// {@endtemplate}
 class Submitted extends StatelessWidget {
+  /// {@macro views.survey.Submitted}
   const Submitted({super.key, required this.summary});
+
+  /// {@template typedef_explanation}
+  /// Whenever you see a weird-looking type, you can hover your mouse over the name
+  /// for an explanation.
+  ///
+  /// [QuestionSummary] is just a tuple of strings.
+  ///
+  /// For a very long time, I had no idea what [ValueChanged] was;
+  /// then I found out that it's just a function with 1 parameter
+  /// that returns `void` (i.e. it doesn't return anything).
+  /// {@endtemplate}
   final List<QuestionSummary> summary;
 
   @override
@@ -114,7 +149,7 @@ class Submitted extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(20, 5, 0, 50),
           child: Text(
             answer ?? '(no answer)',
-            style: TextStyle(color: answer == null ? translucent : null),
+            style: answer == null ? TextStyle(color: translucent) : null,
           ),
         ),
       ]
@@ -124,12 +159,10 @@ class Submitted extends StatelessWidget {
       appBar: AppBar(),
       body: SizedBox.expand(
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [thanks, ...formatted],
-            ),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [thanks, ...formatted],
           ),
         ),
       ),
@@ -137,10 +170,13 @@ class Submitted extends StatelessWidget {
   }
 }
 
+/// {@macro totally_not_a_waste_of_time}
 class _FunQuizResults extends StatelessWidget {
+  /// {@macro totally_not_a_waste_of_time}
   const _FunQuizResults(this.answers);
   final List<int> answers;
 
+  /// 100% if the answer matches mine, 0% if it's as far from mine as possible.
   static double computeNatePercent(int userValue, int nateValue, [int maxValue = 4]) {
     int diff(int a, int b) => (a - b).abs();
     final distance = diff(userValue, nateValue);
@@ -167,113 +203,111 @@ class _FunQuizResults extends StatelessWidget {
     return Scaffold(
       body: SizedBox.expand(
         child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                for (final (i, answer) in preferences.indexed) ...[
-                  Text(
-                    SurveyPresets.funQuiz.questions[i + 1].description,
-                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600, height: 2),
-                  ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text.rich(TextSpan(children: [
-                          const TextSpan(
-                            text: 'you picked: ',
-                            style: TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                          TextSpan(text: FunQuiz.scaleValues[answer]),
-                        ])),
-                      ),
-                      Expanded(
-                        child: Text.rich(TextSpan(children: [
-                          const TextSpan(
-                            text: 'Nate picked: ',
-                            style: TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                          TextSpan(text: FunQuiz.scaleValues[FunQuiz.myAnswers[i]]),
-                        ])),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 5),
-                  for (final flex in [answer, FunQuiz.myAnswers[i]]) _FunQuizChart(flex, 4),
-                  const SizedBox(height: 30),
-                ],
-                Padding(
-                  padding: const EdgeInsets.only(top: 50, bottom: 5),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text.rich(
-                          style: const TextStyle(fontSize: 18),
-                          TextSpan(children: [
-                            const TextSpan(
-                              text: 'your height: ',
-                              style: TextStyle(fontWeight: FontWeight.w600),
-                            ),
-                            TextSpan(text: FunQuiz.heights[userHeight]),
-                          ]),
-                        ),
-                      ),
-                      const Expanded(
-                        child: Text.rich(
-                          style: TextStyle(fontSize: 18),
-                          TextSpan(children: [
-                            TextSpan(
-                              text: "Nate's height: ",
-                              style: TextStyle(fontWeight: FontWeight.w600),
-                            ),
-                            TextSpan(text: "5'5"),
-                          ]),
-                        ),
-                      ),
-                    ],
-                  ),
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (final (i, answer) in preferences.indexed) ...[
+                Text(
+                  SurveyPresets.funQuiz.questions[i + 1].description,
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w600, height: 2),
                 ),
-                for (final flex in [userHeight, FunQuiz.myAnswers.last])
-                  _FunQuizChart(flex, FunQuiz.heights.length - 1),
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 100),
-                    child: Text.rich(
-                      style: const TextStyle(fontSize: 18),
-                      TextSpan(children: [
-                        const TextSpan(text: 'your "Nate%":  '),
-                        TextSpan(
-                          text: ' ${(overallNatePercent * 100).toStringAsFixed(1)}%',
-                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 32),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text.rich(TextSpan(children: [
+                        const TextSpan(
+                          text: 'you picked: ',
+                          style: TextStyle(fontWeight: FontWeight.w600),
                         ),
-                      ]),
+                        TextSpan(text: FunQuiz.scaleValues[answer]),
+                      ])),
                     ),
-                  ),
-                ),
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 30),
-                    child: FilledButton(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: const Color(0xff00ffff),
-                        foregroundColor: Colors.black,
-                        shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(25)),
-                        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 18),
-                      ),
-                      onPressed: () {
-                        FunQuiz.inProgress = false;
-                        navigator.pop();
-                      },
-                      child: const Text(
-                        'Done',
-                        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
-                      ),
+                    Expanded(
+                      child: Text.rich(TextSpan(children: [
+                        const TextSpan(
+                          text: 'Nate picked: ',
+                          style: TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        TextSpan(text: FunQuiz.scaleValues[FunQuiz.myAnswers[i]]),
+                      ])),
                     ),
-                  ),
+                  ],
                 ),
+                const SizedBox(height: 5),
+                for (final flex in [answer, FunQuiz.myAnswers[i]]) _FunQuizChart(flex, 4),
+                const SizedBox(height: 30),
               ],
-            ),
+              Padding(
+                padding: const EdgeInsets.only(top: 50, bottom: 5),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text.rich(
+                        style: const TextStyle(fontSize: 18),
+                        TextSpan(children: [
+                          const TextSpan(
+                            text: 'your height: ',
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          TextSpan(text: FunQuiz.heights[userHeight]),
+                        ]),
+                      ),
+                    ),
+                    const Expanded(
+                      child: Text.rich(
+                        style: TextStyle(fontSize: 18),
+                        TextSpan(children: [
+                          TextSpan(
+                            text: "Nate's height: ",
+                            style: TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          TextSpan(text: "5'5"),
+                        ]),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              for (final flex in [userHeight, FunQuiz.myAnswers.last])
+                _FunQuizChart(flex, FunQuiz.heights.length - 1),
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 100),
+                  child: Text.rich(
+                    style: const TextStyle(fontSize: 18),
+                    TextSpan(children: [
+                      const TextSpan(text: 'your "Nate%":  '),
+                      TextSpan(
+                        text: ' ${(overallNatePercent * 100).toStringAsFixed(1)}%',
+                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 32),
+                      ),
+                    ]),
+                  ),
+                ),
+              ),
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 30),
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xff00ffff),
+                      foregroundColor: Colors.black,
+                      shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(25)),
+                      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 18),
+                    ),
+                    onPressed: () {
+                      FunQuiz.inProgress = false;
+                      navigator.pop();
+                    },
+                    child: const Text(
+                      'Done',
+                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -281,7 +315,9 @@ class _FunQuizResults extends StatelessWidget {
   }
 }
 
+/// {@macro totally_not_a_waste_of_time}
 class _FunQuizChart extends StatefulWidget {
+  /// {@macro totally_not_a_waste_of_time}
   const _FunQuizChart(this.flex, this.maxFlex);
   final int flex, maxFlex;
 
@@ -289,20 +325,18 @@ class _FunQuizChart extends StatefulWidget {
   State<_FunQuizChart> createState() => _FunQuizChartState();
 }
 
+/// {@macro totally_not_a_waste_of_time}
 class _FunQuizChartState extends StateAsync<_FunQuizChart> {
+  /// [animate] will eventually set this to `true`,
+  /// creating a fun little animation.
+  bool expanded = false;
+
   @override
   void animate() => sleepState(0.6, () => expanded = true);
-
-  bool expanded = false;
 
   @override
   Widget build(BuildContext context) {
     final flex = widget.flex / widget.maxFlex;
-    final color = Color.lerp(
-      const Color(0xff800000),
-      const Color(0xff00ffff),
-      expanded ? flex : 0,
-    );
     const buffer = 10.0;
     return Padding(
       padding: const EdgeInsets.only(top: 5),
@@ -315,7 +349,11 @@ class _FunQuizChartState extends StateAsync<_FunQuizChart> {
               duration: Durations.extralong4,
               curve: Curves.ease,
               width: expanded ? flex * (constraints.maxWidth - buffer) + buffer : 0,
-              color: color,
+              color: Color.lerp(
+                const Color(0xff800000),
+                const Color(0xff00ffff),
+                expanded ? flex : 0,
+              ),
               child: const SizedBox.expand(),
             );
           }),
@@ -325,8 +363,15 @@ class _FunQuizChartState extends StateAsync<_FunQuizChart> {
   }
 }
 
-class ValidateMessage extends StatelessWidget {
-  const ValidateMessage(this.invalidCount, {super.key});
+/// {@template views.survey.ValidateMessage}
+/// If the user taps "submit" without answering required questions,
+/// this widget will display some informative text below the button.
+/// {@endtemplate}
+class _ValidateMessage extends StatelessWidget {
+  /// {@macro views.survey.ValidateMessage}
+  const _ValidateMessage(this.invalidCount);
+
+  /// stores the number of required questions that haven't been answered.
   final int invalidCount;
 
   @override
@@ -340,12 +385,15 @@ class ValidateMessage extends StatelessWidget {
         style: theme.textTheme.labelSmall!.copyWith(color: theme.colorScheme.onErrorContainer),
       );
     }
-
     return SizedBox(width: double.infinity, height: 50, child: child);
   }
 }
 
+/// {@template views.survey.SurveyWidget}
+/// This widget does the heavy lifting to display each survey question.
+/// {@endtemplate}
 class SurveyWidget extends StatelessWidget {
+  /// {@macro views.survey.SurveyWidget}
   const SurveyWidget({
     super.key,
     required this.question,
@@ -353,9 +401,22 @@ class SurveyWidget extends StatelessWidget {
     required this.valid,
     required this.onUpdate,
   });
+
+  /// This object stores the relevant question data,
+  /// and its type (one of the [SurveyQuestion] subclasses)
+  /// is used to determine how the data is displayed.
   final SurveyQuestion question;
+
+  /// {@macro views.survey.AnswerType}
   final dynamic answer;
+
+  /// If this is `false`, the question will be highlighted
+  /// with a translucent red box.
   final bool valid;
+
+  /// [SurveyScreen] will pass a function here to update its state.
+  ///
+  /// {@macro typedef_explanation}
   final ValueChanged<dynamic> onUpdate;
 
   @override
@@ -496,7 +557,7 @@ class SurveyWidget extends StatelessWidget {
         );
       case final ScaleQuestion q:
         final value = answer as int;
-        final divisions = q.length - 1;
+        final divisions = q.values.length - 1;
         answerGraphic = LayoutBuilder(builder: (context, constraints) {
           final sliderWidth = constraints.maxWidth - 100;
           final labelOffset = Offset(sliderWidth / 2 - 25, 0);
@@ -531,7 +592,7 @@ class SurveyWidget extends StatelessWidget {
                   ),
                 ),
               ),
-              if (q[value] case final String text)
+              if (q.values[value] case final String text)
                 Padding(
                   padding: EdgeInsets.only(top: 45 + endpointHeight),
                   child: Text(text, style: context.theme.textTheme.labelLarge),
@@ -539,8 +600,6 @@ class SurveyWidget extends StatelessWidget {
             ],
           );
         });
-      case MultipleChoice():
-        throw StateError('All multiple choice questions are either Radio or Checkbox lists.');
     }
     widget ??= Column(children: [
       questionText,

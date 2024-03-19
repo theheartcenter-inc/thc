@@ -46,6 +46,7 @@ class SurveyStyling extends StatelessWidget {
       surface: isLight ? SurveyColors.orangeSunrise : SurveyColors.orangeSunset,
       onSurface: textColor,
     );
+    final size = MediaQuery.of(context).size;
     return Theme(
       data: ThemeData(
         colorScheme: colors,
@@ -104,7 +105,7 @@ class SurveyStyling extends StatelessWidget {
                       colors: [colors.surface, colors.background],
                     ),
                   ),
-            constraints: BoxConstraints(minHeight: MediaQuery.of(context).size.height),
+            constraints: BoxConstraints(minWidth: size.width, minHeight: size.height),
             padding: const EdgeInsets.all(20),
             child: SafeArea(child: Column(children: children)),
           ),
