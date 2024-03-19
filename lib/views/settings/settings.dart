@@ -10,16 +10,14 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
+      appBar: userType.isAdmin ? AppBar() : null,
+      body: const Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'Dark theme?',
-              style: TextStyle(fontSize: 20, color: context.colorScheme.onBackground),
-            ),
-            const SizedBox(height: 20),
-            const _ThemePicker(),
+            Text('Dark theme?', style: TextStyle(fontSize: 20)),
+            SizedBox(height: 20),
+            _ThemePicker(),
           ],
         ),
       ),
@@ -44,13 +42,17 @@ class _ThemePicker extends StatelessWidget {
     final themeMode = context.watch<AppTheme>().state;
     final style = TextStyle(color: context.colorScheme.onBackground);
     return SegmentedButton<ThemeMode>(
+      style: SegmentedButton.styleFrom(
+        side: const BorderSide(style: BorderStyle.none),
+        backgroundColor: context.lightDark(Colors.white54, Colors.black54),
+      ),
       showSelectedIcon: false,
       segments: [
         for (final value in ThemeMode.values)
           ButtonSegment(
             value: value,
             label: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
               child: Text(
                 value.name,
                 style: themeMode == value ? null : style,

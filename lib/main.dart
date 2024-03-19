@@ -5,6 +5,7 @@ import 'package:thc/models/local_storage.dart';
 import 'package:thc/models/navigator.dart';
 import 'package:thc/models/theme.dart';
 import 'package:thc/models/user.dart';
+import 'package:thc/views/home/director_home.dart';
 import 'package:thc/views/home/home_screen.dart';
 import 'package:thc/views/settings/settings.dart';
 
@@ -22,6 +23,7 @@ class App extends StatelessWidget {
     return MultiProvider(
       providers: [
         BlocProvider(create: (_) => AppTheme()),
+        BlocProvider(create: (_) => DirectorNavigation()),
       ],
       builder: (context, _) => MaterialApp(
         navigatorKey: navKey,
@@ -73,15 +75,15 @@ class UserButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colorScheme;
     final buttonStyle = switch (type) {
-      UserType.participant => ElevatedButton.styleFrom(
+      UserType.participant => FilledButton.styleFrom(
           backgroundColor: colors.primary,
           foregroundColor: colors.onPrimary,
         ),
-      UserType.director => ElevatedButton.styleFrom(
+      UserType.director => FilledButton.styleFrom(
           backgroundColor: colors.secondary,
           foregroundColor: colors.onSecondary,
         ),
-      UserType.admin => ElevatedButton.styleFrom(
+      UserType.admin => FilledButton.styleFrom(
           backgroundColor: colors.surface,
           foregroundColor: colors.onSurface,
         ),
@@ -89,7 +91,7 @@ class UserButton extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20),
-      child: ElevatedButton(
+      child: FilledButton(
         onPressed: () {
           userType = type;
           navigator.pushReplacement(const HomeScreen());
