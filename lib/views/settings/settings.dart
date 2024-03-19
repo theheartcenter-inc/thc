@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:thc/models/bloc.dart';
 import 'package:thc/models/local_storage.dart';
 import 'package:thc/models/theme.dart';
+import 'package:thc/models/user.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});

@@ -1,3 +1,5 @@
+import 'package:thc/models/local_storage.dart';
+
 enum UserType {
   participant,
   director,
@@ -16,4 +18,13 @@ enum UserType {
         director => 'Director',
         admin => 'Admin',
       };
+}
+
+/// There are 3 user types:
+/// - Participants – people who benefit from guided meditation
+/// - Directors – create livestreams for participants
+/// - Admins – manage livestream schedules, recorded videos, and other users
+UserType get userType => StorageKeys.userType();
+set userType(UserType type) {
+  StorageKeys.userType.save(type.index);
 }

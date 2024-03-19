@@ -121,8 +121,9 @@ class SurveyButton extends StatelessWidget {
       style: FilledButton.styleFrom(
         backgroundColor: context.lightDark(
           SurveyColors.orangeSunrise,
-          SurveyColors.maroon,
+          SurveyColors.maroonSunset,
         ),
+        foregroundColor: context.lightDark(Colors.black, Colors.white),
       ),
       child: const Padding(
         padding: EdgeInsets.symmetric(vertical: 8),

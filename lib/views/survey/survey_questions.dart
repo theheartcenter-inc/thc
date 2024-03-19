@@ -22,8 +22,10 @@ extension ValidAnswer on String? {
 /// or switch expressions, and Dart will understand when you've covered each
 /// subclass, so no default case is needed.
 /// {@endtemplate}
-sealed class SurveyQuestion<AnswerType> {
-  const SurveyQuestion({required this.description, required this.optional});
+sealed class SurveyQuestion {
+  /// Since it's a sealed class, this constructor can't be used to create
+  /// [SurveyQuestion] objects, but we still need it for defining the subclasses.
+  const SurveyQuestion(this.description, {required this.optional});
 
   /// The question text is stored in this string.
   final String description;
@@ -41,49 +43,50 @@ sealed class SurveyQuestion<AnswerType> {
   /// For example, in a [YesNoQuestion], the answer type is [bool]—
   /// a value of `true` means "yes" and a value of `false` means "no".
   /// {@endtemplate}
-  AnswerType? get initial;
+  dynamic get initial;
 
-  /// This function is able to convert the answer data into a readable text description.
+  /// Converts the answer data into a readable text description.
   ///
   /// It returns `null` if there isn't a valid answer yet.
-  String? answerDescription(AnswerType? answer);
+  String? answerDescription(dynamic answer);
 }
 
 /// {@template views.survey.YesNoQuestion}
 /// Displays a segmented button with 2 options (yes/no).
 /// {@endtemplate}
-class YesNoQuestion extends SurveyQuestion<bool> {
+class YesNoQuestion extends SurveyQuestion {
   /// {@macro views.survey.YesNoQuestion}
-  const YesNoQuestion({required super.description, super.optional = false});
-  @override
-  bool? get initial => null;
+  const YesNoQuestion(super.description, {super.optional = false});
 
   @override
-  String? answerDescription(bool? answer) =>
+  bool? get initial => null;
+  @override
+  String? answerDescription(covariant bool? answer) =>
       switch (answer) { true => 'yes', false => 'no', null => null };
 }
 
 /// {@template views.survey.TextPromptQuestion}
 /// Displays a text field, allowing the user to type a custom response.
 /// {@endtemplate}
-class TextPromptQuestion extends SurveyQuestion<String> {
+class TextPromptQuestion extends SurveyQuestion {
   /// {@macro views.survey.TextPromptQuestion}
-  const TextPromptQuestion({required super.description, super.optional = false});
+  const TextPromptQuestion(super.description, {super.optional = false});
+
   @override
   String get initial => '';
   @override
-  String? answerDescription(String? answer) => answer.validated;
+  String? answerDescription(covariant String? answer) => answer.validated;
 }
 
 /// {@macro views.survey.sealed_class}
 ///
 /// We're using an `(AnswerType, String?)` tuple: a [String] is passed in when
 /// the user types a custom value.
-sealed class MultipleChoice<AnswerType> extends SurveyQuestion<(AnswerType, String?)> {
+sealed class MultipleChoice extends SurveyQuestion {
   /// You can't make a [MultipleChoice] object using this constructor;
   /// it's here because [RadioQuestion] and [CheckboxQuestion] use it.
-  const MultipleChoice({
-    required super.description,
+  const MultipleChoice(
+    super.description, {
     super.optional = false,
     required this.choices,
     this.canType = false,
@@ -107,18 +110,19 @@ sealed class MultipleChoice<AnswerType> extends SurveyQuestion<(AnswerType, Stri
 ///
 /// The answer data is an [int] representing the index of the user's
 /// selected choice.
-class RadioQuestion extends MultipleChoice<int> {
+class RadioQuestion extends MultipleChoice {
   /// {@macro views.survey.RadioQuestion}
-  const RadioQuestion({
-    required super.description,
+  const RadioQuestion(
+    super.description, {
     required super.choices,
     super.optional = false,
     super.canType = false,
   });
+
   @override
   (int, String?)? get initial => null;
   @override
-  String? answerDescription((int, String?)? answer) {
+  String? answerDescription(covariant (int, String?)? answer) {
     if (answer == null) return null;
 
     final (index, userInput) = answer;
@@ -134,19 +138,20 @@ class RadioQuestion extends MultipleChoice<int> {
 ///
 /// The answer data is a list of [bool]s: each item is `true` or `false`
 /// depending on whether the checkbox is selected.
-class CheckboxQuestion extends MultipleChoice<List<bool>> {
+class CheckboxQuestion extends MultipleChoice {
   /// {@macro views.survey.CheckboxQuestion}
-  const CheckboxQuestion({
-    required super.description,
+  const CheckboxQuestion(
+    super.description, {
     required super.choices,
     super.optional = false,
     super.canType = false,
   });
+
   @override
   (List<bool>, String?) get initial =>
       (List.filled(choices.length + (canType ? 1 : 0), false), null);
   @override
-  String? answerDescription((List<bool>, String?)? answer) {
+  String? answerDescription(covariant (List<bool>, String?)? answer) {
     final (checks, userInput) = answer!;
     if (!checks.contains(true)) return null;
 
@@ -165,13 +170,13 @@ class CheckboxQuestion extends MultipleChoice<List<bool>> {
 /// {@template views.survey.ScaleQuestion}
 /// Shows a slider that allows the user to pick a value on a spectrum.
 /// {@endtemplate}
-class ScaleQuestion extends SurveyQuestion<int> {
+class ScaleQuestion extends SurveyQuestion {
   /// {@macro views.survey.ScaleQuestion}
   ///
   /// The value of [optional] only determines whether an asterisk `*` is shown,
   /// since a [ScaleQuestion] is never considered to be "unanswered".
-  const ScaleQuestion({
-    required super.description,
+  const ScaleQuestion(
+    super.description, {
     super.optional = false,
     this.values = _defaults,
     this.showEndLabels = true,
@@ -197,7 +202,7 @@ class ScaleQuestion extends SurveyQuestion<int> {
   @override
   int get initial => 0;
   @override
-  String answerDescription(int? answer) => values[answer!];
+  String answerDescription(covariant int? answer) => values[answer!];
 }
 
 /// {@template views.survey.record_types}
@@ -223,50 +228,31 @@ class ScaleQuestion extends SurveyQuestion<int> {
 /// {@endtemplate}
 typedef QuestionSummary = (String question, String? answer);
 
-/// {@template views.survey.extension_types}
+/// {@template views.survey.SurveyRecord}
 /// Extension types are great for when you want to make an existing type behave in a new way.
+///
+/// `SurveyRecord` takes a [Record] (a.k.a. "tuple") of question and answer data
+/// and has methods that can validate the input and output a description of the answer.
 /// {@endtemplate}
-extension type SurveyRecord<AnswerType>._((SurveyQuestion<AnswerType>, AnswerType?) record) {
-  /// {@macro views.survey.extension_types}
-  SurveyRecord(SurveyQuestion<AnswerType> question, AnswerType? answer)
-      : this._((question, answer));
+extension type SurveyRecord._((SurveyQuestion, dynamic) record) {
+  /// {@macro views.survey.SurveyRecord}
+  SurveyRecord(SurveyQuestion question, dynamic answer) : this._((question, answer));
 
   SurveyQuestion get question => record.$1;
-  AnswerType? get answer => record.$2;
+  String? get answer => question.answerDescription(record.$2);
 
-  bool get valid => question.optional || answered;
-  bool get answered => switch (answer) {
-        null || (null, _) => false,
-        final String s => s.validated != null,
-        (final answer, final String? userInput) => _validateInput(answer, userInput),
-        _ => true,
-      };
-
-  bool _validateInput(dynamic answer, String? userInput) {
-    final validInput = userInput.validated != null;
-    switch (question as MultipleChoice) {
-      case final CheckboxQuestion q:
-        final checks = answer as List<bool>;
-        if (!q.canType || validInput) return checks.contains(true);
-        return checks.sublist(0, checks.length - 1).contains(true);
-
-      case final RadioQuestion q:
-        final index = answer as int;
-        return validInput || index < q.choices.length;
-    }
-  }
-
-  QuestionSummary get summary => (question.description, question.answerDescription(answer));
+  bool get valid => question.optional || answer != null;
+  QuestionSummary get summary => (question.description, answer);
 }
 
-/// {@macro views.survey.extension_types}
+/// This extension type combines 2 lists into a single list of [SurveyRecord]s
 extension type SurveyData(List<SurveyRecord> data) {
-  /// {@macro views.survey.extension_types}
   SurveyData.fromLists(List<SurveyQuestion> questions, List<dynamic> answers)
       : this([for (final (i, question) in questions.indexed) SurveyRecord(question, answers[i])]);
 
+  /// Generates a list of `true`/`false` values based on whether each answer
+  /// meets the requirements for submission.
   List<bool> get validation => [for (final record in data) record.valid];
-
   List<QuestionSummary> get surveySummary => [for (final record in data) record.summary];
 }
 
@@ -276,14 +262,14 @@ enum SurveyPresets {
   intro(
     label: 'intro survey',
     questions: [
-      YesNoQuestion(description: 'Are you in need of meditation?'),
+      YesNoQuestion('Are you in need of meditation?'),
       YesNoQuestion(
-        description: 'Are you a person impacted by incarceration directly '
-            'and through a loved one or survivors too, including CDCR officers, '
-            'and folx who are doing the work to end mass incarceration?',
+        'Are you a person impacted by incarceration directly '
+        'and through a loved one or survivors too, including CDCR officers, '
+        'and folx who are doing the work to end mass incarceration?',
       ),
       CheckboxQuestion(
-        description: 'Which meditation types are you interested in practicing?',
+        'Which meditation types are you interested in practicing?',
         choices: [
           'Mindfulness',
           'Metta (Loving-Kindness)',
@@ -299,12 +285,12 @@ enum SurveyPresets {
     label: 'after finishing stream',
     questions: [
       ScaleQuestion(
-        description: 'How are you feeling right now?',
+        'How are you feeling right now?',
         values: ['awful', 'not good', 'neutral', 'good', 'fantastic'],
       ),
-      YesNoQuestion(description: 'Did you find this practice helpful?'),
+      YesNoQuestion('Did you find this practice helpful?'),
       TextPromptQuestion(
-        description: 'Do you have any feedback for the streamer?',
+        'Do you have any feedback for the streamer?',
         optional: true,
       ),
     ],
@@ -313,7 +299,7 @@ enum SurveyPresets {
     label: 'stream ended early',
     questions: [
       CheckboxQuestion(
-        description: 'What caused you to end the stream early?',
+        'What caused you to end the stream early?',
         choices: [
           'Discomfort/difficulty focusing',
           "The streamer's behavior",
@@ -323,29 +309,30 @@ enum SurveyPresets {
         canType: true,
       ),
       TextPromptQuestion(
-        description: 'Do you have any feedback for the streamer?',
+        'Do you have any feedback for the streamer?',
         optional: true,
       ),
     ],
   ),
 
   /// {@template totally_not_a_waste_of_time}
-  /// The cynical/critical folks may argue that creating this quiz was a waste of time.
+  /// The cynical/critical folks may argue that this was a waste of time.
   ///
-  /// But this fun little quiz is undoubtedly a fantastic way to showcase
-  /// how this survey format can be utilized and possibly expanded upon in the future.
+  /// But this quiz is undoubtedly a fantastic way to showcase how our survey format
+  /// can be utilized and possibly expanded upon in the future.
   /// {@endtemplate}
   funQuiz(
     label: 'Nate%',
     questions: [
       RadioQuestion(
-        description: 'This is just something I made for fun.\n\n'
-            'Answer each question and find out how similar we are!',
+        'This is something I made for fun.\n\n'
+        'Answer each question and find out how similar we are!',
         choices: ['Sounds good!'],
         optional: true,
       ),
       FunQuiz('having a dog 🐕'),
       FunQuiz('having a cat 🐈'),
+      FunQuiz('creative writing ✍️'),
       FunQuiz('anime 🍙'),
       FunQuiz('Sonic the Hedgehog 🦔'),
       FunQuiz('DIY projects 🛠️'),
@@ -355,16 +342,15 @@ enum SurveyPresets {
       FunQuiz('the color "cyan" 🩵'),
       FunQuiz('the movie "Nimona" 🩷'),
       FunQuiz('the show "Game of Thrones" ⚔️'),
-      FunQuiz('capitalism 🪙'),
       FunQuiz('swimming 🏊'),
       FunQuiz('cycling 🚲'),
       FunQuiz('rock climbing 🧗'),
       FunQuiz('football 🏈'),
       FunQuiz('traveling ✈️'),
       FunQuiz('singing 🎤'),
-      FunQuiz('creative writing ✍️'),
+      FunQuiz('going to concerts ✨'),
       ScaleQuestion(
-        description: 'how tall? 📏',
+        'how tall? 📏',
         values: FunQuiz.heights,
         showEndLabels: false,
         optional: true,
@@ -372,8 +358,11 @@ enum SurveyPresets {
     ],
   );
 
+  /// By defining a constructor inside an enum, we can give it members
+  /// in a way similar to a regular class definition.
   const SurveyPresets({required this.label, required this.questions});
 
+  /// Stores the text shown on the button that links to the survey.
   final String label;
   final List<SurveyQuestion> questions;
 }
@@ -381,10 +370,10 @@ enum SurveyPresets {
 /// {@macro totally_not_a_waste_of_time}
 class FunQuiz extends ScaleQuestion {
   /// {@macro totally_not_a_waste_of_time}
-  const FunQuiz(String tag)
-      : super(description: tag, showEndLabels: false, values: scaleValues, optional: true);
+  const FunQuiz(super.description)
+      : super(showEndLabels: false, values: scaleValues, optional: true);
 
-  /// `true` if someone is currently taking the "Nate%" quiz.
+  /// Set to `true` while you're taking the Nate% quiz.
   ///
   /// Changes the survey "submit" button's behavior and a couple of theme colors.
   static bool inProgress = false;
@@ -396,7 +385,7 @@ class FunQuiz extends ScaleQuestion {
   ];
 
   /// Match these values for a "100.0%"!
-  static const myAnswers = [2, 3, 2, 4, 1, 4, 0, 3, 4, 4, 1, 2, 1, 4, 3, 0, 1, 4, 1, 7];
+  static const myAnswers = [2, 3, 1, 2, 4, 1, 4, 0, 3, 4, 4, 1, 1, 4, 3, 0, 1, 4, 1, 7];
 
   @override
   int get initial => 2;

@@ -130,7 +130,7 @@ class Submitted extends StatelessWidget {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             TextSpan(
-              text: "(just kidding it hasn't)\n\n\n",
+              text: "(just kidding, it hasn't)\n\n\n",
               style: TextStyle(fontSize: 13, letterSpacing: 0.33),
             ),
           ],
@@ -176,7 +176,7 @@ class _FunQuizResults extends StatelessWidget {
   const _FunQuizResults(this.answers);
   final List<int> answers;
 
-  /// 100% if the answer matches mine, 0% if it's as far from mine as possible.
+  /// 100% if the answer's, 0% if [userValue] as far away as possible.
   static double computeNatePercent(int userValue, int nateValue, [int maxValue = 4]) {
     int diff(int a, int b) => (a - b).abs();
     final distance = diff(userValue, nateValue);
@@ -200,6 +200,8 @@ class _FunQuizResults extends StatelessWidget {
     );
     final overallNatePercent = natePercentSum / FunQuiz.myAnswers.length;
 
+    const semiBold = TextStyle(fontWeight: FontWeight.w600);
+
     return Scaffold(
       body: SizedBox.expand(
         child: SingleChildScrollView(
@@ -216,19 +218,13 @@ class _FunQuizResults extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text.rich(TextSpan(children: [
-                        const TextSpan(
-                          text: 'you picked: ',
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
+                        const TextSpan(text: 'you picked: ', style: semiBold),
                         TextSpan(text: FunQuiz.scaleValues[answer]),
                       ])),
                     ),
                     Expanded(
                       child: Text.rich(TextSpan(children: [
-                        const TextSpan(
-                          text: 'Nate picked: ',
-                          style: TextStyle(fontWeight: FontWeight.w600),
-                        ),
+                        const TextSpan(text: 'Nate picked: ', style: semiBold),
                         TextSpan(text: FunQuiz.scaleValues[FunQuiz.myAnswers[i]]),
                       ])),
                     ),
@@ -246,10 +242,7 @@ class _FunQuizResults extends StatelessWidget {
                       child: Text.rich(
                         style: const TextStyle(fontSize: 18),
                         TextSpan(children: [
-                          const TextSpan(
-                            text: 'your height: ',
-                            style: TextStyle(fontWeight: FontWeight.w600),
-                          ),
+                          const TextSpan(text: 'your height: ', style: semiBold),
                           TextSpan(text: FunQuiz.heights[userHeight]),
                         ]),
                       ),
@@ -258,10 +251,7 @@ class _FunQuizResults extends StatelessWidget {
                       child: Text.rich(
                         style: TextStyle(fontSize: 18),
                         TextSpan(children: [
-                          TextSpan(
-                            text: "Nate's height: ",
-                            style: TextStyle(fontWeight: FontWeight.w600),
-                          ),
+                          TextSpan(text: "Nate's height: ", style: semiBold),
                           TextSpan(text: "5'5"),
                         ]),
                       ),
@@ -277,7 +267,7 @@ class _FunQuizResults extends StatelessWidget {
                   child: Text.rich(
                     style: const TextStyle(fontSize: 18),
                     TextSpan(children: [
-                      const TextSpan(text: 'your "Nate%":  '),
+                      const TextSpan(text: 'Nate%:  '),
                       TextSpan(
                         text: ' ${(overallNatePercent * 100).toStringAsFixed(1)}%',
                         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 32),
@@ -327,8 +317,7 @@ class _FunQuizChart extends StatefulWidget {
 
 /// {@macro totally_not_a_waste_of_time}
 class _FunQuizChartState extends StateAsync<_FunQuizChart> {
-  /// [animate] will eventually set this to `true`,
-  /// creating a fun little animation.
+  /// [animate] will eventually set this to `true`.
   bool expanded = false;
 
   @override
@@ -371,7 +360,7 @@ class _ValidateMessage extends StatelessWidget {
   /// {@macro views.survey.ValidateMessage}
   const _ValidateMessage(this.invalidCount);
 
-  /// stores the number of required questions that haven't been answered.
+  /// The number of required questions that haven't been answered.
   final int invalidCount;
 
   @override
@@ -402,7 +391,7 @@ class SurveyWidget extends StatelessWidget {
     required this.onUpdate,
   });
 
-  /// This object stores the relevant question data,
+  /// This object has the relevant question data,
   /// and its type (one of the [SurveyQuestion] subclasses)
   /// is used to determine how the data is displayed.
   final SurveyQuestion question;

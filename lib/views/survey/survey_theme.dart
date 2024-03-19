@@ -28,7 +28,11 @@ class SurveyStyling extends StatelessWidget {
     final brightness = context.theme.brightness;
     final isLight = brightness == Brightness.light;
     final blackAndWhite = isLight ? Colors.white : Colors.black;
-    final textColor = isLight ? Colors.black : SurveyColors.orangeWhite;
+    final textColor = isLight
+        ? Colors.black
+        : FunQuiz.inProgress
+            ? const Color(0xffddeeee)
+            : SurveyColors.orangeWhite;
     final error = isLight ? SurveyColors.vibrantRed : Colors.redAccent;
     final paleColor = isLight ? SurveyColors.yellowSunrise : SurveyColors.orangeWhite;
     final colors = ColorScheme(
