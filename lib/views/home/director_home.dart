@@ -99,7 +99,7 @@ class DirectorNavigation extends Cubit<int> {
   DirectorNavigation() : super(_initial);
 
   static int get _initial => switch (StorageKeys.directorScreen()) {
-        final int i when i > 0 && i <= DirectorNavBar._destinations.length => i,
+        final int i when i >= 0 && i < DirectorNavBar._destinations.length => i,
         _ => 0,
       };
 
