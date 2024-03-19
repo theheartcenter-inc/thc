@@ -5,6 +5,7 @@ import 'package:thc/models/navigator.dart';
 import 'package:thc/models/theme.dart';
 import 'package:thc/views/survey/survey_questions.dart';
 import 'package:thc/views/survey/survey_theme.dart';
+import 'package:thc/views/widgets.dart';
 
 class SurveyScreen extends StatefulWidget {
   const SurveyScreen({super.key, required this.questions});
@@ -280,20 +281,45 @@ class _FunQuizResults extends StatelessWidget {
   }
 }
 
-class _FunQuizChart extends StatelessWidget {
+class _FunQuizChart extends StatefulWidget {
   const _FunQuizChart(this.flex, this.maxFlex);
   final int flex, maxFlex;
 
   @override
+  State<_FunQuizChart> createState() => _FunQuizChartState();
+}
+
+class _FunQuizChartState extends StateAsync<_FunQuizChart> {
+  @override
+  void animate() => sleepState(0.6, () => expanded = true);
+
+  bool expanded = false;
+
+  @override
   Widget build(BuildContext context) {
-    final color = Color.lerp(const Color(0xff800000), const Color(0xff00ffff), flex / maxFlex);
+    final flex = widget.flex / widget.maxFlex;
+    final color = Color.lerp(
+      const Color(0xff800000),
+      const Color(0xff00ffff),
+      expanded ? flex : 0,
+    );
+    const buffer = 10.0;
     return Padding(
       padding: const EdgeInsets.only(top: 5),
-      child: Row(
-        children: [
-          Expanded(flex: flex * 10 + 1, child: Container(height: 20, color: color)),
-          Expanded(flex: (maxFlex - flex) * 10, child: const SizedBox.shrink())
-        ],
+      child: SizedBox(
+        height: 20,
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: LayoutBuilder(builder: (context, constraints) {
+            return AnimatedContainer(
+              duration: Durations.extralong4,
+              curve: Curves.ease,
+              width: expanded ? flex * (constraints.maxWidth - buffer) + buffer : 0,
+              color: color,
+              child: const SizedBox.expand(),
+            );
+          }),
+        ),
       ),
     );
   }
