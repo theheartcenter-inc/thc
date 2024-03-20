@@ -1,62 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:thc/models/local_storage.dart';
-import 'package:thc/models/navigator.dart';
-import 'package:thc/models/theme.dart';
 import 'package:thc/models/user.dart';
-import 'package:thc/views/admin_portal/admin_portal.dart';
-import 'package:thc/views/profiles_screen/profiles_screen.dart';
-import 'package:thc/views/widgets.dart';
+import 'package:thc/views/home/admin_home.dart';
+import 'package:thc/views/home/director_home.dart';
+import 'package:thc/views/home/participant_home.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
+  /// Using this `=>` syntax makes things look nice:
+  ///
+  /// ```dart
+  /// // these two functions are equivalent
+  /// Color bestColor() {
+  ///   return Color(0xff00ffff);
+  /// }
+  /// Color bestColor() => Color(0xff00ffff);
+  /// ```
+  ///
+  /// But for most [build] methods, it's better to use the curly braces,
+  /// since they don't indent the function as much and it's easier
+  /// to add in more stuff if you need to.
   @override
   Widget build(BuildContext context) => switch (userType) {
         UserType.participant => const ParticipantHomeScreen(),
         UserType.director => const DirectorHomeScreen(),
-        UserType.admin => const AdminPortal(),
+        UserType.admin => const AdminHomeScreen(),
       };
-}
-
-class ParticipantHomeScreen extends StatelessWidget {
-  const ParticipantHomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Home"),
-        actions: [
-          IconButton(
-            onPressed: () => navigator.push(const ProfilesScreen()),
-            icon: const Icon(Icons.person),
-          ),
-          IconButton(
-            onPressed: () {
-              //handle logout press
-            },
-            icon: const Icon(Icons.logout),
-          )
-        ],
-        backgroundColor: const Color.fromARGB(255, 131, 124, 234),
-      ),
-      body: const Center(child: Text("Implementation of body content")),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(label: "Home", icon: Icon(Icons.home)),
-          BottomNavigationBarItem(label: "About Us", icon: Icon(Icons.info))
-        ],
-      ),
-    );
-  }
-}
-
-class DirectorHomeScreen extends StatelessWidget {
-  const DirectorHomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return FunPlaceholder('Home screen for directors!',
-        color: context.colorScheme.secondary);
-  }
 }

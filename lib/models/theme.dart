@@ -1,13 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// {@template models.theme.colorScheme}
-/// The THC app colors are based on the color palette from
-/// [theheartcenter.one](https://theheartcenter.one/).
-///
-/// Names starting with an `_underscore` are private: they can't be accessed
-/// from another file.
-///
-/// Instead, by pulling colors from the `colorScheme`, the color palette can adapt
+/// By pulling colors from the [ColorScheme], the color palette can adapt
 /// based on whether the app is in light or dark mode.
 ///
 /// ```dart
@@ -22,69 +16,87 @@ import 'package:flutter/material.dart';
 ///   );
 /// }
 /// ```
+///
+/// The THC app colors are based on the color palette from
+/// [theheartcenter.one](https://theheartcenter.one/).
 /// {@endtemplate}
-abstract final class _ThcColors {
+abstract final class ThcColors {
   static const green = Color(0xff99cc99);
   static const pink = Color(0xffeecce0);
   static const orange = Color(0xffffa020);
   static const teal = Color(0xff00b0b0);
   static const tan = Color(0xfff8f0e0);
   static const dullBlue = Color(0xff364764);
+  static const gray = Color(0xff4b4f58);
   static const darkBlue = Color(0xff151c28);
   static const darkGreen = Color(0xff003300);
   static const darkMagenta = Color(0xff663366);
   static const paleAzure = Color(0xffddeeff);
-  static const red = Colors.red;
-  static const white = Colors.white;
-  static const black = Colors.black;
+}
+
+/// [MaterialStateProperty] is pretty neat: you can have different styles
+/// based on whatever's going on with the widget.
+///
+/// For example, if a Director clicks on the "stream" button
+/// and then keeps their mouse hovering over it, then
+/// the button's set of Material states would look like this:
+///
+/// ```dart
+/// states = {MaterialState.hovered, MaterialState.selected};
+/// ```
+///
+/// Since we're using this [_tealWhenSelected] function, the color will be [ThcColors.teal].
+MaterialStateProperty<T> _tealWhenSelected<T>(T Function({Color color}) copyWith) =>
+    MaterialStateProperty.resolveWith((states) => states.contains(MaterialState.selected)
+        ? copyWith(color: ThcColors.teal)
+        : copyWith(color: Colors.white));
+
+const _iconTheme = IconThemeData(size: 32);
+const _labelTextStyle = TextStyle(fontWeight: FontWeight.w600, fontSize: 12);
+
+ThemeData _generateTheme(bool isLight) {
+  return ThemeData(
+    colorScheme: ColorScheme(
+      brightness: isLight ? Brightness.light : Brightness.dark,
+      primary: ThcColors.green,
+      inversePrimary: ThcColors.darkGreen,
+      onPrimary: Colors.white,
+      secondary: ThcColors.teal,
+      onSecondary: Colors.white,
+      tertiary: isLight ? ThcColors.darkMagenta : ThcColors.tan,
+      onTertiary: isLight ? ThcColors.tan : ThcColors.darkMagenta,
+      error: Colors.red,
+      onError: Colors.white,
+      errorContainer: ThcColors.pink,
+      onErrorContainer: Colors.red,
+      background: isLight ? ThcColors.paleAzure : ThcColors.darkBlue,
+      onBackground: isLight ? Colors.black : ThcColors.paleAzure,
+      surface: isLight ? ThcColors.tan : ThcColors.dullBlue,
+      onSurface: isLight ? Colors.black : ThcColors.paleAzure,
+    ),
+    materialTapTargetSize: MaterialTapTargetSize.padded,
+    filledButtonTheme: const FilledButtonThemeData(
+      style: ButtonStyle(shape: MaterialStatePropertyAll(BeveledRectangleBorder())),
+    ),
+    appBarTheme: AppBarTheme(
+      backgroundColor: ThcColors.darkBlue,
+      foregroundColor: isLight ? Colors.white : ThcColors.paleAzure,
+    ),
+    navigationBarTheme: NavigationBarThemeData(
+      backgroundColor: isLight ? ThcColors.darkBlue : Colors.transparent,
+      indicatorColor: Colors.transparent,
+      iconTheme: _tealWhenSelected(_iconTheme.copyWith),
+      labelTextStyle: _tealWhenSelected(_labelTextStyle.copyWith),
+      labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
+    ),
+  );
 }
 
 /// {@macro models.theme.colorScheme}
-final lightTheme = ThemeData(
-  materialTapTargetSize: MaterialTapTargetSize.padded,
-  colorScheme: const ColorScheme(
-    brightness: Brightness.light,
-    primary: _ThcColors.green,
-    inversePrimary: _ThcColors.darkGreen,
-    onPrimary: _ThcColors.white,
-    secondary: _ThcColors.teal,
-    onSecondary: _ThcColors.white,
-    tertiary: _ThcColors.darkMagenta,
-    onTertiary: _ThcColors.tan,
-    error: _ThcColors.red,
-    onError: _ThcColors.white,
-    errorContainer: _ThcColors.pink,
-    onErrorContainer: _ThcColors.red,
-    background: _ThcColors.paleAzure,
-    onBackground: _ThcColors.black,
-    surface: _ThcColors.dullBlue,
-    onSurface: _ThcColors.white,
-    inverseSurface: _ThcColors.darkBlue,
-    onInverseSurface: _ThcColors.orange,
-  ),
-);
+final lightTheme = _generateTheme(true);
 
 /// {@macro models.theme.colorScheme}
-final darkTheme = ThemeData(
-  materialTapTargetSize: MaterialTapTargetSize.padded,
-  colorScheme: const ColorScheme(
-    brightness: Brightness.dark,
-    primary: _ThcColors.green,
-    onPrimary: _ThcColors.white,
-    primaryContainer: _ThcColors.darkGreen,
-    onPrimaryContainer: _ThcColors.white,
-    secondary: _ThcColors.teal,
-    onSecondary: _ThcColors.white,
-    tertiary: _ThcColors.tan,
-    onTertiary: _ThcColors.darkMagenta,
-    error: _ThcColors.red,
-    onError: _ThcColors.white,
-    background: _ThcColors.darkBlue,
-    onBackground: _ThcColors.paleAzure,
-    surface: _ThcColors.dullBlue,
-    onSurface: _ThcColors.paleAzure,
-  ),
-);
+final darkTheme = _generateTheme(false);
 
 /// `extension` lets you add methods to a class, as if you were
 /// doing it inside the class definition.
@@ -102,4 +114,11 @@ extension ThemeGetter on BuildContext {
 
   /// {@macro models.theme.ThemeGetter}
   ColorScheme get colorScheme => theme.colorScheme;
+
+  /// The displayed color will be [light] or [dark] based on
+  /// whether we're currently in dark mode.
+  Color lightDark(Color light, Color dark) => switch (theme.brightness) {
+        Brightness.light => light,
+        Brightness.dark => dark,
+      };
 }
