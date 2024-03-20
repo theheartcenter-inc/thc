@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:thc/models/local_storage.dart';
+import 'package:thc/models/navigator.dart';
 import 'package:thc/models/theme.dart';
 import 'package:thc/models/user.dart';
 import 'package:thc/views/admin_portal/admin_portal.dart';
@@ -11,8 +12,7 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => switch (userType) {
-        // Please change here, I changed to ProfilesScreen to check
-        UserType.participant => const ProfilesScreen(),
+        UserType.participant => const ParticipantHomeScreen(),
         UserType.director => const DirectorHomeScreen(),
         UserType.admin => const AdminPortal(),
       };
@@ -27,6 +27,10 @@ class ParticipantHomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Home"),
         actions: [
+          IconButton(
+            onPressed: () => navigator.push(const ProfilesScreen()),
+            icon: const Icon(Icons.person),
+          ),
           IconButton(
             onPressed: () {
               //handle logout press
