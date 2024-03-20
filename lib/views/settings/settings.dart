@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/models/bloc.dart';
 import 'package:thc/models/local_storage.dart';
-import 'package:thc/models/theme.dart';
 import 'package:thc/models/user.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -41,7 +40,6 @@ class _ThemePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeMode = context.watch<AppTheme>().state;
-    final style = TextStyle(color: context.colorScheme.onBackground);
     return SegmentedButton<ThemeMode>(
       showSelectedIcon: false,
       segments: [
@@ -50,10 +48,7 @@ class _ThemePicker extends StatelessWidget {
             value: value,
             label: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: Text(
-                value.name,
-                style: themeMode == value ? null : style,
-              ),
+              child: Text(value.name),
             ),
           ),
       ],

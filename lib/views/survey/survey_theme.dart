@@ -4,6 +4,9 @@ import 'package:thc/models/theme.dart';
 import 'package:thc/views/settings/settings.dart';
 import 'package:thc/views/survey/survey_questions.dart';
 
+/// The sunrise/sunset gradient in the survey screens does a couple things:
+/// 1. adds a nice aesthetic
+/// 2. gives a visual indicator of how long the survey is, and how far along you are
 abstract final class SurveyColors {
   static const veridian = Color(0xffc03000);
   static const maroon = Color(0xff800040);
@@ -18,7 +21,15 @@ abstract final class SurveyColors {
   static const sunsetError = Color(0x50600000);
 }
 
+/// {@template views.survey.SurveyStyling}
+/// Rather than going to the hassle of changing the app theme,
+/// we can just wrap the survey screen in this widget.
+///
+/// We can also set custom theme data for sliders, buttons,
+/// and text fields that show up as survey UI components.
+/// {@endtemplate}
 class SurveyStyling extends StatelessWidget {
+  /// {@macro views.survey.SurveyStyling}
   const SurveyStyling(this.children, {super.key});
 
   final List<Widget> children;
@@ -38,6 +49,7 @@ class SurveyStyling extends StatelessWidget {
     final colors = ColorScheme(
       brightness: brightness,
       primary: SurveyColors.veridian,
+      primaryContainer: isLight ? SurveyColors.veridian : SurveyColors.orangeWhite,
       onPrimary: blackAndWhite,
       secondary: SurveyColors.maroon,
       onSecondary: blackAndWhite,
@@ -57,10 +69,7 @@ class SurveyStyling extends StatelessWidget {
         inputDecorationTheme: InputDecorationTheme(
           enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: textColor)),
           focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(
-              color: isLight ? SurveyColors.veridian : SurveyColors.orangeWhite,
-              width: 1.5,
-            ),
+            borderSide: BorderSide(color: colors.primaryContainer, width: 1.5),
           ),
         ),
         textSelectionTheme: TextSelectionThemeData(

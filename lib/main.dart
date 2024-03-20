@@ -168,7 +168,12 @@ class _SurveyPickerButton extends StatelessWidget {
       child: FilledButton(
         onPressed: () {
           if (option == SurveyPresets.funQuiz) FunQuiz.inProgress = true;
-          navigator.push(SurveyScreen(questions: option.questions));
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => BlocProvider(
+              create: (_) => SurveyValidation(),
+              child: SurveyScreen(questions: option.questions),
+            ),
+          ));
         },
         style: FilledButton.styleFrom(
           backgroundColor: context.lightDark(

@@ -101,6 +101,8 @@ sealed class MultipleChoice extends SurveyQuestion {
   /// If true, an extra option will appear at the bottom of the list,
   /// allowing the user to type their own response.
   final bool canType;
+
+  int? get typingIndex => canType ? choices.length : null;
 }
 
 /// {@template views.survey.RadioQuestion}
@@ -228,34 +230,6 @@ class ScaleQuestion extends SurveyQuestion {
 /// {@endtemplate}
 typedef QuestionSummary = (String question, String? answer);
 
-/// {@template views.survey.SurveyRecord}
-/// Extension types are great for when you want to make an existing type behave in a new way.
-///
-/// `SurveyRecord` takes a [Record] (a.k.a. "tuple") of question and answer data
-/// and has methods that can validate the input and output a description of the answer.
-/// {@endtemplate}
-extension type SurveyRecord._((SurveyQuestion, dynamic) record) {
-  /// {@macro views.survey.SurveyRecord}
-  SurveyRecord(SurveyQuestion question, dynamic answer) : this._((question, answer));
-
-  SurveyQuestion get question => record.$1;
-  String? get answer => question.answerDescription(record.$2);
-
-  bool get valid => question.optional || answer != null;
-  QuestionSummary get summary => (question.description, answer);
-}
-
-/// This extension type combines 2 lists into a single list of [SurveyRecord]s
-extension type SurveyData(List<SurveyRecord> data) {
-  SurveyData.fromLists(List<SurveyQuestion> questions, List<dynamic> answers)
-      : this([for (final (i, question) in questions.indexed) SurveyRecord(question, answers[i])]);
-
-  /// Generates a list of `true`/`false` values based on whether each answer
-  /// meets the requirements for submission.
-  List<bool> get validation => [for (final record in data) record.valid];
-  List<QuestionSummary> get surveySummary => [for (final record in data) record.summary];
-}
-
 /// The goal of this [Enum] is to showcase different things you can do
 /// with the current survey class implementations.
 enum SurveyPresets {
@@ -315,18 +289,13 @@ enum SurveyPresets {
     ],
   ),
 
-  /// {@template totally_not_a_waste_of_time}
-  /// The cynical/critical folks may argue that this was a waste of time.
-  ///
-  /// But this quiz is undoubtedly a fantastic way to showcase how our survey format
-  /// can be utilized and possibly expanded upon in the future.
-  /// {@endtemplate}
+  /// {@macro totally_not_a_waste_of_time}
   funQuiz(
-    label: 'Nate%',
+    label: 'personality quiz',
     questions: [
       RadioQuestion(
-        'This is something I made for fun.\n\n'
-        'Answer each question and find out how similar we are!',
+        "Hey friends, it's Nate—this is something I made for fun.\n\n"
+        'Answer these questions and find out how similar we are!',
         choices: ['Sounds good!'],
         optional: true,
       ),
