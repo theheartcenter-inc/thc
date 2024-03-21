@@ -62,7 +62,6 @@ class ChooseAnyView extends StatelessWidget {
             Image.asset('assets/thc_logo_with_text.png', width: 250),
             const Spacer(flex: 2),
             for (final type in UserType.values) UserButton(type),
-            const Spacer(),
             const SurveyButton(),
             const Spacer(flex: 3),
           ],
@@ -116,18 +115,21 @@ class SurveyButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FilledButton(
-      onPressed: () => navigator.push(const SurveyPicker()),
-      style: FilledButton.styleFrom(
-        backgroundColor: context.lightDark(
-          SurveyColors.orangeSunrise,
-          SurveyColors.maroonSunset,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: FilledButton(
+        onPressed: () => navigator.push(const SurveyPicker()),
+        style: FilledButton.styleFrom(
+          backgroundColor: context.lightDark(
+            SurveyColors.orangeSunrise,
+            SurveyColors.maroonSunset,
+          ),
+          foregroundColor: context.lightDark(Colors.black, Colors.white),
         ),
-        foregroundColor: context.lightDark(Colors.black, Colors.white),
-      ),
-      child: const Padding(
-        padding: EdgeInsets.symmetric(vertical: 8),
-        child: Text('view Surveys', style: TextStyle(fontSize: 18)),
+        child: const Padding(
+          padding: EdgeInsets.symmetric(vertical: 8),
+          child: Text('view Surveys', style: TextStyle(fontSize: 18)),
+        ),
       ),
     );
   }

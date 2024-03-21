@@ -18,12 +18,12 @@ class SurveyField extends StatelessWidget {
 
   /// {@template ValueChanged}
   /// For a very long time, I had no idea what [ValueChanged] was;
-  /// then I found out that it's just a function.
+  /// then I realized it's just a function signature.
   ///
   /// 2 ways to write the same thing:
   /// ```dart
-  /// final ValueChanged<int> function;
-  /// final void Function(int) function;
+  /// final ValueChanged<int> onChanged;
+  /// final void Function(int) onChanged;
   /// ```
   /// {@endtemplate}
   final ValueChanged<dynamic> update;
