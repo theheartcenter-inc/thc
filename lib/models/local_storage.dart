@@ -51,8 +51,3 @@ enum StorageKeys {
         _ => throw TypeError(),
       };
 }
-
-UserType get userType => StorageKeys.userType();
-set userType(UserType type) {
-  StorageKeys.userType.save(type.index);
-}

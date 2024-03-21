@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:thc/models/local_storage.dart';
 import 'package:thc/models/user.dart';
 import 'package:thc/views/home/admin_home.dart';
 import 'package:thc/views/home/director_home.dart';
