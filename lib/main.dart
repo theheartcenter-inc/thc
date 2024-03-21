@@ -6,6 +6,7 @@ import 'package:thc/models/navigator.dart';
 import 'package:thc/models/theme.dart';
 import 'package:thc/models/user.dart';
 import 'package:thc/views/home/home_screen.dart';
+import 'package:thc/views/login_register/register.dart';
 import 'package:thc/views/settings/settings.dart';
 
 void main() async {
@@ -29,7 +30,7 @@ class App extends StatelessWidget {
         darkTheme: darkTheme,
         themeMode: context.watch<AppTheme>().state,
         debugShowCheckedModeBanner: false,
-        home: const ChooseAnyView(),
+        home: const RegisterScreen(),
       ),
     );
   }
