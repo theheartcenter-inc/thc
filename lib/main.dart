@@ -6,6 +6,7 @@ import 'package:thc/models/navigator.dart';
 import 'package:thc/models/theme.dart';
 import 'package:thc/models/user.dart';
 import 'package:thc/views/home/director_home.dart';
+import 'package:thc/views/home/admin_home.dart';
 import 'package:thc/views/home/home_screen.dart';
 import 'package:thc/views/settings/settings.dart';
 
@@ -24,6 +25,7 @@ class App extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => AppTheme()),
         BlocProvider(create: (_) => DirectorNavigation()),
+        BlocProvider(create: (_) => AdminNavigation()),
       ],
       builder: (context, _) => MaterialApp(
         navigatorKey: navKey,

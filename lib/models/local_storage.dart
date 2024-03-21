@@ -19,6 +19,7 @@ enum StorageKeys {
   themeMode,
   userType,
   directorScreen,
+  adminScreen,
   ;
 
   /// {@macro models.local_storage.StorageKeys}
@@ -26,6 +27,7 @@ enum StorageKeys {
         themeMode => ThemeMode.system.index,
         userType => UserType.participant.index,
         directorScreen => null,
+        adminScreen => null,
       };
 
   /// {@macro models.local_storage.StorageKeys}
@@ -39,6 +41,7 @@ enum StorageKeys {
         themeMode => ThemeMode.values[fromStorage],
         userType => UserType.values[fromStorage],
         directorScreen => fromStorage,
+        adminScreen => fromStorage,
       };
 
   /// {@macro models.local_storage.StorageKeys}
