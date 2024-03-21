@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/models/bloc.dart';
 import 'package:thc/models/local_storage.dart';
-import 'package:thc/models/theme.dart';
+import 'package:thc/models/user.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -10,16 +10,14 @@ class SettingsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
+      appBar: userType.isAdmin ? AppBar() : null,
+      body: const Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'Dark theme?',
-              style: TextStyle(fontSize: 20, color: context.colorScheme.onBackground),
-            ),
-            const SizedBox(height: 20),
-            const _ThemePicker(),
+            Text('Dark theme?', style: TextStyle(fontSize: 20)),
+            SizedBox(height: 20),
+            _ThemePicker(),
           ],
         ),
       ),
@@ -42,7 +40,6 @@ class _ThemePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeMode = context.watch<AppTheme>().state;
-    final style = TextStyle(color: context.colorScheme.onBackground);
     return SegmentedButton<ThemeMode>(
       showSelectedIcon: false,
       segments: [
@@ -50,11 +47,8 @@ class _ThemePicker extends StatelessWidget {
           ButtonSegment(
             value: value,
             label: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                value.name,
-                style: themeMode == value ? null : style,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Text(value.name),
             ),
           ),
       ],
