@@ -14,6 +14,8 @@ dependencies:
   meta: ^1.11.0
   provider: ^6.1.2
   agora_rtc_engine: ^6.3.0
+  firebase_core: ^2.27.1
+  firebase_auth: ^4.17.9
 
 dev_dependencies:
   flutter_test:
