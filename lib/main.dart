@@ -17,10 +17,10 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await loadFromLocalStorage();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  final storage = loadFromLocalStorage();
+  final firebase = Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await storage;
+  await firebase;
   runApp(const App());
 }
 
