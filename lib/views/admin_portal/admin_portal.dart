@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:thc/models/navigator.dart';
 import 'package:thc/models/theme.dart';
+import 'package:thc/views/profiles_screen/profiles_screen.dart';
 import 'package:thc/views/settings/settings.dart';
 import 'package:thc/views/widgets.dart';
 
@@ -11,6 +12,10 @@ class AdminPortal extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(actions: [
+        IconButton(
+          onPressed: () => navigator.push(const ProfilesScreen()),
+          icon: const Icon(Icons.person),
+        ),
         IconButton(
           onPressed: () => navigator.push(const SettingsScreen()),
           icon: const Icon(Icons.settings),
