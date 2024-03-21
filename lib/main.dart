@@ -8,6 +8,7 @@ import 'package:thc/models/user.dart';
 import 'package:thc/views/home/director_home.dart';
 import 'package:thc/views/home/admin_home.dart';
 import 'package:thc/views/home/home_screen.dart';
+import 'package:thc/views/login_register/register.dart';
 import 'package:thc/views/settings/settings.dart';
 import 'package:thc/views/survey/survey_questions.dart';
 import 'package:thc/views/survey/survey_screen.dart';
@@ -56,17 +57,65 @@ class ChooseAnyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const registerButton = NavigateButton(
+      color: Colors.cyan,
+      label: 'login/register',
+      page: RegisterScreen(),
+    );
+    final surveyButton = NavigateButton(
+      color: switch (context.theme.brightness) {
+        Brightness.light => SurveyColors.orangeSunrise,
+        Brightness.dark => SurveyColors.maroon,
+      },
+      label: 'view surveys',
+      page: const SurveyPicker(),
+    );
+
     return Scaffold(
-      body: Center(
-        child: Column(
-          children: [
-            const Spacer(flex: 3),
-            Image.asset('assets/thc_logo_with_text.png', width: 250),
-            const Spacer(flex: 2),
-            for (final type in UserType.values) UserButton(type),
-            const SurveyButton(),
-            const Spacer(flex: 3),
-          ],
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            children: [
+              const SizedBox(height: 50),
+              Image.asset('assets/thc_logo_with_text.png', width: 250),
+              const SizedBox(height: 60),
+              registerButton,
+              for (final type in UserType.values) UserButton(type),
+              surveyButton,
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class NavigateButton extends StatelessWidget {
+  const NavigateButton({
+    required this.color,
+    required this.label,
+    required this.page,
+    this.onPressed,
+    super.key,
+  });
+  final Color color;
+  final String label;
+  final Widget page;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: FilledButton(
+        onPressed: () {
+          onPressed?.call();
+          navigator.pushReplacement(page);
+        },
+        style: FilledButton.styleFrom(backgroundColor: color, foregroundColor: Colors.black),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Text(label, style: const TextStyle(fontSize: 18)),
         ),
       ),
     );
@@ -79,60 +128,15 @@ class UserButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colorScheme;
-    final buttonStyle = switch (type) {
-      UserType.participant => FilledButton.styleFrom(
-          backgroundColor: colors.primary,
-          foregroundColor: colors.onPrimary,
-        ),
-      UserType.director => FilledButton.styleFrom(
-          backgroundColor: colors.secondary,
-          foregroundColor: colors.onSecondary,
-        ),
-      UserType.admin => FilledButton.styleFrom(
-          backgroundColor: colors.surface,
-          foregroundColor: colors.onSurface,
-        ),
-    };
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20),
-      child: FilledButton(
-        onPressed: () {
-          userType = type;
-          navigator.pushReplacement(const HomeScreen());
-        },
-        style: buttonStyle,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 8),
-          child: Text('view as $type', style: const TextStyle(fontSize: 18)),
-        ),
-      ),
-    );
-  }
-}
-
-class SurveyButton extends StatelessWidget {
-  const SurveyButton({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20),
-      child: FilledButton(
-        onPressed: () => navigator.push(const SurveyPicker()),
-        style: FilledButton.styleFrom(
-          backgroundColor: context.lightDark(
-            SurveyColors.orangeSunrise,
-            SurveyColors.maroonSunset,
-          ),
-          foregroundColor: context.lightDark(Colors.black, Colors.white),
-        ),
-        child: const Padding(
-          padding: EdgeInsets.symmetric(vertical: 8),
-          child: Text('view Surveys', style: TextStyle(fontSize: 18)),
-        ),
-      ),
+    return NavigateButton(
+      color: switch (type) {
+        UserType.participant => ThcColors.green,
+        UserType.director => ThcColors.tan,
+        UserType.admin => ThcColors.dullBlue,
+      },
+      label: 'view as $type',
+      onPressed: () => userType = type,
+      page: const HomeScreen(),
     );
   }
 }
@@ -168,7 +172,7 @@ class _SurveyPickerButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 18),
+      padding: const EdgeInsets.symmetric(vertical: 20),
       child: FilledButton(
         onPressed: () {
           if (option == SurveyPresets.funQuiz) FunQuiz.inProgress = true;
