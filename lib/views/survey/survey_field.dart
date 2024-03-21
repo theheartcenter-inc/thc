@@ -34,9 +34,7 @@ class SurveyField extends StatelessWidget {
     final question = _QuestionText(record.question);
 
     Widget answer = builder.buildAnswer(context, update, record.question, record.cleanAnswer);
-    if (record.question is MultipleChoice) {
-      answer = _MultipleChoiceTheme(child: answer);
-    }
+    if (record.question is MultipleChoice) answer = _MultipleChoiceTheme(child: answer);
 
     return _ErrorBox(
       valid: record.valid || !context.watch<SurveyValidation>().state,
