@@ -28,12 +28,10 @@ class _CreateLivestreamState extends State<CreateLivestream> {
     Navigator.of(context).push(
       PageRouteBuilder(
         transitionDuration: Durations.long2,
-        pageBuilder: (_, animation, __) {
-          return BlocProvider(
-            create: (_) => StreamOverlayFadeIn(animation),
-            child: const ActiveStream(),
-          );
-        },
+        pageBuilder: (_, animation, __) => BlocProvider(
+          create: (_) => StreamOverlayFadeIn(animation),
+          child: const ActiveStream(),
+        ),
       ),
     );
   }

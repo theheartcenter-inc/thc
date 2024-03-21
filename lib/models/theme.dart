@@ -78,6 +78,14 @@ ThemeData _generateTheme(bool isLight) {
     filledButtonTheme: const FilledButtonThemeData(
       style: ButtonStyle(shape: MaterialStatePropertyAll(BeveledRectangleBorder())),
     ),
+    segmentedButtonTheme: SegmentedButtonThemeData(
+      style: SegmentedButton.styleFrom(
+        side: const BorderSide(style: BorderStyle.none),
+        backgroundColor: isLight ? Colors.white54 : Colors.black54,
+        selectedBackgroundColor: ThcColors.green,
+        selectedForegroundColor: isLight ? null : Colors.black,
+      ),
+    ),
     appBarTheme: AppBarTheme(
       backgroundColor: ThcColors.darkBlue,
       foregroundColor: isLight ? Colors.white : ThcColors.paleAzure,

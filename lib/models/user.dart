@@ -1,3 +1,5 @@
+import 'package:thc/models/local_storage.dart';
+
 enum UserType {
   participant,
   director,
@@ -16,4 +18,9 @@ enum UserType {
         director => 'Director',
         admin => 'Admin',
       };
+}
+
+UserType get userType => StorageKeys.userType();
+set userType(UserType type) {
+  StorageKeys.userType.save(type.index);
 }

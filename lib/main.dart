@@ -9,6 +9,9 @@ import 'package:thc/views/home/director_home.dart';
 import 'package:thc/views/home/admin_home.dart';
 import 'package:thc/views/home/home_screen.dart';
 import 'package:thc/views/settings/settings.dart';
+import 'package:thc/views/survey/survey_questions.dart';
+import 'package:thc/views/survey/survey_screen.dart';
+import 'package:thc/views/survey/survey_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -61,6 +64,7 @@ class ChooseAnyView extends StatelessWidget {
             Image.asset('assets/thc_logo_with_text.png', width: 250),
             const Spacer(flex: 2),
             for (final type in UserType.values) UserButton(type),
+            const SurveyButton(),
             const Spacer(flex: 3),
           ],
         ),
@@ -103,6 +107,89 @@ class UserButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Text('view as $type', style: const TextStyle(fontSize: 18)),
         ),
+      ),
+    );
+  }
+}
+
+class SurveyButton extends StatelessWidget {
+  const SurveyButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: FilledButton(
+        onPressed: () => navigator.push(const SurveyPicker()),
+        style: FilledButton.styleFrom(
+          backgroundColor: context.lightDark(
+            SurveyColors.orangeSunrise,
+            SurveyColors.maroonSunset,
+          ),
+          foregroundColor: context.lightDark(Colors.black, Colors.white),
+        ),
+        child: const Padding(
+          padding: EdgeInsets.symmetric(vertical: 8),
+          child: Text('view Surveys', style: TextStyle(fontSize: 18)),
+        ),
+      ),
+    );
+  }
+}
+
+class SurveyPicker extends StatelessWidget {
+  const SurveyPicker({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        actions: const [Padding(padding: EdgeInsets.all(20), child: DarkModeSwitch())],
+      ),
+      body: Center(
+        child: Column(
+          children: [
+            const Spacer(flex: 3),
+            const Text('Surveys', style: TextStyle(fontSize: 56, letterSpacing: 0.5)),
+            const Spacer(flex: 2),
+            for (final option in SurveyPresets.values) _SurveyPickerButton(option),
+            const Spacer(flex: 4),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SurveyPickerButton extends StatelessWidget {
+  const _SurveyPickerButton(this.option);
+  final SurveyPresets option;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 18),
+      child: FilledButton(
+        onPressed: () {
+          if (option == SurveyPresets.funQuiz) FunQuiz.inProgress = true;
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => BlocProvider(
+              create: (_) => SurveyValidation(),
+              child: SurveyScreen(questions: option.questions),
+            ),
+          ));
+        },
+        style: FilledButton.styleFrom(
+          backgroundColor: context.lightDark(
+            SurveyColors.orangeSunrise,
+            SurveyColors.veridian,
+          ),
+          foregroundColor: context.colorScheme.onSurface,
+          shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(25)),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
+          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        child: Text(option.label),
       ),
     );
   }
