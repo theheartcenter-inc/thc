@@ -4,12 +4,12 @@ import 'package:thc/models/theme.dart';
 import 'package:thc/views/settings/settings.dart';
 import 'package:thc/views/survey/survey_questions.dart';
 
-/// The sunrise/sunset gradient in the survey screens does a couple things:
+/// The sunrise/sunset gradient does a couple things:
 /// 1. adds a nice aesthetic
 /// 2. gives a visual indicator of how long the survey is, and how far along you are
 abstract final class SurveyColors {
   static const veridian = Color(0xffc03000);
-  static const maroon = Color(0xff800040);
+  static const maroon = Color(0xff600030);
   static const orangeWhite = Color(0xffffeee8);
   static const orangeSunrise = Color(0xffffb060);
   static const orangeSunset = Color(0xffc07020);
@@ -30,9 +30,10 @@ abstract final class SurveyColors {
 /// {@endtemplate}
 class SurveyStyling extends StatelessWidget {
   /// {@macro views.survey.SurveyStyling}
-  const SurveyStyling(this.children, {super.key});
+  const SurveyStyling({required this.child, super.key});
 
-  final List<Widget> children;
+  /// The survey content.
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -98,6 +99,7 @@ class SurveyStyling extends StatelessWidget {
             shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(25)),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
             textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            elevation: isLight ? 1 : null,
           ),
         ),
       ),
@@ -113,14 +115,14 @@ class SurveyStyling extends StatelessWidget {
                   )
                 : BoxDecoration(
                     gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
+                      begin: const Alignment(-0.25, -1.0),
+                      end: const Alignment(0.25, 1.0),
                       colors: [colors.surface, colors.background],
                     ),
                   ),
             constraints: BoxConstraints(minWidth: size.width, minHeight: size.height),
             padding: const EdgeInsets.all(20),
-            child: SafeArea(child: Column(children: children)),
+            child: SafeArea(child: child),
           ),
         ),
       ),
@@ -128,7 +130,11 @@ class SurveyStyling extends StatelessWidget {
   }
 }
 
+/// {@template views.survey.DarkModeSwitch}
+/// A switch that matches the "survey theme" aesthetic.
+/// {@endtemplate}
 class DarkModeSwitch extends StatelessWidget {
+  /// {@macro views.survey.DarkModeSwitch}
   const DarkModeSwitch({super.key});
 
   @override

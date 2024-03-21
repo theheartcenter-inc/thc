@@ -6,22 +6,41 @@ import 'package:thc/models/theme.dart';
 import 'package:thc/views/survey/survey_questions.dart';
 import 'package:thc/views/survey/survey_screen.dart';
 
+/// {@template views.survey.SurveyField}
+/// A widget that displays a survey question.
+/// {@endtemplate}
 class SurveyField extends StatelessWidget {
+  /// {@macro views.survey.SurveyField}
   const SurveyField(this.record, this.update, {super.key});
 
+  /// {@macro views.survey.SurveyRecord}
   final SurveyRecord record;
+
+  /// {@template ValueChanged}
+  /// For a very long time, I had no idea what [ValueChanged] was;
+  /// then I found out that it's just a function.
+  ///
+  /// 2 ways to write the same thing:
+  /// ```dart
+  /// final ValueChanged<int> function;
+  /// final void Function(int) function;
+  /// ```
+  /// {@endtemplate}
   final ValueChanged<dynamic> update;
 
   @override
   Widget build(BuildContext context) {
     final builder = SurveyBuilder.fromRecord(record);
+    final question = _QuestionText(record.question);
 
-    final question = QuestionText(record.question);
-    final answer = builder.buildAnswer(context, update, record.question, record.cleanAnswer);
+    Widget answer = builder.buildAnswer(context, update, record.question, record.cleanAnswer);
+    if (record.question is MultipleChoice) {
+      answer = _MultipleChoiceTheme(child: answer);
+    }
 
-    return ErrorBox(
+    return _ErrorBox(
       valid: record.valid || !context.watch<SurveyValidation>().state,
-      child: builder.fieldLayout(context, question, answer),
+      child: builder.layout(context, question, answer),
     );
   }
 }
@@ -38,14 +57,34 @@ extension type SurveyRecord.fromRecord((SurveyQuestion, dynamic) record) {
 
   SurveyQuestion get question => record.$1;
   dynamic get answer => record.$2;
+
+  /// [MultipleChoice] questions have answers stored as tuples:
+  /// the first value is information about which answer(s) are selected,
+  /// and the second value can contain a custom text response that the user typed in.
+  ///
+  /// This getter ignores the second value and returns the data showing what's been selected.
   dynamic get cleanAnswer => switch (answer) { (final a, _) || final a => a };
 
+  /// In order for the user to finish the survey, all non-optional questions must be answered.
   bool get valid => question.optional || question.answerDescription(answer) != null;
+
+  /// Contains text that describes the question & answer.
   QuestionSummary get summary => (question.description, question.answerDescription(answer));
 }
 
-/// This extension type combines 2 lists into a single list of [SurveyRecord]s
 extension type SurveyData(List<SurveyRecord> data) implements List<SurveyRecord> {
+  /// This constructor turns a list of questions into a list of [SurveyRecord]s:
+  ///
+  /// ```dart
+  /// final List<SurveyQuestion> questions = [question1, question2, question3];
+  ///
+  /// // SurveyData.fromQuestions(questions)
+  /// [
+  ///   SurveyRecord(question1, answer1),
+  ///   SurveyRecord(question2, answer2),
+  ///   SurveyRecord(question3, answer3),
+  /// ]
+  /// ```
   SurveyData.fromQuestions(List<SurveyQuestion> questions)
       : this([for (final question in questions) SurveyRecord(question, question.initial)]);
 
@@ -54,12 +93,18 @@ extension type SurveyData(List<SurveyRecord> data) implements List<SurveyRecord>
   bool get valid => data.every((record) => record.valid);
   int get invalidCount => data.fold(0, (previous, record) => previous + (record.valid ? 0 : 1));
 
-  List<dynamic> get answers => [for (final record in data) record.answer];
-  List<QuestionSummary> get surveySummary => [for (final record in data) record.summary];
+  /// The "fun quiz" only uses [ScaleQuestion]s, so its answer output can be an [int] list.
+  List<int> get funQuizResults => [for (final record in data.sublist(1)) record.answer];
+
+  /// Contains text that describes each question & answer.
+  List<QuestionSummary> get summary => [for (final record in data) record.summary];
 }
 
-class ErrorBox extends StatelessWidget {
-  const ErrorBox({required this.valid, super.key, required this.child});
+/// {@macro views.survey.SurveyValidation}
+class _ErrorBox extends StatelessWidget {
+  /// {@macro views.survey.SurveyValidation}
+  const _ErrorBox({required this.valid, required this.child});
+
   final bool valid;
   final Widget child;
 
@@ -78,8 +123,13 @@ class ErrorBox extends StatelessWidget {
   }
 }
 
-class QuestionText extends StatelessWidget {
-  const QuestionText(this.question, {super.key});
+/// {@template views.survey.QuestionText}
+/// Displays the question text, and adds an asterisk `*` to any non-optional question.
+/// {@endtemplate}
+class _QuestionText extends StatelessWidget {
+  /// {@macro views.survey.QuestionText}
+  const _QuestionText(this.question);
+
   final SurveyQuestion question;
 
   @override
@@ -112,28 +162,45 @@ class QuestionText extends StatelessWidget {
   }
 }
 
-class MultipleChoiceTheme extends Theme {
-  MultipleChoiceTheme({super.key, required ColorScheme colors, required super.child})
-      : super(data: _data(colors));
+/// {@template views.survey.MultipleChoiceTheme}
+/// Unlike [_TextPrompt], the [MultipleChoice] questions that allow typed responses
+/// have an [UnderlineInputBorder], thanks to this widget.
+/// {@endtemplate}
+class _MultipleChoiceTheme extends StatelessWidget {
+  /// {@macro views.survey.MultipleChoiceTheme}
+  const _MultipleChoiceTheme({required this.child});
 
-  static _data(ColorScheme colors) {
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colorScheme;
     final enabled = BorderSide(color: colors.onBackground);
     final focused = BorderSide(color: colors.primaryContainer, width: 1.5);
-
-    return ThemeData(
-      inputDecorationTheme: InputDecorationTheme(
-        enabledBorder: OutlineInputBorder(borderSide: enabled),
-        focusedBorder: OutlineInputBorder(borderSide: focused),
-        isDense: true,
+    return Theme(
+      data: context.theme.copyWith(
+        inputDecorationTheme: InputDecorationTheme(
+          enabledBorder: UnderlineInputBorder(borderSide: enabled),
+          focusedBorder: UnderlineInputBorder(borderSide: focused),
+          isDense: true,
+        ),
       ),
+      child: child,
     );
   }
 }
 
+/// {@template views.survey.SurveyBuilder}
+/// These builder classes make it so we don't need a chonky `build()` method.
+///
+/// Each survey builder implements a [buildAnswer] method, and can also
+/// override the [layout] if necessary.
+/// {@endtemplate}
 abstract class SurveyBuilder<Q extends SurveyQuestion> {
   /// If we remove this constructor, the subclasses get mad :(
   const SurveyBuilder();
 
+  /// {@macro views.survey.SurveyBuilder}
   factory SurveyBuilder.fromRecord(SurveyRecord record) => switch (record.question) {
         YesNoQuestion() => _YesNo(),
         TextPromptQuestion() => _TextPrompt(),
@@ -142,16 +209,20 @@ abstract class SurveyBuilder<Q extends SurveyQuestion> {
         ScaleQuestion() => _Scale(),
       } as SurveyBuilder<Q>;
 
-  Widget fieldLayout(BuildContext context, Widget question, Widget answer) {
+  /// The question & answer are arranged vertically by default.
+  ///
+  /// But in the case of [YesNoQuestion], they're placed side-by-side.
+  Widget layout(BuildContext context, Widget question, Widget answer) {
     return Column(children: [question, answer, const SizedBox(height: 20)]);
   }
 
+  /// {@macro views.survey.SurveyBuilder}
   Widget buildAnswer(BuildContext context, ValueChanged update, Q question, _);
 }
 
 class _YesNo extends SurveyBuilder<YesNoQuestion> {
   @override
-  Widget fieldLayout(context, question, answer) {
+  Widget layout(context, question, answer) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

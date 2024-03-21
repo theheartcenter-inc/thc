@@ -165,7 +165,7 @@ class CheckboxQuestion extends MultipleChoice {
     ];
 
     if (selectedChoices.isEmpty) return null;
-    return selectedChoices.join(', ');
+    return [for (final selection in selectedChoices) '☑ $selection'].join('\n');
   }
 }
 
@@ -237,10 +237,20 @@ enum SurveyPresets {
     label: 'intro survey',
     questions: [
       YesNoQuestion('Are you in need of meditation?'),
-      YesNoQuestion(
-        'Are you a person impacted by incarceration directly '
-        'and through a loved one or survivors too, including CDCR officers, '
-        'and folx who are doing the work to end mass incarceration?',
+      CheckboxQuestion(
+        'Please check all that apply:',
+        choices: [
+          'Currently incarcerated',
+          'Have been incarcerated in the past',
+          'Impacted by the incarceration of a loved one',
+          'CDCR officer',
+        ],
+        optional: true,
+      ),
+      TextPromptQuestion(
+        "Is there anything you'd like to share "
+        'regarding your mental health or interest in meditation?',
+        optional: true,
       ),
       CheckboxQuestion(
         'Which meditation types are you interested in practicing?',

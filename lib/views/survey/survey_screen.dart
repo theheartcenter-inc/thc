@@ -26,20 +26,29 @@ class SurveyScreen extends StatefulWidget {
 
 /// {@macro views.survey.SurveyScreen}
 class _SurveyScreenState extends State<SurveyScreen> {
-  late SurveyData data = SurveyData.fromQuestions(widget.questions);
+  /// A list of question and answer data.
+  late final SurveyData data = SurveyData.fromQuestions(widget.questions);
 
+  /// {@template views.survey.SurveyValidation}
+  /// When the user taps "submit", it triggers the [SurveyValidation] cubit.
+  ///
+  /// Each question that still needs to be answered will be highlighted in a red box.
+  /// {@endtemplate}
+  ///
+  /// If every non-optional question is answered, this will navigate
+  /// to a screen that shows results.
   void validate() {
     if (FunQuiz.inProgress) {
-      navigator.pushReplacement(FunQuizResults((data.answers..removeAt(0)).cast()));
+      navigator.pushReplacement(FunQuizResults(data.funQuizResults));
+      return;
+    } else if (data.valid) {
+      navigator.pushReplacement(Submitted(data.summary));
       return;
     }
     context.read<SurveyValidation>().submit();
-
-    if (data.valid) {
-      navigator.pushReplacement(Submitted(summary: data.surveySummary));
-    }
   }
 
+  /// Creates a function for each [SurveyField] that can update the survey [data].
   ValueChanged<dynamic> update(int i, SurveyRecord record) {
     (dynamic, String?) fromMultipleChoice((dynamic, String?) newAnswer) {
       final (oldData, String? oldInput) = record.answer ?? (null, null);
@@ -58,13 +67,17 @@ class _SurveyScreenState extends State<SurveyScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SurveyStyling([
-      const DarkModeSwitch(),
-      const SizedBox(height: 20),
-      for (final (i, record) in data.indexed) SurveyField(record, update(i, record)),
-      FilledButton(onPressed: validate, child: const Text('Submit')),
-      _ValidateMessage(data),
-    ]);
+    return SurveyStyling(
+      child: Column(
+        children: [
+          const DarkModeSwitch(),
+          const SizedBox(height: 20),
+          for (final (i, record) in data.indexed) SurveyField(record, update(i, record)),
+          FilledButton(onPressed: validate, child: const Text('Submit')),
+          _ValidateMessage(data.invalidCount),
+        ],
+      ),
+    );
   }
 }
 
@@ -73,18 +86,14 @@ class _SurveyScreenState extends State<SurveyScreen> {
 /// {@endtemplate}
 class Submitted extends StatelessWidget {
   /// {@macro views.survey.Submitted}
-  const Submitted({super.key, required this.summary});
+  const Submitted(this.summary, {super.key});
 
   /// Whenever you see a weird-looking type, you can hover your mouse on it
   /// for an explanation.
   ///
   /// [QuestionSummary] is just a tuple of strings.
   ///
-  /// {@template ValueChanged}
-  /// For a very long time, I had no idea what [ValueChanged] was;
-  /// then I found out that it's just a function with 1 parameter
-  /// that returns `void` (i.e. it doesn't return anything).
-  /// {@endtemplate}
+  /// {@macro ValueChanged}
   final List<QuestionSummary> summary;
 
   @override
@@ -149,14 +158,13 @@ class Submitted extends StatelessWidget {
 /// {@endtemplate}
 class _ValidateMessage extends StatelessWidget {
   /// {@macro views.survey.ValidateMessage}
-  const _ValidateMessage(this.data);
+  const _ValidateMessage(this.invalidCount);
 
   /// The number of required questions that haven't been answered.
-  final SurveyData data;
+  final int invalidCount;
 
   @override
   Widget build(BuildContext context) {
-    final invalidCount = data.invalidCount;
     Widget? child;
     if (context.watch<SurveyValidation>().state && invalidCount > 0) {
       final theme = Theme.of(context);
@@ -173,8 +181,11 @@ class _ValidateMessage extends StatelessWidget {
   }
 }
 
+/// {@macro views.survey.SurveyValidation}
 class SurveyValidation extends Cubit<bool> {
+  /// {@macro views.survey.SurveyValidation}
   SurveyValidation() : super(false);
 
+  /// {@macro views.survey.SurveyValidation}
   void submit() => state ? null : emit(true);
 }
