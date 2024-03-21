@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/models/bloc.dart';
@@ -12,10 +13,14 @@ import 'package:thc/views/settings/settings.dart';
 import 'package:thc/views/survey/survey_questions.dart';
 import 'package:thc/views/survey/survey_screen.dart';
 import 'package:thc/views/survey/survey_theme.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await loadFromLocalStorage();
+  final storage = loadFromLocalStorage();
+  final firebase = Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  await storage;
+  await firebase;
   runApp(const App());
 }
 
