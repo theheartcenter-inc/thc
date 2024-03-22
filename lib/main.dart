@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/models/bloc.dart';
 import 'package:thc/models/local_storage.dart';
-import 'package:thc/models/navigator.dart';
+import 'package:thc/models/navigation.dart';
 import 'package:thc/models/theme.dart';
 import 'package:thc/models/user.dart';
-import 'package:thc/views/home/director_home.dart';
-import 'package:thc/views/home/admin_home.dart';
 import 'package:thc/views/home/home_screen.dart';
 import 'package:thc/views/login_register/register.dart';
 import 'package:thc/views/settings/settings.dart';
@@ -28,8 +26,7 @@ class App extends StatelessWidget {
     return MultiProvider(
       providers: [
         BlocProvider(create: (_) => AppTheme()),
-        BlocProvider(create: (_) => DirectorNavigation()),
-        BlocProvider(create: (_) => AdminNavigation()),
+        BlocProvider(create: (_) => NavBarIndex()),
       ],
       builder: (context, _) => MaterialApp(
         navigatorKey: navKey,
@@ -68,7 +65,7 @@ class ChooseAnyView extends StatelessWidget {
         Brightness.dark => SurveyColors.maroon,
       },
       label: 'view surveys',
-      page: const SurveyPicker(),
+      onPressed: () => navigator.push(const SurveyPicker()),
     );
 
     return Scaffold(
@@ -94,13 +91,14 @@ class NavigateButton extends StatelessWidget {
   const NavigateButton({
     required this.color,
     required this.label,
-    required this.page,
+    this.page,
     this.onPressed,
     super.key,
-  });
+  }) : assert((page ?? onPressed) != null);
+
   final Color color;
   final String label;
-  final Widget page;
+  final Widget? page;
   final VoidCallback? onPressed;
 
   @override
@@ -108,10 +106,7 @@ class NavigateButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 20),
       child: FilledButton(
-        onPressed: () {
-          onPressed?.call();
-          navigator.pushReplacement(page);
-        },
+        onPressed: onPressed ?? () => navigator.pushReplacement(page!),
         style: FilledButton.styleFrom(backgroundColor: color, foregroundColor: Colors.black),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 8),
@@ -135,8 +130,10 @@ class UserButton extends StatelessWidget {
         UserType.admin => ThcColors.dullBlue,
       },
       label: 'view as $type',
-      onPressed: () => userType = type,
-      page: const HomeScreen(),
+      onPressed: () {
+        userType = type;
+        navigator.pushReplacement(const HomeScreen());
+      },
     );
   }
 }

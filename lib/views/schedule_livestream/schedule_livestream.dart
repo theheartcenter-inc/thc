@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:thc/views/widgets.dart';
-import 'package:thc/models/theme.dart';
 
 class ScheduleLivestream extends StatelessWidget {
   const ScheduleLivestream({super.key});
