@@ -51,10 +51,16 @@ MaterialStateProperty<T> _tealWhenSelected<T>(T Function({Color color}) copyWith
         ? copyWith(color: ThcColors.teal)
         : copyWith(color: Colors.white));
 
+MaterialStateProperty<Color> _selected(Color selectedColor, Color unselectedColor) =>
+    MaterialStateProperty.resolveWith(
+        (states) => states.contains(MaterialState.selected) ? selectedColor : unselectedColor);
+
 const _iconTheme = IconThemeData(size: 32);
 const _labelTextStyle = TextStyle(fontWeight: FontWeight.w600, fontSize: 12);
 
 ThemeData _generateTheme(bool isLight) {
+  final textColor = isLight ? Colors.black : ThcColors.paleAzure;
+  final slightContrast = isLight ? ThcColors.dullBlue : ThcColors.paleAzure;
   return ThemeData(
     colorScheme: ColorScheme(
       brightness: isLight ? Brightness.light : Brightness.dark,
@@ -70,11 +76,19 @@ ThemeData _generateTheme(bool isLight) {
       errorContainer: ThcColors.pink,
       onErrorContainer: Colors.red,
       background: isLight ? ThcColors.paleAzure : ThcColors.darkBlue,
-      onBackground: isLight ? Colors.black : ThcColors.paleAzure,
+      onBackground: textColor,
       surface: isLight ? ThcColors.tan : ThcColors.dullBlue,
-      onSurface: isLight ? Colors.black : ThcColors.paleAzure,
+      onSurface: textColor,
     ),
     materialTapTargetSize: MaterialTapTargetSize.padded,
+    switchTheme: SwitchThemeData(
+      thumbColor: _selected(Colors.white, slightContrast),
+      trackOutlineColor: _selected(ThcColors.green, slightContrast),
+      trackColor: _selected(
+        ThcColors.green,
+        ThcColors.dullBlue.withOpacity(isLight ? 0.33 : 1),
+      ),
+    ),
     filledButtonTheme: const FilledButtonThemeData(
       style: ButtonStyle(shape: MaterialStatePropertyAll(BeveledRectangleBorder())),
     ),
