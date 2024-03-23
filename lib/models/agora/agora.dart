@@ -5,9 +5,44 @@
 library;
 
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:thc/models/credentials/credentials.dart';
 
-const engineContext = RtcEngineContext(
-  appId: AgoraCredentials.id,
-  channelProfile: ChannelProfileType.channelProfileLiveBroadcasting,
-);
+abstract final class Agora {
+  static late final RtcEngine _engine;
+  static double viewerCount = 0;
+
+  static void init() async {
+    _engine = createAgoraRtcEngine();
+    await _engine.initialize(const RtcEngineContext(
+      appId: AgoraCredentials.id,
+      channelProfile: ChannelProfileType.channelProfileLiveBroadcasting,
+    ));
+  }
+
+  static void watchLivestream() async {
+    await _engine.setClientRole(role: ClientRoleType.clientRoleAudience);
+    await _engine.enableVideo();
+    await _engine.startPreview();
+    await _engine.joinChannel(
+      token: AgoraCredentials.token,
+      channelId: AgoraCredentials.channel,
+      uid: 0,
+      options: const ChannelMediaOptions(),
+    );
+  }
+
+  static void createLivestream() async {
+    await [Permission.microphone, Permission.camera].request();
+
+    await _engine.setClientRole(role: ClientRoleType.clientRoleBroadcaster);
+    await _engine.enableVideo();
+    await _engine.startPreview();
+    await _engine.joinChannel(
+      token: AgoraCredentials.token,
+      channelId: AgoraCredentials.channel,
+      uid: 0,
+      options: const ChannelMediaOptions(),
+    );
+  }
+}
