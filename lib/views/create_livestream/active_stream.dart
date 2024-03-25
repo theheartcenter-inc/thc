@@ -10,11 +10,6 @@ import 'package:thc/models/credentials/credentials.dart';
 import 'package:thc/models/navigation.dart';
 import 'package:thc/views/widgets.dart';
 
-final bool isMobile = switch (Platform.operatingSystem) {
-  'ios' || 'android' => true,
-  _ => false,
-};
-
 class ActiveStream extends StatefulWidget {
   const ActiveStream({super.key});
 
@@ -23,8 +18,8 @@ class ActiveStream extends StatefulWidget {
 }
 
 class _ActiveStreamState extends StateAsync<ActiveStream> {
-  /// The [_EndButton] appears when you tap the screen,
-  /// then goes away after a few seconds, thanks to this timer.
+  /// The buttons appear when you tap the screen,
+  /// then go away after a few seconds, thanks to this timer.
   Timer? timer;
   void setTimer([_]) {
     timer?.cancel();
@@ -35,16 +30,27 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
     );
   }
 
-  @override
-  void animate() => sleep(0.5, then: setTimer);
+  final AgoraClient client = AgoraClient(
+    agoraConnectionData: AgoraConnectionData(
+      appId: AgoraCredentials.id,
+      channelName: AgoraCredentials.channel,
+      tempToken: AgoraCredentials.token,
+    ),
+  );
 
-  /// Determines whether [_EndButton] is shown.
+  @override
+  void animate() async {
+    client.initialize();
+    sleep(0.5, then: setTimer);
+  }
+
+  /// Determines whether buttons are shown.
   ///
   /// (Also makes [_ViewCount] more opaque.)
   bool overlayVisible = true;
   bool buttonHovered = false;
 
-  /// Prevents the [_EndButton] from disappearing when you
+  /// Prevents the buttons from disappearing when you
   /// move your mouse to click it, cause that would be weird.
   void buttonHover(bool isHovered) {
     buttonHovered = isHovered;
@@ -83,21 +89,29 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
           children: [
             const _Backdrop(),
             StreamOverlay(overlayVisible ? 1.0 : 0.25, child: const _ViewCount()),
-            _StreamingCamera(overlayVisible),
+            AgoraVideoViewer(
+              client: client,
+              layoutType: Layout.floating,
+              enableHostControls: true,
+            ),
             NavBar.of(context, belowPage: true),
           ],
         ),
       ),
       floatingActionButton: StreamOverlay(
         overlayVisible ? Offset.zero : const Offset(0, 2),
-        child: _EndButton(onPressed: navigator.pop, onHover: buttonHover),
+        child: AgoraVideoButtons(client: client),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
 
+/// {@template views.create_livestream.AdaptiveInput}
+/// Tracks the mouse on desktop platforms, and recognizes tapping on mobile.
+/// {@endtemplate}
 class AdaptiveInput extends StatelessWidget {
+  /// {@macro views.create_livestream.AdaptiveInput}
   const AdaptiveInput({
     required this.desktop,
     required this.mobile,
@@ -111,7 +125,7 @@ class AdaptiveInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (isMobile) {
+    if (Platform.operatingSystem case 'ios' || 'android') {
       return GestureDetector(
         onTap: mobile.onTap,
         child: child,
@@ -139,7 +153,7 @@ class _Backdrop extends StatelessWidget {
     return Hero(
       tag: 'go live',
       child: Transform.scale(
-        scale: 1.1,
+        scale: 1.25,
         child: const DecoratedBox(
           decoration: BoxDecoration(
             color: Colors.black,
@@ -148,67 +162,6 @@ class _Backdrop extends StatelessWidget {
           child: SizedBox.expand(),
         ),
       ),
-    );
-  }
-}
-
-/// {@template views.create_livestream.StreamingCamera}
-/// Currently just a placeholder.
-/// {@endtemplate}
-class _StreamingCamera extends StatelessWidget {
-  /// {@macro views.create_livestream.StreamingCamera}
-  const _StreamingCamera(this.overlayVisible);
-  final bool overlayVisible;
-
-  @override
-  Widget build(BuildContext context) {
-    final bool streamingForReal = isMobile;
-
-    if (streamingForReal) return const _AgoraLivestream();
-
-    return StreamOverlay(
-      overlayVisible ? 1.0 : 0.0,
-      child: const Center(
-        child: Text(
-          "(pretend you're filming a very cool livestream)",
-          style: TextStyle(color: Colors.white70),
-        ),
-      ),
-    );
-  }
-}
-
-class _AgoraLivestream extends StatefulWidget {
-  const _AgoraLivestream();
-
-  @override
-  State<_AgoraLivestream> createState() => _AgoraLivestreamState();
-}
-
-class _AgoraLivestreamState extends StateAsync<_AgoraLivestream> {
-  late final AgoraClient client;
-  @override
-  void animate() async {
-    client = AgoraClient(
-      agoraConnectionData: AgoraConnectionData(
-        appId: AgoraCredentials.id,
-        channelName: AgoraCredentials.channel,
-        tempToken: AgoraCredentials.token,
-      ),
-    )..initialize();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        AgoraVideoViewer(
-          client: client,
-          layoutType: Layout.floating,
-          enableHostControls: true,
-        ),
-        AgoraVideoButtons(client: client),
-      ],
     );
   }
 }
@@ -235,22 +188,7 @@ class _ViewCount extends StatelessWidget {
   }
 }
 
-/// Whether this button is shown is determined by [_ActiveStreamState.overlayVisible].
-///
-/// Unlike the rest of the overlay, it disappears by sliding off the screen.
-class _EndButton extends FilledButton {
-  const _EndButton({required super.onPressed, required super.onHover})
-      : super(style: _style, child: const Text('End', style: TextStyle(fontSize: 18)));
-
-  static const _style = ButtonStyle(
-    backgroundColor: MaterialStatePropertyAll(Colors.red),
-    padding: MaterialStatePropertyAll(EdgeInsets.symmetric(horizontal: 25, vertical: 18)),
-    shape: MaterialStatePropertyAll(
-      RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(100))),
-    ),
-  );
-}
-
+/// {@template views.create_livestream.StreamOverlay}
 /// Without this widget, things would be kind of ugly:
 ///
 /// ```dart
@@ -266,13 +204,14 @@ class _EndButton extends FilledButton {
 /// ```
 ///
 /// Not a big fan of the double-nested [AnimatedOpacity].
-///
-/// But since [_EndButton] disappears by sliding, we need
-/// [value] to have a more flexible type.
+/// {@endtemplate}
 class StreamOverlay extends StatelessWidget {
+  /// {@macro views.create_livestream.StreamOverlay}
   const StreamOverlay(this.value, {super.key, required this.child})
       : assert(value is Offset || value is double);
 
+  /// Since the buttons disappear by sliding, we need
+  /// [value] to have a flexible type.
   final dynamic value;
   final Widget child;
 
@@ -287,17 +226,9 @@ class StreamOverlay extends StatelessWidget {
     );
 
     return switch (value) {
-      final double opacity => AnimatedOpacity(
-          opacity: opacity,
-          duration: duration,
-          child: child,
-        ),
-      final Offset offset => AnimatedSlide(
-          offset: offset,
-          duration: duration,
-          curve: Curves.ease,
-          child: child,
-        ),
+      final Offset offset =>
+        AnimatedSlide(offset: offset, duration: duration, curve: Curves.ease, child: child),
+      final double opacity => AnimatedOpacity(opacity: opacity, duration: duration, child: child),
       _ => throw TypeError(),
     };
   }
