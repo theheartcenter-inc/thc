@@ -149,9 +149,7 @@ class SurveyPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        actions: const [Padding(padding: EdgeInsets.all(20), child: DarkModeSwitch())],
-      ),
+      appBar: AppBar(),
       body: Center(
         child: Column(
           children: [
