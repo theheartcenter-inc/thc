@@ -2,10 +2,9 @@ import 'dart:async';
 import 'dart:io' show Platform;
 import 'dart:math';
 
-import 'package:agora_uikit/agora_uikit.dart' as agora_ui;
+import 'package:agora_uikit/agora_uikit.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:thc/models/agora/agora.dart';
 import 'package:thc/models/bloc.dart';
 import 'package:thc/models/credentials/credentials.dart';
 import 'package:thc/models/navigation.dart';
@@ -187,36 +186,29 @@ class _AgoraLivestream extends StatefulWidget {
 }
 
 class _AgoraLivestreamState extends StateAsync<_AgoraLivestream> {
+  late final AgoraClient client;
   @override
   void animate() async {
-    await Agora.init();
-    await Agora.createLivestream();
-    await client.initialize();
+    client = AgoraClient(
+      agoraConnectionData: AgoraConnectionData(
+        appId: AgoraCredentials.id,
+        channelName: AgoraCredentials.channel,
+        tempToken: AgoraCredentials.token,
+      ),
+    )..initialize();
   }
-
-  final agora_ui.AgoraClient client = agora_ui.AgoraClient(
-    agoraConnectionData: agora_ui.AgoraConnectionData(
-      appId: AgoraCredentials.id,
-      channelName: AgoraCredentials.channel,
-      // tempToken: AgoraCredentials.token,
-    ),
-  );
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Stack(
-        children: [
-          agora_ui.AgoraVideoViewer(
-            client: client,
-            layoutType: agora_ui.Layout.floating,
-            enableHostControls: true,
-          ),
-          agora_ui.AgoraVideoButtons(
-            client: client,
-          ),
-        ],
-      ),
+    return Stack(
+      children: [
+        AgoraVideoViewer(
+          client: client,
+          layoutType: Layout.floating,
+          enableHostControls: true,
+        ),
+        AgoraVideoButtons(client: client),
+      ],
     );
   }
 }
