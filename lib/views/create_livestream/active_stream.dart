@@ -1,11 +1,20 @@
 import 'dart:async';
+import 'dart:io' show Platform;
 import 'dart:math';
 
+import 'package:agora_uikit/agora_uikit.dart' as agora_ui;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:thc/models/agora/agora.dart';
 import 'package:thc/models/bloc.dart';
+import 'package:thc/models/credentials/credentials.dart';
 import 'package:thc/models/navigation.dart';
 import 'package:thc/views/widgets.dart';
+
+final bool isMobile = switch (Platform.operatingSystem) {
+  'ios' || 'android' => true,
+  _ => false,
+};
 
 class ActiveStream extends StatefulWidget {
   const ActiveStream({super.key});
@@ -20,7 +29,7 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
   Timer? timer;
   void setTimer([_]) {
     timer?.cancel();
-    if (!overlayVisible) setState(() => overlayVisible = true);
+    if (!overlayVisible) safeState(() => overlayVisible = true);
     timer = Timer(
       const Duration(seconds: 4),
       () => safeState(() => overlayVisible = false),
@@ -67,20 +76,17 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: MouseRegion(
-        onHover: setTimer,
-        onExit: mouseOffScreen,
-        child: GestureDetector(
-          onTap: onTap,
-          child: Stack(
-            alignment: Alignment.bottomRight,
-            children: [
-              const _Backdrop(),
-              StreamOverlay(overlayVisible ? 1.0 : 0.25, child: const _ViewCount()),
-              StreamOverlay(overlayVisible ? 1.0 : 0.0, child: const _StreamingCamera()),
-              NavBar.of(context, belowPage: true),
-            ],
-          ),
+      body: AdaptiveInput(
+        desktop: (onHover: setTimer, mouseOffScreen: mouseOffScreen),
+        mobile: (onTap: onTap),
+        child: Stack(
+          alignment: Alignment.bottomRight,
+          children: [
+            const _Backdrop(),
+            StreamOverlay(overlayVisible ? 1.0 : 0.25, child: const _ViewCount()),
+            _StreamingCamera(overlayVisible),
+            NavBar.of(context, belowPage: true),
+          ],
         ),
       ),
       floatingActionButton: StreamOverlay(
@@ -89,6 +95,35 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
+  }
+}
+
+class AdaptiveInput extends StatelessWidget {
+  const AdaptiveInput({
+    required this.desktop,
+    required this.mobile,
+    required this.child,
+    super.key,
+  });
+
+  final ({VoidCallback onHover, VoidCallback mouseOffScreen}) desktop;
+  final ({VoidCallback onTap}) mobile;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (isMobile) {
+      return GestureDetector(
+        onTap: mobile.onTap,
+        child: child,
+      );
+    } else {
+      return MouseRegion(
+        onHover: (_) => desktop.onHover(),
+        onExit: (_) => desktop.mouseOffScreen(),
+        child: child,
+      );
+    }
   }
 }
 
@@ -123,14 +158,64 @@ class _Backdrop extends StatelessWidget {
 /// {@endtemplate}
 class _StreamingCamera extends StatelessWidget {
   /// {@macro views.create_livestream.StreamingCamera}
-  const _StreamingCamera();
+  const _StreamingCamera(this.overlayVisible);
+  final bool overlayVisible;
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text(
-        "(pretend you're filming a very cool livestream)",
-        style: TextStyle(color: Colors.white70),
+    final bool streamingForReal = isMobile;
+
+    if (streamingForReal) return const _AgoraLivestream();
+
+    return StreamOverlay(
+      overlayVisible ? 1.0 : 0.0,
+      child: const Center(
+        child: Text(
+          "(pretend you're filming a very cool livestream)",
+          style: TextStyle(color: Colors.white70),
+        ),
+      ),
+    );
+  }
+}
+
+class _AgoraLivestream extends StatefulWidget {
+  const _AgoraLivestream();
+
+  @override
+  State<_AgoraLivestream> createState() => _AgoraLivestreamState();
+}
+
+class _AgoraLivestreamState extends StateAsync<_AgoraLivestream> {
+  @override
+  void animate() async {
+    await Agora.init();
+    await Agora.createLivestream();
+    await client.initialize();
+  }
+
+  final agora_ui.AgoraClient client = agora_ui.AgoraClient(
+    agoraConnectionData: agora_ui.AgoraConnectionData(
+      appId: AgoraCredentials.id,
+      channelName: AgoraCredentials.channel,
+      // tempToken: AgoraCredentials.token,
+    ),
+  );
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Stack(
+        children: [
+          agora_ui.AgoraVideoViewer(
+            client: client,
+            layoutType: agora_ui.Layout.floating,
+            enableHostControls: true,
+          ),
+          agora_ui.AgoraVideoButtons(
+            client: client,
+          ),
+        ],
       ),
     );
   }

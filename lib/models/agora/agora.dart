@@ -12,7 +12,7 @@ abstract final class Agora {
   static late final RtcEngine _engine;
   static double viewerCount = 0;
 
-  static void init() async {
+  static Future<void> init() async {
     _engine = createAgoraRtcEngine();
     await _engine.initialize(const RtcEngineContext(
       appId: AgoraCredentials.id,
@@ -20,7 +20,7 @@ abstract final class Agora {
     ));
   }
 
-  static void watchLivestream() async {
+  static Future<void> watchLivestream() async {
     await _engine.setClientRole(role: ClientRoleType.clientRoleAudience);
     await _engine.enableVideo();
     await _engine.startPreview();
@@ -32,7 +32,7 @@ abstract final class Agora {
     );
   }
 
-  static void createLivestream() async {
+  static Future<void> createLivestream() async {
     await [Permission.microphone, Permission.camera].request();
 
     await _engine.setClientRole(role: ClientRoleType.clientRoleBroadcaster);
