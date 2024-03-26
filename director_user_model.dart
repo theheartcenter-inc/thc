@@ -1,25 +1,48 @@
-//import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:thc/models/user.dart';
 import 'package:thc/models/local_storage.dart';
 
-class Director {
-  final String directorId;
-  final String name;
-  final bool isLive;
+enum UserType {
+  participant,
+  director,
+  admin;
 
+  bool get canLivestream => switch (this) {
+        participant => false,
+        director || admin => true,
+      };
+
+  bool get isAdmin => this == admin;
+
+  @override
+  String toString() => switch (this) {
+        participant => 'Participant',
+        director => 'Director',
+        admin => 'Admin',
+      };
+}
+
+UserType get userType => StorageKeys.userType();
+set userType(UserType type) {
+  StorageKeys.userType.save(type.index);
+}
+
+class Director {
   Director({
     required this.directorId,
     required this.name,
     required this.isLive,
   });
 
-  factory Director.fromSnapshot(DocumentSnapshot snapshot) {
+  factory Director.fromSnapshot(dynamic snapshot) {
     return Director(
       directorId: snapshot['director_id'],
       name: snapshot['name'],
       isLive: snapshot['is_live'] ?? false,
     );
   }
+
+  final String directorId;
+  final String name;
+  final bool isLive;
 
   Map<String, dynamic> toDocument() => {
         'director_id': directorId,
@@ -29,12 +52,6 @@ class Director {
 }
 
 class User {
-  final String userId;
-  final String name;
-  final String lobby;
-  final bool active;
-  final String directorId; // Foreign key
-
   User({
     required this.userId,
     required this.name,
@@ -43,7 +60,7 @@ class User {
     required this.directorId,
   });
 
-  factory User.fromSnapshot(DocumentSnapshot snapshot) {
+  factory User.fromSnapshot(dynamic snapshot) {
     return User(
       userId: snapshot['user_id'],
       name: snapshot['name'],
@@ -52,6 +69,12 @@ class User {
       directorId: snapshot['director_id'],
     );
   }
+
+  final String userId;
+  final String name;
+  final String lobby;
+  final bool active;
+  final String directorId; // Foreign key
 
   Map<String, dynamic> toDocument() => {
         'user_id': userId,
