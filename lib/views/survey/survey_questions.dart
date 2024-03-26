@@ -27,6 +27,49 @@ sealed class SurveyQuestion {
   /// [SurveyQuestion] objects, but we still need it for defining the subclasses.
   const SurveyQuestion(this.description, {required this.optional});
 
+  factory SurveyQuestion.fromJson(Map<String, dynamic> json) {
+    final String question = json['question'];
+    final bool optional = json['optional'] ?? false;
+
+    final String type = json['type'];
+    switch (type.split(' ')) {
+      case ['yesNo']:
+        return YesNoQuestion(question, optional: optional);
+
+      case ['textPrompt']:
+        return TextPromptQuestion(question, optional: optional);
+
+      case [final choicesType, 'multiple', 'choice']:
+        final List<String> choices = json['choices'];
+        final bool canType = json['custom response allowed'] ?? false;
+        return switch (choicesType) {
+          'radio' => RadioQuestion(
+              question,
+              optional: optional,
+              choices: choices,
+              canType: canType,
+            ),
+          'checkbox' || _ => CheckboxQuestion(
+              question,
+              optional: optional,
+              choices: choices,
+              canType: canType,
+            ),
+        };
+
+      case ['scale']:
+        return ScaleQuestion(
+          question,
+          optional: optional,
+          values: json['values'],
+          showEndLabels: json['show endpoint labels'] ?? false,
+        );
+
+      default:
+        throw ArgumentError('couldn\'t parse "$type" into a question type.');
+    }
+  }
+
   /// The question text is stored in this string.
   final String description;
 
@@ -49,6 +92,8 @@ sealed class SurveyQuestion {
   ///
   /// It returns `null` if there isn't a valid answer yet.
   String? answerDescription(dynamic answer);
+
+  Map<String, dynamic> get json => {'question': description, if (optional) 'optional': true};
 }
 
 /// {@template views.survey.YesNoQuestion}
@@ -63,6 +108,9 @@ class YesNoQuestion extends SurveyQuestion {
   @override
   String? answerDescription(covariant bool? answer) =>
       switch (answer) { true => 'yes', false => 'no', null => null };
+
+  @override
+  Map<String, dynamic> get json => {...super.json, 'type': 'yesNo'};
 }
 
 /// {@template views.survey.TextPromptQuestion}
@@ -76,6 +124,9 @@ class TextPromptQuestion extends SurveyQuestion {
   String get initial => '';
   @override
   String? answerDescription(covariant String? answer) => answer.validated;
+
+  @override
+  Map<String, dynamic> get json => {...super.json, 'type': 'textPrompt'};
 }
 
 /// {@macro views.survey.sealed_class}
@@ -103,6 +154,21 @@ sealed class MultipleChoice extends SurveyQuestion {
   final bool canType;
 
   int? get typingIndex => canType ? choices.length : null;
+
+  @override
+  Map<String, dynamic> get json {
+    final type = switch (this) {
+      RadioQuestion() => 'radio',
+      CheckboxQuestion() => 'checkbox',
+    };
+
+    return {
+      ...super.json,
+      'type': '$type multiple choice',
+      'choices': choices,
+      if (canType) 'custom response allowed': true,
+    };
+  }
 }
 
 /// {@template views.survey.RadioQuestion}
@@ -181,7 +247,7 @@ class ScaleQuestion extends SurveyQuestion {
     super.description, {
     super.optional = false,
     this.values = _defaults,
-    this.showEndLabels = true,
+    this.showEndLabels = false,
   });
 
   /// {@template views.survey.endpoint_labels}
@@ -205,6 +271,14 @@ class ScaleQuestion extends SurveyQuestion {
   int get initial => 0;
   @override
   String answerDescription(covariant int? answer) => values[answer!];
+
+  @override
+  Map<String, dynamic> get json => {
+        ...super.json,
+        'type': 'scale',
+        'values': values,
+        if (showEndLabels) 'show endpoint labels': true,
+      };
 }
 
 /// {@template views.survey.record_types}
@@ -271,6 +345,7 @@ enum SurveyPresets {
       ScaleQuestion(
         'How are you feeling right now?',
         values: ['awful', 'not good', 'neutral', 'good', 'fantastic'],
+        showEndLabels: true,
       ),
       YesNoQuestion('Did you find this practice helpful?'),
       TextPromptQuestion(
@@ -331,7 +406,6 @@ enum SurveyPresets {
       ScaleQuestion(
         'how tall? 📏',
         values: FunQuiz.heights,
-        showEndLabels: false,
         optional: true,
       ),
     ],
@@ -349,8 +423,7 @@ enum SurveyPresets {
 /// {@macro totally_not_a_waste_of_time}
 class FunQuiz extends ScaleQuestion {
   /// {@macro totally_not_a_waste_of_time}
-  const FunQuiz(super.description)
-      : super(showEndLabels: false, values: scaleValues, optional: true);
+  const FunQuiz(super.description) : super(values: scaleValues, optional: true);
 
   /// Set to `true` while you're taking the Nate% quiz.
   ///
