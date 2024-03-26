@@ -51,8 +51,8 @@ class Director {
       };
 }
 
-class User {
-  User({
+class Participant {
+  Participant({
     required this.userId,
     required this.name,
     required this.lobby,
@@ -60,8 +60,8 @@ class User {
     required this.directorId,
   });
 
-  factory User.fromSnapshot(dynamic snapshot) {
-    return User(
+  factory Participant.fromSnapshot(dynamic snapshot) {
+    return Participant(
       userId: snapshot['user_id'],
       name: snapshot['name'],
       lobby: snapshot['lobby'],
