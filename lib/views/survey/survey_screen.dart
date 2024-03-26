@@ -53,7 +53,12 @@ class _SurveyScreenState extends State<SurveyScreen> {
     (dynamic, String?) fromMultipleChoice((dynamic, String?) newAnswer) {
       final (oldData, String? oldInput) = record.answer ?? (null, null);
       final (newData, String? newInput) = newAnswer;
-      return (newData ?? oldData, newInput.validated ?? oldInput);
+      final answer = switch (newInput) {
+        String() when newInput.valid => newInput,
+        String() => null, // blank answer
+        null => oldInput,
+      };
+      return (newData ?? oldData, answer);
     }
 
     return (newAnswer) {
