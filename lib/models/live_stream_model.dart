@@ -1,13 +1,4 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 class LiveStreamModel {
-  String liveStreamId;
-  String title;
-  DateTime startTime;
-  int viewers;
-  String channelId;
-  String directorId;
-  String directorName;
-
   LiveStreamModel({
     required this.liveStreamId,
     required this.title,
@@ -18,17 +9,25 @@ class LiveStreamModel {
     required this.directorName,
   });
 
-  factory LiveStreamModel.fromSnapshot(DocumentSnapshot snapshot) {
+  factory LiveStreamModel.fromSnapshot(/*DocumentSnapshot*/ dynamic snapshot) {
     return LiveStreamModel(
       liveStreamId: snapshot['liveStreamId'],
       title: snapshot['title'],
-      startTime: (snapshot['startTime'] as Timestamp).toDate(),
+      startTime: snapshot['startTime'] /*as Timestamp*/ .toDate(),
       channelId: snapshot['channelId'],
       directorId: snapshot['directorId'],
       directorName: snapshot['directorName'],
       viewers: snapshot['viewers'],
     );
   }
+
+  String liveStreamId;
+  String title;
+  DateTime startTime;
+  int viewers;
+  String channelId;
+  String directorId;
+  String directorName;
 
   Map<String, dynamic> toDocument() => {
         'liveStreamId': liveStreamId,
