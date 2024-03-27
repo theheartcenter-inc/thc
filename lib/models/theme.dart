@@ -92,6 +92,12 @@ ThemeData _generateTheme(bool isLight) {
     filledButtonTheme: const FilledButtonThemeData(
       style: ButtonStyle(shape: MaterialStatePropertyAll(BeveledRectangleBorder())),
     ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        foregroundColor: isLight ? Colors.white : ThcColors.paleAzure,
+        backgroundColor: ThcColors.dullBlue,
+      ),
+    ),
     segmentedButtonTheme: SegmentedButtonThemeData(
       style: SegmentedButton.styleFrom(
         side: const BorderSide(style: BorderStyle.none),
