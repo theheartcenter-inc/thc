@@ -32,7 +32,7 @@ class _ParticipantHomeScreenState extends State<ParticipantHomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_currentIndex == 0 ? 'Home' : 'About Us'),
+        title: Text(_currentIndex == 0 ? 'Watch Live' : 'About Us'),
         actions: [
           IconButton(
             onPressed: () async {
