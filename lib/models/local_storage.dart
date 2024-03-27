@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thc/models/navigation.dart';
 import 'package:thc/models/user.dart';
 
 Future<void> loadFromLocalStorage() async {
@@ -18,12 +19,18 @@ late final SharedPreferences _storage;
 enum StorageKeys {
   themeMode,
   userType,
+  navBarState,
+  adminWatchLive,
+  adminStream,
   ;
 
   /// {@macro models.local_storage.StorageKeys}
   dynamic get initial => switch (this) {
         themeMode => ThemeMode.system.index,
         userType => UserType.participant.index,
+        navBarState => 0,
+        adminWatchLive => true,
+        adminStream => false,
       };
 
   /// {@macro models.local_storage.StorageKeys}
@@ -36,6 +43,8 @@ enum StorageKeys {
   dynamic call() => switch (this) {
         themeMode => ThemeMode.values[fromStorage],
         userType => UserType.values[fromStorage],
+        navBarState => NavBarData.values[fromStorage],
+        adminWatchLive || adminStream => fromStorage,
       };
 
   /// {@macro models.local_storage.StorageKeys}
@@ -47,9 +56,4 @@ enum StorageKeys {
         List<String>() => _storage.setStringList(name, newValue),
         _ => throw TypeError(),
       };
-}
-
-UserType get userType => StorageKeys.userType();
-set userType(UserType type) {
-  StorageKeys.userType.save(type.index);
 }

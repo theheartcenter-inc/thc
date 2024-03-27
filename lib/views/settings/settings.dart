@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/models/bloc.dart';
 import 'package:thc/models/local_storage.dart';
-import 'package:thc/models/theme.dart';
+import 'package:thc/models/navigation.dart';
+import 'package:thc/models/user.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -14,15 +15,44 @@ class SettingsScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'Dark theme?',
-              style: TextStyle(fontSize: 20, color: context.colorScheme.onBackground),
-            ),
+            const Text('Dark theme?', style: TextStyle(fontSize: 20)),
             const SizedBox(height: 20),
             const _ThemePicker(),
+            if (userType.isAdmin) ...const [
+              SizedBox(height: 50),
+              NavBarSwitch(StorageKeys.adminWatchLive),
+              NavBarSwitch(StorageKeys.adminStream),
+            ],
           ],
         ),
       ),
+    );
+  }
+}
+
+class NavBarSwitch extends StatefulWidget {
+  const NavBarSwitch(this.storageKey, {super.key});
+  final StorageKeys storageKey;
+
+  @override
+  State<NavBarSwitch> createState() => _NavBarSwitchState();
+}
+
+class _NavBarSwitchState extends State<NavBarSwitch> {
+  late bool value = widget.storageKey();
+  @override
+  Widget build(BuildContext context) {
+    return SwitchListTile.adaptive(
+      title: Text(switch (widget.storageKey) {
+        StorageKeys.adminWatchLive => 'show "watch live"',
+        StorageKeys.adminStream || _ => 'show "stream"',
+      }),
+      value: value,
+      onChanged: (newValue) {
+        setState(() => value = newValue);
+        widget.storageKey.save(newValue);
+        context.read<NavBarIndex>().refresh();
+      },
     );
   }
 }
@@ -42,7 +72,6 @@ class _ThemePicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeMode = context.watch<AppTheme>().state;
-    final style = TextStyle(color: context.colorScheme.onBackground);
     return SegmentedButton<ThemeMode>(
       showSelectedIcon: false,
       segments: [
@@ -50,11 +79,8 @@ class _ThemePicker extends StatelessWidget {
           ButtonSegment(
             value: value,
             label: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Text(
-                value.name,
-                style: themeMode == value ? null : style,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: Text(value.name),
             ),
           ),
       ],
