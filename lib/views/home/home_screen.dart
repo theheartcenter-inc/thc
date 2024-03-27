@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:thc/models/navigation.dart';
 import 'package:thc/models/theme.dart';
 import 'package:thc/models/user.dart';
+import 'package:thc/views/watch_live/watch_live.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -47,9 +48,7 @@ class _ParticipantHomeScreenState extends State<ParticipantHomeScreen> {
         index: _currentIndex,
         children: const [
           // home page (index 0)
-          Center(
-            child: Text('Homepage Implementation'),
-          ),
+          WatchLive(),
           // about us (index 1)
           Center(
             child: Text('About Us Implementation'),
