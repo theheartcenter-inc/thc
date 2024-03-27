@@ -1,6 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:thc/models/navigation.dart';
 import 'package:thc/models/theme.dart';
-import 'package:thc/views/widgets.dart';
 
 class WatchLive extends StatefulWidget {
   const WatchLive({super.key});
@@ -10,15 +12,6 @@ class WatchLive extends StatefulWidget {
 }
 
 class _WatchLiveState extends State<WatchLive> {
-
-  //function to handle 'Join' press
-  void navigateToLobby(){
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const LobbyScreen())
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,7 +29,7 @@ class _WatchLiveState extends State<WatchLive> {
               ),
               const SizedBox(height: 20),
               ElevatedButton( //change btn color
-                onPressed: navigateToLobby, 
+                onPressed: () => navigator.push(const LobbyScreen()), 
                 style: ElevatedButton.styleFrom(
                   backgroundColor: ThcColors.darkMagenta,
                 ),
@@ -53,7 +46,10 @@ class _WatchLiveState extends State<WatchLive> {
   }
 }
 
-//lobby screen
+/// If the director hasn't started the livestream yet,
+/// participants are directed to this screen and can wait for it to start.
+/// 
+/// Will redirect to [ParticipantStreamScreen] once the director is ready.
 class LobbyScreen extends StatefulWidget {
   const LobbyScreen({super.key});
 
@@ -62,9 +58,15 @@ class LobbyScreen extends StatefulWidget {
 }
 
 class _LobbyScreenState extends State<LobbyScreen> {
-    //function to handle 'Leave Lobby' press
-  void leaveLobby(BuildContext context){
-    Navigator.pop(context); //pop current screen
+  /// Eventually, we'll connect with Firebase and Agora—
+  /// for now, it's set up to show the [ParticipantStreamScreen] after 5 seconds.
+  @override
+  void initState() {
+    super.initState();
+    Timer(
+      const Duration(seconds: 5),
+      () => navigator.pushReplacement(const ParticipantStreamScreen()),
+    );
   }
 
   @override
@@ -83,7 +85,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
             const Text("We've informed the host that you're here. Please be patient and give them a few moments to let you join."),
             const SizedBox(height:20),
             ElevatedButton(
-              onPressed: () => leaveLobby(context), //checks if user clicked 'Leave Lobby'
+              onPressed: () => navigator.pop(),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.red,
               ),
@@ -99,7 +101,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
   }
 }
 
-//this is the function to execute if host let participant join & participant didn't leave lobby
+/// this is the function to execute if host let participant join & participant didn't leave lobby
 class ParticipantStreamScreen extends StatefulWidget {
   const ParticipantStreamScreen({super.key});
 
@@ -111,15 +113,12 @@ class _ParticipantStreamScreenState extends State<ParticipantStreamScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-            'This is the stream title (same with home page)'), // const for now
-      ),
       body: const Center(
         // const for now
         child: Text('Implementation of host screen'),
       ),
       bottomNavigationBar: BottomNavigationBar(
+        onTap: (_) => navigator.pop(),
         items: const [
           BottomNavigationBarItem(
             // I am dummy item 1
