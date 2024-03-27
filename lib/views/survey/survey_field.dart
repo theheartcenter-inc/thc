@@ -53,6 +53,16 @@ extension type SurveyRecord.fromRecord((SurveyQuestion, dynamic) record) {
   /// {@macro views.survey.SurveyRecord}
   SurveyRecord(SurveyQuestion question, dynamic answer) : this.fromRecord((question, answer));
 
+  SurveyRecord.init(SurveyQuestion question) : this(question, initialAnswer(question));
+
+  static initialAnswer(SurveyQuestion question) => switch (question) {
+        FunQuiz() => 2,
+        ScaleQuestion() => 0,
+        TextPromptQuestion() => '',
+        final CheckboxQuestion question => (List.filled(question.totalChoices, false), null),
+        YesNoQuestion() || RadioQuestion() => null,
+      };
+
   SurveyQuestion get question => record.$1;
   dynamic get answer => record.$2;
 
@@ -84,7 +94,7 @@ extension type SurveyData(List<SurveyRecord> data) implements List<SurveyRecord>
   /// ]
   /// ```
   SurveyData.fromQuestions(List<SurveyQuestion> questions)
-      : this([for (final question in questions) SurveyRecord(question, question.initial)]);
+      : this([for (final question in questions) SurveyRecord.init(question)]);
 
   /// Generates a list of `true`/`false` values based on whether each answer
   /// meets the requirements for submission.
@@ -215,7 +225,7 @@ abstract class SurveyBuilder<Q extends SurveyQuestion> {
   }
 
   /// {@macro views.survey.SurveyBuilder}
-  Widget buildAnswer(BuildContext context, ValueChanged update, Q question, _);
+  Widget buildAnswer(BuildContext context, ValueChanged update, Q question, covariant _);
 }
 
 class _YesNo extends SurveyBuilder<YesNoQuestion> {
@@ -231,7 +241,7 @@ class _YesNo extends SurveyBuilder<YesNoQuestion> {
   }
 
   @override
-  Widget buildAnswer(context, update, question, covariant bool? saidYes) {
+  Widget buildAnswer(context, update, question, bool? saidYes) {
     return SegmentedButton<bool>(
       showSelectedIcon: false,
       emptySelectionAllowed: true,
@@ -263,7 +273,7 @@ class _TextPrompt extends SurveyBuilder<TextPromptQuestion> {
 
 class _Radio extends SurveyBuilder<RadioQuestion> {
   @override
-  Widget buildAnswer(context, update, question, covariant int? index) {
+  Widget buildAnswer(context, update, question, int? index) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -291,7 +301,7 @@ class _Radio extends SurveyBuilder<RadioQuestion> {
 
 class _Checkbox extends SurveyBuilder<CheckboxQuestion> {
   @override
-  Widget buildAnswer(context, update, question, covariant List<bool> checks) {
+  Widget buildAnswer(context, update, question, List<bool> checks) {
     void updateSelected(int i, [String? input]) {
       final selected = checks.toList();
       selected[i] = !selected[i];
@@ -325,7 +335,7 @@ class _Checkbox extends SurveyBuilder<CheckboxQuestion> {
 
 class _Scale extends SurveyBuilder<ScaleQuestion> {
   @override
-  Widget buildAnswer(context, update, question, covariant int value) {
+  Widget buildAnswer(context, update, question, int value) {
     final divisions = question.values.length - 1;
     return LayoutBuilder(builder: (context, constraints) {
       final sliderWidth = constraints.maxWidth - 100;

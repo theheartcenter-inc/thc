@@ -71,8 +71,7 @@ class SurveyEditor extends StatelessWidget {
       body: Center(
         child: ReorderableListView(
           children: [
-            for (final question in customSurvey)
-              SurveyFieldEditor(SurveyRecord(question, question.initial)),
+            for (final question in customSurvey) SurveyFieldEditor(SurveyRecord.init(question)),
           ],
           onReorder: (_, __) => {},
         ),

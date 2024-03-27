@@ -78,20 +78,10 @@ sealed class SurveyQuestion {
   /// If so, hitting "submit" won't work if the question hasn't been answered.
   final bool optional;
 
-  /// {@template views.survey.AnswerType}
-  /// The answer type is different for each type of question.
-  ///
-  /// It contains the data needed to determine the user's answer based on the question data.
-  ///
-  /// For example, in a [YesNoQuestion], the answer type is [bool]—
-  /// a value of `true` means "yes" and a value of `false` means "no".
-  /// {@endtemplate}
-  dynamic get initial;
-
-  /// Converts the answer data into a readable text description.
+  /// Converts answer data into a readable text description.
   ///
   /// It returns `null` if there isn't a valid answer yet.
-  String? answerDescription(dynamic answer);
+  String? answerDescription(covariant dynamic answer);
 
   Map<String, dynamic> get json => {'question': description, if (optional) 'optional': true};
 }
@@ -104,9 +94,7 @@ class YesNoQuestion extends SurveyQuestion {
   const YesNoQuestion(super.description, {super.optional = false});
 
   @override
-  bool? get initial => null;
-  @override
-  String? answerDescription(covariant bool? answer) =>
+  String? answerDescription(bool? answer) =>
       switch (answer) { true => 'yes', false => 'no', null => null };
 
   @override
@@ -121,9 +109,7 @@ class TextPromptQuestion extends SurveyQuestion {
   const TextPromptQuestion(super.description, {super.optional = false});
 
   @override
-  String get initial => '';
-  @override
-  String? answerDescription(covariant String? answer) => answer.validated;
+  String? answerDescription(String? answer) => answer.validated;
 
   @override
   Map<String, dynamic> get json => {...super.json, 'type': 'textPrompt'};
@@ -148,6 +134,8 @@ sealed class MultipleChoice extends SurveyQuestion {
   /// The number of choices will be `choices.length + 1`
   /// if [canType] is set to `true`.
   final List<String> choices;
+
+  int get totalChoices => choices.length + (canType ? 1 : 0);
 
   /// If true, an extra option will appear at the bottom of the list,
   /// allowing the user to type their own response.
@@ -188,9 +176,7 @@ class RadioQuestion extends MultipleChoice {
   });
 
   @override
-  (int, String?)? get initial => null;
-  @override
-  String? answerDescription(covariant (int, String?)? answer) {
+  String? answerDescription((int, String?)? answer) {
     if (answer == null) return null;
 
     final (index, userInput) = answer;
@@ -216,10 +202,7 @@ class CheckboxQuestion extends MultipleChoice {
   });
 
   @override
-  (List<bool>, String?) get initial =>
-      (List.filled(choices.length + (canType ? 1 : 0), false), null);
-  @override
-  String? answerDescription(covariant (List<bool>, String?)? answer) {
+  String? answerDescription((List<bool>, String?)? answer) {
     final (checks, userInput) = answer!;
     if (!checks.contains(true)) return null;
 
@@ -268,9 +251,7 @@ class ScaleQuestion extends SurveyQuestion {
   (String, String)? get endpoints => showEndLabels ? (values.first, values.last) : null;
 
   @override
-  int get initial => 0;
-  @override
-  String answerDescription(covariant int? answer) => values[answer!];
+  String answerDescription(int? answer) => values[answer!];
 
   @override
   Map<String, dynamic> get json => {
@@ -425,7 +406,7 @@ class FunQuiz extends ScaleQuestion {
   /// {@macro totally_not_a_waste_of_time}
   const FunQuiz(super.description) : super(values: scaleValues, optional: true);
 
-  /// Set to `true` while you're taking the Nate% quiz.
+  /// Set to `true` while you're taking the personality quiz.
   ///
   /// Changes the survey "submit" button's behavior and a couple of theme colors.
   static bool inProgress = false;
@@ -438,7 +419,4 @@ class FunQuiz extends ScaleQuestion {
 
   /// Match these values for a "100.0%"!
   static const myAnswers = [2, 3, 1, 2, 4, 1, 4, 0, 3, 4, 4, 1, 1, 4, 3, 0, 1, 4, 1, 7];
-
-  @override
-  int get initial => 2;
 }
