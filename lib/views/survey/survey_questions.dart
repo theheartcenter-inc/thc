@@ -291,20 +291,21 @@ enum SurveyPresets {
   intro(
     label: 'intro survey',
     questions: [
-      YesNoQuestion('Are you in need of meditation?'),
+      YesNoQuestion('Are you in need of guided meditation?'),
       CheckboxQuestion(
         'Please check all that apply:',
         choices: [
           'Currently incarcerated',
           'Have been incarcerated in the past',
-          'Impacted by the incarceration of a loved one',
+          'Impacted by incarceration through a loved one',
           'CDCR officer',
         ],
         optional: true,
+        canType: true,
       ),
+      YesNoQuestion('Have you practiced meditation before?'),
       TextPromptQuestion(
-        "Is there anything you'd like to share "
-        'regarding your mental health or interest in meditation?',
+        'If yes, feel free to provide details:',
         optional: true,
       ),
       CheckboxQuestion(
@@ -313,9 +314,13 @@ enum SurveyPresets {
           'Mindfulness',
           'Metta (Loving-Kindness)',
           'Tai Chi (moving meditation)',
-          'Mantra (chanting)',
           'Zen (focus)',
         ],
+        optional: true,
+        canType: true,
+      ),
+      TextPromptQuestion(
+        "Is there anything else you'd like to share with us?",
         optional: true,
       ),
     ],
