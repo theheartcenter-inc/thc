@@ -82,6 +82,8 @@ ThemeData _generateTheme(bool isLight) {
       onSurface: textColor,
       surfaceVariant: ThcColors.dullBlue,
       onSurfaceVariant: paleColor,
+      outline: slightContrast,
+      outlineVariant: slightContrast.withOpacity(0.25),
     ),
     materialTapTargetSize: MaterialTapTargetSize.padded,
     switchTheme: SwitchThemeData(
@@ -107,6 +109,7 @@ ThemeData _generateTheme(bool isLight) {
       backgroundColor: ThcColors.darkBlue,
       foregroundColor: isLight ? Colors.white : ThcColors.paleAzure,
     ),
+    listTileTheme: ListTileThemeData(iconColor: slightContrast),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: isLight ? ThcColors.darkBlue : Colors.transparent,
       indicatorColor: Colors.transparent,

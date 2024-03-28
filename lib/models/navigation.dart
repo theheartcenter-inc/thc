@@ -6,7 +6,7 @@ import 'package:thc/models/bloc.dart';
 import 'package:thc/models/local_storage.dart';
 import 'package:thc/models/user.dart';
 import 'package:thc/views/create_livestream/create_livestream.dart';
-import 'package:thc/views/profiles_screen/profiles_screen.dart';
+import 'package:thc/views/profile/profile.dart';
 import 'package:thc/views/user_management/user_management.dart';
 import 'package:thc/views/video_library/video_library.dart';
 import 'package:thc/views/watch_live/watch_live.dart';

@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/models/bloc.dart';
 import 'package:thc/models/local_storage.dart';
@@ -8,7 +9,7 @@ import 'package:thc/models/theme.dart';
 import 'package:thc/models/user.dart';
 import 'package:thc/views/home/home_screen.dart';
 import 'package:thc/views/login_register/register.dart';
-import 'package:thc/views/settings/settings.dart';
+import 'package:thc/views/profile/settings.dart';
 import 'package:thc/views/survey/survey_questions.dart';
 import 'package:thc/views/survey/survey_screen.dart';
 import 'package:thc/views/survey/survey_theme.dart';
@@ -18,6 +19,13 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final storage = loadFromLocalStorage();
   final firebase = Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  HardwareKeyboard.instance.addHandler((event) {
+    if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
+      navigator.pop();
+      return true;
+    }
+    return false;
+  });
   await storage;
   await firebase;
   runApp(const App());
