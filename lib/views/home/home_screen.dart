@@ -14,51 +14,71 @@ import 'package:thc/views/video_library/video_library.dart';
 import 'package:thc/views/watch_live/watch_live.dart';
 
 enum NavBarButton with StatelessEnum {
+  /// A place for admins to manage other users.
   users(
     outlined: Icon(Icons.group_outlined),
     filled: Icon(Icons.group),
-    page: ManageUsers(),
+    screen: ManageUsers(),
   ),
+
+  /// A place for admins to edit surveys, and view a summary of survey responses.
   surveys(
     outlined: Icon(Icons.leaderboard_outlined),
     filled: Icon(Icons.leaderboard),
-    page: ManageSurveys(),
+    screen: ManageSurveys(),
   ),
+
+  /// Participants can join an active livestream and view a schedule of upcoming streams.
   watchLive(
     outlined: Icon(Icons.spa_outlined),
     filled: Icon(Icons.spa),
     label: 'watch live',
-    page: WatchLive(),
+    screen: WatchLive(),
   ),
+
+  /// A place for directors to start streaming.
   stream(
     outlined: Icon(Icons.stream),
-    page: CreateLivestream(),
+    screen: CreateLivestream(),
   ),
+
+  /// A catalog of recorded guided meditation videos.
   library(
     outlined: Icon(Icons.movie_outlined),
     filled: Icon(Icons.movie),
-    page: VideoLibrary(),
+    screen: VideoLibrary(),
   ),
+
+  /// View and manage account information.
   profile(
     outlined: Icon(Icons.account_circle_outlined),
     filled: Icon(Icons.account_circle),
     label: 'me',
-    page: ProfilesScreen(),
+    screen: ProfilesScreen(),
   );
 
   const NavBarButton({
     required this.outlined,
     this.filled,
     this.label,
-    required this.page,
+    required this.screen,
   });
 
+  /// Shown when the button is unselected (and also when selected, if [filled] is null).
   final Icon outlined;
-  final Icon? filled;
-  final String? label;
-  final Widget page;
 
-  bool get buttonEnabled {
+  /// A filled-in icon, used when the button is selected.
+  final Icon? filled;
+
+  /// If this is `null`, the enum value name will be used as the button label.
+  final String? label;
+
+  /// The screen to show when this button is selected.
+  final Widget screen;
+
+  /// Not every button should be enabled for every user,
+  /// e.g. participants and directors don't have access to the admin portal.
+  bool get enabled {
     final bool isAdmin = userType.isAdmin;
     return switch (this) {
       watchLive when isAdmin => StorageKeys.adminWatchLive(),
@@ -69,11 +89,13 @@ enum NavBarButton with StatelessEnum {
     };
   }
 
-  static List<NavBarButton> get enabledValues =>
-      List.of(values.where((value) => value.buttonEnabled));
+  /// The list of buttons to display at the bottom of the home screen.
+  static List<NavBarButton> get enabledValues => List.of(values.where((value) => value.enabled));
 
+  /// The button's position within [enabledValues].
   int get navIndex => max(enabledValues.indexOf(this), 0);
 
+  /// These enum values can be built into a widget thanks to the [StatelessEnum] mixin.
   @override
   Widget build(BuildContext context) {
     return NavigationDestination(
@@ -93,13 +115,20 @@ class HomeScreen extends StatelessWidget {
     final navBar = NavBar.of(context);
 
     return Scaffold(
-      body: navBar.page,
+      body: navBar.screen,
       bottomNavigationBar: navBar,
     );
   }
 }
 
+/// {@template views.home.NavBar}
+/// Why are we extending [NavigationBar] and making a BLoC class for state management?
+///
+/// Literally just so that the navigation bar slides down when you click "Go Live"
+/// and then smoothly slides back up when the stream is over.
+/// {@endtemplate}
 class NavBar extends NavigationBar {
+  /// {@macro views.home.NavBar}
   NavBar.of(BuildContext context, {super.key, this.belowPage = false})
       : super(
           selectedIndex: context.watch<NavBarIndex>().state,
@@ -118,7 +147,7 @@ class NavBar extends NavigationBar {
   /// and set its alignment to the bottom of the screen.
   final bool belowPage;
 
-  Widget get page => NavBarButton.enabledValues[selectedIndex].page;
+  Widget get screen => NavBarButton.enabledValues[selectedIndex].screen;
 
   @override
   Widget build(BuildContext context) {
