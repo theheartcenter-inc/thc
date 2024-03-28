@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:thc/models/enum_widget.dart';
 import 'package:thc/models/navigator.dart';
-import 'package:thc/views/login_register/login.dart';
 import 'package:thc/views/profile/edit_profile.dart';
 import 'package:thc/views/profile/heart_center_info.dart';
 import 'package:thc/views/profile/issue_report.dart';
@@ -31,16 +30,15 @@ enum ProfileOption with StatelessEnum {
   logout(
     icon: Icons.logout,
     label: 'sign out',
-    page: LoginScreen(),
   );
 
-  const ProfileOption({required this.icon, required this.label, required this.page});
+  const ProfileOption({required this.icon, required this.label, this.page});
   final IconData icon;
   final String label;
-  final Widget page;
+  final Widget? page;
 
   VoidCallback get onTap => switch (this) {
-        edit || settings || info || report => () => navigator.push(page),
+        edit || settings || info || report => () => navigator.push(page!),
         logout => () {
             navigator.showDialog(
               builder: (context) => AlertDialog.adaptive(
@@ -51,11 +49,11 @@ enum ProfileOption with StatelessEnum {
                 ),
                 actions: [
                   ElevatedButton(
-                    onPressed: () => navigator.pop(),
+                    onPressed: navigator.pop,
                     child: const Text('back'),
                   ),
                   ElevatedButton(
-                    onPressed: () => navigator.push(page),
+                    onPressed: navigator.logout,
                     child: const Text('sign out'),
                   ),
                 ],

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:thc/views/login_register/login.dart';
 
 /// {@template models.navigator}
 /// We can make navigation a little cleaner with a global key and an extension type:
@@ -68,5 +69,10 @@ extension type Nav(NavigatorState navigator) {
       builder: builder,
       barrierDismissible: barrierDismissible,
     );
+  }
+
+  void logout() {
+    navigator.popUntil((_) => !navigator.canPop());
+    pushReplacement(const LoginScreen());
   }
 }
