@@ -6,7 +6,7 @@ import 'package:thc/models/bloc.dart';
 import 'package:thc/models/local_storage.dart';
 import 'package:thc/models/user.dart';
 import 'package:thc/views/create_livestream/create_livestream.dart';
-import 'package:thc/views/settings/settings.dart';
+import 'package:thc/views/profiles_screen/profiles_screen.dart';
 import 'package:thc/views/user_management/user_management.dart';
 import 'package:thc/views/video_library/video_library.dart';
 import 'package:thc/views/watch_live/watch_live.dart';
@@ -93,10 +93,11 @@ enum NavBarData {
     filled: Icon(Icons.movie),
     page: VideoLibrary(),
   ),
-  settings(
-    outlined: Icon(Icons.settings_outlined),
-    filled: Icon(Icons.settings),
-    page: SettingsScreen(),
+  profile(
+    outlined: Icon(Icons.account_circle_outlined),
+    filled: Icon(Icons.account_circle),
+    label: 'me',
+    page: ProfilesScreen(),
   );
 
   const NavBarData({required this.outlined, this.filled, this.label, required this.page});
@@ -113,7 +114,7 @@ enum NavBarData {
       stream when isAdmin => StorageKeys.adminStream(),
       stream => userType.canLivestream,
       manageUsers => isAdmin,
-      watchLive || library || settings => true,
+      watchLive || library || profile => true,
     };
   }
 
@@ -190,5 +191,5 @@ class NavBarIndex extends Cubit<int> {
     emit(index);
   }
 
-  void refresh() => update(enabledScreens.indexOf(NavBarData.settings));
+  void refresh() => update(enabledScreens.indexOf(NavBarData.profile));
 }
