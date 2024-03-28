@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:thc/models/navigation.dart';
 import 'package:thc/models/theme.dart';
 import 'package:thc/models/user.dart';
+import 'package:thc/views/watch_live/watch_live.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -32,7 +33,7 @@ class _ParticipantHomeScreenState extends State<ParticipantHomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_currentIndex == 0 ? 'Home' : 'About Us'),
+        title: Text(_currentIndex == 0 ? 'Watch Live' : 'About Us'),
         actions: [
           IconButton(
             onPressed: () async {
@@ -47,9 +48,7 @@ class _ParticipantHomeScreenState extends State<ParticipantHomeScreen> {
         index: _currentIndex,
         children: const [
           // home page (index 0)
-          Center(
-            child: Text('Homepage Implementation'),
-          ),
+          WatchLive(),
           // about us (index 1)
           Center(
             child: Text('About Us Implementation'),
