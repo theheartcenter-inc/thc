@@ -110,11 +110,10 @@ enum NavBarData {
     final bool isAdmin = userType.isAdmin;
     return switch (this) {
       watchLive when isAdmin => StorageKeys.adminWatchLive(),
-      watchLive => true,
       stream when isAdmin => StorageKeys.adminStream(),
       stream => userType.canLivestream,
       manageUsers => isAdmin,
-      library || settings => true,
+      watchLive || library || settings => true,
     };
   }
 

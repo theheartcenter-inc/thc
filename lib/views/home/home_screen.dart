@@ -1,72 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:thc/models/navigation.dart';
-import 'package:thc/models/theme.dart';
-import 'package:thc/models/user.dart';
-import 'package:thc/views/watch_live/watch_live.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    if (userType == UserType.participant) return const ParticipantHomeScreen();
-
     final navigationBar = NavBar.of(context);
     return Scaffold(
       bottomNavigationBar: navigationBar,
       body: navigationBar.page,
-    );
-  }
-}
-
-class ParticipantHomeScreen extends StatefulWidget {
-  const ParticipantHomeScreen({super.key});
-
-  @override
-  State<ParticipantHomeScreen> createState() => _ParticipantHomeScreenState();
-}
-
-class _ParticipantHomeScreenState extends State<ParticipantHomeScreen> {
-  int _currentIndex = 0; // default
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_currentIndex == 0 ? 'Watch Live' : 'About Us'),
-        actions: [
-          IconButton(
-            onPressed: () async {
-              // await handle logout press
-            },
-            icon: const Icon(Icons.logout),
-          )
-        ],
-        backgroundColor: _currentIndex == 0 ? ThcColors.darkMagenta : ThcColors.green,
-      ),
-      body: IndexedStack(
-        index: _currentIndex,
-        children: const [
-          // home page (index 0)
-          WatchLive(),
-          // about us (index 1)
-          Center(
-            child: Text('About Us Implementation'),
-          ),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        items: const [
-          BottomNavigationBarItem(label: 'Home', icon: Icon(Icons.home)),
-          BottomNavigationBarItem(label: 'About Us', icon: Icon(Icons.info)),
-        ],
-      ),
     );
   }
 }
