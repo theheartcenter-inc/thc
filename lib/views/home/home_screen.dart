@@ -13,25 +13,16 @@ import 'package:thc/views/profile/profile.dart';
 import 'package:thc/views/video_library/video_library.dart';
 import 'package:thc/views/watch_live/watch_live.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final navBar = NavBar.of(context);
-
-    return Scaffold(
-      body: navBar.page,
-      bottomNavigationBar: navBar,
-    );
-  }
-}
-
 enum NavBarButton with StatelessEnum {
   users(
     outlined: Icon(Icons.group_outlined),
     filled: Icon(Icons.group),
     page: ManageUsers(),
+  ),
+  surveys(
+    outlined: Icon(Icons.leaderboard_outlined),
+    filled: Icon(Icons.leaderboard),
+    page: ManageSurveys(),
   ),
   watchLive(
     outlined: Icon(Icons.spa_outlined),
@@ -42,11 +33,6 @@ enum NavBarButton with StatelessEnum {
   stream(
     outlined: Icon(Icons.stream),
     page: CreateLivestream(),
-  ),
-  surveys(
-    outlined: Icon(Icons.leaderboard_outlined),
-    filled: Icon(Icons.leaderboard),
-    page: ManageSurveys(),
   ),
   library(
     outlined: Icon(Icons.movie_outlined),
@@ -83,8 +69,10 @@ enum NavBarButton with StatelessEnum {
     };
   }
 
-  static List<NavBarButton> get enabled => List.of(values.where((value) => value.buttonEnabled));
-  int get navIndex => max(enabled.indexOf(this), 0);
+  static List<NavBarButton> get enabledValues =>
+      List.of(values.where((value) => value.buttonEnabled));
+
+  int get navIndex => max(enabledValues.indexOf(this), 0);
 
   @override
   Widget build(BuildContext context) {
@@ -97,12 +85,26 @@ enum NavBarButton with StatelessEnum {
   }
 }
 
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final navBar = NavBar.of(context);
+
+    return Scaffold(
+      body: navBar.page,
+      bottomNavigationBar: navBar,
+    );
+  }
+}
+
 class NavBar extends NavigationBar {
   NavBar.of(BuildContext context, {super.key, this.belowPage = false})
       : super(
           selectedIndex: context.watch<NavBarIndex>().state,
-          onDestinationSelected: (i) => context.read<NavBarIndex>().update(i),
-          destinations: NavBarButton.enabled,
+          onDestinationSelected: (i) => context.read<NavBarIndex>().select(i),
+          destinations: NavBarButton.enabledValues,
         );
 
   /// If [belowPage] is true, then instead of passing this widget
@@ -116,7 +118,7 @@ class NavBar extends NavigationBar {
   /// and set its alignment to the bottom of the screen.
   final bool belowPage;
 
-  Widget get page => NavBarButton.enabled[selectedIndex].page;
+  Widget get page => NavBarButton.enabledValues[selectedIndex].page;
 
   @override
   Widget build(BuildContext context) {
@@ -152,11 +154,12 @@ class NavBarIndex extends Cubit<int> {
   /// 2. `navIndex`: its index in [NavigationBar.destinations]
   ///
   /// `index` is used in [StorageKeys], and `navIndex` is used in the [NavBar].
-  void update(int navIndex) {
-    final newButton = NavBarButton.enabled[navIndex];
+  void select(int navIndex) {
+    final newButton = NavBarButton.enabledValues[navIndex];
     StorageKeys.navBarState.save(newButton.index);
     emit(navIndex);
   }
 
-  void refresh() => update(NavBarButton.profile.navIndex);
+  /// Ensures that the index remains valid when an admin adds or removes a [NavBarButton].
+  void refresh() => select(NavBarButton.profile.navIndex);
 }
