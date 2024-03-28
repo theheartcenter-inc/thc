@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:thc/models/navigation.dart';
 import 'package:thc/models/user.dart';
+import 'package:thc/views/home/home_screen.dart';
 
 Future<void> loadFromLocalStorage() async {
   _storage = await SharedPreferences.getInstance();

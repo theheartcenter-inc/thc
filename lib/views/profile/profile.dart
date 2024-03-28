@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:thc/models/enum_widget.dart';
-import 'package:thc/models/navigation.dart';
+import 'package:thc/models/navigator.dart';
 import 'package:thc/views/profile/edit_profile.dart';
 import 'package:thc/views/profile/heart_center_info.dart';
 import 'package:thc/views/profile/issue_report.dart';

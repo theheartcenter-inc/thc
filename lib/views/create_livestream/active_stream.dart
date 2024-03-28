@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/models/bloc.dart';
 import 'package:thc/models/credentials/credentials.dart';
-import 'package:thc/models/navigation.dart';
+import 'package:thc/views/home/home_screen.dart';
 import 'package:thc/views/widgets.dart';
 
 class ActiveStream extends StatefulWidget {

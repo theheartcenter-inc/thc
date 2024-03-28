@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/models/bloc.dart';
 import 'package:thc/models/local_storage.dart';
-import 'package:thc/models/navigation.dart';
 import 'package:thc/models/user.dart';
+import 'package:thc/views/home/home_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
