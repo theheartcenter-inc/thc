@@ -32,19 +32,42 @@ final GlobalKey<NavigatorState> navKey = GlobalKey<NavigatorState>();
 /// {@macro models.navigator}
 Nav get navigator => Nav(navKey.currentState!);
 
-/// {@macro models.navigator}
+/// {@template models.navigator_example}
+/// Example:
+///
+/// ```dart
+/// void main() {
+///   runApp(const App()); // "/"
+/// }
+///
+/// navigator.push(const Screen1()); // "/Screen1"
+///
+/// navigator.push(const Screen2()); // "/Screen1/Screen2"
+///
+/// navigator.pushReplacement(const Replacement()); // "/Screen1/Replacement"
+///
+/// navigator.pop(); // "/Screen1"
+///
+/// navigator.pop(); // "/"
+/// ```
+/// {@endtemplate}
 extension type Nav(NavigatorState navigator) {
-  /// if you call [push], you'll navigate to a new widget,
-  /// and calling [pop] will take you back to where you came from.
+  /// Adds a new screen to the route.
+  ///
+  /// {@macro models.navigator_example}
   Future<T?> push<T>(Widget destination) =>
       navigator.push<T>(MaterialPageRoute<T>(builder: (context) => destination));
 
-  /// if you call [pushReplacement], you'll navigate to a new widget,
-  /// and calling [pop] won't do anything.
+  /// Adds a new screen in place of the current screen.
+  ///
+  /// {@macro models.navigator_example}
   Future<void> pushReplacement(Widget destination) => navigator.pushReplacement<void, void>(
         MaterialPageRoute<void>(builder: (context) => destination),
       );
 
+  /// Removes the current screen from the route.
+  ///
+  /// {@macro models.navigator_example}
   void pop<T>([T? value]) => navigator.maybePop<T>(value);
 }
 
