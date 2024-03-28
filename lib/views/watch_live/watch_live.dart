@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:thc/models/navigator.dart';
 import 'package:thc/models/theme.dart';
-import 'package:thc/views/widgets.dart';
+import 'package:thc/views/watch_live/watching_livestream.dart';
 
 class WatchLive extends StatelessWidget {
   const WatchLive({super.key});
@@ -38,7 +38,7 @@ class WatchLive extends StatelessWidget {
 /// If the director hasn't started the livestream yet,
 /// participants are directed to this screen and can wait for it to start.
 ///
-/// Will redirect to [ParticipantStreamScreen] once the director is ready.
+/// Will redirect to [WatchingLivestream] once the director is ready.
 class LobbyScreen extends StatefulWidget {
   const LobbyScreen({super.key});
 
@@ -48,13 +48,13 @@ class LobbyScreen extends StatefulWidget {
 
 class _LobbyScreenState extends State<LobbyScreen> {
   /// Eventually, we'll connect with Firebase and Agora…
-  /// for now, it's set up to show the [ParticipantStreamScreen] after 5 seconds.
+  /// for now, it's set up to show the [WatchingLivestream] after 5 seconds.
   @override
   void initState() {
     super.initState();
     Timer(
       const Duration(seconds: 5),
-      () => navigator.pushReplacement(const ParticipantStreamScreen()),
+      () => navigator.pushReplacement(const WatchingLivestream()),
     );
   }
 
@@ -85,41 +85,5 @@ class _LobbyScreenState extends State<LobbyScreen> {
             ],
           ),
         ));
-  }
-}
-
-/// this is the function to execute if host let participant join & participant didn't leave lobby
-class ParticipantStreamScreen extends StatefulWidget {
-  const ParticipantStreamScreen({super.key});
-
-  @override
-  State<ParticipantStreamScreen> createState() => _ParticipantStreamScreenState();
-}
-
-class _ParticipantStreamScreenState extends State<ParticipantStreamScreen> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      body: const FunPlaceholder(
-        'Watching a livestream!',
-        color: Colors.grey,
-        buildScaffold: false,
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.black,
-        onTap: (_) => navigator.pop(),
-        items: const [
-          // I am dummy item 1
-          BottomNavigationBarItem(icon: SizedBox.shrink(), label: ''),
-          // I am dummy item 2
-          BottomNavigationBarItem(icon: SizedBox.shrink(), label: ''),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.logout, color: Colors.red, size: 24),
-            label: 'Leave', // Add label for clarity
-          ),
-        ],
-      ),
-    );
   }
 }

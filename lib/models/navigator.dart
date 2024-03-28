@@ -58,4 +58,15 @@ extension type Nav(NavigatorState navigator) {
   ///
   /// {@macro models.navigator_example}
   void pop<T>([T? value]) => navigator.maybePop<T>(value);
+
+  /// Creates a pop-up dialog.
+  ///
+  /// The [builder] should return an [AlertDialog] or something similar.
+  Future<T?> showDialog<T>({required WidgetBuilder builder, bool? barrierDismissible}) {
+    return showAdaptiveDialog<T>(
+      context: navigator.context,
+      builder: builder,
+      barrierDismissible: barrierDismissible,
+    );
+  }
 }

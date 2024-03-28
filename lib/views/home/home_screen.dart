@@ -7,6 +7,7 @@ import 'package:thc/models/enum_widget.dart';
 import 'package:thc/models/local_storage.dart';
 import 'package:thc/models/user.dart';
 import 'package:thc/views/create_livestream/create_livestream.dart';
+import 'package:thc/views/manage_surveys/manage_surveys.dart';
 import 'package:thc/views/manage_users/manage_users.dart';
 import 'package:thc/views/profile/profile.dart';
 import 'package:thc/views/video_library/video_library.dart';
@@ -17,19 +18,19 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final navigationBar = NavBar.of(context);
+    final navBar = NavBar.of(context);
+
     return Scaffold(
-      bottomNavigationBar: navigationBar,
-      body: navigationBar.page,
+      body: navBar.page,
+      bottomNavigationBar: navBar,
     );
   }
 }
 
-enum NavBarData with StatelessEnum {
-  manageUsers(
+enum NavBarButton with StatelessEnum {
+  users(
     outlined: Icon(Icons.group_outlined),
     filled: Icon(Icons.group),
-    label: 'users',
     page: ManageUsers(),
   ),
   watchLive(
@@ -41,6 +42,11 @@ enum NavBarData with StatelessEnum {
   stream(
     outlined: Icon(Icons.stream),
     page: CreateLivestream(),
+  ),
+  surveys(
+    outlined: Icon(Icons.leaderboard_outlined),
+    filled: Icon(Icons.leaderboard),
+    page: ManageSurveys(),
   ),
   library(
     outlined: Icon(Icons.movie_outlined),
@@ -54,28 +60,35 @@ enum NavBarData with StatelessEnum {
     page: ProfilesScreen(),
   );
 
-  const NavBarData({required this.outlined, this.filled, this.label, required this.page});
+  const NavBarButton({
+    required this.outlined,
+    this.filled,
+    this.label,
+    required this.page,
+  });
 
   final Icon outlined;
   final Icon? filled;
   final String? label;
   final Widget page;
 
-  bool get enabled {
+  bool get buttonEnabled {
     final bool isAdmin = userType.isAdmin;
     return switch (this) {
       watchLive when isAdmin => StorageKeys.adminWatchLive(),
       stream when isAdmin => StorageKeys.adminStream(),
       stream => userType.canLivestream,
-      manageUsers => isAdmin,
+      users || surveys => isAdmin,
       watchLive || library || profile => true,
     };
   }
 
+  static List<NavBarButton> get enabled => List.of(values.where((value) => value.buttonEnabled));
+  int get navIndex => max(enabled.indexOf(this), 0);
+
   @override
   Widget build(BuildContext context) {
     return NavigationDestination(
-      key: Key(name),
       icon: outlined,
       selectedIcon: filled,
       label: label ?? name,
@@ -84,19 +97,12 @@ enum NavBarData with StatelessEnum {
   }
 }
 
-List<NavBarData> get enabledScreens => [
-      for (final screen in NavBarData.values)
-        if (screen.enabled) screen
-    ];
-
 class NavBar extends NavigationBar {
   NavBar.of(BuildContext context, {super.key, this.belowPage = false})
       : super(
           selectedIndex: context.watch<NavBarIndex>().state,
-          onDestinationSelected: (newIndex) {
-            context.read<NavBarIndex>().update(newIndex);
-          },
-          destinations: enabledScreens,
+          onDestinationSelected: (i) => context.read<NavBarIndex>().update(i),
+          destinations: NavBarButton.enabled,
         );
 
   /// If [belowPage] is true, then instead of passing this widget
@@ -110,20 +116,20 @@ class NavBar extends NavigationBar {
   /// and set its alignment to the bottom of the screen.
   final bool belowPage;
 
-  Widget get page => enabledScreens[selectedIndex].page;
+  Widget get page => NavBarButton.enabled[selectedIndex].page;
 
   @override
   Widget build(BuildContext context) {
-    final adminBar = Hero(
+    final navBar = Hero(
       tag: 'Admin home screen bottom bar',
       child: super.build(context),
     );
 
-    if (!belowPage) return adminBar;
+    if (!belowPage) return navBar;
 
     return Transform(
       transform: Matrix4.translationValues(0, 80, 0.0),
-      child: adminBar,
+      child: navBar,
     );
   }
 }
@@ -136,18 +142,21 @@ class NavBarIndex extends Cubit<int> {
   /// {@macro models.NavBarIndex}
   NavBarIndex() : super(_initial);
 
-  static int get _initial => max(enabledScreens.indexOf(StorageKeys.navBarState()), 0);
-
-  /// This function is kinda tricky, since the new screen has 2 indexes:
-  /// 1. its index in [NavBarData.values]
-  /// 2. its index in [enabledScreens]
-  ///
-  /// #1 is used in [StorageKeys], and #2 is used in the [NavBar].
-  void update(int index) {
-    final newScreen = enabledScreens[index];
-    StorageKeys.navBarState.save(newScreen.index);
-    emit(index);
+  static int get _initial {
+    final NavBarButton fromStorage = StorageKeys.navBarState();
+    return fromStorage.navIndex;
   }
 
-  void refresh() => update(enabledScreens.indexOf(NavBarData.profile));
+  /// This function is kinda tricky, since NavBar buttons have 2 indexes:
+  /// 1. `index`: its index in [NavBarButton.values]
+  /// 2. `navIndex`: its index in [NavigationBar.destinations]
+  ///
+  /// `index` is used in [StorageKeys], and `navIndex` is used in the [NavBar].
+  void update(int navIndex) {
+    final newButton = NavBarButton.enabled[navIndex];
+    StorageKeys.navBarState.save(newButton.index);
+    emit(navIndex);
+  }
+
+  void refresh() => update(NavBarButton.profile.navIndex);
 }

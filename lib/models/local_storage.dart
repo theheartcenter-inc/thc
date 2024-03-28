@@ -43,7 +43,7 @@ enum StorageKeys {
   dynamic call() => switch (this) {
         themeMode => ThemeMode.values[fromStorage],
         userType => UserType.values[fromStorage],
-        navBarState => NavBarData.values[fromStorage],
+        navBarState => NavBarButton.values[fromStorage],
         adminWatchLive || adminStream => fromStorage,
       };
 
