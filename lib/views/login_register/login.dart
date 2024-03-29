@@ -6,6 +6,8 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const FunPlaceholder('log in', color: Colors.deepOrange);
+    return const Scaffold(
+      body: FunPlaceholder('log in', color: Colors.deepOrange),
+    );
   }
 }
