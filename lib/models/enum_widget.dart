@@ -1,8 +1,8 @@
 /// {@template models.enum_widget}
 /// Unlike other Widget classes, you don't pass any arguments into an enum widget.
 ///
-/// Thus, the enum widget [build] method logic only uses the following:
-/// - the current enum value (`a`, `b`, or `c` in the above example)
+/// Thus, the enum widget `build()` method logic only uses the following:
+/// - the current enum value (`a`, `b`, or `c` in the example)
 /// - other methods and properties within the enum declaration
 /// - anything that can be accessed globally or through the [BuildContext]
 /// {@endtemplate}
