@@ -44,16 +44,11 @@ abstract final class ThcColors {
 /// ```dart
 /// states = {MaterialState.hovered, MaterialState.selected};
 /// ```
-///
-/// Since we're using this [_tealWhenSelected] function, the color will be [ThcColors.teal].
-MaterialStateProperty<T> _tealWhenSelected<T>(T Function({Color color}) copyWith) =>
-    MaterialStateProperty.resolveWith((states) => states.contains(MaterialState.selected)
-        ? copyWith(color: ThcColors.teal)
-        : copyWith(color: Colors.white));
-
-MaterialStateProperty<Color> _selected(Color selectedColor, Color unselectedColor) =>
-    MaterialStateProperty.resolveWith(
-        (states) => states.contains(MaterialState.selected) ? selectedColor : unselectedColor);
+MaterialStateProperty<T> _selected<T>(T selected, T unselected) {
+  return MaterialStateProperty.resolveWith(
+    (states) => states.contains(MaterialState.selected) ? selected : unselected,
+  );
+}
 
 const _iconTheme = IconThemeData(size: 32);
 const _labelTextStyle = TextStyle(fontWeight: FontWeight.w600, fontSize: 12);
@@ -61,6 +56,12 @@ const _labelTextStyle = TextStyle(fontWeight: FontWeight.w600, fontSize: 12);
 ThemeData _generateTheme(bool isLight) {
   final textColor = isLight ? Colors.black : ThcColors.paleAzure;
   final slightContrast = isLight ? ThcColors.dullBlue : ThcColors.paleAzure;
+  final paleColor = isLight ? Colors.white : ThcColors.paleAzure;
+
+  MaterialStateProperty<T> tealWhenSelected<T>(T Function({Color color}) copyWith, bool isLight) {
+    return _selected(copyWith(color: ThcColors.teal), copyWith(color: paleColor));
+  }
+
   return ThemeData(
     colorScheme: ColorScheme(
       brightness: isLight ? Brightness.light : Brightness.dark,
@@ -79,6 +80,10 @@ ThemeData _generateTheme(bool isLight) {
       onBackground: textColor,
       surface: isLight ? ThcColors.tan : ThcColors.dullBlue,
       onSurface: textColor,
+      surfaceVariant: ThcColors.dullBlue,
+      onSurfaceVariant: paleColor,
+      outline: slightContrast,
+      outlineVariant: slightContrast.withOpacity(0.25),
     ),
     materialTapTargetSize: MaterialTapTargetSize.padded,
     switchTheme: SwitchThemeData(
@@ -92,6 +97,12 @@ ThemeData _generateTheme(bool isLight) {
     filledButtonTheme: const FilledButtonThemeData(
       style: ButtonStyle(shape: MaterialStatePropertyAll(BeveledRectangleBorder())),
     ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        foregroundColor: isLight ? Colors.white : ThcColors.paleAzure,
+        backgroundColor: ThcColors.dullBlue,
+      ),
+    ),
     segmentedButtonTheme: SegmentedButtonThemeData(
       style: SegmentedButton.styleFrom(
         side: const BorderSide(style: BorderStyle.none),
@@ -104,11 +115,12 @@ ThemeData _generateTheme(bool isLight) {
       backgroundColor: ThcColors.darkBlue,
       foregroundColor: isLight ? Colors.white : ThcColors.paleAzure,
     ),
+    listTileTheme: ListTileThemeData(iconColor: slightContrast),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: isLight ? ThcColors.darkBlue : Colors.transparent,
       indicatorColor: Colors.transparent,
-      iconTheme: _tealWhenSelected(_iconTheme.copyWith),
-      labelTextStyle: _tealWhenSelected(_labelTextStyle.copyWith),
+      iconTheme: tealWhenSelected(_iconTheme.copyWith, isLight),
+      labelTextStyle: tealWhenSelected(_labelTextStyle.copyWith, isLight),
       labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
     ),
   );
