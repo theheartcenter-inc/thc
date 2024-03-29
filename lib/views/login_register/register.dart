@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:thc/models/bloc.dart';
+import 'package:thc/views/create_livestream/active_stream.dart';
+import 'package:thc/views/login_register/login.dart';
+import 'package:thc/views/login_register/verify_email.dart';
+import 'package:thc/views/widgets.dart';
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -13,8 +19,7 @@ class RegisterScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text('Login', style: TextStyle(color: Colors.white, fontSize: 40)),
-                Text('Welcome Back', style: TextStyle(color: Colors.white, fontSize: 18)),
+                Text('Register', style: TextStyle(color: Colors.white, fontSize: 40)),
               ],
             ),
           ),
@@ -52,7 +57,7 @@ class RegisterScreen extends StatelessWidget {
                             ),
                             child: const TextField(
                               decoration: InputDecoration(
-                                hintText: 'Email or Phone number',
+                                hintText: 'Email',
                                 hintStyle: TextStyle(color: Colors.grey),
                                 border: InputBorder.none,
                               ),
@@ -75,72 +80,46 @@ class RegisterScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    const Text(
-                      'Forget Password?',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    const SizedBox(height: 20),
-                    Container(
-                      height: 50,
-                      margin: const EdgeInsets.symmetric(horizontal: 50),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(50),
-                        color: Colors.cyan,
-                      ),
-                      child: const Center(
-                        child: Text(
-                          'Login',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 30),
-                    const Text(
-                      'Continue with social media',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    const SizedBox(height: 30),
-                    Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: Container(
-                            height: 50,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(50),
-                              color: Colors.cyan,
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'Google',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                    Center(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (context) => const VerifyEmailScreen()),
+                          );
+                        },
+                        child: Container(
+                          height: 50,
+                          margin: const EdgeInsets.symmetric(horizontal: 50),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(50),
+                            color: Colors.cyan,
+                          ),
+                          child: const Center(
+                            child: Text(
+                              'Register',
+                              style: TextStyle(color: Colors.white),
                             ),
                           ),
                         ),
-                        const SizedBox(width: 30),
-                        Expanded(
-                          child: Container(
-                            height: 45,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(50),
-                              color: Colors.black,
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'Facebook',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                      ),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          PageRouteBuilder(
+                            transitionDuration: Durations.long2,
+                            pageBuilder: (_, animation, __) => BlocProvider(
+                              create: (_) => StreamOverlayFadeIn(animation),
+                              child: const LoginScreen(),
                             ),
                           ),
-                        ),
-                      ],
-                    )
+                        );
+                      },
+                      child: const Text(
+                        'All ready registered? Login Here',
+                      ),
+                    ),
                   ],
                 ),
               ),
