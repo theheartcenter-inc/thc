@@ -7,11 +7,9 @@ class ManageSurveys extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: FunPlaceholder(
-        'edit surveys,\nview survey response summary',
-        color: SurveyColors.orangeSunset,
-      ),
+    return const FunPlaceholder(
+      'edit surveys,\nview survey response summary',
+      color: SurveyColors.orangeSunset,
     );
   }
 }

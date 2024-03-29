@@ -2,16 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:thc/models/theme.dart';
 
 class FunPlaceholder extends StatelessWidget {
-  const FunPlaceholder(
-    this.label, {
-    this.color = ThcColors.green,
-    this.buildScaffold = true,
-    super.key,
-  });
+  const FunPlaceholder(this.label, {this.color = ThcColors.green, super.key});
 
   final String label;
   final Color color;
-  final bool buildScaffold;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +21,7 @@ class FunPlaceholder extends StatelessWidget {
       ],
     );
 
-    final placeHolder = Container(
+    return Container(
       margin: const EdgeInsets.all(20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -37,10 +31,6 @@ class FunPlaceholder extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(label, textAlign: TextAlign.center, style: style),
     );
-
-    if (!buildScaffold) return placeHolder;
-
-    return Scaffold(body: placeHolder);
   }
 }
 

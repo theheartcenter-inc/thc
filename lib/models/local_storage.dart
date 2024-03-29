@@ -29,8 +29,7 @@ enum StorageKeys {
         themeMode => ThemeMode.system.index,
         userType => UserType.participant.index,
         navBarState => 0,
-        adminWatchLive => true,
-        adminStream => false,
+        adminWatchLive || adminStream => false,
       };
 
   /// {@macro models.local_storage.StorageKeys}

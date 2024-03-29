@@ -102,6 +102,7 @@ class _StartSwitch extends StatelessWidget {
         color: context.lightDark(Colors.white38, Colors.black38),
         child: SwitchListTile.adaptive(
           activeTrackColor: ThcColors.teal,
+          trackOutlineColor: MaterialStatePropertyAll(aboutToStart ? ThcColors.teal : null),
           title: const Text('stream about to start?'),
           value: aboutToStart,
           onChanged: onChanged,

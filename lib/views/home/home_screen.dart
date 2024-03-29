@@ -7,6 +7,7 @@ import 'package:thc/models/enum_widget.dart';
 import 'package:thc/models/local_storage.dart';
 import 'package:thc/models/user.dart';
 import 'package:thc/views/create_livestream/create_livestream.dart';
+import 'package:thc/views/manage_schedule/manage_schedule.dart';
 import 'package:thc/views/manage_surveys/manage_surveys.dart';
 import 'package:thc/views/manage_users/manage_users.dart';
 import 'package:thc/views/profile/profile.dart';
@@ -19,6 +20,13 @@ enum NavBarButton with StatelessEnum {
     outlined: Icon(Icons.group_outlined),
     filled: Icon(Icons.group),
     screen: ManageUsers(),
+  ),
+
+  /// Admins can edit the livestream schedule.
+  schedule(
+    outlined: Icon(Icons.calendar_month_outlined),
+    filled: Icon(Icons.calendar_month),
+    screen: ManageSchedule(),
   ),
 
   /// A place for admins to edit surveys, and view a summary of survey responses.
@@ -84,7 +92,7 @@ enum NavBarButton with StatelessEnum {
       watchLive when isAdmin => StorageKeys.adminWatchLive(),
       stream when isAdmin => StorageKeys.adminStream(),
       stream => userType.canLivestream,
-      users || surveys => isAdmin,
+      users || schedule || surveys => isAdmin,
       watchLive || library || profile => true,
     };
   }

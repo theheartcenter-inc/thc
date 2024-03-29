@@ -15,11 +15,7 @@ class _WatchingLivestreamState extends State<WatchingLivestream> {
     const placeholder = BottomNavigationBarItem(icon: SizedBox.shrink(), label: '');
     return Scaffold(
       backgroundColor: Colors.black,
-      body: const FunPlaceholder(
-        'Watching a livestream!',
-        color: Colors.grey,
-        buildScaffold: false,
-      ),
+      body: const FunPlaceholder('Watching a livestream!', color: Colors.grey),
       bottomNavigationBar: BottomNavigationBar(
         useLegacyColorScheme: false,
         backgroundColor: Colors.black,
