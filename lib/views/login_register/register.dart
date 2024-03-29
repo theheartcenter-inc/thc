@@ -3,7 +3,6 @@ import 'package:thc/models/bloc.dart';
 import 'package:thc/views/create_livestream/active_stream.dart';
 import 'package:thc/views/login_register/login.dart';
 import 'package:thc/views/login_register/verify_email.dart';
-import 'package:thc/views/widgets.dart';
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
@@ -61,6 +60,7 @@ class RegisterScreen extends StatelessWidget {
                                 hintStyle: TextStyle(color: Colors.grey),
                                 border: InputBorder.none,
                               ),
+                              style: TextStyle(color: Colors.black),
                             ),
                           ),
                           Container(
@@ -74,6 +74,7 @@ class RegisterScreen extends StatelessWidget {
                                 hintStyle: TextStyle(color: Colors.grey),
                                 border: InputBorder.none,
                               ),
+                              style: TextStyle(color: Colors.black),
                             ),
                           ),
                         ],

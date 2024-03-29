@@ -57,10 +57,11 @@ class LoginScreen extends StatelessWidget {
                             ),
                             child: const TextField(
                               decoration: InputDecoration(
-                                hintText: 'Email',
-                                hintStyle: TextStyle(color: Colors.grey),
-                                border: InputBorder.none,
-                              ),
+                                  hintText: 'Email',
+                                  hintStyle: TextStyle(color: Colors.grey),
+                                  border: InputBorder.none,
+                                  labelStyle: TextStyle(color: Colors.black)),
+                              style: TextStyle(color: Colors.black),
                             ),
                           ),
                           Container(
@@ -74,6 +75,7 @@ class LoginScreen extends StatelessWidget {
                                 hintStyle: TextStyle(color: Colors.grey),
                                 border: InputBorder.none,
                               ),
+                              style: TextStyle(color: Colors.black),
                             ),
                           ),
                         ],
@@ -98,41 +100,42 @@ class LoginScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     Container(
-                        height: 50,
-                        margin: const EdgeInsets.symmetric(horizontal: 50),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(50),
-                          color: const Color.fromRGBO(0, 188, 212, 1),
-                        ),
+                      height: 50,
+                      margin: const EdgeInsets.symmetric(horizontal: 50),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(50),
+                        color: const Color.fromRGBO(0, 188, 212, 1),
+                      ),
 
-                        // Add funtionality if user is director or admin will be linked to
-                        // appropritate home screens
-                        child: Center(
-                          child: GestureDetector(
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const ParticipantHomeScreen(),
-                                ),
-                              );
-                            },
-                            child: Container(
-                              height: 50,
-                              margin: const EdgeInsets.symmetric(horizontal: 50),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(50),
-                                color: Colors.cyan,
+                      // Add funtionality if user is director or admin will be linked to
+                      // appropritate home screens
+                      child: Center(
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const HomeScreen(),
                               ),
-                              child: const Center(
-                                child: Text(
-                                  'Login',
-                                  style: TextStyle(color: Colors.white),
-                                ),
+                            );
+                          },
+                          child: Container(
+                            height: 50,
+                            margin: const EdgeInsets.symmetric(horizontal: 50),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(50),
+                              color: Colors.cyan,
+                            ),
+                            child: const Center(
+                              child: Text(
+                                'Login',
+                                style: TextStyle(color: Colors.white),
                               ),
                             ),
                           ),
-                        )),
+                        ),
+                      ),
+                    ),
                     TextButton(
                       onPressed: () {
                         Navigator.of(context).push(
