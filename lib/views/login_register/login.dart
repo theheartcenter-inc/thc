@@ -1,10 +1,47 @@
 import 'package:flutter/material.dart';
-import 'package:thc/models/bloc.dart';
+import 'package:thc/models/navigator.dart';
 import 'package:thc/models/theme.dart';
-import 'package:thc/views/create_livestream/active_stream.dart';
 import 'package:thc/views/home/home_screen.dart';
 import 'package:thc/views/login_register/forgot_password.dart';
 import 'package:thc/views/login_register/register.dart';
+
+class BigButton extends StatelessWidget {
+  const BigButton({
+    required this.onPressed,
+    this.style = const TextStyle(),
+    required this.label,
+    super.key,
+  });
+
+  final VoidCallback onPressed;
+  final TextStyle style;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 50),
+      child: FilledButton(
+        onPressed: onPressed,
+        style: FilledButton.styleFrom(
+          backgroundColor: Colors.cyan,
+          foregroundColor: ThcColors.darkBlue,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+        ),
+        child: SizedBox(
+          width: double.infinity,
+          height: 50,
+          child: Center(
+            child: Text(
+              label,
+              style: style.merge(const TextStyle(fontWeight: FontWeight.w600)),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -15,11 +52,7 @@ class LoginScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           const Padding(
-            padding: EdgeInsets.only(
-              top: 50,
-              bottom: 20,
-              left: 20,
-            ),
+            padding: EdgeInsets.fromLTRB(20, 50, 0, 20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -62,10 +95,11 @@ class LoginScreen extends StatelessWidget {
                             ),
                             child: const TextField(
                               decoration: InputDecoration(
-                                  hintText: 'Email',
-                                  hintStyle: TextStyle(color: Colors.grey),
-                                  border: InputBorder.none,
-                                  labelStyle: TextStyle(color: Colors.black)),
+                                hintText: 'Email',
+                                hintStyle: TextStyle(color: Colors.grey),
+                                border: InputBorder.none,
+                                labelStyle: TextStyle(color: Colors.black),
+                              ),
                               style: TextStyle(color: Colors.black),
                             ),
                           ),
@@ -88,74 +122,21 @@ class LoginScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     TextButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          PageRouteBuilder(
-                            transitionDuration: Durations.long2,
-                            pageBuilder: (_, animation, __) => BlocProvider(
-                              create: (_) => StreamOverlayFadeIn(animation),
-                              child: const ForgotPasswordScreen(),
-                            ),
-                          ),
-                        );
-                      },
-                      child: const Text(
-                        'Forgot Password?',
-                      ),
+                      onPressed: () => navigator.noTransition(const ForgotPasswordScreen()),
+                      child: const Text('Forgot Password?'),
                     ),
                     const SizedBox(height: 20),
-                    Container(
-                      height: 50,
-                      margin: const EdgeInsets.symmetric(horizontal: 50),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(50),
-                        color: const Color.fromRGBO(0, 188, 212, 1),
-                      ),
-
-                      // Add funtionality if user is director or admin will be linked to
-                      // appropritate home screens
-                      child: Center(
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const HomeScreen(),
-                              ),
-                            );
-                          },
-                          child: Container(
-                            height: 50,
-                            margin: const EdgeInsets.symmetric(horizontal: 50),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(50),
-                              color: Colors.cyan,
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'Login',
-                                style: TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+                    BigButton(
+                      onPressed: () => navigator.pushReplacement(const HomeScreen()),
+                      style: const TextStyle(color: Colors.white, fontSize: 16),
+                      label: 'Login',
                     ),
                     TextButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          PageRouteBuilder(
-                            transitionDuration: Durations.long2,
-                            pageBuilder: (_, animation, __) => BlocProvider(
-                              create: (_) => StreamOverlayFadeIn(animation),
-                              child: const RegisterScreen(),
-                            ),
-                          ),
-                        );
-                      },
-                      child: const Text(
-                        'Not registered yet? Register Here',
+                      onPressed: () => navigator.noTransition(
+                        const RegisterScreen(),
+                        replacing: true,
                       ),
+                      child: const Text('Not registered yet? Register Here'),
                     ),
                   ],
                 ),

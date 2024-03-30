@@ -60,6 +60,16 @@ extension type Nav(NavigatorState navigator) {
   /// {@macro models.navigator_example}
   void pop<T>([T? value]) => navigator.maybePop<T>(value);
 
+  void noTransition(Widget destination, {bool replacing = false}) {
+    final route = PageRouteBuilder(
+      pageBuilder: (context, _, __) => destination,
+      transitionDuration: Duration.zero,
+      reverseTransitionDuration: Duration.zero,
+    );
+
+    replacing ? navigator.pushReplacement(route) : navigator.push(route);
+  }
+
   /// Creates a pop-up dialog.
   ///
   /// The [builder] should return an [AlertDialog] or something similar.

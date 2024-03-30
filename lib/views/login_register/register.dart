@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:thc/models/bloc.dart';
+import 'package:thc/models/navigator.dart';
 import 'package:thc/models/theme.dart';
-import 'package:thc/views/create_livestream/active_stream.dart';
 import 'package:thc/views/login_register/login.dart';
 import 'package:thc/views/login_register/verify_email.dart';
 
@@ -15,16 +14,10 @@ class RegisterScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           const Padding(
-            padding: EdgeInsets.only(
-              top: 50,
-              bottom: 20,
-              left: 20,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text('Register', style: TextStyle(color: ThcColors.darkBlue, fontSize: 40)),
-              ],
+            padding: EdgeInsets.fromLTRB(20, 50, 0, 20),
+            child: Text(
+              'Register',
+              style: TextStyle(color: ThcColors.darkBlue, fontSize: 40),
             ),
           ),
           Expanded(
@@ -49,7 +42,7 @@ class RegisterScreen extends StatelessWidget {
                             color: ThcColors.gray,
                             blurRadius: 10,
                             offset: Offset(0, 8),
-                          )
+                          ),
                         ],
                       ),
                       child: Column(
@@ -86,45 +79,16 @@ class RegisterScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    Center(
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (context) => const VerifyEmailScreen()),
-                          );
-                        },
-                        child: Container(
-                          height: 50,
-                          margin: const EdgeInsets.symmetric(horizontal: 50),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(50),
-                            color: Colors.cyan,
-                          ),
-                          child: const Center(
-                            child: Text(
-                              'Register',
-                              style: TextStyle(color: ThcColors.darkBlue),
-                            ),
-                          ),
-                        ),
-                      ),
+                    BigButton(
+                      onPressed: () => navigator.push(const VerifyEmailScreen()),
+                      label: 'Register',
                     ),
                     TextButton(
-                      onPressed: () {
-                        Navigator.of(context).push(
-                          PageRouteBuilder(
-                            transitionDuration: Durations.long2,
-                            pageBuilder: (_, animation, __) => BlocProvider(
-                              create: (_) => StreamOverlayFadeIn(animation),
-                              child: const LoginScreen(),
-                            ),
-                          ),
-                        );
-                      },
-                      child: const Text(
-                        'All ready registered? Login Here',
+                      onPressed: () => navigator.noTransition(
+                        const LoginScreen(),
+                        replacing: true,
                       ),
+                      child: const Text('All ready registered? Login Here'),
                     ),
                   ],
                 ),
