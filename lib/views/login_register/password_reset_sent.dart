@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:thc/models/theme.dart';
 
 class PasswordResetSentScreen extends StatelessWidget {
   const PasswordResetSentScreen({super.key});
@@ -10,12 +11,16 @@ class PasswordResetSentScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           Padding(
-            padding: EdgeInsets.all(20),
+            padding: EdgeInsets.only(top: 30),
+            child: BackButton(color: ThcColors.darkBlue),
+          ),
+          Padding(
+            padding: EdgeInsets.all(10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                BackButton(),
-                Text('Check your inbox', style: TextStyle(color: Colors.white, fontSize: 40)),
+                Text('Check your inbox',
+                    style: TextStyle(color: ThcColors.darkBlue, fontSize: 40)),
               ],
             ),
           ),
@@ -27,7 +32,7 @@ class PasswordResetSentScreen extends StatelessWidget {
                 Text(
                   'If your email is associated with an account, you will recived an email with a link to reset your password in your inbox.',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: ThcColors.darkBlue,
                     fontSize: 20,
                   ),
                 ),

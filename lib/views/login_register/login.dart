@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:thc/models/bloc.dart';
+import 'package:thc/models/theme.dart';
 import 'package:thc/views/create_livestream/active_stream.dart';
 import 'package:thc/views/home/home_screen.dart';
 import 'package:thc/views/login_register/forgot_password.dart';
@@ -14,12 +15,16 @@ class LoginScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           const Padding(
-            padding: EdgeInsets.all(20),
+            padding: EdgeInsets.only(
+              top: 50,
+              bottom: 20,
+              left: 20,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text('Login', style: TextStyle(color: Colors.white, fontSize: 40)),
-                Text('Welcome Back', style: TextStyle(color: Colors.white, fontSize: 18)),
+                Text('Login', style: TextStyle(color: ThcColors.darkBlue, fontSize: 40)),
+                Text('Welcome Back', style: TextStyle(color: ThcColors.darkBlue, fontSize: 18)),
               ],
             ),
           ),
@@ -42,9 +47,9 @@ class LoginScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                         boxShadow: const [
                           BoxShadow(
-                            color: Color.fromRGBO(225, 95, 27, .3),
-                            blurRadius: 20,
-                            offset: Offset(0, 10),
+                            color: ThcColors.gray,
+                            blurRadius: 10,
+                            offset: Offset(0, 8),
                           )
                         ],
                       ),

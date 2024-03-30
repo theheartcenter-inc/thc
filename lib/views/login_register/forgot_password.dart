@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:thc/models/theme.dart';
+import 'package:thc/views/login_register/common.dart';
 import 'package:thc/views/login_register/password_reset_sent.dart';
 
 class ForgotPasswordScreen extends StatelessWidget {
@@ -11,12 +13,20 @@ class ForgotPasswordScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           const Padding(
+            padding: EdgeInsets.only(
+              top: 30,
+            ),
+            child: BackButton(
+              color: ThcColors.darkBlue,
+            ),
+          ),
+          const Padding(
             padding: EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                BackButton(),
-                Text('Forgot Password?', style: TextStyle(color: Colors.white, fontSize: 40)),
+                Text('Forgot Password?',
+                    style: TextStyle(color: ThcColors.darkBlue, fontSize: 40)),
               ],
             ),
           ),
@@ -28,7 +38,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                 Text(
                   'We will send you a link to reset your password.',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AuthColors.darkBlue,
                     fontSize: 20,
                   ),
                 ),
@@ -42,11 +52,11 @@ class ForgotPasswordScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.grey,
-                    ),
-                    color: Colors.white,
-                  ),
+                      border: Border.all(
+                        color: Colors.grey,
+                      ),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12)),
                   child: const TextField(
                     decoration: InputDecoration(
                         hintText: 'Email',
@@ -77,7 +87,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                       child: const Center(
                         child: Text(
                           'Reset Password',
-                          style: TextStyle(color: Colors.white),
+                          style: TextStyle(color: ThcColors.darkBlue),
                         ),
                       ),
                     ),
