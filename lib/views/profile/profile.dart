@@ -5,7 +5,6 @@ import 'package:thc/views/profile/edit_profile.dart';
 import 'package:thc/views/profile/heart_center_info.dart';
 import 'package:thc/views/profile/issue_report.dart';
 import 'package:thc/views/profile/settings.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 enum ProfileOption with StatelessEnum {
   edit(
@@ -15,15 +14,13 @@ enum ProfileOption with StatelessEnum {
   ),
   settings(
     icon: Icons.settings,
+    label: 'settings',
     page: SettingsScreen(),
   ),
   info(
     icon: Icons.info_outline,
     label: 'about The Heart Center',
     page: HeartCenterInfo(),
-  ),
-  donate(
-    icon: Icons.favorite,
   ),
   report(
     icon: Icons.report_problem,
@@ -35,17 +32,15 @@ enum ProfileOption with StatelessEnum {
     label: 'sign out',
   );
 
-  const ProfileOption({required this.icon, this.label, this.page});
+  const ProfileOption({required this.icon, required this.label, this.page});
   final IconData icon;
-  final String? label;
+  final String label;
   final Widget? page;
 
   VoidCallback get onTap => switch (this) {
         edit || settings || info || report => () => navigator.push(page!),
-        donate => () => launchUrl(
-              Uri.parse('https://secure.givelively.org/donate/heart-center-inc'),
-            ),
-        logout => () => navigator.showDialog(
+        logout => () {
+            navigator.showDialog(
               builder: (context) => AlertDialog.adaptive(
                 title: const Text('sign out'),
                 content: const Text(
@@ -64,7 +59,8 @@ enum ProfileOption with StatelessEnum {
                 ],
                 actionsAlignment: MainAxisAlignment.spaceEvenly,
               ),
-            ),
+            );
+          },
       };
 
   @override
@@ -74,7 +70,7 @@ enum ProfileOption with StatelessEnum {
     return ListTile(
       contentPadding: padding,
       leading: Icon(icon),
-      title: Padding(padding: padding, child: Text(label ?? name)),
+      title: Padding(padding: padding, child: Text(label)),
       trailing: const Icon(Icons.chevron_right),
       onTap: onTap,
     );
