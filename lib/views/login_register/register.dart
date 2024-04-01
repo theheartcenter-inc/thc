@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:thc/models/navigator.dart';
+import 'package:thc/models/theme.dart';
+import 'package:thc/views/login_register/login.dart';
+import 'package:thc/views/login_register/verify_email.dart';
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -9,13 +14,10 @@ class RegisterScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           const Padding(
-            padding: EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text('Login', style: TextStyle(color: Colors.white, fontSize: 40)),
-                Text('Welcome Back', style: TextStyle(color: Colors.white, fontSize: 18)),
-              ],
+            padding: EdgeInsets.fromLTRB(20, 50, 0, 20),
+            child: Text(
+              'Register',
+              style: TextStyle(color: ThcColors.darkBlue, fontSize: 40),
             ),
           ),
           Expanded(
@@ -37,10 +39,10 @@ class RegisterScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(10),
                         boxShadow: const [
                           BoxShadow(
-                            color: Color.fromRGBO(225, 95, 27, .3),
-                            blurRadius: 20,
-                            offset: Offset(0, 10),
-                          )
+                            color: ThcColors.gray,
+                            blurRadius: 10,
+                            offset: Offset(0, 8),
+                          ),
                         ],
                       ),
                       child: Column(
@@ -52,10 +54,11 @@ class RegisterScreen extends StatelessWidget {
                             ),
                             child: const TextField(
                               decoration: InputDecoration(
-                                hintText: 'Email or Phone number',
+                                hintText: 'Email',
                                 hintStyle: TextStyle(color: Colors.grey),
                                 border: InputBorder.none,
                               ),
+                              style: TextStyle(color: Colors.black),
                             ),
                           ),
                           Container(
@@ -69,78 +72,24 @@ class RegisterScreen extends StatelessWidget {
                                 hintStyle: TextStyle(color: Colors.grey),
                                 border: InputBorder.none,
                               ),
+                              style: TextStyle(color: Colors.black),
                             ),
                           ),
                         ],
                       ),
                     ),
                     const SizedBox(height: 20),
-                    const Text(
-                      'Forget Password?',
-                      style: TextStyle(color: Colors.grey),
+                    BigButton(
+                      onPressed: () => navigator.push(const VerifyEmailScreen()),
+                      label: 'Register',
                     ),
-                    const SizedBox(height: 20),
-                    Container(
-                      height: 50,
-                      margin: const EdgeInsets.symmetric(horizontal: 50),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(50),
-                        color: Colors.cyan,
+                    TextButton(
+                      onPressed: () => navigator.noTransition(
+                        const LoginScreen(),
+                        replacing: true,
                       ),
-                      child: const Center(
-                        child: Text(
-                          'Login',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                        ),
-                      ),
+                      child: const Text('All ready registered? Login Here'),
                     ),
-                    const SizedBox(height: 30),
-                    const Text(
-                      'Continue with social media',
-                      style: TextStyle(color: Colors.grey),
-                    ),
-                    const SizedBox(height: 30),
-                    Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: Container(
-                            height: 50,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(50),
-                              color: Colors.cyan,
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'Google',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 30),
-                        Expanded(
-                          child: Container(
-                            height: 45,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(50),
-                              color: Colors.black,
-                            ),
-                            child: const Center(
-                              child: Text(
-                                'Facebook',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    )
                   ],
                 ),
               ),
