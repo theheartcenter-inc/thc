@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:thc/models/theme.dart';
-import 'package:thc/views/login_register/common.dart';
 import 'package:thc/views/login_register/password_reset_sent.dart';
 
 class ForgotPasswordScreen extends StatelessWidget {
@@ -38,7 +37,7 @@ class ForgotPasswordScreen extends StatelessWidget {
                 Text(
                   'We will send you a link to reset your password.',
                   style: TextStyle(
-                    color: AuthColors.darkBlue,
+                    color: ThcColors.darkBlue,
                     fontSize: 20,
                   ),
                 ),
