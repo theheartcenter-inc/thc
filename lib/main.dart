@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/surveys/edit_survey/survey_editor.dart';
+import 'package:thc/home/surveys/manage_surveys/manage_surveys.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/home/surveys/take_survey/survey_theme.dart';
@@ -166,37 +167,7 @@ class SurveyPicker extends StatelessWidget {
             const Spacer(flex: 2),
             for (final option in SurveyPresets.values) _SurveyPickerButton(option),
             const Spacer(),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: ThcColors.dullBlue.withAlpha(0x40),
-                borderRadius: BorderRadius.circular(25),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(25),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text(
-                      'custom survey',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(width: 25),
-                    Column(
-                      children: [
-                        ElevatedButton(
-                          onPressed: () => navigator.push(const ViewCustomSurvey()),
-                          child: const Text('view'),
-                        ),
-                        ElevatedButton(
-                          onPressed: () => navigator.push(const SurveyEditor()),
-                          child: const Text('edit'),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            const CustomSurveyButtons(),
             const Spacer(flex: 4),
           ],
         ),

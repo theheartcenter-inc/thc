@@ -61,7 +61,10 @@ ThemeData _generateTheme(bool isLight) {
   final paleColor = isLight ? Colors.white : ThcColors.paleAzure;
 
   MaterialStateProperty<T> tealWhenSelected<T>(T Function({Color color}) copyWith, bool isLight) {
-    return _selected(copyWith(color: ThcColors.teal), copyWith(color: paleColor));
+    return _selected(
+      copyWith(color: ThcColors.teal),
+      copyWith(color: paleColor.withOpacity(0.33)),
+    );
   }
 
   return ThemeData(
@@ -82,6 +85,8 @@ ThemeData _generateTheme(bool isLight) {
       onBackground: textColor,
       surface: isLight ? ThcColors.tan : ThcColors.dullBlue,
       onSurface: textColor,
+      inverseSurface: isLight ? ThcColors.darkBlue : ThcColors.paleAzure,
+      onInverseSurface: isLight ? Colors.white : ThcColors.darkBlue,
       surfaceVariant: ThcColors.dullBlue,
       onSurfaceVariant: paleColor,
       outline: slightContrast,
@@ -116,6 +121,7 @@ ThemeData _generateTheme(bool isLight) {
     appBarTheme: AppBarTheme(
       backgroundColor: ThcColors.darkBlue,
       foregroundColor: isLight ? Colors.white : ThcColors.paleAzure,
+      surfaceTintColor: isLight ? null : Colors.black,
     ),
     listTileTheme: ListTileThemeData(iconColor: slightContrast),
     radioTheme: RadioThemeData(
@@ -125,7 +131,9 @@ ThemeData _generateTheme(bool isLight) {
       side: BorderSide(color: textColor.withOpacity(0.75), width: 2),
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: isLight ? ThcColors.darkBlue : Colors.transparent,
+      backgroundColor: ThcColors.darkBlue,
+      overlayColor: const MaterialStatePropertyAll(Colors.transparent),
+      surfaceTintColor: isLight ? Colors.transparent : Colors.black,
       indicatorColor: Colors.transparent,
       iconTheme: tealWhenSelected(_iconTheme.copyWith, isLight),
       labelTextStyle: tealWhenSelected(_labelTextStyle.copyWith, isLight),

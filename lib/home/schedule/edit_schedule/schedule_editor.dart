@@ -7,6 +7,9 @@ class ScheduleEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const FunPlaceholder('schedule a livestream!', color: ThcColors.dullBlue);
+    return Scaffold(
+      appBar: AppBar(),
+      body: const FunPlaceholder('change livestream schedule!', color: ThcColors.dullBlue),
+    );
   }
 }
