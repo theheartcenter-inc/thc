@@ -2,9 +2,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:thc/models/navigator.dart';
 import 'package:thc/models/theme.dart';
-import 'package:thc/utils/show_error_dialog.dart';
 import 'package:thc/views/login_register/login.dart';
 import 'package:thc/views/login_register/password_reset_sent.dart';
+import 'package:thc/views/widgets.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -83,27 +83,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       final email = _email.text;
                       try {
                         await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
-                        
-                        navigator.pushReplacement(
-                          const PasswordResetSentScreen(),
-                        );
+
+                        navigator.pushReplacement(const PasswordResetSentScreen());
                       } on FirebaseAuthException catch (e) {
-                        if (e.code == 'invalid-email') {
-                          await showErrorDialog(
-                            context,
-                            'Please Enter a valid email.',
-                          );
-                        } else {
-                          await showErrorDialog(
-                            context,
-                            'Error: ${e.code}',
-                          );
-                        }
+                        final errorMessage = switch (e.code) {
+                          'invalid-email' => 'Please enter a valid email.',
+                          _ => 'Error: ${e.code}',
+                        };
+                        navigator.showDialog(builder: (_) => ErrorDialog(errorMessage));
                       } catch (e) {
-                        await showErrorDialog(
-                          context,
-                          e.toString(),
-                        );
+                        navigator.showDialog(builder: (_) => ErrorDialog(e.toString()));
                       }
                     },
                     label: 'Reset Password',

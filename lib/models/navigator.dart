@@ -81,6 +81,10 @@ extension type Nav(NavigatorState navigator) {
     );
   }
 
+  /// Shows a fun little bar of text at the bottom of the screen.
+  void showSnackBar(SnackBar snackBar) =>
+      ScaffoldMessenger.of(navigator.context).showSnackBar(snackBar);
+
   void logout() {
     navigator.popUntil((_) => !navigator.canPop());
     pushReplacement(const LoginScreen());
