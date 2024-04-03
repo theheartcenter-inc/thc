@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:thc/models/navigator.dart';
 import 'package:thc/models/theme.dart';
 
 class FunPlaceholder extends StatelessWidget {
@@ -83,5 +84,21 @@ abstract class StateAsync<T extends StatefulWidget> extends State<T> {
   void initState() {
     super.initState();
     animate();
+  }
+}
+
+class ErrorDialog extends StatelessWidget {
+  const ErrorDialog(this.text, {super.key});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('An error occurred'),
+      content: Text(text),
+      actions: [
+        TextButton(onPressed: () => navigator.pop(), child: const Text('okay')),
+      ],
+    );
   }
 }

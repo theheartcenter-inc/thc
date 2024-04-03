@@ -2,11 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:thc/models/navigator.dart';
 import 'package:thc/models/theme.dart';
-import 'package:thc/utils/show_error_dialog.dart';
 import 'package:thc/views/home/home_screen.dart';
 import 'package:thc/views/login_register/forgot_password.dart';
 import 'package:thc/views/login_register/register.dart';
 import 'package:thc/views/login_register/verify_email.dart';
+import 'package:thc/views/widgets.dart';
 
 class BigButton extends StatelessWidget {
   const BigButton({
@@ -154,9 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     color: Theme.of(context).primaryColorDark,
                                   ),
                                   onPressed: () {
-                                    setState(() {
-                                      _passwordVisible = !_passwordVisible;
-                                    });
+                                    setState(() => _passwordVisible = !_passwordVisible);
                                   },
                                 ),
                               ),
@@ -183,44 +181,23 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                           final user = FirebaseAuth.instance.currentUser;
                           if (user?.emailVerified ?? false) {
-                            navigator.pushReplacement(
-                              const HomeScreen(),
-                            );
+                            navigator.pushReplacement(const HomeScreen());
                           } else {
                             user?.sendEmailVerification();
-                            navigator.pushReplacement(
-                              VerifyEmailScreen(
-                                user: user,
-                              ),
-                            );
+                            navigator.pushReplacement(VerifyEmailScreen(user));
                           }
                         } on FirebaseAuthException catch (e) {
-                          if (e.code == 'invalid-credential') {
-                            await showErrorDialog(
-                              context,
-                              'Wrong credentials.',
-                            );
-                          } else if (e.code == 'wrong-password' || e.code == 'invalid-password') {
-                            await showErrorDialog(
-                              context,
+                          final errorMessage = switch (e.code) {
+                            'invalid-credential' => 'Wrong credentials.',
+                            'wrong-password' ||
+                            'invalid-password' =>
                               'Invalid Password. Please enter password if blank.',
-                            );
-                          } else if (e.code == 'invalid-email') {
-                            await showErrorDialog(
-                              context,
-                              'Invalid Email. Please enter email if blank.',
-                            );
-                          } else {
-                            await showErrorDialog(
-                              context,
-                              'Error: ${e.code}',
-                            );
-                          }
+                            'invalid-email' => 'Invalid Email. Please enter email if blank.',
+                            _ => 'Error: ${e.code}',
+                          };
+                          navigator.showDialog(builder: (_) => ErrorDialog(errorMessage));
                         } catch (e) {
-                          await showErrorDialog(
-                            context,
-                            e.toString(),
-                          );
+                          navigator.showDialog(builder: (_) => ErrorDialog(e.toString()));
                         }
                       },
                       style: const TextStyle(color: Colors.white, fontSize: 16),

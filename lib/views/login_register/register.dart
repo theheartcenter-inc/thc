@@ -2,14 +2,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:thc/models/navigator.dart';
 import 'package:thc/models/theme.dart';
-import 'package:thc/utils/show_error_dialog.dart';
 import 'package:thc/views/login_register/login.dart';
 import 'package:thc/views/login_register/verify_email.dart';
+import 'package:thc/views/widgets.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
+
   @override
-  _RegisterScreenState createState() => _RegisterScreenState();
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
@@ -109,9 +110,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     color: Theme.of(context).primaryColorDark,
                                   ),
                                   onPressed: () {
-                                    setState(() {
-                                      _passwordVisible = !_passwordVisible;
-                                    });
+                                    setState(() => _passwordVisible = !_passwordVisible);
                                   },
                                 ),
                               ),
@@ -134,38 +133,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           );
                           user = FirebaseAuth.instance.currentUser;
                           await user?.sendEmailVerification();
-                          navigator.pushReplacement(VerifyEmailScreen(
-                            user: user,
-                          ));
+                          navigator.pushReplacement(VerifyEmailScreen(user));
                         } on FirebaseAuthException catch (e) {
-                          if (e.code == 'weak-password') {
-                            await showErrorDialog(
-                              context,
-                              'Weak password',
-                            );
-                          } else if (e.code == 'email-already-in-use') {
-                            await showErrorDialog(
-                              context,
-                              'Email is already in use',
-                            );
-                          } else if (e.code == 'invalid-email') {
-                            await showErrorDialog(
-                              context,
-                              'Invalid email entered',
-                            );
-                          } else {
-                            print(e.code);
-                            await showErrorDialog(
-                              context,
-                              'Error ${e.code}',
-                            );
-                          }
+                          final errorMessage = switch (e.code) {
+                            'weak-password' => 'Weak password',
+                            'email-already-in-use' => 'Email is already in use',
+                            'invalid-email' => 'Invalid email entered',
+                            _ => 'Error: ${e.code}',
+                          };
+                          navigator.showDialog(builder: (_) => ErrorDialog(errorMessage));
                           user?.delete();
                         } catch (e) {
-                          await showErrorDialog(
-                            context,
-                            e.toString(),
-                          );
+                          navigator.showDialog(builder: (_) => ErrorDialog(e.toString()));
                         }
                       },
                       label: 'Register',
