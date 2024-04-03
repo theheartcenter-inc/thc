@@ -30,7 +30,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
   late final SurveyData data = SurveyData.fromQuestions(widget.questions);
 
   /// {@template views.survey.SurveyValidation}
-  /// When the user taps "submit", it triggers the [SurveyValidation] cubit.
+  /// When the user taps "submit", it triggers the [AnswerValidation] cubit.
   ///
   /// Each question that still needs to be answered will be highlighted in a red box.
   /// {@endtemplate}
@@ -41,11 +41,14 @@ class _SurveyScreenState extends State<SurveyScreen> {
     if (FunQuiz.inProgress) {
       navigator.pushReplacement(FunQuizResults(data.funQuizResults));
       return;
-    } else if (data.valid) {
+    }
+    final validation = context.read<AnswerValidation>();
+    if (data.valid) {
+      validation.reset();
       navigator.pushReplacement(Submitted(data.summary));
       return;
     }
-    context.read<SurveyValidation>().submit();
+    validation.submit();
   }
 
   /// Creates a function for each [SurveyField] that can update the survey [data].
@@ -171,7 +174,7 @@ class _ValidateMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget? child;
-    if (context.watch<SurveyValidation>().state && invalidCount > 0) {
+    if (context.watch<AnswerValidation>().state && invalidCount > 0) {
       final theme = Theme.of(context);
       child = Padding(
         padding: const EdgeInsets.all(8.0),
@@ -187,10 +190,13 @@ class _ValidateMessage extends StatelessWidget {
 }
 
 /// {@macro views.survey.SurveyValidation}
-class SurveyValidation extends Cubit<bool> {
+class AnswerValidation extends Cubit<bool> {
   /// {@macro views.survey.SurveyValidation}
-  SurveyValidation() : super(false);
+  AnswerValidation() : super(false);
 
   /// {@macro views.survey.SurveyValidation}
   void submit() => state ? null : emit(true);
+
+  /// {@macro views.survey.SurveyValidation}
+  void reset() => state ? emit(false) : null;
 }

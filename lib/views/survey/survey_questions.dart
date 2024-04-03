@@ -125,7 +125,7 @@ sealed class MultipleChoice extends SurveyQuestion {
   const MultipleChoice(
     super.description, {
     super.optional = false,
-    required this.choices,
+    this.choices = const ['option 1', 'option 2'],
     this.canType = false,
   });
 
@@ -170,7 +170,7 @@ class RadioQuestion extends MultipleChoice {
   /// {@macro views.survey.RadioQuestion}
   const RadioQuestion(
     super.description, {
-    required super.choices,
+    super.choices,
     super.optional = false,
     super.canType = false,
   });
@@ -196,7 +196,7 @@ class CheckboxQuestion extends MultipleChoice {
   /// {@macro views.survey.CheckboxQuestion}
   const CheckboxQuestion(
     super.description, {
-    required super.choices,
+    super.choices,
     super.optional = false,
     super.canType = false,
   });

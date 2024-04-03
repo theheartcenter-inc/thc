@@ -41,6 +41,9 @@ class App extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => AppTheme()),
         BlocProvider(create: (_) => NavBarIndex()),
+        BlocProvider(create: (_) => SurveyEditorBloc()),
+        BlocProvider(create: (_) => QuestionValidation()),
+        BlocProvider(create: (_) => AnswerValidation()),
       ],
       builder: (context, _) => MaterialApp(
         navigatorKey: navKey,
@@ -217,12 +220,7 @@ class _SurveyPickerButton extends StatelessWidget {
       child: FilledButton(
         onPressed: () {
           if (option == SurveyPresets.funQuiz) FunQuiz.inProgress = true;
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => BlocProvider(
-              create: (_) => SurveyValidation(),
-              child: SurveyScreen(questions: option.questions),
-            ),
-          ));
+          navigator.push(SurveyScreen(questions: option.questions));
         },
         style: FilledButton.styleFrom(
           backgroundColor: context.lightDark(

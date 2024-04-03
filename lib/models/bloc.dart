@@ -168,11 +168,24 @@ abstract class CustomBloc<S> extends Bloc<S> {
 /// {@endtemplate}
 class BlocProvider<T extends Bloc> extends InheritedProvider<T> {
   /// {@macro models.bloc.BlocProvider}
-  BlocProvider({super.key, required super.create, super.child, super.lazy = true})
+  BlocProvider({super.key, required super.create, super.child, super.builder, super.lazy = true})
       : super(startListening: _startListening, dispose: _dispose);
 
   static VoidCallback _startListening(InheritedContext<Bloc?> context, Bloc value) =>
       value._streamController.stream.listen((_) => context.markNeedsNotifyDependents()).cancel;
 
   static void _dispose(BuildContext _, Bloc bloc) => bloc._streamController.close();
+}
+
+/// {@template models.bloc.BlocConsumer}
+/// Why do we have a class that does the exact same thing as [Consumer] with a different name?
+///
+/// Because I don't like having to write `builder:`, and `Bloc` is a cool-looking word.
+/// {@endtemplate}
+class BlocConsumer<T> extends Consumer<T> {
+  /// {@macro models.bloc.BlocConsumer}
+  BlocConsumer(
+    Widget Function(BuildContext context, T value, Widget? child) builder, {
+    super.key,
+  }) : super(builder: builder);
 }

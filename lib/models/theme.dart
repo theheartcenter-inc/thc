@@ -72,9 +72,9 @@ ThemeData _generateTheme(bool isLight) {
       onSecondary: Colors.white,
       tertiary: isLight ? ThcColors.darkMagenta : ThcColors.tan,
       onTertiary: isLight ? ThcColors.tan : ThcColors.darkMagenta,
-      error: Colors.red,
+      error: Colors.red.withOpacity(0.75),
       onError: Colors.white,
-      errorContainer: ThcColors.pink,
+      errorContainer: Colors.red.withOpacity(0.33),
       onErrorContainer: Colors.red,
       background: isLight ? ThcColors.paleAzure : ThcColors.darkBlue,
       onBackground: textColor,
@@ -116,6 +116,12 @@ ThemeData _generateTheme(bool isLight) {
       foregroundColor: isLight ? Colors.white : ThcColors.paleAzure,
     ),
     listTileTheme: ListTileThemeData(iconColor: slightContrast),
+    radioTheme: RadioThemeData(
+      fillColor: MaterialStatePropertyAll(textColor.withOpacity(0.75)),
+    ),
+    checkboxTheme: CheckboxThemeData(
+      side: BorderSide(color: textColor.withOpacity(0.75), width: 2),
+    ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: isLight ? ThcColors.darkBlue : Colors.transparent,
       indicatorColor: Colors.transparent,

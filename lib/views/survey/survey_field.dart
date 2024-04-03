@@ -32,12 +32,10 @@ class SurveyField extends StatelessWidget {
   Widget build(BuildContext context) {
     final builder = SurveyBuilder.fromRecord(record);
     final question = _QuestionText(record.question);
-
-    Widget answer = builder.buildAnswer(context, update, record.question, record.cleanAnswer);
-    if (record.question is MultipleChoice) answer = _MultipleChoiceTheme(child: answer);
+    final answer = builder.buildAnswer(context, update, record.question, record.cleanAnswer);
 
     return _ErrorBox(
-      valid: record.valid || !context.watch<SurveyValidation>().state,
+      valid: record.valid || !context.watch<AnswerValidation>().state,
       child: builder.layout(context, question, answer),
     );
   }
@@ -174,26 +172,32 @@ class _QuestionText extends StatelessWidget {
 /// Unlike [_TextPrompt], the [MultipleChoice] questions that allow typed responses
 /// have an [UnderlineInputBorder], thanks to this widget.
 /// {@endtemplate}
-class _MultipleChoiceTheme extends StatelessWidget {
+class _MultipleChoiceTyping extends StatelessWidget {
   /// {@macro views.survey.MultipleChoiceTheme}
-  const _MultipleChoiceTheme({required this.child});
+  const _MultipleChoiceTyping({required this.onChanged, required this.onSubmitted});
 
-  final Widget child;
+  final dynamic onChanged, onSubmitted;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colorScheme;
     final enabled = BorderSide(color: colors.onBackground);
     final focused = BorderSide(color: colors.primaryContainer, width: 1.5);
-    return Theme(
-      data: context.theme.copyWith(
-        inputDecorationTheme: InputDecorationTheme(
-          enabledBorder: UnderlineInputBorder(borderSide: enabled),
-          focusedBorder: UnderlineInputBorder(borderSide: focused),
-          isDense: true,
+    return Row(
+      children: [
+        const Text('(other) '),
+        Expanded(
+          child: TextField(
+            decoration: InputDecoration(
+              enabledBorder: UnderlineInputBorder(borderSide: enabled),
+              focusedBorder: UnderlineInputBorder(borderSide: focused),
+              isDense: true,
+            ),
+            onChanged: onChanged,
+            onSubmitted: onSubmitted,
+          ),
         ),
-      ),
-      child: child,
+      ],
     );
   }
 }
@@ -286,7 +290,7 @@ class _Radio extends SurveyBuilder<RadioQuestion> {
           ),
         if (question.typingIndex case final i?)
           RadioListTile<int>(
-            title: TextField(
+            title: _MultipleChoiceTyping(
               onChanged: (userInput) => update((null, userInput)),
               onSubmitted: (userInput) => update((i, userInput)),
             ),
@@ -321,7 +325,7 @@ class _Checkbox extends SurveyBuilder<CheckboxQuestion> {
         if (question.typingIndex case final i?)
           CheckboxListTile(
             controlAffinity: ListTileControlAffinity.leading,
-            title: TextField(
+            title: _MultipleChoiceTyping(
               onChanged: (userInput) => update((null, userInput)),
               onSubmitted: (userInput) => updateSelected(i, userInput),
             ),
