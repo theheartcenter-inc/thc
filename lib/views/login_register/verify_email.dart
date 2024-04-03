@@ -57,6 +57,4 @@ class VerifyEmailScreen extends StatelessWidget {
       ),
     );
   }
-
-  setState(bool Function() param0) {}
 }
