@@ -72,7 +72,7 @@ abstract class StateBloc<S> extends Bloc<S> {
   }
 }
 
-/// {@template models.bloc.Cubit}
+/// {@template Cubit}
 /// A BLoC to use for immutable types.
 ///
 /// This class behaves the same way as the `Cubit` class found at
@@ -81,7 +81,7 @@ abstract class StateBloc<S> extends Bloc<S> {
 /// For mutable types, consider using [Claybit].
 /// {@endtemplate}
 class Cubit<S> extends StateBloc<S> {
-  /// {@macro models.bloc.Cubit}
+  /// {@macro Cubit}
   Cubit(S state) : _state = state;
 
   S _state;
@@ -99,13 +99,13 @@ class Cubit<S> extends StateBloc<S> {
   }
 }
 
-/// {@template models.bloc.Claybit}
+/// {@template Claybit}
 /// Similar to [Cubit], but designed for mutable types.
 ///
 /// Listening widgets are rebuilt each time [emit] is called.
 /// {@endtemplate}
 class Claybit<S> extends StateBloc<S> {
-  /// {@macro models.bloc.Claybit}
+  /// {@macro Claybit}
   Claybit(this.state);
 
   /// The claybit's current value.
@@ -153,7 +153,7 @@ abstract class CustomBloc<S> extends Bloc<S> {
   StreamController<S> get _streamController => controller;
 }
 
-/// {@template models.bloc.BlocProvider}
+/// {@template BlocProvider}
 /// A [Bloc] can be used when it's passed into the [MultiProvider] found in `main.dart`.
 ///
 /// ```dart
@@ -167,7 +167,7 @@ abstract class CustomBloc<S> extends Bloc<S> {
 /// ```
 /// {@endtemplate}
 class BlocProvider<T extends Bloc> extends InheritedProvider<T> {
-  /// {@macro models.bloc.BlocProvider}
+  /// {@macro BlocProvider}
   BlocProvider({super.key, required super.create, super.child, super.builder, super.lazy = true})
       : super(startListening: _startListening, dispose: _dispose);
 
@@ -177,13 +177,13 @@ class BlocProvider<T extends Bloc> extends InheritedProvider<T> {
   static void _dispose(BuildContext _, Bloc bloc) => bloc._streamController.close();
 }
 
-/// {@template models.bloc.BlocConsumer}
+/// {@template BlocConsumer}
 /// Why do we have a class that does the exact same thing as [Consumer] with a different name?
 ///
 /// Because I don't like having to write `builder:`, and `Bloc` is a cool-looking word.
 /// {@endtemplate}
 class BlocConsumer<T> extends Consumer<T> {
-  /// {@macro models.bloc.BlocConsumer}
+  /// {@macro BlocConsumer}
   BlocConsumer(
     Widget Function(BuildContext context, T value, Widget? child) builder, {
     super.key,

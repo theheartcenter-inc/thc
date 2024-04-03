@@ -14,7 +14,7 @@ extension ValidAnswer on String? {
   bool get valid => validated != null;
 }
 
-/// {@template views.survey.sealed_class}
+/// {@template sealed_class}
 /// When you make a `sealed` class, you're only allowed to extend or implement
 /// the class if you're inside the same file.
 ///
@@ -86,11 +86,11 @@ sealed class SurveyQuestion {
   Map<String, dynamic> get json => {'question': description, if (optional) 'optional': true};
 }
 
-/// {@template views.survey.YesNoQuestion}
+/// {@template YesNoQuestion}
 /// Displays a segmented button with 2 options (yes/no).
 /// {@endtemplate}
 class YesNoQuestion extends SurveyQuestion {
-  /// {@macro views.survey.YesNoQuestion}
+  /// {@macro YesNoQuestion}
   const YesNoQuestion(super.description, {super.optional = false});
 
   @override
@@ -101,11 +101,11 @@ class YesNoQuestion extends SurveyQuestion {
   Map<String, dynamic> get json => {...super.json, 'type': 'yesNo'};
 }
 
-/// {@template views.survey.TextPromptQuestion}
+/// {@template TextPromptQuestion}
 /// Displays a text field, allowing the user to type a custom response.
 /// {@endtemplate}
 class TextPromptQuestion extends SurveyQuestion {
-  /// {@macro views.survey.TextPromptQuestion}
+  /// {@macro TextPromptQuestion}
   const TextPromptQuestion(super.description, {super.optional = false});
 
   @override
@@ -115,7 +115,7 @@ class TextPromptQuestion extends SurveyQuestion {
   Map<String, dynamic> get json => {...super.json, 'type': 'textPrompt'};
 }
 
-/// {@macro views.survey.sealed_class}
+/// {@macro sealed_class}
 ///
 /// We're using an `(AnswerType, String?)` tuple: a [String] is passed in when
 /// the user types a custom value.
@@ -159,7 +159,7 @@ sealed class MultipleChoice extends SurveyQuestion {
   }
 }
 
-/// {@template views.survey.RadioQuestion}
+/// {@template RadioQuestion}
 /// The standard multiple-choice format: there's a bunch of circles,
 /// and you tap one of them to select it.
 /// {@endtemplate}
@@ -167,7 +167,7 @@ sealed class MultipleChoice extends SurveyQuestion {
 /// The answer data is an [int] representing the index of the user's
 /// selected choice.
 class RadioQuestion extends MultipleChoice {
-  /// {@macro views.survey.RadioQuestion}
+  /// {@macro RadioQuestion}
   const RadioQuestion(
     super.description, {
     super.choices,
@@ -185,7 +185,7 @@ class RadioQuestion extends MultipleChoice {
   }
 }
 
-/// {@template views.survey.CheckboxQuestion}
+/// {@template CheckboxQuestion}
 /// A multiple-choice question with checkboxes next to each item,
 /// so you can select one or more.
 /// {@endtemplate}
@@ -193,7 +193,7 @@ class RadioQuestion extends MultipleChoice {
 /// The answer data is a list of [bool]s: each item is `true` or `false`
 /// depending on whether the checkbox is selected.
 class CheckboxQuestion extends MultipleChoice {
-  /// {@macro views.survey.CheckboxQuestion}
+  /// {@macro CheckboxQuestion}
   const CheckboxQuestion(
     super.description, {
     super.choices,
@@ -218,11 +218,11 @@ class CheckboxQuestion extends MultipleChoice {
   }
 }
 
-/// {@template views.survey.ScaleQuestion}
+/// {@template ScaleQuestion}
 /// Shows a slider that allows the user to pick a value on a spectrum.
 /// {@endtemplate}
 class ScaleQuestion extends SurveyQuestion {
-  /// {@macro views.survey.ScaleQuestion}
+  /// {@macro ScaleQuestion}
   ///
   /// The value of [optional] only determines whether an asterisk `*` is shown,
   /// since a [ScaleQuestion] is never considered to be "unanswered".
@@ -233,7 +233,7 @@ class ScaleQuestion extends SurveyQuestion {
     this.showEndLabels = false,
   });
 
-  /// {@template views.survey.endpoint_labels}
+  /// {@template endpoint_labels}
   /// The current selected value is always shown below the slider;
   /// setting [showEndLabels] as `true` will add small labels above the endpoints.
   /// {@endtemplate}
@@ -247,7 +247,7 @@ class ScaleQuestion extends SurveyQuestion {
     'strongly agree',
   ];
 
-  /// {@macro views.survey.endpoint_labels}
+  /// {@macro endpoint_labels}
   (String, String)? get endpoints => showEndLabels ? (values.first, values.last) : null;
 
   @override
@@ -262,7 +262,7 @@ class ScaleQuestion extends SurveyQuestion {
       };
 }
 
-/// {@template views.survey.record_types}
+/// {@template record_types}
 /// Dart recently added [Record] types, which make several things more convenient.
 ///
 /// ```dart

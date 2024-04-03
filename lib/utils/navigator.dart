@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:thc/login/login.dart';
 
-/// {@template models.navigator}
+/// {@template navigator}
 /// We can make navigation a little cleaner with a global key and an extension type:
 ///
 /// ```dart
@@ -19,10 +19,10 @@ import 'package:thc/login/login.dart';
 /// {@endtemplate}
 final GlobalKey<NavigatorState> navKey = GlobalKey<NavigatorState>();
 
-/// {@macro models.navigator}
+/// {@macro navigator}
 Nav get navigator => Nav(navKey.currentState!);
 
-/// {@template models.navigator_example}
+/// {@template navigator_example}
 /// Example:
 ///
 /// ```dart
@@ -44,20 +44,20 @@ Nav get navigator => Nav(navKey.currentState!);
 extension type Nav(NavigatorState navigator) {
   /// Adds a new screen to the route.
   ///
-  /// {@macro models.navigator_example}
+  /// {@macro navigator_example}
   Future<T?> push<T>(Widget destination) =>
       navigator.push<T>(MaterialPageRoute<T>(builder: (context) => destination));
 
   /// Adds a new screen in place of the current screen.
   ///
-  /// {@macro models.navigator_example}
+  /// {@macro navigator_example}
   Future<void> pushReplacement(Widget destination) => navigator.pushReplacement<void, void>(
         MaterialPageRoute<void>(builder: (context) => destination),
       );
 
   /// Removes the current screen from the route.
   ///
-  /// {@macro models.navigator_example}
+  /// {@macro navigator_example}
   void pop<T>([T? value]) => navigator.maybePop<T>(value);
 
   void noTransition(Widget destination, {bool replacing = false}) {

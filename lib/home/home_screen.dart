@@ -131,14 +131,14 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-/// {@template views.home.NavBar}
+/// {@template NavBar}
 /// Why are we extending [NavigationBar] and making a BLoC class for state management?
 ///
 /// Literally just so that the navigation bar slides down when you click "Go Live"
 /// and then smoothly slides back up when the stream is over.
 /// {@endtemplate}
 class NavBar extends NavigationBar {
-  /// {@macro views.home.NavBar}
+  /// {@macro NavBar}
   NavBar.of(BuildContext context, {super.key, this.belowPage = false})
       : super(
           selectedIndex: context.watch<NavBarIndex>().state,
@@ -175,12 +175,12 @@ class NavBar extends NavigationBar {
   }
 }
 
-/// {@template models.NavBarIndex}
+/// {@template NavBarIndex}
 /// Updates the active [NavBar] index when you move to another page,
 /// and when you turn a page on/off in the Admin settings.
 /// {@endtemplate}
 class NavBarIndex extends Cubit<int> {
-  /// {@macro models.NavBarIndex}
+  /// {@macro NavBarIndex}
   NavBarIndex() : super(_initial);
 
   static int get _initial {

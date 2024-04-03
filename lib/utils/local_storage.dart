@@ -9,7 +9,7 @@ Future<void> loadFromLocalStorage() async {
 
 late final SharedPreferences _storage;
 
-/// {@template models.local_storage.StorageKeys}
+/// {@template StorageKeys}
 /// Local storage supports 5 types:
 /// ```dart
 /// bool, int, double, String, List<String>
@@ -24,7 +24,7 @@ enum StorageKeys {
   adminStream,
   ;
 
-  /// {@macro models.local_storage.StorageKeys}
+  /// {@macro StorageKeys}
   dynamic get initial => switch (this) {
         themeMode => ThemeMode.system.index,
         userType => UserType.participant.index,
@@ -32,7 +32,7 @@ enum StorageKeys {
         adminWatchLive || adminStream => false,
       };
 
-  /// {@macro models.local_storage.StorageKeys}
+  /// {@macro StorageKeys}
   dynamic get fromStorage => _storage.get(name) ?? initial;
 
   /// By defining the `call()` method of a class, you're able
@@ -46,7 +46,7 @@ enum StorageKeys {
         adminWatchLive || adminStream => fromStorage,
       };
 
-  /// {@macro models.local_storage.StorageKeys}
+  /// {@macro StorageKeys}
   Future<bool> save(dynamic newValue) => switch (newValue) {
         bool() => _storage.setBool(name, newValue),
         int() => _storage.setInt(name, newValue),

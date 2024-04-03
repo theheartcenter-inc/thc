@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
 
-/// {@template models.theme.colorScheme}
+/// {@template colorScheme}
 /// By pulling colors from the [ColorScheme], the color palette can adapt
 /// based on whether the app is in light or dark mode.
 ///
@@ -134,16 +134,16 @@ ThemeData _generateTheme(bool isLight) {
   );
 }
 
-/// {@macro models.theme.colorScheme}
+/// {@macro colorScheme}
 final lightTheme = _generateTheme(true);
 
-/// {@macro models.theme.colorScheme}
+/// {@macro colorScheme}
 final darkTheme = _generateTheme(false);
 
 /// `extension` lets you add methods to a class, as if you were
 /// doing it inside the class definition.
 ///
-/// {@template models.theme.ThemeGetter}
+/// {@template ThemeGetter}
 /// This extension makes fetching the color scheme a bit cleaner.
 ///
 /// ```dart
@@ -154,7 +154,7 @@ final darkTheme = _generateTheme(false);
 extension ThemeGetter on BuildContext {
   ThemeData get theme => Theme.of(this);
 
-  /// {@macro models.theme.ThemeGetter}
+  /// {@macro ThemeGetter}
   ColorScheme get colorScheme => theme.colorScheme;
 
   /// The displayed color will be [light] or [dark] based on

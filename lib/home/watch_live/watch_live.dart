@@ -54,7 +54,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
     super.initState();
     Timer(
       const Duration(seconds: 5),
-      () => navigator.pushReplacement(const WatchingLivestream()),
+      () => mounted ? navigator.pushReplacement(const WatchingLivestream()) : null,
     );
   }
 
@@ -75,7 +75,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
                 ),
               ),
               ElevatedButton(
-                onPressed: () => navigator.pop(),
+                onPressed: navigator.pop,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                   foregroundColor: Colors.white,

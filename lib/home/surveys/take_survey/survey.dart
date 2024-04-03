@@ -8,11 +8,11 @@ import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/theme.dart';
 
-/// {@template views.survey.SurveyScreen}
+/// {@template SurveyScreen}
 /// Displays survey questions for the user to answer.
 /// {@endtemplate}
 class SurveyScreen extends StatefulWidget {
-  /// {@macro views.survey.SurveyScreen}
+  /// {@macro SurveyScreen}
   const SurveyScreen({super.key, required this.questions});
 
   /// The list of questions to use.
@@ -24,13 +24,13 @@ class SurveyScreen extends StatefulWidget {
   State<SurveyScreen> createState() => _SurveyScreenState();
 }
 
-/// {@macro views.survey.SurveyScreen}
+/// {@macro SurveyScreen}
 class _SurveyScreenState extends State<SurveyScreen> {
   /// A list of question and answer data.
   late final SurveyData data = SurveyData.fromQuestions(widget.questions);
 
-  /// {@template views.survey.SurveyValidation}
-  /// When the user taps "submit", it triggers the [AnswerValidation] cubit.
+  /// {@template SurveyValidation}
+  /// When the user taps "submit", it triggers the [ValidSurveyAnswers] cubit.
   ///
   /// Each question that still needs to be answered will be highlighted in a red box.
   /// {@endtemplate}
@@ -42,13 +42,13 @@ class _SurveyScreenState extends State<SurveyScreen> {
       navigator.pushReplacement(FunQuizResults(data.funQuizResults));
       return;
     }
-    final validation = context.read<AnswerValidation>();
+    final validation = context.read<ValidSurveyAnswers>();
     if (data.valid) {
-      validation.reset();
+      validation.emit(false);
       navigator.pushReplacement(Submitted(data.summary));
       return;
     }
-    validation.submit();
+    validation.emit(true);
   }
 
   /// Creates a function for each [SurveyField] that can update the survey [data].
@@ -89,11 +89,11 @@ class _SurveyScreenState extends State<SurveyScreen> {
   }
 }
 
-/// {@template views.survey.Submitted}
+/// {@template Submitted}
 /// Shows a big "thank you" and a summary of the user's answers.
 /// {@endtemplate}
 class Submitted extends StatelessWidget {
-  /// {@macro views.survey.Submitted}
+  /// {@macro Submitted}
   const Submitted(this.summary, {super.key});
 
   /// Whenever you see a weird-looking type, you can hover your mouse on it
@@ -160,12 +160,12 @@ class Submitted extends StatelessWidget {
   }
 }
 
-/// {@template views.survey.ValidateMessage}
+/// {@template ValidateMessage}
 /// If the user taps "submit" without answering required questions,
 /// this widget will display some informative text below the button.
 /// {@endtemplate}
 class _ValidateMessage extends StatelessWidget {
-  /// {@macro views.survey.ValidateMessage}
+  /// {@macro ValidateMessage}
   const _ValidateMessage(this.invalidCount);
 
   /// The number of required questions that haven't been answered.
@@ -174,7 +174,7 @@ class _ValidateMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget? child;
-    if (context.watch<AnswerValidation>().state && invalidCount > 0) {
+    if (context.watch<ValidSurveyAnswers>().state && invalidCount > 0) {
       final theme = Theme.of(context);
       child = Padding(
         padding: const EdgeInsets.all(8.0),
@@ -189,14 +189,8 @@ class _ValidateMessage extends StatelessWidget {
   }
 }
 
-/// {@macro views.survey.SurveyValidation}
-class AnswerValidation extends Cubit<bool> {
-  /// {@macro views.survey.SurveyValidation}
-  AnswerValidation() : super(false);
-
-  /// {@macro views.survey.SurveyValidation}
-  void submit() => state ? null : emit(true);
-
-  /// {@macro views.survey.SurveyValidation}
-  void reset() => state ? emit(false) : null;
+/// {@macro SurveyValidation}
+class ValidSurveyAnswers extends Cubit<bool> {
+  /// {@macro SurveyValidation}
+  ValidSurveyAnswers() : super(false);
 }

@@ -20,7 +20,7 @@ abstract final class SurveyColors {
   static const sunsetError = Color(0x50600000);
 }
 
-/// {@template views.survey.SurveyStyling}
+/// {@template SurveyStyling}
 /// Rather than going to the hassle of changing the app theme,
 /// we can just wrap the survey screen in this widget.
 ///
@@ -28,7 +28,7 @@ abstract final class SurveyColors {
 /// and text fields that show up as survey UI components.
 /// {@endtemplate}
 class SurveyStyling extends StatelessWidget {
-  /// {@macro views.survey.SurveyStyling}
+  /// {@macro SurveyStyling}
   const SurveyStyling({required this.child, super.key});
 
   /// The survey content.
@@ -129,11 +129,11 @@ class SurveyStyling extends StatelessWidget {
   }
 }
 
-/// {@template views.survey.DarkModeSwitch}
+/// {@template DarkModeSwitch}
 /// A switch that matches the "survey theme" aesthetic.
 /// {@endtemplate}
 class DarkModeSwitch extends StatelessWidget {
-  /// {@macro views.survey.DarkModeSwitch}
+  /// {@macro DarkModeSwitch}
   const DarkModeSwitch({super.key});
 
   @override

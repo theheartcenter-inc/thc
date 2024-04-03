@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/surveys/edit_survey/survey_editor.dart';
-import 'package:thc/home/surveys/edit_survey/survey_field_editor.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/home/surveys/take_survey/survey_theme.dart';
@@ -38,9 +37,9 @@ class App extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => AppTheme()),
         BlocProvider(create: (_) => NavBarIndex()),
-        BlocProvider(create: (_) => SurveyEditorBloc()),
-        BlocProvider(create: (_) => QuestionValidation()),
-        BlocProvider(create: (_) => AnswerValidation()),
+        BlocProvider(create: (_) => EditSurveyStructure()),
+        BlocProvider(create: (_) => ValidSurveyQuestions()),
+        BlocProvider(create: (_) => ValidSurveyAnswers()),
       ],
       builder: (context, _) => MaterialApp(
         navigatorKey: navKey,
@@ -54,7 +53,7 @@ class App extends StatelessWidget {
   }
 }
 
-/// {@template main.ChooseAnyView}
+/// {@template ChooseAnyView}
 /// Change the value of `home` to anything you want!
 ///
 /// If you're working on the login screen, you can use
@@ -63,7 +62,7 @@ class App extends StatelessWidget {
 /// ```
 /// {@endtemplate}
 class ChooseAnyView extends StatelessWidget {
-  /// {@macro main.ChooseAnyView}
+  /// {@macro ChooseAnyView}
   const ChooseAnyView({super.key});
 
   @override

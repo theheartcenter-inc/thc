@@ -6,14 +6,14 @@ import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/utils/theme.dart';
 
-/// {@template views.survey.SurveyField}
+/// {@template SurveyField}
 /// A widget that displays a survey question.
 /// {@endtemplate}
 class SurveyField extends StatelessWidget {
-  /// {@macro views.survey.SurveyField}
+  /// {@macro SurveyField}
   const SurveyField(this.record, this.update, {super.key});
 
-  /// {@macro views.survey.SurveyRecord}
+  /// {@macro SurveyRecord}
   final SurveyRecord record;
 
   /// {@template ValueChanged}
@@ -35,20 +35,20 @@ class SurveyField extends StatelessWidget {
     final answer = builder.buildAnswer(context, update, record.question, record.cleanAnswer);
 
     return _ErrorBox(
-      valid: record.valid || !context.watch<AnswerValidation>().state,
+      valid: record.valid || !context.watch<ValidSurveyAnswers>().state,
       child: builder.layout(context, question, answer),
     );
   }
 }
 
-/// {@template views.survey.SurveyRecord}
+/// {@template SurveyRecord}
 /// Extension types are great for when you want to make an existing type behave in a new way.
 ///
 /// `SurveyRecord` takes a [Record] of question and answer data
 /// and has methods that can validate the input and output a description of the answer.
 /// {@endtemplate}
 extension type SurveyRecord.fromRecord((SurveyQuestion, dynamic) record) {
-  /// {@macro views.survey.SurveyRecord}
+  /// {@macro SurveyRecord}
   SurveyRecord(SurveyQuestion question, dynamic answer) : this.fromRecord((question, answer));
 
   SurveyRecord.init(SurveyQuestion question) : this(question, initialAnswer(question));
@@ -106,9 +106,9 @@ extension type SurveyData(List<SurveyRecord> data) implements List<SurveyRecord>
   List<QuestionSummary> get summary => [for (final record in data) record.summary];
 }
 
-/// {@macro views.survey.SurveyValidation}
+/// {@macro SurveyValidation}
 class _ErrorBox extends StatelessWidget {
-  /// {@macro views.survey.SurveyValidation}
+  /// {@macro SurveyValidation}
   const _ErrorBox({required this.valid, required this.child});
 
   final bool valid;
@@ -129,11 +129,11 @@ class _ErrorBox extends StatelessWidget {
   }
 }
 
-/// {@template views.survey.QuestionText}
+/// {@template QuestionText}
 /// Displays the question text, and adds an asterisk `*` to any non-optional question.
 /// {@endtemplate}
 class _QuestionText extends StatelessWidget {
-  /// {@macro views.survey.QuestionText}
+  /// {@macro QuestionText}
   const _QuestionText(this.question);
 
   final SurveyQuestion question;
@@ -168,12 +168,12 @@ class _QuestionText extends StatelessWidget {
   }
 }
 
-/// {@template views.survey.MultipleChoiceTheme}
+/// {@template MultipleChoiceTheme}
 /// Unlike [_TextPrompt], the [MultipleChoice] questions that allow typed responses
 /// have an [UnderlineInputBorder], thanks to this widget.
 /// {@endtemplate}
 class _MultipleChoiceTyping extends StatelessWidget {
-  /// {@macro views.survey.MultipleChoiceTheme}
+  /// {@macro MultipleChoiceTheme}
   const _MultipleChoiceTyping({required this.onChanged, required this.onSubmitted});
 
   final dynamic onChanged, onSubmitted;
@@ -202,7 +202,7 @@ class _MultipleChoiceTyping extends StatelessWidget {
   }
 }
 
-/// {@template views.survey.SurveyBuilder}
+/// {@template SurveyBuilder}
 /// These builder classes make it so we don't need a chonky `build()` method.
 ///
 /// Each survey builder implements a [buildAnswer] method, and can also
@@ -212,7 +212,7 @@ abstract class SurveyBuilder<Q extends SurveyQuestion> {
   /// If we remove this constructor, the subclasses get mad :(
   const SurveyBuilder();
 
-  /// {@macro views.survey.SurveyBuilder}
+  /// {@macro SurveyBuilder}
   factory SurveyBuilder.fromRecord(SurveyRecord record) => switch (record.question) {
         YesNoQuestion() => _YesNo(),
         TextPromptQuestion() => _TextPrompt(),
@@ -228,7 +228,7 @@ abstract class SurveyBuilder<Q extends SurveyQuestion> {
     return Column(children: [question, answer, const SizedBox(height: 20)]);
   }
 
-  /// {@macro views.survey.SurveyBuilder}
+  /// {@macro SurveyBuilder}
   Widget buildAnswer(BuildContext context, ValueChanged update, Q question, covariant _);
 }
 

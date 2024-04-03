@@ -4,9 +4,10 @@ import 'package:provider/provider.dart';
 import 'package:thc/home/surveys/edit_survey/survey_editor.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey_field.dart';
-import 'package:thc/utils/bloc.dart';
+import 'package:thc/utils/platform.dart';
 import 'package:thc/utils/theme.dart';
 
+/// Shows a preview of a [SurveyField] that you can tap to edit.
 class SurveyFieldEditor extends StatefulWidget {
   const SurveyFieldEditor({
     required this.divider,
@@ -30,6 +31,11 @@ class SurveyFieldEditor extends StatefulWidget {
   State<SurveyFieldEditor> createState() => _SurveyFieldEditorState();
 }
 
+/// Whether it's a radio, checkbox, or scale question,
+/// you need an ability to add, remove, and reorder choices.
+///
+/// The `ChoiceText` widget has a bunch of [TextField]s
+/// in a [ReorderableListView] to accomplish this.
 class ChoiceText extends StatelessWidget {
   ChoiceText(
     this.data, {
@@ -44,13 +50,31 @@ class ChoiceText extends StatelessWidget {
   }) : super(key: data.key);
 
   final TextFieldData data;
+
+  /// This item's index in the choice list.
   final int index;
+
+  /// Set to `true`, unless there's currently only 1 choice.
   final bool plural;
+
+  /// The main focus node of the enclosing [SurveyFieldEditor].
   final FocusNode mainNode;
+
+  /// The checkbox/radio icon to use, if applicable.
   final IconData? icon;
+
+  /// Updates the question data based on what's currently being typed.
   final ValueChanged<String> onChanged;
+
+  /// When the user hits "enter", move to the next choice
+  /// (or add another choice if we're at the end of the list).
   final VoidCallback onEditingComplete;
+
+  /// Delete this choice.
   final VoidCallback? yeet;
+
+  /// On desktop platforms, the "delete" and "reorder" icons are hidden
+  /// until you hover your mouse cursor on the choice.
   final ValueChanged<bool> onHover;
 
   @override
@@ -102,7 +126,7 @@ class ChoiceText extends StatelessWidget {
       ],
     );
 
-    if (isMobile) return widget;
+    if (mobileDevice) return widget;
 
     return MouseRegion(
       onEnter: (_) => onHover(true),
@@ -112,27 +136,47 @@ class ChoiceText extends StatelessWidget {
   }
 }
 
+/// {@template TextFieldData}
+/// A handy class that stores all the data relating to a single [TextField].
+/// {@endtemplate}
 class TextFieldData {
+  /// {@macro TextFieldData}
   TextFieldData(String text, [this.handler]) : controller = TextEditingController(text: text);
 
   final TextEditingController controller;
+
+  /// stores the keyboard shortcuts from [_SurveyFieldEditorState.keyboardShortcuts].
   final FocusOnKeyEventCallback Function(TextFieldData)? handler;
+
+  /// The keyboard shortcut [handler] is active when this [node] is focused.
   late final FocusNode node = FocusNode(onKeyEvent: handler?.call(this));
+
+  /// A unique key to use for the text field widget.
   final Key key = UniqueKey();
-  bool showIcons = isMobile;
-  int get index => key.hashCode;
+
+  /// Determines whether "delete" and "reorder" icons are shown.
+  bool showIcons = mobileDevice;
 
   String get text => controller.text;
   set text(String newText) {
     controller.text = newText;
   }
 
+  /// Once [ValidSurveyQuestions] is triggered,
+  /// options that are empty or duplicates will have an error message.
   String? errorText;
 }
 
 enum EditorMode {
+  /// The editor will show a preview of the [SurveyField],
+  /// and you can tap to edit.
   view,
+
+  /// The survey field is being edited.
   edit,
+
+  /// The editor only exists in [collapsed] mode very briefly,
+  /// to make an animation when it's being added or deleted.
   collapsed;
 
   factory EditorMode.update(List<FocusNode> nodes) =>
@@ -141,16 +185,18 @@ enum EditorMode {
 
 class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
   EditorMode mode = EditorMode.collapsed;
-  void stopEditing() => mode = switch (mode) {
-        EditorMode.view || EditorMode.edit => EditorMode.view,
-        EditorMode.collapsed => EditorMode.collapsed,
-      };
+  void stopEditing() {
+    if (mode == EditorMode.edit) mode = EditorMode.view;
+  }
 
   late final SurveyQuestion q = widget.question;
   final mainNode = FocusNode();
 
   late final titleData = TextFieldData(q.description);
 
+  /// Controls whether this is a required question.
+  ///
+  /// We need to use the name `optional`, since `required` is already a Dart keyword.
   late bool optional = q.optional;
   final optionalNode = FocusNode();
 
@@ -171,6 +217,7 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
         for (final textFieldData in choices) textFieldData.node,
       ];
 
+  /// Creates an updated [SurveyQuestion] based on the current state of the editor.
   SurveyQuestion get updatedQuestion {
     final description = titleData.text.trim();
     final choices = [for (final choice in this.choices) choice.text.trim()];
@@ -198,6 +245,8 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
     };
   }
 
+  /// Stores the name of each choice in this question (if applicable),
+  /// plus some other data.
   late final List<TextFieldData> choices;
   IconData? get choiceIcon => switch (q) {
         RadioQuestion() => Icons.radio_button_unchecked,
@@ -206,11 +255,13 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
       };
 
   void addChoice() {
-    setState(() => choices.add(TextFieldData('', yeetChoice)));
+    setState(() => choices.add(TextFieldData('', keyboardShortcuts)));
     choices.last.node.requestFocus();
   }
 
-  FocusOnKeyEventCallback yeetChoice(TextFieldData option) => (node, event) {
+  /// You can use the arrow keys to navigate between choices,
+  /// and "backspace" will delete an empty choice.
+  FocusOnKeyEventCallback keyboardShortcuts(TextFieldData option) => (node, event) {
         if (event is KeyUpEvent) return KeyEventResult.ignored;
         int index = choices.indexOf(option);
         switch (event.logicalKey) {
@@ -234,7 +285,9 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
         return KeyEventResult.handled;
       };
 
+  /// The duration of the animation for moving to and from [EditorMode.collapsed].
   static const duration = Durations.short4;
+
   @override
   void initState() {
     super.initState();
@@ -245,9 +298,10 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
       final ScaleQuestion q => q.values.toList(),
     };
     choices = [
-      for (final option in options) TextFieldData(option, yeetChoice),
+      for (final option in options) TextFieldData(option, keyboardShortcuts),
     ];
 
+    // when nothing in this editor is focused, we should return to "view" mode.
     for (final node in allNodes) {
       node.addListener(() {
         if (mode == EditorMode.collapsed) return;
@@ -261,8 +315,11 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
         }
       });
     }
+
+    // we need to delay this,
+    // since there wouldn't be any animation if we just set the value immediately.
     Future.delayed(
-      const Duration(milliseconds: 1),
+      const Duration(milliseconds: 5),
       () => setState(() => mode = EditorMode.view),
     );
   }
@@ -279,7 +336,9 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
     super.dispose();
   }
 
+  /// Controls whether duplicate/delete/reorder icons are shown.
   bool showButtons = false;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colorScheme;
@@ -289,8 +348,8 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
     final choiceNames = [for (final choice in choices) choice.text];
     const choicePadding = EdgeInsets.fromLTRB(48, 0, 36, 16);
 
-    final validating = context.watch<QuestionValidation>().state;
-    final mobileEditing = context.watch<SurveyEditorBloc>().state;
+    final validating = context.watch<ValidSurveyQuestions>().state;
+    final mobileEditing = context.watch<EditSurveyStructure>().state;
     if (mobileEditing) stopEditing();
 
     Widget? content;
@@ -330,7 +389,11 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
                 }
               },
               onHover: (hovering) => setState(() => choices[i].showIcons = hovering),
-              yeet: () => setState(() => choices.removeAt(i)),
+              yeet: () {
+                setState(() => choices.removeAt(i));
+                choiceData.controller.dispose();
+                choiceData.node.dispose();
+              },
             )
         ];
         content = Column(
@@ -445,7 +508,7 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
                   child: ReorderableDragStartListener(
                     index: widget.index,
                     child: Opacity(
-                      opacity: isMobile ? 1 : 0.5,
+                      opacity: mobileDevice ? 1 : 0.5,
                       child: const Icon(Icons.reorder),
                     ),
                   ),
@@ -464,7 +527,7 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
           }
         }
 
-        if (!isMobile) {
+        if (!mobileDevice) {
           content = MouseRegion(
             onEnter: (_) => setState(() => showButtons = true),
             onExit: (_) => setState(() => showButtons = false),
@@ -499,8 +562,13 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
   }
 }
 
+/// {@template QuestionTypeIcon}
+/// Cute little icons to show when adding a question.
+/// {@endtemplate}
 class QuestionTypeIcon extends StatelessWidget {
+  /// {@macro QuestionTypeIcon}
   const QuestionTypeIcon(this.question, {super.key});
+
   final SurveyQuestion question;
 
   @override
@@ -591,7 +659,7 @@ class QuestionTypeIcon extends StatelessWidget {
         child: DecoratedBox(
           decoration: BoxDecoration(
             border: question is ScaleQuestion
-                ? null
+                ? null // no border on the far right side
                 : Border(right: BorderSide(color: foregroundColor.withOpacity(0.25))),
           ),
           child: Align(
@@ -604,11 +672,4 @@ class QuestionTypeIcon extends StatelessWidget {
       ),
     );
   }
-}
-
-class QuestionValidation extends Cubit<bool> {
-  QuestionValidation() : super(false);
-
-  void submit() => state ? null : emit(true);
-  void reset() => state ? emit(false) : null;
 }

@@ -1,6 +1,3 @@
-import 'dart:io';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/home/surveys/edit_survey/survey_field_editor.dart';
@@ -8,13 +5,13 @@ import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/navigator.dart';
+import 'package:thc/utils/platform.dart';
 import 'package:thc/utils/theme.dart';
 
 /// This is meant for demonstration; the survey isn't saved to Firebase or local storage.
 List<SurveyQuestion> customSurvey = [];
 
-final isMobile = switch (Platform.operatingSystem) { 'ios' || 'android' => true, _ => false };
-
+/// {@macro ValidSurveyQuestions}
 extension ValidChoices on List<String> {
   /// Returns `true` if the item at this [index] is a valid option
   /// for a scale or multiple-choice question.
@@ -65,44 +62,113 @@ class SurveyEditor extends StatefulWidget {
   State<SurveyEditor> createState() => _SurveyEditorState();
 }
 
+/// {@template Key}
+/// Let's say you start with this list:
+/// ```dart
+/// [SomeWidget(x: 1), SomeWidget(x: 2)];
+/// ```
+///
+/// and end with this one:
+/// ```dart
+/// [SomeWidget(x: 2), SomeWidget(x: 1)];
+/// ```
+///
+/// This could have happened a couple different ways:
+///
+/// ```dart
+/// // maybe they got swapped
+/// newList = [oldList.last, oldList.first];
+///
+/// // maybe both values were changed
+/// list[0].x = 2;
+/// list[1].x = 1;
+/// ```
+///
+/// Flutter avoids getting confused by using the Widget's [Key].
+///
+/// ```dart
+/// [SomeWidget(key: Key('1'), x: 1), SomeWidget(key: Key('2'), x: 2)];
+///
+/// // values changed
+/// [SomeWidget(key: Key('1'), x: 2), SomeWidget(key: Key('2'), x: 1)];
+///
+/// // got swapped
+/// [SomeWidget(key: Key('2'), x: 2), SomeWidget(key: Key('1'), x: 1)];
+/// ```
+///
+/// A [ReorderableList] requires that each item has a unique key,
+/// to prevent any confusion about which values are being swapped.
+/// {@endtemplate}
+///
+/// This extension type attaches a [UniqueKey] to each question so they can be reordered.
 extension type KeyedQuestion.from((SurveyQuestion, Key) record) {
+  /// {@macro Key}
   KeyedQuestion(SurveyQuestion question) : this.from((question, newKey));
 
   SurveyQuestion get question => record.$1;
+
+  /// {@macro Key}
   Key get key => record.$2;
+
+  /// {@macro Key}
   static Key get newKey => UniqueKey();
 
+  /// Creates a new [KeyedQuestion] object: same question, different key.
   KeyedQuestion copy() => KeyedQuestion.from((question, newKey));
+
+  /// Returns an updated [question] with the same [key].
   KeyedQuestion update(SurveyQuestion newQuestion) => KeyedQuestion.from((newQuestion, key));
 }
 
 class _SurveyEditorState extends State<SurveyEditor> {
-  final questions = [for (final question in customSurvey) KeyedQuestion(question)];
-  List<String> get questionNames => [for (final q in questions) q.question.description];
+  final keyedQuestions = [for (final question in customSurvey) KeyedQuestion(question)];
+  List<String> get questionNames => [for (final q in keyedQuestions) q.question.description];
 
+  /// {@macro edit_survey.divider}
   SurveyEditDivider divider(int index) => SurveyEditDivider(
-        (question) => setState(() => questions.insert(index, KeyedQuestion(question))),
+        (question) => setState(() => keyedQuestions.insert(index, KeyedQuestion(question))),
       );
+
+  void validate() {
+    final checks = [
+      questionNames.valid,
+      for (final record in keyedQuestions)
+        switch (record.question) {
+          YesNoQuestion() || TextPromptQuestion() => true,
+          final MultipleChoice q => q.choices.valid,
+          final ScaleQuestion q => q.values.valid,
+        },
+    ];
+    final validation = context.read<ValidSurveyQuestions>();
+
+    if (checks.contains(false)) return validation.emit(true);
+
+    customSurvey = [for (final q in keyedQuestions) q.question];
+    validation.emit(false);
+    navigator.pop();
+  }
 
   @override
   Widget build(BuildContext context) {
     final editors = [
-      for (final (i, q) in questions.indexed)
+      for (final (i, record) in keyedQuestions.indexed)
         SurveyFieldEditor(
-          key: q.key,
+          key: record.key,
           index: i,
-          question: q.question,
-          update: (newValue) => setState(() => questions[i] = questions[i].update(newValue)),
-          duplicate: () => setState(() => questions.insert(i + 1, q.copy())),
-          yeet: () => setState(() => questions.removeAt(i)),
+          question: record.question,
+          update: (newValue) => setState(
+            () => keyedQuestions[i] = keyedQuestions[i].update(newValue),
+          ),
+          duplicate: () => setState(() => keyedQuestions.insert(i + 1, record.copy())),
+          yeet: () => setState(() => keyedQuestions.removeAt(i)),
           validate: () => questionNames.validChoice(i),
           divider: divider(i),
         ),
     ];
 
     Widget? editButton;
-    if (isMobile && questions.isNotEmpty) {
-      editButton = BlocConsumer<SurveyEditorBloc>(
+    if (mobileDevice && keyedQuestions.isNotEmpty) {
+      editButton = BlocConsumer<EditSurveyStructure>(
         (_, value, __) => IconButton.filled(
           icon: Icon(value.icon, color: Colors.black87),
           onPressed: value.toggle,
@@ -112,32 +178,10 @@ class _SurveyEditorState extends State<SurveyEditor> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Survey Editor'),
-        actions: [
-          IconButton(
-            onPressed: () {
-              context.read<QuestionValidation>().submit();
-
-              final everythingValid = ![
-                questionNames.valid,
-                for (final question in questions)
-                  switch (question.question) {
-                    YesNoQuestion() || TextPromptQuestion() => const [],
-                    final MultipleChoice q => q.choices.valid,
-                    final ScaleQuestion q => q.values.valid,
-                  },
-              ].contains(false);
-              if (everythingValid) {
-                customSurvey = [for (final q in questions) q.question];
-                context.read<QuestionValidation>().reset();
-                navigator.pop();
-              }
-            },
-            icon: const Icon(Icons.exit_to_app),
-          ),
-        ],
+        actions: [IconButton(onPressed: validate, icon: const Icon(Icons.exit_to_app))],
       ),
       body: GestureDetector(
-        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        onTap: FocusManager.instance.primaryFocus?.unfocus,
         behavior: HitTestBehavior.translucent,
         child: Center(
           child: SingleChildScrollView(
@@ -147,12 +191,14 @@ class _SurveyEditorState extends State<SurveyEditor> {
                   shrinkWrap: true,
                   buildDefaultDragHandles: false,
                   onReorder: (oldIndex, newIndex) {
-                    if (newIndex > oldIndex) newIndex = min(newIndex, questions.length) - 1;
-                    setState(() => questions.insert(newIndex, questions.removeAt(oldIndex)));
+                    if (newIndex > oldIndex) newIndex--;
+                    setState(() {
+                      keyedQuestions.insert(newIndex, keyedQuestions.removeAt(oldIndex));
+                    });
                   },
                   children: editors,
                 ),
-                divider(questions.length),
+                divider(keyedQuestions.length),
               ],
             ),
           ),
@@ -163,7 +209,13 @@ class _SurveyEditorState extends State<SurveyEditor> {
   }
 }
 
+/// {@template edit_survey.divider}
+/// A horizontal line with a little "+" button.
+///
+/// You can press the button to insert a new question.
+/// {@endtemplate}
 class SurveyEditDivider extends StatefulWidget {
+  /// {@macro edit_survey.divider}
   const SurveyEditDivider(this.addQuestion, {super.key});
   final void Function(SurveyQuestion) addQuestion;
 
@@ -179,6 +231,12 @@ class _SurveyEditDividerState extends State<SurveyEditDivider> {
   void initState() {
     super.initState();
     node.addListener(() => setState(() => focused = node.hasPrimaryFocus));
+  }
+
+  @override
+  void dispose() {
+    node.dispose();
+    super.dispose();
   }
 
   static const presets = [
@@ -223,7 +281,7 @@ class _SurveyEditDividerState extends State<SurveyEditDivider> {
       );
     }
 
-    final bool expanded = isMobile || hovered || focused;
+    final bool expanded = mobileDevice || hovered || focused;
 
     final child = SizedBox(
       height: 60,
@@ -245,7 +303,7 @@ class _SurveyEditDividerState extends State<SurveyEditDivider> {
       ),
     );
 
-    if (isMobile) return child;
+    if (mobileDevice) return child;
 
     return MouseRegion(
       onEnter: (_) => setState(() => hovered = true),
@@ -255,11 +313,28 @@ class _SurveyEditDividerState extends State<SurveyEditDivider> {
   }
 }
 
-/// mobile device floating action button
-class SurveyEditorBloc extends Cubit<bool> {
-  SurveyEditorBloc() : super(false);
+/// You can see options for duplicating, deleting, and reordering survey questions
+/// when you hover your mouse over the question.
+///
+/// Mobile devices don't have mouse cursors,
+/// so instead there's a button that uses this BLoC to show/hide the extra options.
+class EditSurveyStructure extends Cubit<bool> {
+  EditSurveyStructure() : super(false);
 
   IconData get icon => state ? Icons.done : Icons.edit;
 
   void toggle() => emit(!state);
+}
+
+/// {@template ValidSurveyQuestions}
+/// In order for a custom survey to work, we need a valid list of question names,
+/// and each question with multiple [String] values needs its list to be valid too.
+///
+/// A list is "valid" if:
+/// - it's non-empty
+/// - there are no duplicate items
+/// {@endtemplate}
+class ValidSurveyQuestions extends Cubit<bool> {
+  /// {@macro ValidSurveyQuestions}
+  ValidSurveyQuestions() : super(false);
 }

@@ -1,4 +1,4 @@
-/// {@template models.enum_widget}
+/// {@template enum_widget}
 /// Unlike other Widget classes, you don't pass any arguments into an enum widget.
 ///
 /// Thus, the enum widget `build()` method logic only uses the following:
@@ -43,7 +43,7 @@ class _StatelessEnum extends StatelessWidget {
 /// Column(children: MyEnum.values)
 /// ```
 ///
-/// {@macro models.enum_widget}
+/// {@macro enum_widget}
 mixin StatelessEnum on Enum implements StatelessWidget {
   _StatelessEnum get _statefulEnum => _StatelessEnum(build);
 
@@ -118,7 +118,7 @@ class _StatefulEnum extends StatefulWidget {
 /// Column(children: MyEnum.values)
 /// ```
 ///
-/// {@macro models.enum_widget}
+/// {@macro enum_widget}
 mixin StatefulEnum on Enum implements StatefulWidget {
   _StatefulEnum get _statefulEnum => _StatefulEnum(createState);
 

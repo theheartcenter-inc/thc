@@ -1,4 +1,8 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:thc/home/surveys/survey_questions.dart';
+import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/widgets/fun_placeholder.dart';
 
@@ -10,6 +14,13 @@ class WatchingLivestream extends StatefulWidget {
 }
 
 class _WatchingLivestreamState extends State<WatchingLivestream> {
+  final timer = Timer(
+    const Duration(seconds: 5),
+    () => navigator.pushReplacement(
+      SurveyScreen(questions: SurveyPresets.streamFinished.questions),
+    ),
+  );
+
   @override
   Widget build(BuildContext context) {
     const placeholder = BottomNavigationBarItem(icon: SizedBox.shrink(), label: '');
@@ -23,7 +34,12 @@ class _WatchingLivestreamState extends State<WatchingLivestream> {
           color: Colors.white70,
           fontWeight: FontWeight.w600,
         ),
-        onTap: (_) => navigator.pop(),
+        onTap: (_) {
+          timer.cancel();
+          navigator.pushReplacement(
+            SurveyScreen(questions: SurveyPresets.streamEndedEarly.questions),
+          );
+        },
         items: const [
           placeholder,
           placeholder,

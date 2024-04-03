@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 import 'dart:math';
 
 import 'package:agora_uikit/agora_uikit.dart';
@@ -8,6 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:thc/credentials/credentials.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/utils/bloc.dart';
+import 'package:thc/utils/platform.dart';
 import 'package:thc/utils/widgets/state_async.dart';
 
 class ActiveStream extends StatefulWidget {
@@ -107,11 +107,11 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
   }
 }
 
-/// {@template views.create_livestream.AdaptiveInput}
+/// {@template AdaptiveInput}
 /// Tracks the mouse on desktop platforms, and recognizes tapping on mobile.
 /// {@endtemplate}
 class AdaptiveInput extends StatelessWidget {
-  /// {@macro views.create_livestream.AdaptiveInput}
+  /// {@macro AdaptiveInput}
   const AdaptiveInput({
     required this.desktop,
     required this.mobile,
@@ -125,7 +125,7 @@ class AdaptiveInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (Platform.operatingSystem case 'ios' || 'android') {
+    if (mobileDevice) {
       return GestureDetector(
         onTap: mobile.onTap,
         child: child,
@@ -140,12 +140,12 @@ class AdaptiveInput extends StatelessWidget {
   }
 }
 
-/// {@template views.create_livestream.Backdrop}
+/// {@template Backdrop}
 /// The [Hero] widget gives the "Go Live" button a fun little animation
 /// as it expands into this black backdrop.
 /// {@endtemplate}
 class _Backdrop extends StatelessWidget {
-  /// {@macro views.create_livestream.Backdrop}
+  /// {@macro Backdrop}
   const _Backdrop();
 
   @override
@@ -166,12 +166,12 @@ class _Backdrop extends StatelessWidget {
   }
 }
 
-/// {@template views.create_livestream.ViewCount}
+/// {@template ViewCount}
 /// The view has an [AnimatedOpacity] based on
 /// whether the overlay is being shown.
 /// {@endtemplate}
 class _ViewCount extends StatelessWidget {
-  /// {@macro views.create_livestream.ViewCount}
+  /// {@macro ViewCount}
   const _ViewCount();
 
   int get peopleWatching => Random().nextBool() ? 69 : 420;
@@ -188,7 +188,7 @@ class _ViewCount extends StatelessWidget {
   }
 }
 
-/// {@template views.create_livestream.StreamOverlay}
+/// {@template StreamOverlay}
 /// Without this widget, things would be kind of ugly:
 ///
 /// ```dart
@@ -206,7 +206,7 @@ class _ViewCount extends StatelessWidget {
 /// Not a big fan of the double-nested [AnimatedOpacity].
 /// {@endtemplate}
 class StreamOverlay extends StatelessWidget {
-  /// {@macro views.create_livestream.StreamOverlay}
+  /// {@macro StreamOverlay}
   const StreamOverlay(this.value, {super.key, required this.child})
       : assert(value is Offset || value is double);
 
