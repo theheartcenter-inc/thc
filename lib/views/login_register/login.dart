@@ -6,6 +6,7 @@ import 'package:thc/utils/show_error_dialog.dart';
 import 'package:thc/views/home/home_screen.dart';
 import 'package:thc/views/login_register/forgot_password.dart';
 import 'package:thc/views/login_register/register.dart';
+import 'package:thc/views/login_register/verify_email.dart';
 
 class BigButton extends StatelessWidget {
   const BigButton({
@@ -54,11 +55,13 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   late final TextEditingController _email;
   late final TextEditingController _password;
+  late bool _passwordVisible;
 
   @override
   void initState() {
     _email = TextEditingController();
     _password = TextEditingController();
+    _passwordVisible = false;
     super.initState();
   }
 
@@ -138,13 +141,24 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                             child: TextField(
                               controller: _password,
-                              obscureText: true,
+                              obscureText: !_passwordVisible,
                               enableSuggestions: false,
                               autocorrect: false,
-                              decoration: const InputDecoration(
+                              decoration: InputDecoration(
                                 hintText: 'Password',
-                                hintStyle: TextStyle(color: Colors.grey),
+                                hintStyle: const TextStyle(color: Colors.grey),
                                 border: InputBorder.none,
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _passwordVisible ? Icons.visibility : Icons.visibility_off,
+                                    color: Theme.of(context).primaryColorDark,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _passwordVisible = !_passwordVisible;
+                                    });
+                                  },
+                                ),
                               ),
                               style: const TextStyle(color: Colors.black),
                             ),
@@ -167,9 +181,19 @@ class _LoginScreenState extends State<LoginScreen> {
                             email: email,
                             password: password,
                           );
-                          navigator.pushReplacement(
-                            const HomeScreen(),
-                          );
+                          final user = FirebaseAuth.instance.currentUser;
+                          if (user?.emailVerified ?? false) {
+                            navigator.pushReplacement(
+                              const HomeScreen(),
+                            );
+                          } else {
+                            user?.sendEmailVerification();
+                            navigator.pushReplacement(
+                              VerifyEmailScreen(
+                                user: user,
+                              ),
+                            );
+                          }
                         } on FirebaseAuthException catch (e) {
                           if (e.code == 'invalid-credential') {
                             await showErrorDialog(

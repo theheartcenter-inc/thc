@@ -15,11 +15,13 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   late final TextEditingController _email;
   late final TextEditingController _password;
+  late bool _passwordVisible;
 
   @override
   void initState() {
     _email = TextEditingController();
     _password = TextEditingController();
+    _passwordVisible = false;
     super.initState();
   }
 
@@ -94,10 +96,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                             child: TextField(
                               controller: _password,
-                              decoration: const InputDecoration(
+                              obscureText: !_passwordVisible,
+                              enableSuggestions: false,
+                              autocorrect: false,
+                              decoration: InputDecoration(
                                 hintText: 'Password',
-                                hintStyle: TextStyle(color: Colors.grey),
+                                hintStyle: const TextStyle(color: Colors.grey),
                                 border: InputBorder.none,
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _passwordVisible ? Icons.visibility : Icons.visibility_off,
+                                    color: Theme.of(context).primaryColorDark,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _passwordVisible = !_passwordVisible;
+                                    });
+                                  },
+                                ),
                               ),
                               style: const TextStyle(color: Colors.black),
                             ),

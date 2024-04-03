@@ -37,7 +37,6 @@ class VerifyEmailScreen extends StatelessWidget {
             ),
             BigButton(
               onPressed: () async {
-                print('Email Verification sent');
                 await user?.sendEmailVerification();
                 const snackBar = SnackBar(content: Text('Email has been resent'));
                 ScaffoldMessenger.of(context).showSnackBar(snackBar);
