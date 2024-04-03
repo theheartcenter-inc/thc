@@ -7,6 +7,6 @@ class ManageSchedule extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FunPlaceholder('Manage Schedule', color: context.colorScheme.secondary);
+    return const FunPlaceholder('schedule a livestream!', color: ThcColors.dullBlue);
   }
 }
