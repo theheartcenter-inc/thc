@@ -2,6 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:thc/firebase_options.dart';
 import 'package:thc/models/bloc.dart';
 import 'package:thc/models/local_storage.dart';
 import 'package:thc/models/navigator.dart';
@@ -10,11 +11,10 @@ import 'package:thc/models/user.dart';
 import 'package:thc/views/home/home_screen.dart';
 import 'package:thc/views/login_register/register.dart';
 import 'package:thc/views/profile/settings.dart';
-import 'package:thc/views/survey/survey_editor.dart';
-import 'package:thc/views/survey/survey_questions.dart';
-import 'package:thc/views/survey/survey_screen.dart';
-import 'package:thc/views/survey/survey_theme.dart';
-import 'firebase_options.dart';
+import 'package:thc/views/surveys/edit_survey/survey_editor.dart';
+import 'package:thc/views/surveys/survey_questions.dart';
+import 'package:thc/views/surveys/take_survey/survey_screen.dart';
+import 'package:thc/views/surveys/take_survey/survey_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -3,10 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:thc/models/bloc.dart';
 import 'package:thc/models/navigator.dart';
 import 'package:thc/models/theme.dart';
-import 'package:thc/views/survey/fun_quiz.dart';
-import 'package:thc/views/survey/survey_field.dart';
-import 'package:thc/views/survey/survey_questions.dart';
-import 'package:thc/views/survey/survey_theme.dart';
+import 'package:thc/views/surveys/survey_questions.dart';
+import 'package:thc/views/surveys/take_survey/fun_quiz.dart';
+import 'package:thc/views/surveys/take_survey/survey_field.dart';
+import 'package:thc/views/surveys/take_survey/survey_theme.dart';
 
 /// {@template views.survey.SurveyScreen}
 /// Displays survey questions for the user to answer.

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:thc/views/survey/survey_theme.dart';
+import 'package:thc/views/surveys/take_survey/survey_theme.dart';
 import 'package:thc/views/widgets.dart';
 
 class ManageSurveys extends StatelessWidget {

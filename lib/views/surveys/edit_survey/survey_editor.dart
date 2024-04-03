@@ -7,9 +7,9 @@ import 'package:provider/provider.dart';
 import 'package:thc/models/bloc.dart';
 import 'package:thc/models/navigator.dart';
 import 'package:thc/models/theme.dart';
-import 'package:thc/views/survey/survey_field.dart';
-import 'package:thc/views/survey/survey_questions.dart';
-import 'package:thc/views/survey/survey_screen.dart';
+import 'package:thc/views/surveys/survey_questions.dart';
+import 'package:thc/views/surveys/take_survey/survey_field.dart';
+import 'package:thc/views/surveys/take_survey/survey_screen.dart';
 
 /// This is meant for demonstration; the survey isn't saved to Firebase or local storage.
 List<SurveyQuestion> customSurvey = [];

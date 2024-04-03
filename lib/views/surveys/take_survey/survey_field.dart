@@ -3,8 +3,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/models/theme.dart';
-import 'package:thc/views/survey/survey_questions.dart';
-import 'package:thc/views/survey/survey_screen.dart';
+import 'package:thc/views/surveys/survey_questions.dart';
+import 'package:thc/views/surveys/take_survey/survey_screen.dart';
 
 /// {@template views.survey.SurveyField}
 /// A widget that displays a survey question.

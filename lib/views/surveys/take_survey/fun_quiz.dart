@@ -12,7 +12,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:thc/models/navigator.dart';
-import 'package:thc/views/survey/survey_questions.dart';
+import 'package:thc/views/surveys/survey_questions.dart';
 import 'package:thc/views/widgets.dart';
 
 /// {@macro totally_not_a_waste_of_time}

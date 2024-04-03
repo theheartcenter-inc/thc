@@ -8,9 +8,9 @@ import 'package:thc/models/local_storage.dart';
 import 'package:thc/models/user.dart';
 import 'package:thc/views/create_livestream/create_livestream.dart';
 import 'package:thc/views/manage_schedule/manage_schedule.dart';
-import 'package:thc/views/manage_surveys/manage_surveys.dart';
 import 'package:thc/views/manage_users/manage_users.dart';
 import 'package:thc/views/profile/profile.dart';
+import 'package:thc/views/surveys/manage_surveys/manage_surveys.dart';
 import 'package:thc/views/video_library/video_library.dart';
 import 'package:thc/views/watch_live/watch_live.dart';
 

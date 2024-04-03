@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/models/theme.dart';
 import 'package:thc/views/profile/settings.dart';
-import 'package:thc/views/survey/survey_questions.dart';
+import 'package:thc/views/surveys/survey_questions.dart';
 
 /// The sunrise/sunset gradient does a couple things:
 /// 1. adds a nice aesthetic
