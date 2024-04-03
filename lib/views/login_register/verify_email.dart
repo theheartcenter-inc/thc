@@ -1,10 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:thc/models/navigator.dart';
 import 'package:thc/models/theme.dart';
 import 'package:thc/views/login_register/login.dart';
 
 class VerifyEmailScreen extends StatelessWidget {
-  const VerifyEmailScreen({super.key});
-
+  const VerifyEmailScreen(this.user, {super.key});
+  final User? user;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,11 +34,20 @@ class VerifyEmailScreen extends StatelessWidget {
               ),
             ),
             BigButton(
-              onPressed: () {
-                const snackBar = SnackBar(content: Text('Email has been resent'));
-                ScaffoldMessenger.of(context).showSnackBar(snackBar);
+              onPressed: () async {
+                await user?.sendEmailVerification();
+                navigator.showSnackBar(const SnackBar(content: Text('Email has been resent')));
               },
               label: 'Resend verification email',
+            ),
+            Center(
+              child: TextButton(
+                onPressed: () => navigator.noTransition(
+                  const LoginScreen(),
+                  replacing: true,
+                ),
+                child: const Text('Navigate to Log In'),
+              ),
             )
           ],
         ),
