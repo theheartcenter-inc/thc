@@ -7,10 +7,10 @@ import 'package:thc/models/enum_widget.dart';
 import 'package:thc/models/local_storage.dart';
 import 'package:thc/models/user.dart';
 import 'package:thc/views/create_livestream/create_livestream.dart';
-import 'package:thc/views/schedule/schedule.dart';
 import 'package:thc/views/manage_surveys/manage_surveys.dart';
 import 'package:thc/views/manage_users/manage_users.dart';
 import 'package:thc/views/profile/profile.dart';
+import 'package:thc/views/schedule/schedule.dart';
 import 'package:thc/views/video_library/video_library.dart';
 import 'package:thc/views/watch_live/watch_live.dart';
 
@@ -20,13 +20,6 @@ enum NavBarButton with StatelessEnum {
     outlined: Icon(Icons.group_outlined),
     filled: Icon(Icons.group),
     screen: ManageUsers(),
-  ),
-
-  /// Admins can edit the livestream schedule.
-  schedule(
-    outlined: Icon(Icons.calendar_month_outlined),
-    filled: Icon(Icons.calendar_month),
-    screen: Schedule(),
   ),
 
   /// A place for admins to edit surveys, and view a summary of survey responses.
@@ -42,6 +35,15 @@ enum NavBarButton with StatelessEnum {
     filled: Icon(Icons.spa),
     label: 'watch live',
     screen: WatchLive(),
+  ),
+
+  /// Users can view a schedule of upcoming livestreams.
+  ///
+  /// Admins can edit this schedule.
+  schedule(
+    outlined: Icon(Icons.calendar_month_outlined),
+    filled: Icon(Icons.calendar_month),
+    screen: Schedule(),
   ),
 
   /// A place for directors to start streaming.
@@ -92,8 +94,8 @@ enum NavBarButton with StatelessEnum {
       watchLive when isAdmin => StorageKeys.adminWatchLive(),
       stream when isAdmin => StorageKeys.adminStream(),
       stream => userType.canLivestream,
-      users || schedule || surveys => isAdmin,
-      watchLive || library || profile => true,
+      users || surveys => isAdmin,
+      watchLive || schedule || library || profile => true,
     };
   }
 
@@ -140,7 +142,7 @@ class NavBar extends NavigationBar {
   NavBar.of(BuildContext context, {super.key, this.belowPage = false})
       : super(
           selectedIndex: context.watch<NavBarIndex>().state,
-          onDestinationSelected: (i) => context.read<NavBarIndex>().select(i),
+          onDestinationSelected: (i) => context.read<NavBarIndex>().selectIndex(i),
           destinations: NavBarButton.enabledValues,
         );
 
@@ -191,12 +193,20 @@ class NavBarIndex extends Cubit<int> {
   /// 2. `navIndex`: its index in [NavigationBar.destinations]
   ///
   /// `index` is used in [StorageKeys], and `navIndex` is used in the [NavBar].
-  void select(int navIndex) {
+  void selectIndex(int navIndex) {
     final newButton = NavBarButton.enabledValues[navIndex];
     StorageKeys.navBarState.save(newButton.index);
     emit(navIndex);
   }
 
+  /// Similar to [selectIndex], but you can pass in the desired button directly.
+  void selectButton(NavBarButton button) {
+    return switch (NavBarButton.enabledValues.indexOf(button)) {
+      < 0 => throw UnsupportedError('"$userType" does not currently have access to "$button".'),
+      final int navIndex => selectIndex(navIndex),
+    };
+  }
+
   /// Ensures that the index remains valid when an admin adds or removes a [NavBarButton].
-  void refresh() => select(NavBarButton.profile.navIndex);
+  void refresh() => selectButton(NavBarButton.profile);
 }
