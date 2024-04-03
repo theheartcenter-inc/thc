@@ -1,11 +1,34 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:thc/models/navigator.dart';
 import 'package:thc/models/theme.dart';
+import 'package:thc/utils/show_error_dialog.dart';
 import 'package:thc/views/login_register/login.dart';
 import 'package:thc/views/login_register/verify_email.dart';
 
-class RegisterScreen extends StatelessWidget {
+class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
+  @override
+  _RegisterScreenState createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  late final TextEditingController _email;
+  late final TextEditingController _password;
+
+  @override
+  void initState() {
+    _email = TextEditingController();
+    _password = TextEditingController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _email.dispose();
+    _password.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,13 +75,16 @@ class RegisterScreen extends StatelessWidget {
                             decoration: const BoxDecoration(
                               border: Border(bottom: BorderSide(color: Colors.grey)),
                             ),
-                            child: const TextField(
-                              decoration: InputDecoration(
+                            child: TextField(
+                              autocorrect: false,
+                              enableSuggestions: false,
+                              controller: _email,
+                              decoration: const InputDecoration(
                                 hintText: 'Email',
                                 hintStyle: TextStyle(color: Colors.grey),
                                 border: InputBorder.none,
                               ),
-                              style: TextStyle(color: Colors.black),
+                              style: const TextStyle(color: Colors.black),
                             ),
                           ),
                           Container(
@@ -66,13 +92,14 @@ class RegisterScreen extends StatelessWidget {
                             decoration: const BoxDecoration(
                               border: Border(bottom: BorderSide(color: Colors.grey)),
                             ),
-                            child: const TextField(
-                              decoration: InputDecoration(
+                            child: TextField(
+                              controller: _password,
+                              decoration: const InputDecoration(
                                 hintText: 'Password',
                                 hintStyle: TextStyle(color: Colors.grey),
                                 border: InputBorder.none,
                               ),
-                              style: TextStyle(color: Colors.black),
+                              style: const TextStyle(color: Colors.black),
                             ),
                           ),
                         ],
@@ -80,7 +107,51 @@ class RegisterScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     BigButton(
-                      onPressed: () => navigator.push(const VerifyEmailScreen()),
+                      onPressed: () async {
+                        final email = _email.text;
+                        final password = _password.text;
+                        var user = FirebaseAuth.instance.currentUser;
+                        try {
+                          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+                            email: email,
+                            password: password,
+                          );
+                          user = FirebaseAuth.instance.currentUser;
+                          await user?.sendEmailVerification();
+                          navigator.pushReplacement(VerifyEmailScreen(
+                            user: user,
+                          ));
+                        } on FirebaseAuthException catch (e) {
+                          if (e.code == 'weak-password') {
+                            await showErrorDialog(
+                              context,
+                              'Weak password',
+                            );
+                          } else if (e.code == 'email-already-in-use') {
+                            await showErrorDialog(
+                              context,
+                              'Email is already in use',
+                            );
+                          } else if (e.code == 'invalid-email') {
+                            await showErrorDialog(
+                              context,
+                              'Invalid email entered',
+                            );
+                          } else {
+                            print(e.code);
+                            await showErrorDialog(
+                              context,
+                              'Error ${e.code}',
+                            );
+                          }
+                          user?.delete();
+                        } catch (e) {
+                          await showErrorDialog(
+                            context,
+                            e.toString(),
+                          );
+                        }
+                      },
                       label: 'Register',
                     ),
                     TextButton(

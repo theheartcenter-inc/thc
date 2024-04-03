@@ -1,6 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:thc/models/navigator.dart';
 import 'package:thc/models/theme.dart';
+import 'package:thc/utils/show_error_dialog.dart';
 import 'package:thc/views/home/home_screen.dart';
 import 'package:thc/views/login_register/forgot_password.dart';
 import 'package:thc/views/login_register/register.dart';
@@ -43,8 +45,30 @@ class BigButton extends StatelessWidget {
   }
 }
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  late final TextEditingController _email;
+  late final TextEditingController _password;
+
+  @override
+  void initState() {
+    _email = TextEditingController();
+    _password = TextEditingController();
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _email.dispose();
+    _password.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,14 +117,18 @@ class LoginScreen extends StatelessWidget {
                             decoration: const BoxDecoration(
                               border: Border(bottom: BorderSide(color: Colors.grey)),
                             ),
-                            child: const TextField(
-                              decoration: InputDecoration(
+                            child: TextField(
+                              controller: _email,
+                              autocorrect: false,
+                              enableSuggestions: false,
+                              keyboardType: TextInputType.emailAddress,
+                              decoration: const InputDecoration(
                                 hintText: 'Email',
                                 hintStyle: TextStyle(color: Colors.grey),
                                 border: InputBorder.none,
                                 labelStyle: TextStyle(color: Colors.black),
                               ),
-                              style: TextStyle(color: Colors.black),
+                              style: const TextStyle(color: Colors.black),
                             ),
                           ),
                           Container(
@@ -108,13 +136,17 @@ class LoginScreen extends StatelessWidget {
                             decoration: const BoxDecoration(
                               border: Border(bottom: BorderSide(color: Colors.grey)),
                             ),
-                            child: const TextField(
-                              decoration: InputDecoration(
+                            child: TextField(
+                              controller: _password,
+                              obscureText: true,
+                              enableSuggestions: false,
+                              autocorrect: false,
+                              decoration: const InputDecoration(
                                 hintText: 'Password',
                                 hintStyle: TextStyle(color: Colors.grey),
                                 border: InputBorder.none,
                               ),
-                              style: TextStyle(color: Colors.black),
+                              style: const TextStyle(color: Colors.black),
                             ),
                           ),
                         ],
@@ -127,7 +159,46 @@ class LoginScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     BigButton(
-                      onPressed: () => navigator.pushReplacement(const HomeScreen()),
+                      onPressed: () async {
+                        final email = _email.text;
+                        final password = _password.text;
+                        try {
+                          await FirebaseAuth.instance.signInWithEmailAndPassword(
+                            email: email,
+                            password: password,
+                          );
+                          navigator.pushReplacement(
+                            const HomeScreen(),
+                          );
+                        } on FirebaseAuthException catch (e) {
+                          if (e.code == 'invalid-credential') {
+                            await showErrorDialog(
+                              context,
+                              'Wrong credentials.',
+                            );
+                          } else if (e.code == 'wrong-password' || e.code == 'invalid-password') {
+                            await showErrorDialog(
+                              context,
+                              'Invalid Password. Please enter password if blank.',
+                            );
+                          } else if (e.code == 'invalid-email') {
+                            await showErrorDialog(
+                              context,
+                              'Invalid Email. Please enter email if blank.',
+                            );
+                          } else {
+                            await showErrorDialog(
+                              context,
+                              'Error: ${e.code}',
+                            );
+                          }
+                        } catch (e) {
+                          await showErrorDialog(
+                            context,
+                            e.toString(),
+                          );
+                        }
+                      },
                       style: const TextStyle(color: Colors.white, fontSize: 16),
                       label: 'Login',
                     ),
