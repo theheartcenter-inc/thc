@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:thc/models/navigator.dart';
 import 'package:thc/models/theme.dart';
 import 'package:thc/models/user.dart';
+import 'package:thc/views/home/home_screen.dart';
 import 'package:thc/views/manage_schedule/manage_schedule.dart';
 
 class Schedule extends StatelessWidget {
@@ -12,30 +14,21 @@ class Schedule extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Livestream Schedule'),
-        backgroundColor: ThcColors.darkBlue,
         actions: [
-          Visibility(
-            visible: userType.isAdmin,
-            child: IconButton(
-              icon: const Icon(Icons.add), // Choose your desired icon
-              onPressed: () {
-                // Add your onPressed callback function here
-                // This function will be called when the icon button is clicked
-                navigator.push(const ManageSchedule());
-              },
+          if (userType.isAdmin)
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () => navigator.push(const ManageSchedule()),
             ),
-          ),
         ],
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // First Header
-            Container(
-              margin: const EdgeInsets.only(top: 16.0),
-              padding: const EdgeInsets.all(16.0),
-              child: const Text(
-                'Active Livestreams',
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 32, 16, 16),
+              child: Text(
+                'Active Livestream',
                 style: TextStyle(
                   fontSize: 24.0,
                   color: ThcColors.darkBlue,
@@ -43,28 +36,26 @@ class Schedule extends StatelessWidget {
                 ),
               ),
             ),
-            // First ListView inside a Card
-            Container(
-              margin: const EdgeInsets.all(16.0),
-              child: const Column(
-                children: [
-                  Card(
-                    color: ThcColors.green,
-                    margin: EdgeInsets.all(8.0), // Set margins for all sides
-                    child: ListTile(
-                      leading: FlutterLogo(size: 56.0),
-                      title: Text('Active Livestream'),
-                      subtitle: Text('April 3, 2024 12:00PM EST'),
-                    ),
-                  ),
-                  // Add more ListTiles as needed
-                ],
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Card(
+                color: ThcColors.green,
+                margin: const EdgeInsets.all(8.0),
+                clipBehavior: Clip.antiAlias,
+                child: ListTile(
+                  onTap: () {
+                    context.read<NavBarIndex>().selectButton(NavBarButton.watchLive);
+                  },
+                  hoverColor: ThcColors.darkGreen.withOpacity(1 / 8),
+                  leading: const FlutterLogo(size: 56.0),
+                  title: const Text('Active Livestream'),
+                  subtitle: const Text('April 3, 2024 12:00PM EST'),
+                ),
               ),
             ),
-            // Second Header
-            Container(
-              padding: const EdgeInsets.all(16.0),
-              child: const Text(
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
                 'Upcoming Livestreams',
                 style: TextStyle(
                   fontSize: 24.0,
@@ -73,14 +64,13 @@ class Schedule extends StatelessWidget {
                 ),
               ),
             ),
-            // Second ListView inside a Card
-            Container(
-              margin: const EdgeInsets.all(16.0),
-              child: const Column(
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Column(
                 children: [
                   Card(
                     color: ThcColors.green,
-                    margin: EdgeInsets.all(8.0), // Set margins for all sides
+                    margin: EdgeInsets.all(8.0),
                     child: ListTile(
                       leading: FlutterLogo(size: 56.0),
                       title: Text('Upcoming Livestream A'),
@@ -89,7 +79,7 @@ class Schedule extends StatelessWidget {
                   ),
                   Card(
                     color: ThcColors.green,
-                    margin: EdgeInsets.all(8.0), // Set margins for all sides
+                    margin: EdgeInsets.all(8.0),
                     child: ListTile(
                       leading: FlutterLogo(size: 56.0),
                       title: Text('Upcoming Livestream B'),
@@ -98,7 +88,7 @@ class Schedule extends StatelessWidget {
                   ),
                   Card(
                     color: ThcColors.green,
-                    margin: EdgeInsets.all(8.0), // Set margins for all sides
+                    margin: EdgeInsets.all(8.0),
                     child: ListTile(
                       leading: FlutterLogo(size: 56.0),
                       title: Text('Upcoming Livestream C'),
@@ -107,7 +97,7 @@ class Schedule extends StatelessWidget {
                   ),
                   Card(
                     color: ThcColors.green,
-                    margin: EdgeInsets.all(8.0), // Set margins for all sides
+                    margin: EdgeInsets.all(8.0),
                     child: ListTile(
                       leading: FlutterLogo(size: 56.0),
                       title: Text('Upcoming Livestream D'),
@@ -116,18 +106,16 @@ class Schedule extends StatelessWidget {
                   ),
                   Card(
                     color: ThcColors.green,
-                    margin: EdgeInsets.all(8.0), // Set margins for all sides
+                    margin: EdgeInsets.all(8.0),
                     child: ListTile(
                       leading: FlutterLogo(size: 56.0),
                       title: Text('Upcoming Livestream E'),
                       subtitle: Text('June 25, 2024 4:00PM EST'),
                     ),
                   ),
-                  // Add more ListTiles as needed
                 ],
               ),
             ),
-            // Add more headers and cards with ListViews as needed
           ],
         ),
       ),
