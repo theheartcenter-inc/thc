@@ -9,7 +9,7 @@ import 'package:thc/models/navigator.dart';
 import 'package:thc/models/theme.dart';
 import 'package:thc/models/user.dart';
 import 'package:thc/views/home/home_screen.dart';
-import 'package:thc/views/login_register/register.dart';
+import 'package:thc/views/login_register/login.dart';
 import 'package:thc/views/profile/settings.dart';
 import 'package:thc/views/surveys/edit_survey/survey_editor.dart';
 import 'package:thc/views/surveys/survey_questions.dart';
@@ -71,10 +71,10 @@ class ChooseAnyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const registerButton = NavigateButton(
+    const loginButton = NavigateButton(
       color: Colors.cyan,
-      label: 'login/register',
-      page: RegisterScreen(),
+      label: 'login',
+      page: LoginScreen(),
     );
     final surveyButton = NavigateButton(
       color: switch (context.theme.brightness) {
@@ -93,7 +93,7 @@ class ChooseAnyView extends StatelessWidget {
               const SizedBox(height: 50),
               Image.asset('assets/thc_logo_with_text.png', width: 250),
               const SizedBox(height: 60),
-              registerButton,
+              loginButton,
               for (final type in UserType.values) UserButton(type),
               surveyButton,
             ],
