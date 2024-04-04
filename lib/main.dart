@@ -38,7 +38,7 @@ class App extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => AppTheme()),
         BlocProvider(create: (_) => NavBarIndex()),
-        BlocProvider(create: (_) => EditSurveyStructure()),
+        BlocProvider(create: (_) => MobileEditing()),
         BlocProvider(create: (_) => ValidSurveyQuestions()),
         BlocProvider(create: (_) => ValidSurveyAnswers()),
       ],

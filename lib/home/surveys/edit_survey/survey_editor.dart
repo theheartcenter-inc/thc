@@ -89,11 +89,11 @@ class SurveyEditor extends StatefulWidget {
 /// ```dart
 /// [SomeWidget(key: Key('1'), x: 1), SomeWidget(key: Key('2'), x: 2)];
 ///
-/// // values changed
-/// [SomeWidget(key: Key('1'), x: 2), SomeWidget(key: Key('2'), x: 1)];
-///
 /// // got swapped
 /// [SomeWidget(key: Key('2'), x: 2), SomeWidget(key: Key('1'), x: 1)];
+///
+/// // values changed
+/// [SomeWidget(key: Key('1'), x: 2), SomeWidget(key: Key('2'), x: 1)];
 /// ```
 ///
 /// A [ReorderableList] requires that each item has a unique key,
@@ -160,7 +160,10 @@ class _SurveyEditorState extends State<SurveyEditor> {
             () => keyedQuestions[i] = keyedQuestions[i].update(newValue),
           ),
           duplicate: () => setState(() => keyedQuestions.insert(i + 1, record.copy())),
-          yeet: () => setState(() => keyedQuestions.removeAt(i)),
+          yeet: () {
+            setState(() => keyedQuestions.removeAt(i));
+            if (keyedQuestions.isEmpty) context.read<MobileEditing>().emit(false);
+          },
           validate: () => questionNames.validChoice(i),
           divider: divider(i),
         ),
@@ -168,7 +171,7 @@ class _SurveyEditorState extends State<SurveyEditor> {
 
     Widget? editButton;
     if (mobileDevice && keyedQuestions.isNotEmpty) {
-      editButton = BlocConsumer<EditSurveyStructure>(
+      editButton = BlocConsumer<MobileEditing>(
         (_, value, __) => IconButton.filled(
           icon: Icon(value.icon, color: Colors.black87),
           onPressed: value.toggle,
@@ -178,16 +181,22 @@ class _SurveyEditorState extends State<SurveyEditor> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Survey Editor'),
-        actions: [IconButton(onPressed: validate, icon: const Icon(Icons.exit_to_app))],
+        actions: [
+          IconButton(
+            onPressed: context.watch<MobileEditing>().state ? null : validate,
+            icon: const Icon(Icons.save),
+          ),
+        ],
       ),
       body: GestureDetector(
-        onTap: FocusManager.instance.primaryFocus?.unfocus,
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         behavior: HitTestBehavior.translucent,
         child: Center(
           child: SingleChildScrollView(
             child: Column(
               children: [
                 ReorderableListView(
+                  physics: const NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
                   buildDefaultDragHandles: false,
                   onReorder: (oldIndex, newIndex) {
@@ -219,6 +228,8 @@ class SurveyEditDivider extends StatefulWidget {
   const SurveyEditDivider(this.addQuestion, {super.key});
   final void Function(SurveyQuestion) addQuestion;
 
+  static const height = 60.0;
+
   @override
   State<SurveyEditDivider> createState() => _SurveyEditDividerState();
 }
@@ -249,6 +260,9 @@ class _SurveyEditDividerState extends State<SurveyEditDivider> {
 
   @override
   Widget build(BuildContext context) {
+    if (context.watch<MobileEditing>().state) {
+      return const SizedBox(height: SurveyEditDivider.height / 2);
+    }
     final Widget button;
     if (focused) {
       button = Focus(
@@ -276,7 +290,10 @@ class _SurveyEditDividerState extends State<SurveyEditDivider> {
         onTap: node.requestFocus,
         child: Padding(
           padding: EdgeInsets.all(hovered ? 8 : 2),
-          child: Opacity(opacity: hovered ? 1 : 0.5, child: const Icon(Icons.add)),
+          child: Opacity(
+            opacity: hovered ? 1 : 0.5,
+            child: const Icon(Icons.add),
+          ),
         ),
       );
     }
@@ -284,7 +301,7 @@ class _SurveyEditDividerState extends State<SurveyEditDivider> {
     final bool expanded = mobileDevice || hovered || focused;
 
     final child = SizedBox(
-      height: 60,
+      height: SurveyEditDivider.height,
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -318,10 +335,10 @@ class _SurveyEditDividerState extends State<SurveyEditDivider> {
 ///
 /// Mobile devices don't have mouse cursors,
 /// so instead there's a button that uses this BLoC to show/hide the extra options.
-class EditSurveyStructure extends Cubit<bool> {
-  EditSurveyStructure() : super(false);
+class MobileEditing extends Cubit<bool> {
+  MobileEditing() : super(false);
 
-  IconData get icon => state ? Icons.done : Icons.edit;
+  IconData get icon => state ? Icons.done : Icons.calendar_view_day;
 
   void toggle() => emit(!state);
 }

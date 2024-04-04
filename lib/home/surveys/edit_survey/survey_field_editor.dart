@@ -101,6 +101,7 @@ class ChoiceText extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(top: 5),
           child: IconButton(
+            focusNode: FocusNode(skipTraversal: true),
             style: TextButton.styleFrom(
               foregroundColor: switch (useDataIcon) {
                 true => context.colorScheme.error,
@@ -271,7 +272,9 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
             choices[index + 1].node.requestFocus();
 
           case LogicalKeyboardKey.delete || LogicalKeyboardKey.backspace:
-            if (option.controller.text.isNotEmpty || choices.length == 1) {
+            if (option.controller.text.isNotEmpty ||
+                choices.length == 1 ||
+                (index == 0 && event.logicalKey == LogicalKeyboardKey.backspace)) {
               return KeyEventResult.ignored;
             }
             setState(() => choices.removeAt(index));
@@ -349,7 +352,7 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
     const choicePadding = EdgeInsets.fromLTRB(48, 0, 36, 16);
 
     final validating = context.watch<ValidSurveyQuestions>().state;
-    final mobileEditing = context.watch<EditSurveyStructure>().state;
+    final mobileEditing = context.watch<MobileEditing>().state;
     if (mobileEditing) stopEditing();
 
     Widget? content;
@@ -470,6 +473,18 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
           ],
         );
       case EditorMode.view:
+        final Widget dragHandle;
+        if (mobileDevice) {
+          dragHandle = const ColoredBox(
+            color: Colors.transparent,
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Icon(Icons.reorder, size: 28),
+            ),
+          );
+        } else {
+          dragHandle = const Opacity(opacity: 0.5, child: Icon(Icons.reorder));
+        }
         content = Stack(
           alignment: Alignment.bottomCenter,
           children: [
@@ -505,13 +520,7 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
                 right: 8,
                 child: Align(
                   alignment: Alignment.centerRight,
-                  child: ReorderableDragStartListener(
-                    index: widget.index,
-                    child: Opacity(
-                      opacity: mobileDevice ? 1 : 0.5,
-                      child: const Icon(Icons.reorder),
-                    ),
-                  ),
+                  child: ReorderableDragStartListener(index: widget.index, child: dragHandle),
                 ),
               ),
             ],
@@ -526,8 +535,12 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
             );
           }
         }
-
-        if (!mobileDevice) {
+        if (mobileEditing) {
+          content = Padding(
+            padding: const EdgeInsets.only(bottom: SurveyEditDivider.height / 2),
+            child: content,
+          );
+        } else if (!mobileDevice) {
           content = MouseRegion(
             onEnter: (_) => setState(() => showButtons = true),
             onExit: (_) => setState(() => showButtons = false),
