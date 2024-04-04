@@ -1,9 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:thc/models/navigator.dart';
 import 'package:thc/models/theme.dart';
 import 'package:thc/views/home/home_screen.dart';
 import 'package:thc/views/login_register/forgot_password.dart';
 import 'package:thc/views/login_register/register.dart';
+import 'package:thc/views/login_register/verify_email.dart';
+import 'package:thc/views/widgets.dart';
 
 class BigButton extends StatelessWidget {
   const BigButton({
@@ -43,8 +46,32 @@ class BigButton extends StatelessWidget {
   }
 }
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  late final TextEditingController _email;
+  late final TextEditingController _password;
+  late bool _passwordVisible;
+
+  @override
+  void initState() {
+    _email = TextEditingController();
+    _password = TextEditingController();
+    _passwordVisible = false;
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _email.dispose();
+    _password.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,14 +120,18 @@ class LoginScreen extends StatelessWidget {
                             decoration: const BoxDecoration(
                               border: Border(bottom: BorderSide(color: Colors.grey)),
                             ),
-                            child: const TextField(
-                              decoration: InputDecoration(
+                            child: TextField(
+                              controller: _email,
+                              autocorrect: false,
+                              enableSuggestions: false,
+                              keyboardType: TextInputType.emailAddress,
+                              decoration: const InputDecoration(
                                 hintText: 'Email',
                                 hintStyle: TextStyle(color: Colors.grey),
                                 border: InputBorder.none,
                                 labelStyle: TextStyle(color: Colors.black),
                               ),
-                              style: TextStyle(color: Colors.black),
+                              style: const TextStyle(color: Colors.black),
                             ),
                           ),
                           Container(
@@ -108,13 +139,26 @@ class LoginScreen extends StatelessWidget {
                             decoration: const BoxDecoration(
                               border: Border(bottom: BorderSide(color: Colors.grey)),
                             ),
-                            child: const TextField(
+                            child: TextField(
+                              controller: _password,
+                              obscureText: !_passwordVisible,
+                              enableSuggestions: false,
+                              autocorrect: false,
                               decoration: InputDecoration(
                                 hintText: 'Password',
-                                hintStyle: TextStyle(color: Colors.grey),
+                                hintStyle: const TextStyle(color: Colors.grey),
                                 border: InputBorder.none,
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _passwordVisible ? Icons.visibility : Icons.visibility_off,
+                                    color: Theme.of(context).primaryColorDark,
+                                  ),
+                                  onPressed: () {
+                                    setState(() => _passwordVisible = !_passwordVisible);
+                                  },
+                                ),
                               ),
-                              style: TextStyle(color: Colors.black),
+                              style: const TextStyle(color: Colors.black),
                             ),
                           ),
                         ],
@@ -127,7 +171,35 @@ class LoginScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 20),
                     BigButton(
-                      onPressed: () => navigator.pushReplacement(const HomeScreen()),
+                      onPressed: () async {
+                        final email = _email.text;
+                        final password = _password.text;
+                        try {
+                          await FirebaseAuth.instance.signInWithEmailAndPassword(
+                            email: email,
+                            password: password,
+                          );
+                          final user = FirebaseAuth.instance.currentUser;
+                          if (user?.emailVerified ?? false) {
+                            navigator.pushReplacement(const HomeScreen());
+                          } else {
+                            user?.sendEmailVerification();
+                            navigator.pushReplacement(VerifyEmailScreen(user));
+                          }
+                        } on FirebaseAuthException catch (e) {
+                          final errorMessage = switch (e.code) {
+                            'invalid-credential' => 'Wrong credentials.',
+                            'wrong-password' ||
+                            'invalid-password' =>
+                              'Invalid Password. Please enter password if blank.',
+                            'invalid-email' => 'Invalid Email. Please enter email if blank.',
+                            _ => 'Error: ${e.code}',
+                          };
+                          navigator.showDialog(builder: (_) => ErrorDialog(errorMessage));
+                        } catch (e) {
+                          navigator.showDialog(builder: (_) => ErrorDialog(e.toString()));
+                        }
+                      },
                       style: const TextStyle(color: Colors.white, fontSize: 16),
                       label: 'Login',
                     ),
