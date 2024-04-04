@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:thc/login/login.dart';
+import 'package:thc/login_register/login.dart';
 
 /// {@template navigator}
 /// We can make navigation a little cleaner with a global key and an extension type:

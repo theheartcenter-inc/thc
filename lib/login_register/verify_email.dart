@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:thc/login/login.dart';
+import 'package:thc/login_register/login.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/theme.dart';
 

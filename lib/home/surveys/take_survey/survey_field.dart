@@ -106,9 +106,9 @@ extension type SurveyData(List<SurveyRecord> data) implements List<SurveyRecord>
   List<QuestionSummary> get summary => [for (final record in data) record.summary];
 }
 
-/// {@macro SurveyValidation}
+/// {@macro ValidSurveyAnswers}
 class _ErrorBox extends StatelessWidget {
-  /// {@macro SurveyValidation}
+  /// {@macro ValidSurveyAnswers}
   const _ErrorBox({required this.valid, required this.child});
 
   final bool valid;

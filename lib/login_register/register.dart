@@ -1,58 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:thc/home/home_screen.dart';
-import 'package:thc/login/forgot_password.dart';
-import 'package:thc/login/register.dart';
-import 'package:thc/login/verify_email.dart';
+import 'package:thc/login_register/login.dart';
+import 'package:thc/login_register/verify_email.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/error_dialog.dart';
 
-class BigButton extends StatelessWidget {
-  const BigButton({
-    required this.onPressed,
-    this.style = const TextStyle(),
-    required this.label,
-    super.key,
-  });
-
-  final VoidCallback onPressed;
-  final TextStyle style;
-  final String label;
+class RegisterScreen extends StatefulWidget {
+  const RegisterScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 50),
-      child: FilledButton(
-        onPressed: onPressed,
-        style: FilledButton.styleFrom(
-          backgroundColor: Colors.cyan,
-          foregroundColor: ThcColors.darkBlue,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-        ),
-        child: SizedBox(
-          width: double.infinity,
-          height: 50,
-          child: Center(
-            child: Text(
-              label,
-              style: style.merge(const TextStyle(fontWeight: FontWeight.w600)),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+  State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
-  @override
-  State<LoginScreen> createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
+class _RegisterScreenState extends State<RegisterScreen> {
   late final TextEditingController _email;
   late final TextEditingController _password;
   late bool _passwordVisible;
@@ -80,12 +41,9 @@ class _LoginScreenState extends State<LoginScreen> {
         children: <Widget>[
           const Padding(
             padding: EdgeInsets.fromLTRB(20, 50, 0, 20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text('Login', style: TextStyle(color: ThcColors.darkBlue, fontSize: 40)),
-                Text('Welcome Back', style: TextStyle(color: ThcColors.darkBlue, fontSize: 18)),
-              ],
+            child: Text(
+              'Register',
+              style: TextStyle(color: ThcColors.darkBlue, fontSize: 40),
             ),
           ),
           Expanded(
@@ -110,7 +68,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             color: ThcColors.gray,
                             blurRadius: 10,
                             offset: Offset(0, 8),
-                          )
+                          ),
                         ],
                       ),
                       child: Column(
@@ -121,15 +79,13 @@ class _LoginScreenState extends State<LoginScreen> {
                               border: Border(bottom: BorderSide(color: Colors.grey)),
                             ),
                             child: TextField(
-                              controller: _email,
                               autocorrect: false,
                               enableSuggestions: false,
-                              keyboardType: TextInputType.emailAddress,
+                              controller: _email,
                               decoration: const InputDecoration(
                                 hintText: 'Email',
                                 hintStyle: TextStyle(color: Colors.grey),
                                 border: InputBorder.none,
-                                labelStyle: TextStyle(color: Colors.black),
                               ),
                               style: const TextStyle(color: Colors.black),
                             ),
@@ -165,50 +121,40 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    TextButton(
-                      onPressed: () => navigator.noTransition(const ForgotPasswordScreen()),
-                      child: const Text('Forgot Password?'),
-                    ),
-                    const SizedBox(height: 20),
                     BigButton(
                       onPressed: () async {
                         final email = _email.text;
                         final password = _password.text;
+                        var user = FirebaseAuth.instance.currentUser;
                         try {
-                          await FirebaseAuth.instance.signInWithEmailAndPassword(
+                          await FirebaseAuth.instance.createUserWithEmailAndPassword(
                             email: email,
                             password: password,
                           );
-                          final user = FirebaseAuth.instance.currentUser;
-                          if (user?.emailVerified ?? false) {
-                            navigator.pushReplacement(const HomeScreen());
-                          } else {
-                            user?.sendEmailVerification();
-                            navigator.pushReplacement(VerifyEmailScreen(user));
-                          }
+                          user = FirebaseAuth.instance.currentUser;
+                          await user?.sendEmailVerification();
+                          navigator.pushReplacement(VerifyEmailScreen(user));
                         } on FirebaseAuthException catch (e) {
                           final errorMessage = switch (e.code) {
-                            'invalid-credential' => 'Wrong credentials.',
-                            'wrong-password' ||
-                            'invalid-password' =>
-                              'Invalid Password. Please enter password if blank.',
-                            'invalid-email' => 'Invalid Email. Please enter email if blank.',
+                            'weak-password' => 'Weak password',
+                            'email-already-in-use' => 'Email is already in use',
+                            'invalid-email' => 'Invalid email entered',
                             _ => 'Error: ${e.code}',
                           };
                           navigator.showDialog(builder: (_) => ErrorDialog(errorMessage));
+                          user?.delete();
                         } catch (e) {
                           navigator.showDialog(builder: (_) => ErrorDialog(e.toString()));
                         }
                       },
-                      style: const TextStyle(color: Colors.white, fontSize: 16),
-                      label: 'Login',
+                      label: 'Register',
                     ),
                     TextButton(
                       onPressed: () => navigator.noTransition(
-                        const RegisterScreen(),
+                        const LoginScreen(),
                         replacing: true,
                       ),
-                      child: const Text('Not registered yet? Register Here'),
+                      child: const Text('All ready registered? Login Here'),
                     ),
                   ],
                 ),

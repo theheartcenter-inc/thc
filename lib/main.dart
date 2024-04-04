@@ -8,7 +8,7 @@ import 'package:thc/home/surveys/manage_surveys/manage_surveys.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/home/surveys/take_survey/survey_theme.dart';
-import 'package:thc/login/login.dart';
+import 'package:thc/login_register/login.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/keyboard_shortcuts.dart';
 import 'package:thc/utils/local_storage.dart';

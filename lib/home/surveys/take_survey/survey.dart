@@ -29,7 +29,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
   /// A list of question and answer data.
   late final SurveyData data = SurveyData.fromQuestions(widget.questions);
 
-  /// {@template SurveyValidation}
+  /// {@template ValidSurveyAnswers}
   /// When the user taps "submit", it triggers the [ValidSurveyAnswers] cubit.
   ///
   /// Each question that still needs to be answered will be highlighted in a red box.
@@ -189,8 +189,8 @@ class _ValidateMessage extends StatelessWidget {
   }
 }
 
-/// {@macro SurveyValidation}
+/// {@macro ValidSurveyAnswers}
 class ValidSurveyAnswers extends Cubit<bool> {
-  /// {@macro SurveyValidation}
+  /// {@macro ValidSurveyAnswers}
   ValidSurveyAnswers() : super(false);
 }
