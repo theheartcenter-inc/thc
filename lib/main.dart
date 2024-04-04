@@ -1,33 +1,31 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:thc/models/bloc.dart';
-import 'package:thc/models/local_storage.dart';
-import 'package:thc/models/navigator.dart';
-import 'package:thc/models/theme.dart';
-import 'package:thc/models/user.dart';
-import 'package:thc/views/home/home_screen.dart';
-import 'package:thc/views/login_register/login.dart';
-import 'package:thc/views/profile/settings.dart';
-import 'package:thc/views/survey/survey_questions.dart';
-import 'package:thc/views/survey/survey_screen.dart';
-import 'package:thc/views/survey/survey_theme.dart';
-import 'firebase_options.dart';
+import 'package:thc/firebase/firebase.dart';
+import 'package:thc/home/home_screen.dart';
+import 'package:thc/home/surveys/edit_survey/survey_editor.dart';
+import 'package:thc/home/surveys/manage_surveys/manage_surveys.dart';
+import 'package:thc/home/surveys/survey_questions.dart';
+import 'package:thc/home/surveys/take_survey/survey.dart';
+import 'package:thc/home/surveys/take_survey/survey_theme.dart';
+import 'package:thc/login_register/login.dart';
+import 'package:thc/utils/bloc.dart';
+import 'package:thc/utils/keyboard_shortcuts.dart';
+import 'package:thc/utils/local_storage.dart';
+import 'package:thc/utils/navigator.dart';
+import 'package:thc/utils/theme.dart';
+import 'package:thc/utils/user.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final storage = loadFromLocalStorage();
-  final firebase = Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  HardwareKeyboard.instance.addHandler((event) {
-    if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
-      navigator.pop();
-      return true;
-    }
-    return false;
-  });
-  await storage;
-  await firebase;
+
+  final asyncSetup = [
+    initFirebase(),
+    loadFromLocalStorage(),
+  ];
+  HardwareKeyboard.instance.addHandler(shortcuts);
+  await Future.wait(asyncSetup);
+
   runApp(const App());
 }
 
@@ -40,6 +38,9 @@ class App extends StatelessWidget {
       providers: [
         BlocProvider(create: (_) => AppTheme()),
         BlocProvider(create: (_) => NavBarIndex()),
+        BlocProvider(create: (_) => MobileEditing()),
+        BlocProvider(create: (_) => ValidSurveyQuestions()),
+        BlocProvider(create: (_) => ValidSurveyAnswers()),
       ],
       builder: (context, _) => MaterialApp(
         navigatorKey: navKey,
@@ -53,7 +54,7 @@ class App extends StatelessWidget {
   }
 }
 
-/// {@template main.ChooseAnyView}
+/// {@template ChooseAnyView}
 /// Change the value of `home` to anything you want!
 ///
 /// If you're working on the login screen, you can use
@@ -62,7 +63,7 @@ class App extends StatelessWidget {
 /// ```
 /// {@endtemplate}
 class ChooseAnyView extends StatelessWidget {
-  /// {@macro main.ChooseAnyView}
+  /// {@macro ChooseAnyView}
   const ChooseAnyView({super.key});
 
   @override
@@ -165,6 +166,8 @@ class SurveyPicker extends StatelessWidget {
             const Text('Surveys', style: TextStyle(fontSize: 56, letterSpacing: 0.5)),
             const Spacer(flex: 2),
             for (final option in SurveyPresets.values) _SurveyPickerButton(option),
+            const Spacer(),
+            const CustomSurveyButtons(),
             const Spacer(flex: 4),
           ],
         ),
@@ -184,12 +187,7 @@ class _SurveyPickerButton extends StatelessWidget {
       child: FilledButton(
         onPressed: () {
           if (option == SurveyPresets.funQuiz) FunQuiz.inProgress = true;
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => BlocProvider(
-              create: (_) => SurveyValidation(),
-              child: SurveyScreen(questions: option.questions),
-            ),
-          ));
+          navigator.push(SurveyScreen(questions: option.questions));
         },
         style: FilledButton.styleFrom(
           backgroundColor: context.lightDark(
