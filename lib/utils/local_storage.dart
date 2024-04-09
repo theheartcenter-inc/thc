@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thc/home/home_screen.dart';
-import 'package:thc/utils/user.dart';
 
 Future<void> loadFromLocalStorage() async {
   _storage = await SharedPreferences.getInstance();
@@ -18,7 +17,7 @@ late final SharedPreferences _storage;
 /// {@endtemplate}
 enum StorageKeys {
   themeMode,
-  userType,
+  userId,
   navBarState,
   adminWatchLive,
   adminStream,
@@ -27,7 +26,7 @@ enum StorageKeys {
   /// {@macro StorageKeys}
   dynamic get initial => switch (this) {
         themeMode => ThemeMode.system.index,
-        userType => UserType.participant.index,
+        userId => null,
         navBarState => 0,
         adminWatchLive || adminStream => false,
       };
@@ -39,15 +38,20 @@ enum StorageKeys {
   /// to call the class instance as if it were a function.
   ///
   /// This has the advantage of looking really snazzy.
-  dynamic call() => switch (this) {
-        themeMode => ThemeMode.values[fromStorage],
-        userType => UserType.values[fromStorage],
-        navBarState => NavBarButton.values[fromStorage],
-        adminWatchLive || adminStream => fromStorage,
-      };
+  dynamic call() {
+    final value = fromStorage;
+    return switch (this) {
+      _ when value == 'null' => null,
+      themeMode => ThemeMode.values[value],
+      navBarState => NavBarButton.values[value],
+      userId => value,
+      adminWatchLive || adminStream => value,
+    };
+  }
 
   /// {@macro StorageKeys}
   Future<bool> save(dynamic newValue) => switch (newValue) {
+        null => _storage.setString(name, 'null'),
         bool() => _storage.setBool(name, newValue),
         int() => _storage.setInt(name, newValue),
         double() => _storage.setDouble(name, newValue),

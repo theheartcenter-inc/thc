@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import 'package:thc/credentials/credentials.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/utils/bloc.dart';
-import 'package:thc/utils/platform.dart';
+import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/widgets/state_async.dart';
 
 class ActiveStream extends StatefulWidget {
@@ -40,7 +40,7 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
 
   @override
   void animate() async {
-    client.initialize();
+    if (useInternet) client.initialize();
     sleep(0.5, then: setTimer);
   }
 
@@ -89,11 +89,16 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
           children: [
             const _Backdrop(),
             StreamOverlay(overlayVisible ? 1.0 : 0.25, child: const _ViewCount()),
-            AgoraVideoViewer(
-              client: client,
-              layoutType: Layout.floating,
-              enableHostControls: true,
-            ),
+            if (useInternet)
+              AgoraVideoViewer(
+                client: client,
+                layoutType: Layout.floating,
+                enableHostControls: true,
+              )
+            else
+              const Center(
+                child: Text('making a livestream!', style: TextStyle(color: Colors.white)),
+              ),
             NavBar.of(context, belowPage: true),
           ],
         ),

@@ -3,18 +3,20 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
+import 'package:thc/home/profile/profile.dart';
 import 'package:thc/home/surveys/edit_survey/survey_editor.dart';
 import 'package:thc/home/surveys/manage_surveys/manage_surveys.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/home/surveys/take_survey/survey_theme.dart';
 import 'package:thc/login_register/login.dart';
+import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/keyboard_shortcuts.dart';
 import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/theme.dart';
-import 'package:thc/utils/user.dart';
+import 'package:thc/firebase/user.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,6 +43,7 @@ class App extends StatelessWidget {
         BlocProvider(create: (_) => MobileEditing()),
         BlocProvider(create: (_) => ValidSurveyQuestions()),
         BlocProvider(create: (_) => ValidSurveyAnswers()),
+        BlocProvider(create: (_) => EditingProfile()),
       ],
       builder: (context, _) => MaterialApp(
         navigatorKey: navKey,
@@ -132,20 +135,20 @@ class NavigateButton extends StatelessWidget {
 }
 
 class UserButton extends StatelessWidget {
-  const UserButton(this.type, {super.key});
-  final UserType type;
+  const UserButton(this.userType, {super.key});
+  final UserType userType;
 
   @override
   Widget build(BuildContext context) {
     return NavigateButton(
-      color: switch (type) {
+      color: switch (userType) {
         UserType.participant => ThcColors.green,
         UserType.director => ThcColors.tan,
         UserType.admin => ThcColors.dullBlue,
       },
-      label: 'view as $type',
-      onPressed: () {
-        userType = type;
+      label: 'view as $userType',
+      onPressed: () async {
+        user = useInternet ? await ThcUser.download(userType.testId) : userType.testUser;
         navigator.pushReplacement(const HomeScreen());
       },
     );
