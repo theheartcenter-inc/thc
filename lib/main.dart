@@ -43,7 +43,7 @@ class App extends StatelessWidget {
         BlocProvider(create: (_) => MobileEditing()),
         BlocProvider(create: (_) => ValidSurveyQuestions()),
         BlocProvider(create: (_) => ValidSurveyAnswers()),
-        BlocProvider(create: (_) => EditingProfile()),
+        BlocProvider(create: (_) => AccountFields()),
       ],
       builder: (context, _) => MaterialApp(
         navigatorKey: navKey,

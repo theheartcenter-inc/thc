@@ -10,11 +10,13 @@ enum UserType {
   director,
   admin;
 
-  factory UserType.fromTestId(String id) =>
-      values.firstWhere((userType) => id == userType.testUser.id);
+  factory UserType.fromJson(Map<String, dynamic> json) {
+    final type = json['type'];
+    return values.firstWhere((userType) => userType.toString() == type);
+  }
 
   String get testId => 'test_$name';
-  static const _testName = 'First LastName';
+  static const _testName = 'First Lastname';
 
   ThcUser get testUser => switch (this) {
         participant => Participant(id: testId, name: _testName),
@@ -48,12 +50,12 @@ String? get userId => StorageKeys.userId();
 /// Currently not used in the login window, but this may change in the future.
 void login(String id, String password) async {
   StorageKeys.userId.save(id);
-  user = useInternet ? await ThcUser.download(id) : UserType.fromTestId(id).testUser;
+  user = await ThcUser.download(id);
   navigator.pushReplacement(const HomeScreen());
 }
 
 /// {@template ThcUser}
-/// `User` is one of the Firebase classes, so we gotta use the name "THC user" 😏
+/// We can't just call this class `User`, since that's one of the Firebase classes.
 /// {@endtemplate}
 ///
 /// {@macro sealed_class}
@@ -61,88 +63,68 @@ void login(String id, String password) async {
 sealed class ThcUser {
   /// {@macro ThcUser}
   const ThcUser._({
-    required this.type,
-    required this.id,
     required this.name,
+    required this.type,
+    this.id,
     this.email,
-    this.phoneNumber,
-  });
+    this.phone,
+  }) : assert((id ?? email ?? phone) != null);
 
   /// {@macro ThcUser}
   factory ThcUser({
-    required UserType type,
-    required String id,
     required String name,
+    required UserType type,
+    String? id,
     String? email,
-    String? phoneNumber,
+    String? phone,
   }) {
     return switch (type) {
       UserType.participant => Participant(
-          id: id,
           name: name,
+          id: id,
           email: email,
-          phoneNumber: phoneNumber,
+          phone: phone,
         ),
       UserType.director => Director(
-          id: id,
           name: name,
+          id: id,
           email: email,
-          phoneNumber: phoneNumber,
+          phone: phone,
         ),
       UserType.admin => Admin(
-          id: id,
           name: name,
+          id: id,
           email: email,
-          phoneNumber: phoneNumber,
+          phone: phone,
         ),
     };
   }
 
   /// {@macro ThcUser}
   factory ThcUser.fromJson(Map<String, dynamic> json) {
-    final id = json['id'];
-    final name = json['name'];
-    final email = json['email'];
-    final phoneNumber = json['phone number'];
-
-    return switch (
-        UserType.values.byName(((json['type'] ?? 'participant') as String).toLowerCase())) {
-      UserType.participant => Participant(
-          id: id,
-          name: name,
-          email: email,
-          phoneNumber: phoneNumber,
-        ),
-      UserType.director => Director(
-          id: id,
-          name: name,
-          email: email,
-          phoneNumber: phoneNumber,
-        ),
-      UserType.admin => Admin(
-          id: id,
-          name: name,
-          email: email,
-          phoneNumber: phoneNumber,
-        ),
-    };
+    return ThcUser(
+      name: json['name'],
+      type: UserType.fromJson(json),
+      id: json['id'],
+      email: json['email'],
+      phone: json['phone'],
+    );
   }
 
-  final UserType type;
-  final String id;
   final String name;
+  final UserType type;
+  final String? id;
   final String? email;
-  final String? phoneNumber;
+  final String? phone;
 
   /// {@macro ThcUser}
   static Future<ThcUser> download(String id) async {
-    try {
-      final snapshot = await db.doc('users/$id').get();
-      return ThcUser.fromJson(snapshot.data()!);
-    } catch (e) {
-      print(e);
-      throw Exception(e);
+    if (!useInternet) {
+      return UserType.values.firstWhere((value) => id.contains(value.name)).testUser;
     }
+
+    final snapshot = await db.doc('users/$id').get();
+    return ThcUser.fromJson(snapshot.data()!);
   }
 
   ThcUser copyWith({
@@ -150,23 +132,24 @@ sealed class ThcUser {
     String? id,
     String? name,
     String? email,
-    String? phoneNumber,
+    String? phone,
   }) {
     return ThcUser(
       type: type ?? this.type,
       id: id ?? this.id,
       name: name ?? this.name,
       email: email ?? this.email,
-      phoneNumber: phoneNumber ?? this.phoneNumber,
+      phone: phone ?? this.phone,
     );
   }
 
   Future<void> upload() async => db.doc('users/$id').set(json);
   Map<String, dynamic> get json => {
-        'id': id,
+        'name': name,
         'type': '$type',
+        if (id != null) 'id': id,
         if (email != null) 'email': email,
-        if (phoneNumber != null) 'phone number': phoneNumber,
+        if (phone != null) 'phone': phone,
       };
 
   @override
@@ -176,11 +159,11 @@ sealed class ThcUser {
         other.id == id &&
         other.name == name &&
         other.email == email &&
-        other.phoneNumber == phoneNumber;
+        other.phone == phone;
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, name, email, phoneNumber);
+  int get hashCode => Object.hash(runtimeType, id, name, email, phone);
 }
 
 class Participant extends ThcUser {
@@ -188,7 +171,7 @@ class Participant extends ThcUser {
     required super.id,
     required super.name,
     super.email,
-    super.phoneNumber,
+    super.phone,
   }) : super._(type: UserType.participant);
 }
 
@@ -197,7 +180,7 @@ class Director extends ThcUser {
     required super.id,
     required super.name,
     super.email,
-    super.phoneNumber,
+    super.phone,
   }) : super._(type: UserType.director);
 }
 
@@ -206,6 +189,6 @@ class Admin extends ThcUser {
     required super.id,
     required super.name,
     super.email,
-    super.phoneNumber,
+    super.phone,
   }) : super._(type: UserType.admin);
 }

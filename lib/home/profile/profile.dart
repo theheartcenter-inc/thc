@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/firebase/user.dart';
 import 'package:thc/home/profile/account/account_settings.dart';
 import 'package:thc/home/profile/info/heart_center_info.dart';
@@ -83,7 +82,6 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    db.doc('users/${user!.id}').get().then((value) => print(value.data()));
     const image = Padding(
       padding: EdgeInsets.all(10),
       child: SizedBox(
@@ -100,18 +98,22 @@ class ProfileScreen extends StatelessWidget {
 
     if (user == null) throw Exception('The value of "user" isn\'t set.');
 
-    final userWatch = context.watch<EditingProfile>().state;
-    final overview = Center(
-      child: Column(
-        children: [
-          image,
-          Text(userWatch.name, style: const TextStyle(fontSize: 28)),
-          const SizedBox(height: 5),
-          Text('user ID: ${user?.id}', style: const TextStyle(fontWeight: FontWeight.w600)),
-          if (userWatch.email case final email?) Opacity(opacity: 0.5, child: Text(email)),
-          if (userWatch.phoneNumber case final phone?) Opacity(opacity: 0.75, child: Text(phone)),
-          const SizedBox(height: 25),
-        ],
+    final userWatch = context.watch<AccountFields>().state;
+
+    final overview = DefaultTextStyle(
+      style: const TextStyle(height: 2),
+      child: Center(
+        child: Column(
+          children: [
+            image,
+            Text(userWatch.name, style: const TextStyle(fontSize: 28)),
+            if (user!.id case final id?)
+              Text('user ID: $id', style: const TextStyle(fontWeight: FontWeight.w600)),
+            if (userWatch.email case final email?) Opacity(opacity: 0.5, child: Text(email)),
+            if (userWatch.phone case final phone?) Opacity(opacity: 0.75, child: Text(phone)),
+            const SizedBox(height: 25),
+          ],
+        ),
       ),
     );
 
@@ -132,15 +134,20 @@ class ProfileListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(15),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 600),
-          child: ListView.separated(
-            itemCount: itemCount,
-            itemBuilder: itemBuilder,
-            separatorBuilder: (_, index) => const Divider(),
+    return SizedBox(
+      width: double.infinity,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(15),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: itemCount,
+              itemBuilder: itemBuilder,
+              separatorBuilder: (_, __) => const Divider(),
+            ),
           ),
         ),
       ),
@@ -148,11 +155,20 @@ class ProfileListView extends StatelessWidget {
   }
 }
 
-class EditingProfile extends Cubit<ThcUser> {
-  EditingProfile() : super(user!);
+class AccountFields extends Cubit<ThcUser> {
+  AccountFields() : super(user!);
 
-  void save({String? name, String? email, String? phoneNumber}) {
-    user = state.copyWith(name: name, email: email, phoneNumber: phoneNumber);
-    emit(user!..upload());
+  void update(AccountField field) => emit(AccountField.updatedUser);
+
+  bool get hasChanges => AccountField.values.any((value) => value.updated != null);
+
+  Future<void> save(ThcUser updatedUser) async {
+    await updatedUser.upload();
+    emit(user = updatedUser);
+  }
+
+  Future<void> yeet(AccountField field) async {
+    final data = user!.json..remove(field.name);
+    await save(ThcUser.fromJson(data));
   }
 }
