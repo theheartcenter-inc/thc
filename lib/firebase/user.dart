@@ -1,9 +1,7 @@
 import 'package:meta/meta.dart';
 import 'package:thc/firebase/firebase.dart';
-import 'package:thc/home/home_screen.dart';
 import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/local_storage.dart';
-import 'package:thc/utils/navigator.dart';
 
 enum UserType {
   participant,
@@ -46,13 +44,6 @@ ThcUser? user;
 UserType? get userType => user?.type;
 
 String? get userId => StorageKeys.userId();
-
-/// Currently not used in the login window, but this may change in the future.
-void login(String id, String password) async {
-  StorageKeys.userId.save(id);
-  user = await ThcUser.download(id);
-  navigator.pushReplacement(const HomeScreen());
-}
 
 /// {@template ThcUser}
 /// We can't just call this class `User`, since that's one of the Firebase classes.
@@ -113,9 +104,12 @@ sealed class ThcUser {
 
   final String name;
   final UserType type;
+
+  /// A unique string to identify the user, probably chosen by an admin.
   final String? id;
-  final String? email;
-  final String? phone;
+
+  /// Used for password recovery.
+  final String? email, phone;
 
   /// {@macro ThcUser}
   static Future<ThcUser> download(String id) async {
@@ -127,6 +121,7 @@ sealed class ThcUser {
     return ThcUser.fromJson(snapshot.data()!);
   }
 
+  /// {@macro ThcUser}
   ThcUser copyWith({
     UserType? type,
     String? id,
@@ -143,7 +138,6 @@ sealed class ThcUser {
     );
   }
 
-  Future<void> upload() async => db.doc('users/$id').set(json);
   Map<String, dynamic> get json => {
         'name': name,
         'type': '$type',
@@ -151,6 +145,9 @@ sealed class ThcUser {
         if (email != null) 'email': email,
         if (phone != null) 'phone': phone,
       };
+
+  /// Saves the current user data to Firebase.
+  Future<void> upload() async => db.doc('users/$id').set(json);
 
   @override
   bool operator ==(Object other) {

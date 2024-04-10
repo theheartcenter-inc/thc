@@ -7,6 +7,7 @@ import 'package:thc/home/profile/report/issue_report.dart';
 import 'package:thc/home/profile/settings/settings.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/navigator.dart';
+import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -33,9 +34,7 @@ enum ProfileOption with StatelessEnum {
     Icons.report_problem,
     label: 'report an issue / send feedback',
     page: IssueReport(),
-  ),
-
-  logout(Icons.logout, label: 'sign out');
+  );
 
   const ProfileOption(this.icon, {this.label, this.page});
   final IconData icon;
@@ -46,20 +45,6 @@ enum ProfileOption with StatelessEnum {
         account || settings || info || report => () => navigator.push(page!),
         donate => () => launchUrl(
               Uri.parse('https://secure.givelively.org/donate/heart-center-inc'),
-            ),
-        logout => () => navigator.showDialog(
-              builder: (_) => AlertDialog.adaptive(
-                title: const Text('sign out'),
-                content: const Text(
-                  'Are you sure you want to sign out?\n'
-                  "You'll need to enter your email & password to sign back in.",
-                ),
-                actions: [
-                  ElevatedButton(onPressed: navigator.pop, child: const Text('back')),
-                  ElevatedButton(onPressed: navigator.logout, child: const Text('sign out')),
-                ],
-                actionsAlignment: MainAxisAlignment.spaceEvenly,
-              ),
             ),
       };
 
@@ -99,9 +84,9 @@ class ProfileScreen extends StatelessWidget {
     if (user == null) throw Exception('The value of "user" isn\'t set.');
 
     final userWatch = context.watch<AccountFields>().state;
-
+    final linkColor = Color.lerp(ThcColors.dullBlue, ThcColors.teal, 0.25)!;
     final overview = DefaultTextStyle(
-      style: const TextStyle(height: 2),
+      style: TextStyle(height: 1.75, color: context.colorScheme.onBackground),
       child: Center(
         child: Column(
           children: [
@@ -109,7 +94,8 @@ class ProfileScreen extends StatelessWidget {
             Text(userWatch.name, style: const TextStyle(fontSize: 28)),
             if (user!.id case final id?)
               Text('user ID: $id', style: const TextStyle(fontWeight: FontWeight.w600)),
-            if (userWatch.email case final email?) Opacity(opacity: 0.5, child: Text(email)),
+            if (userWatch.email case final email?)
+              Text(email, style: TextStyle(color: linkColor)),
             if (userWatch.phone case final phone?) Opacity(opacity: 0.75, child: Text(phone)),
             const SizedBox(height: 25),
           ],

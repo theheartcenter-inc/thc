@@ -58,6 +58,7 @@ ThemeData _generateTheme(bool isLight) {
   final textColor = isLight ? Colors.black : ThcColors.paleAzure;
   final slightContrast = isLight ? ThcColors.dullBlue : ThcColors.paleAzure;
   final paleColor = isLight ? Colors.white : ThcColors.paleAzure;
+  final lightBackground = Color.lerp(ThcColors.paleAzure, Colors.white, 0.33)!;
 
   MaterialStateProperty<T> selected<T>(T selected, T unselected) =>
       MaterialStateProperty.resolveWith((states) => states.isSelected ? selected : unselected);
@@ -83,7 +84,7 @@ ThemeData _generateTheme(bool isLight) {
       onError: Colors.white,
       errorContainer: Colors.red.withOpacity(0.33),
       onErrorContainer: Colors.red,
-      background: isLight ? ThcColors.paleAzure : ThcColors.darkBlue,
+      background: isLight ? lightBackground : ThcColors.darkBlue,
       onBackground: textColor,
       surface: isLight ? ThcColors.tan : ThcColors.dullBlue,
       onSurface: textColor,

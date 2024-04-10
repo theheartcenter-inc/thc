@@ -2,33 +2,52 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/firebase/user.dart';
 import 'package:thc/home/profile/profile.dart';
+import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
 
+/// A [TextField] with a name that matches a [ThcUser.json] key.
 enum AccountField with StatefulEnum {
+  /// The user's first & last name (cannot be deleted).
   name,
+
+  /// The user's email.
+  ///
+  /// (Eventually, we should probably verify the email whenever it's updated.)
   email,
+
+  /// The user's phone number.
+  ///
+  /// (Eventually, we should probably verify the phone number whenever it's updated.)
   phone;
 
+  /// The current values in the [TextField]s.
   static final List<String> textValues = List.filled(values.length, '');
   void update(String newText) => textValues[index] = newText.trim();
 
+  /// The value of this field before any editing occurred.
   String? get current => switch (this) {
         name => user!.name,
         email => user!.email,
         phone => user!.phone,
       };
+
+  /// The new [TextField] value that the user typed in.
+  ///
+  /// Set to `null` if it's empty or if it's unchanged.
   String? get updated {
     final text = textValues[index];
     return text.isNotEmpty && text != current ? text : null;
   }
 
+  /// A [ThcUser] object, updated to match the current [TextField] content.
   static ThcUser get updatedUser => user!.copyWith(
         name: name.updated,
         email: email.updated,
         phone: phone.updated,
       );
 
+  /// Changes all [textValues] to match the current [user].
   static void reset() {
     for (final value in values) {
       value.update(value.current ?? '');
@@ -40,6 +59,8 @@ enum AccountField with StatefulEnum {
 }
 
 class _AccountFieldState extends State<AccountField> {
+  /// If this value is `true` (and the relevant value is non-null),
+  /// a button will appear to remove (i.e. "yeet") the stored email or phone number.
   bool showYeetButton = false;
   late final TextEditingController controller;
 
@@ -152,9 +173,34 @@ class _AccountSettingsState extends State<AccountSettings> {
           itemCount: 4,
           itemBuilder: (_, index) => switch (index) {
             0 => Column(children: [...AccountField.values, saveButton]),
-            1 => const ListTile(title: Text('change password')),
-            2 => const ListTile(title: Text('sign out')),
-            _ => const ListTile(title: Text('close account')),
+            1 => const ListTile(
+                leading: Icon(Icons.lock_outline),
+                title: Text('change password'),
+                // onTap: () {},
+              ),
+            2 => ListTile(
+                leading: const Icon(Icons.logout),
+                title: const Text('sign out'),
+                onTap: () => navigator.showDialog(
+                  builder: (_) => AlertDialog.adaptive(
+                    title: const Text('sign out'),
+                    content: const Text(
+                      'Are you sure you want to sign out?\n'
+                      "You'll need to enter your email & password to sign back in.",
+                    ),
+                    actions: [
+                      ElevatedButton(onPressed: navigator.pop, child: const Text('back')),
+                      ElevatedButton(onPressed: navigator.logout, child: const Text('sign out')),
+                    ],
+                    actionsAlignment: MainAxisAlignment.spaceEvenly,
+                  ),
+                ),
+              ),
+            _ => const ListTile(
+                leading: Icon(Icons.person_off_outlined),
+                title: Text('close account'),
+                // onTap: () {},
+              ),
           },
         ),
       ),
