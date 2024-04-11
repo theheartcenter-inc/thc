@@ -81,9 +81,7 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
 
-    if (user == null) throw Exception('The value of "user" isn\'t set.');
-
-    final userWatch = context.watch<AccountFields>().state;
+    final userWatch = context.watch<AccountFields>().state!;
     final linkColor = Color.lerp(ThcColors.dullBlue, ThcColors.teal, 0.25)!;
     final overview = DefaultTextStyle(
       style: TextStyle(height: 1.75, color: context.colorScheme.onBackground),
@@ -141,8 +139,8 @@ class ProfileListView extends StatelessWidget {
   }
 }
 
-class AccountFields extends Cubit<ThcUser> {
-  AccountFields() : super(user!);
+class AccountFields extends Cubit<ThcUser?> {
+  AccountFields() : super(user);
 
   void update(AccountField field) => emit(AccountField.updatedUser);
 
