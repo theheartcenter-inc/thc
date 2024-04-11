@@ -3,7 +3,28 @@ import 'package:provider/provider.dart';
 import 'package:thc/firebase/user.dart';
 import 'package:thc/home/profile/account/account_field.dart';
 import 'package:thc/home/profile/profile.dart';
+import 'package:thc/main.dart';
 import 'package:thc/utils/navigator.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+_showSuccessDialog(BuildContext context) {
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text('Account Closed'),
+      content: const Text('You have successfully closed your account.'),
+      actions: [
+        ElevatedButton(
+          onPressed: () {
+            // go back to the home page
+            navigator.pushReplacement(const ChooseAnyView());
+          },
+          child: const Text('OK'),
+        ),
+      ],
+    ),
+  );
+}
 
 class AccountSettings extends StatefulWidget {
   const AccountSettings({super.key});
@@ -13,10 +34,19 @@ class AccountSettings extends StatefulWidget {
 }
 
 class _AccountSettingsState extends State<AccountSettings> {
+  late TextEditingController _deleteController;
+
   @override
   void initState() {
     AccountField.reset();
+    _deleteController = TextEditingController();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _deleteController.dispose(); // Dispose of the controller when done
+    super.dispose();
   }
 
   @override
@@ -58,17 +88,58 @@ class _AccountSettingsState extends State<AccountSettings> {
                       "You'll need to enter your email & password to sign back in.",
                     ),
                     actions: [
-                      ElevatedButton(onPressed: navigator.pop, child: const Text('back')),
-                      ElevatedButton(onPressed: navigator.logout, child: const Text('sign out')),
+                      ElevatedButton(
+                          onPressed: navigator.pop, child: const Text('back')),
+                      ElevatedButton(
+                          onPressed: navigator.logout,
+                          child: const Text('sign out')),
                     ],
                     actionsAlignment: MainAxisAlignment.spaceEvenly,
                   ),
                 ),
               ),
-            _ => const ListTile(
-                leading: Icon(Icons.person_off_outlined),
-                title: Text('close account'),
-                // onTap: () {},
+            _ => ListTile(
+                leading: const Icon(Icons.person_off_outlined),
+                title: const Text('close account'),
+                onTap: () => showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: const Text('Close Account'),
+                    content: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'To confirm deletion, please type "DELETE" in the field below and tap "Confirm".',
+                          style: TextStyle(fontSize: 16),
+                        ),
+                        TextField(
+                          controller: _deleteController,
+                          decoration: const InputDecoration(
+                            hintText: 'Type DELETE here',
+                            labelText: 'Confirmation',
+                          ),
+                        ),
+                      ],
+                    ),
+                    actions: [
+                      ElevatedButton(
+                          onPressed: navigator.pop,
+                          child: const Text('Cancel')),
+                      ElevatedButton(
+                          onPressed: () async {
+                            final userInput = _deleteController.text;
+                            if (userInput == 'DELETE') {
+                              await FirebaseAuth.instance.currentUser?.delete();
+                              // firebase.deleteUserData();
+                              // Show success message dialog
+                              _showSuccessDialog(context);
+                            }
+                          },
+                          child: const Text('Confirm')),
+                    ],
+                  ),
+                ),
               ),
           },
         ),
