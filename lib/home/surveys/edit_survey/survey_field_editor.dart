@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:thc/home/surveys/edit_survey/survey_editor.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey_field.dart';
-import 'package:thc/utils/platform.dart';
+import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/theme.dart';
 
 /// Shows a preview of a [SurveyField] that you can tap to edit.
