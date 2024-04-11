@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
-import 'package:thc/home/profile/profile.dart';
+import 'package:thc/home/profile/account/account_field.dart';
 import 'package:thc/home/surveys/edit_survey/survey_editor.dart';
 import 'package:thc/home/surveys/manage_surveys/manage_surveys.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
