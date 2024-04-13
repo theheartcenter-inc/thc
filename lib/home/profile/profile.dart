@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/firebase/user.dart';
+import 'package:thc/home/profile/account/account_field.dart';
 import 'package:thc/home/profile/account/account_settings.dart';
 import 'package:thc/home/profile/info/heart_center_info.dart';
 import 'package:thc/home/profile/report/issue_report.dart';
 import 'package:thc/home/profile/settings/settings.dart';
-import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
@@ -136,23 +136,5 @@ class ProfileListView extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class AccountFields extends Cubit<ThcUser?> {
-  AccountFields() : super(user);
-
-  void update(AccountField field) => emit(AccountField.updatedUser);
-
-  bool get hasChanges => AccountField.values.any((value) => value.updated != null);
-
-  Future<void> save(ThcUser updatedUser) async {
-    await updatedUser.upload();
-    emit(user = updatedUser);
-  }
-
-  Future<void> yeet(AccountField field) async {
-    final data = user!.json..remove(field.name);
-    await save(ThcUser.fromJson(data));
   }
 }

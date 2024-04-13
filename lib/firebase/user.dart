@@ -145,8 +145,6 @@ sealed class ThcUser {
         if (id != null) 'id': id,
         if (email != null) 'email': email,
         if (phone != null) 'phone': phone,
-        if ('$type' != 'Participant' || '$type' != 'Director' || '$type' != 'Admin')
-          'registered': false,
       };
 
   /// Saves the current user data to Firebase.
