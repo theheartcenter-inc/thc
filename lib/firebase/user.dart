@@ -153,7 +153,7 @@ sealed class ThcUser {
     await db.doc('$collection/$id').set(json);
   }
 
-  Future<void> removeUnregisteredUser(String id) async =>
+  static Future<void> removeUnregisteredUser(String id) async =>
       await db.doc('unregistered_users/$id').delete();
 
   @override
