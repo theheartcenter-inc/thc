@@ -10,6 +10,7 @@ import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/home/surveys/take_survey/survey_theme.dart';
 import 'package:thc/login_register/login.dart';
+import 'package:thc/start/start.dart';
 import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/keyboard_shortcuts.dart';
@@ -51,7 +52,7 @@ class App extends StatelessWidget {
         darkTheme: darkTheme,
         themeMode: context.watch<AppTheme>().state,
         debugShowCheckedModeBanner: false,
-        home: const ChooseAnyView(),
+        home: const StartScreen(),
       ),
     );
   }

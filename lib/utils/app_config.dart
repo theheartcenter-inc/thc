@@ -6,4 +6,4 @@ final mobileDevice = switch (Platform.operatingSystem) { 'ios' || 'android' => t
 
 /// Set this to `false` if you're just working on frontend stuff
 /// and you don't want to worry about connecting with Agora or Firebase.
-const useInternet = true;
+const useInternet = false;
