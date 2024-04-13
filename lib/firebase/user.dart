@@ -112,12 +112,13 @@ sealed class ThcUser {
   final String? email, phone;
 
   /// {@macro ThcUser}
-  static Future<ThcUser> download(String id) async {
+  static Future<ThcUser> download(String id, {bool registered = true}) async {
     if (!useInternet) {
       return UserType.values.firstWhere((value) => id.contains(value.name)).testUser;
     }
 
-    final snapshot = await db.doc('users/$id').get();
+    final collection = registered ? 'users' : 'unregistered_users';
+    final snapshot = await db.doc('$collection/$id').get();
     return ThcUser.fromJson(snapshot.data()!);
   }
 
@@ -144,10 +145,18 @@ sealed class ThcUser {
         if (id != null) 'id': id,
         if (email != null) 'email': email,
         if (phone != null) 'phone': phone,
+        if ('$type' != 'Participant' || '$type' != 'Director' || '$type' != 'Admin')
+          'registered': false,
       };
 
   /// Saves the current user data to Firebase.
-  Future<void> upload() async => db.doc('users/$id').set(json);
+  Future<void> upload({bool isRegistered = true}) async {
+    final collection = isRegistered ? 'users' : 'unregistered_users';
+    await db.doc('$collection/$id').set(json);
+  }
+
+  Future<void> removeUnregisteredUser(String id) async =>
+      await db.doc('unregistered_users/$id').delete();
 
   @override
   bool operator ==(Object other) {
