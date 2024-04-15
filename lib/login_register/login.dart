@@ -190,7 +190,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           FirebaseFirestore.instance
                               .collection('usersCollection')
                               .add(dataToSave);
-                          if (user.emailVerified ?? false) {
+                          if (user.emailVerified) {
                             navigator.pushReplacement(const HomeScreen());
                           } else {
                             user.sendEmailVerification();
