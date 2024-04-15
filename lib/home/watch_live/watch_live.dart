@@ -7,12 +7,13 @@ import 'package:thc/utils/theme.dart';
 
 class WatchLive extends StatelessWidget {
   const WatchLive({super.key});
+  static final lightBackground = Color.lerp(ThcColors.pink, Colors.white, 0.33)!;
   static final darkBackground = Color.lerp(ThcColors.darkMagenta, Colors.black, 0.75)!;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: context.lightDark(ThcColors.pink, darkBackground),
+      backgroundColor: context.lightDark(lightBackground, darkBackground),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

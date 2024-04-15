@@ -1,4 +1,4 @@
 [submodule "lib/credentials"]
 	path = lib/credentials
-	url = https://github.com/theheartcenter-one/thc-credentials.git
+	url = https://github.com/theheartcenter-inc/thc-credentials.git
 	branch = main

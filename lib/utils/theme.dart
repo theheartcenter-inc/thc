@@ -46,10 +46,9 @@ abstract final class ThcColors {
 /// ```dart
 /// states = {MaterialState.hovered, MaterialState.selected};
 /// ```
-MaterialStateProperty<T> _selected<T>(T selected, T unselected) {
-  return MaterialStateProperty.resolveWith(
-    (states) => states.contains(MaterialState.selected) ? selected : unselected,
-  );
+extension ThatOneVideo on Set<MaterialState> {
+  bool get isFocused => contains(MaterialState.focused);
+  bool get isSelected => contains(MaterialState.selected);
 }
 
 const _iconTheme = IconThemeData(size: 32);
@@ -59,9 +58,13 @@ ThemeData _generateTheme(bool isLight) {
   final textColor = isLight ? Colors.black : ThcColors.paleAzure;
   final slightContrast = isLight ? ThcColors.dullBlue : ThcColors.paleAzure;
   final paleColor = isLight ? Colors.white : ThcColors.paleAzure;
+  final lightBackground = Color.lerp(ThcColors.paleAzure, Colors.white, 0.33)!;
+
+  MaterialStateProperty<T> selected<T>(T selected, T unselected) =>
+      MaterialStateProperty.resolveWith((states) => states.isSelected ? selected : unselected);
 
   MaterialStateProperty<T> tealWhenSelected<T>(T Function({Color color}) copyWith, bool isLight) {
-    return _selected(
+    return selected(
       copyWith(color: ThcColors.teal),
       copyWith(color: paleColor.withOpacity(0.33)),
     );
@@ -81,7 +84,7 @@ ThemeData _generateTheme(bool isLight) {
       onError: Colors.white,
       errorContainer: Colors.red.withOpacity(0.33),
       onErrorContainer: Colors.red,
-      background: isLight ? ThcColors.paleAzure : ThcColors.darkBlue,
+      background: isLight ? lightBackground : ThcColors.darkBlue,
       onBackground: textColor,
       surface: isLight ? ThcColors.tan : ThcColors.dullBlue,
       onSurface: textColor,
@@ -94,9 +97,9 @@ ThemeData _generateTheme(bool isLight) {
     ),
     materialTapTargetSize: MaterialTapTargetSize.padded,
     switchTheme: SwitchThemeData(
-      thumbColor: _selected(Colors.white, slightContrast),
-      trackOutlineColor: _selected(ThcColors.green, slightContrast),
-      trackColor: _selected(
+      thumbColor: selected(Colors.white, slightContrast),
+      trackOutlineColor: selected(ThcColors.green, slightContrast),
+      trackColor: selected(
         ThcColors.green,
         ThcColors.dullBlue.withOpacity(isLight ? 0.33 : 1),
       ),
