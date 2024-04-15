@@ -1,13 +1,5 @@
-import 'dart:convert';
-import 'dart:ffi';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:thc/home/stream/active_stream.dart';
-import 'package:thc/utils/theme.dart';
-import 'package:thc/utils/widgets/fun_placeholder.dart';
 
 class ManageUsers extends StatefulWidget {
   const ManageUsers({super.key});
@@ -42,21 +34,32 @@ class _ManageUsersState extends State<ManageUsers> {
               }
             }
             return Expanded(
-              child: DataTable(
-                // headingTextStyle: const TextStyle(
-                //   fontSize: 14,
-                // ),
-                // dataTextStyle: const TextStyle(
-                //   fontSize: 12,
-                // ),
-                sortColumnIndex: 0,
-                columns: const [
-                  DataColumn(label: Text('Id')),
-                  DataColumn(label: Text('Name')),
-                  DataColumn(label: Text('Type')),
-                  DataColumn(label: Text('Action'))
-                ],
-                rows: userWidgets,
+              child: Scrollbar(
+                child: ListView(
+                  children: [
+                    SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: SingleChildScrollView(
+                        child: DataTable(
+                          // headingTextStyle: const TextStyle(
+                          //   fontSize: 14,
+                          // ),
+                          // dataTextStyle: const TextStyle(
+                          //   fontSize: 12,
+                          // ),
+                          sortColumnIndex: 0,
+                          columns: const [
+                            DataColumn(label: Text('Id')),
+                            DataColumn(label: Text('Name')),
+                            DataColumn(label: Text('Type')),
+                            DataColumn(label: Text('Actions'))
+                          ],
+                          rows: userWidgets,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
               ),
             );
           },
