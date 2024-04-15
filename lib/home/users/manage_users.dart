@@ -1,23 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:thc/firebase/firebase.dart';
-import 'package:thc/utils/app_config.dart';
 
-class ManageUsers extends StatefulWidget {
+class ManageUsers extends StatelessWidget {
   const ManageUsers({super.key});
-
-  @override
-  State<ManageUsers> createState() => _ManageUsersState();
-}
-
-class _ManageUsersState extends State<ManageUsers> {
-  final horizontalScroll = ScrollController();
-
-  @override
-  void dispose() {
-    super.dispose();
-    horizontalScroll.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,18 +32,13 @@ class _ManageUsersState extends State<ManageUsers> {
 
     return LayoutBuilder(
       builder: (context, constraints) => SingleChildScrollView(
-        child: Scrollbar(
-          controller: horizontalScroll,
-          thumbVisibility: mobileDevice ? null : true,
-          child: SingleChildScrollView(
-            controller: horizontalScroll,
-            scrollDirection: Axis.horizontal,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(minWidth: constraints.maxWidth),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                child: dataTable,
-              ),
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minWidth: constraints.maxWidth),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: dataTable,
             ),
           ),
         ),
