@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/firebase/user.dart';
 import 'package:thc/home/profile/account/account_field.dart';
+import 'package:thc/home/profile/account/close_account.dart';
 import 'package:thc/home/profile/profile.dart';
 import 'package:thc/main.dart';
 import 'package:thc/utils/navigator.dart';
@@ -38,9 +39,8 @@ class _AccountSettingsState extends State<AccountSettings> {
 
   @override
   void initState() {
-    AccountField.reset();
-    _deleteController = TextEditingController();
     super.initState();
+    AccountField.reset();
   }
 
   @override
@@ -81,7 +81,7 @@ class _AccountSettingsState extends State<AccountSettings> {
                 leading: const Icon(Icons.logout),
                 title: const Text('sign out'),
                 onTap: () => navigator.showDialog(
-                  builder: (_) => AlertDialog.adaptive(
+                  AlertDialog.adaptive(
                     title: const Text('sign out'),
                     content: const Text(
                       'Are you sure you want to sign out?\n'
@@ -98,43 +98,7 @@ class _AccountSettingsState extends State<AccountSettings> {
             _ => ListTile(
                 leading: const Icon(Icons.person_off_outlined),
                 title: const Text('close account'),
-                onTap: () => showDialog(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    title: const Text('Close Account'),
-                    content: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'To confirm deletion, please type "DELETE" in the field below and tap "Confirm".',
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        TextField(
-                          controller: _deleteController,
-                          decoration: const InputDecoration(
-                            hintText: 'Type DELETE here',
-                            labelText: 'Confirmation',
-                          ),
-                        ),
-                      ],
-                    ),
-                    actions: [
-                      ElevatedButton(onPressed: navigator.pop, child: const Text('Cancel')),
-                      ElevatedButton(
-                          onPressed: () async {
-                            final userInput = _deleteController.text;
-                            if (userInput == 'DELETE') {
-                              await FirebaseAuth.instance.currentUser?.delete();
-                              // firebase.deleteUserData();
-                              // Show success message dialog
-                              _showSuccessDialog(context);
-                            }
-                          },
-                          child: const Text('Confirm')),
-                    ],
-                  ),
-                ),
+                onTap: () => navigator.showDialog(const CloseAccount()),
               ),
           },
         ),

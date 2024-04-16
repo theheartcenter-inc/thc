@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:meta/meta.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/utils/app_config.dart';
@@ -12,6 +14,8 @@ enum UserType {
     final type = json['type'];
     return values.firstWhere((userType) => userType.toString() == type);
   }
+
+  static List<String> get _testIds => [for (final userType in values) userType.testId];
 
   String get testId => 'test_$name';
   static const _testName = 'First Lastname';
@@ -28,6 +32,18 @@ enum UserType {
         director => 'Director',
         admin => 'Admin',
       };
+}
+
+// ignore: constant_identifier_names
+enum UserCollection { users, unregistered_users }
+
+extension GetCollection on UserCollection? {
+  DocumentReference<Map<String, dynamic>> doc([String? path]) {
+    final userCollection = this ?? UserCollection.users;
+    final dbCollection = db.collection(userCollection.name);
+
+    return dbCollection.doc(path);
+  }
 }
 
 extension UserAuthorization on UserType? {
@@ -112,14 +128,20 @@ sealed class ThcUser {
   final String? email, phone;
 
   /// {@macro ThcUser}
-  static Future<ThcUser> download(String id, {bool registered = true}) async {
+  static Future<ThcUser> download(String id, {UserCollection? userCollection}) async {
     if (!useInternet) {
       return UserType.values.firstWhere((value) => id.contains(value.name)).testUser;
     }
 
-    final collection = registered ? 'users' : 'unregistered_users';
-    final snapshot = await db.doc('$collection/$id').get();
+    final snapshot = await userCollection.doc(id).get();
     return ThcUser.fromJson(snapshot.data()!);
+  }
+
+  static Future<void> remove(String id, {UserCollection? userCollection}) {
+    return switch (useInternet && !UserType._testIds.contains(id)) {
+      true => userCollection.doc(id).delete(),
+      false => Future.delayed(const Duration(seconds: 3)),
+    };
   }
 
   /// {@macro ThcUser}
@@ -148,13 +170,16 @@ sealed class ThcUser {
       };
 
   /// Saves the current user data to Firebase.
-  Future<void> upload({bool isRegistered = true}) async {
-    final collection = isRegistered ? 'users' : 'unregistered_users';
-    await db.doc('$collection/$id').set(json);
-  }
+  Future<void> upload({UserCollection? userCollection}) => userCollection.doc(id).set(json);
 
-  static Future<void> removeUnregisteredUser(String id) async =>
-      await db.doc('unregistered_users/$id').delete();
+  /// Removes this user from the database.
+  ///
+  /// Any function that calls this method should also call `navigator.logout()`
+  /// to return to the login screen.
+  Future<void> yeet() => Future.wait([
+        if (FirebaseAuth.instance.currentUser case final user?) user.delete(),
+        if (id case final id?) remove(id),
+      ]);
 
   @override
   bool operator ==(Object other) {

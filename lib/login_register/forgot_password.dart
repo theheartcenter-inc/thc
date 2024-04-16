@@ -90,9 +90,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           'invalid-email' => 'Please enter a valid email.',
                           _ => 'Error: ${e.code}',
                         };
-                        navigator.showDialog(builder: (_) => ErrorDialog(errorMessage));
+                        navigator.showDialog(ErrorDialog(errorMessage));
                       } catch (e) {
-                        navigator.showDialog(builder: (_) => ErrorDialog(e.toString()));
+                        navigator.showDialog(ErrorDialog(e.toString()));
                       }
                     },
                     label: 'Reset Password',

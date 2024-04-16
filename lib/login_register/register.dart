@@ -141,10 +141,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             'invalid-email' => 'Invalid email entered',
                             _ => 'Error: ${e.code}',
                           };
-                          navigator.showDialog(builder: (_) => ErrorDialog(errorMessage));
+                          navigator.showDialog(ErrorDialog(errorMessage));
                           user?.delete();
                         } catch (e) {
-                          navigator.showDialog(builder: (_) => ErrorDialog(e.toString()));
+                          navigator.showDialog(ErrorDialog(e.toString()));
                         }
                       },
                       label: 'Register',

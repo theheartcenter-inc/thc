@@ -171,11 +171,9 @@ class _SurveyEditorState extends State<SurveyEditor> {
 
     Widget? editButton;
     if (mobileDevice && keyedQuestions.isNotEmpty) {
-      editButton = BlocConsumer<MobileEditing>(
-        (_, value, __) => IconButton.filled(
-          icon: Icon(value.icon, color: Colors.black87),
-          onPressed: value.toggle,
-        ),
+      editButton = IconButton.filled(
+        icon: Icon(context.watch<MobileEditing>().icon, color: Colors.black87),
+        onPressed: context.read<MobileEditing>().toggle,
       );
     }
     return Scaffold(
