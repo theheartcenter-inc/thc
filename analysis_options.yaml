@@ -5,6 +5,8 @@ include: package:flutter_lints/flutter.yaml
 
 linter:
   rules:
+    use_build_context_synchronously: false
+
     annotate_redeclares: true
     avoid_escaping_inner_quotes: true
     avoid_final_parameters: true

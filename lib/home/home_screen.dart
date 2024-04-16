@@ -125,7 +125,7 @@ class HomeScreen extends StatelessWidget {
     final navBar = NavBar.of(context);
 
     return Scaffold(
-      body: navBar.screen,
+      body: SafeArea(bottom: false, child: navBar.screen),
       bottomNavigationBar: navBar,
     );
   }

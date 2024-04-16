@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:thc/home/home_screen.dart';
@@ -180,10 +181,19 @@ class _LoginScreenState extends State<LoginScreen> {
                             password: password,
                           );
                           final user = FirebaseAuth.instance.currentUser;
-                          if (user?.emailVerified ?? false) {
+                          final Map<String, Object> dataToSave = {
+                            'name': 'random_name',
+                            'uid': user!.uid,
+                            'role': 'user',
+                            'is_active': false,
+                          };
+                          FirebaseFirestore.instance
+                              .collection('usersCollection')
+                              .add(dataToSave);
+                          if (user.emailVerified) {
                             navigator.pushReplacement(const HomeScreen());
                           } else {
-                            user?.sendEmailVerification();
+                            user.sendEmailVerification();
                             navigator.pushReplacement(VerifyEmailScreen(user));
                           }
                         } on FirebaseAuthException catch (e) {
