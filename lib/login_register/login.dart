@@ -205,9 +205,9 @@ class _LoginScreenState extends State<LoginScreen> {
                             'invalid-email' => 'Invalid Email. Please enter email if blank.',
                             _ => 'Error: ${e.code}',
                           };
-                          navigator.showDialog(builder: (_) => ErrorDialog(errorMessage));
+                          navigator.showDialog(ErrorDialog(errorMessage));
                         } catch (e) {
-                          navigator.showDialog(builder: (_) => ErrorDialog(e.toString()));
+                          navigator.showDialog(ErrorDialog(e.toString()));
                         }
                       },
                       style: const TextStyle(color: Colors.white, fontSize: 16),

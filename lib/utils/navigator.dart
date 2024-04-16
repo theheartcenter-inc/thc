@@ -73,10 +73,15 @@ extension type Nav(NavigatorState navigator) {
   /// Creates a pop-up dialog.
   ///
   /// The [builder] should return an [AlertDialog] or something similar.
-  Future<T?> showDialog<T>({required WidgetBuilder builder, bool? barrierDismissible}) {
+  Future<T?> showDialog<T>(
+    Widget dialog, {
+    bool? barrierDismissible,
+    Color? barrierColor,
+  }) {
     return showAdaptiveDialog<T>(
       context: navigator.context,
-      builder: builder,
+      builder: (_) => dialog,
+      barrierColor: barrierColor,
       barrierDismissible: barrierDismissible,
     );
   }
