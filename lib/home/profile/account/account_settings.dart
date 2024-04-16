@@ -88,11 +88,8 @@ class _AccountSettingsState extends State<AccountSettings> {
                       "You'll need to enter your email & password to sign back in.",
                     ),
                     actions: [
-                      ElevatedButton(
-                          onPressed: navigator.pop, child: const Text('back')),
-                      ElevatedButton(
-                          onPressed: navigator.logout,
-                          child: const Text('sign out')),
+                      ElevatedButton(onPressed: navigator.pop, child: const Text('back')),
+                      ElevatedButton(onPressed: navigator.logout, child: const Text('sign out')),
                     ],
                     actionsAlignment: MainAxisAlignment.spaceEvenly,
                   ),
@@ -123,9 +120,7 @@ class _AccountSettingsState extends State<AccountSettings> {
                       ],
                     ),
                     actions: [
-                      ElevatedButton(
-                          onPressed: navigator.pop,
-                          child: const Text('Cancel')),
+                      ElevatedButton(onPressed: navigator.pop, child: const Text('Cancel')),
                       ElevatedButton(
                           onPressed: () async {
                             final userInput = _deleteController.text;

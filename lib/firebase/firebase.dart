@@ -16,8 +16,7 @@ Future<void> initFirebase() async {
     TargetPlatform.iOS => FirebaseCredentials.ios,
     TargetPlatform.macOS => FirebaseCredentials.macos,
     TargetPlatform.linux || TargetPlatform.windows => FirebaseCredentials.web,
-    TargetPlatform.fuchsia =>
-      throw Exception("(I don't think we'll be supporting Fuchsia)"),
+    TargetPlatform.fuchsia => throw Exception("(I don't think we'll be supporting Fuchsia)"),
   };
 
   final firebaseApp = await Firebase.initializeApp(options: options);
