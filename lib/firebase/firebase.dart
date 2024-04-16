@@ -22,7 +22,7 @@ Future<void> initFirebase() async {
   final firebaseApp = await Firebase.initializeApp(options: options);
   db = FirebaseFirestore.instanceFor(
     app: firebaseApp,
-    databaseURL: firebaseApp.options.databaseURL,
+    databaseId: firebaseApp.options.databaseURL,
   );
 
   // This is just a one-time setup: uncomment if there's a change to testUser or Firebase
