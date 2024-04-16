@@ -20,10 +20,7 @@ Future<void> initFirebase() async {
   };
 
   final firebaseApp = await Firebase.initializeApp(options: options);
-  db = FirebaseFirestore.instanceFor(
-    app: firebaseApp,
-    databaseId: firebaseApp.options.databaseURL,
-  );
+  db = FirebaseFirestore.instanceFor(app: firebaseApp);
 
   // This is just a one-time setup: uncomment if there's a change to testUser or Firebase
   // for (final userType in UserType.values) {
