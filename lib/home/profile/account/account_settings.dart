@@ -4,28 +4,7 @@ import 'package:thc/firebase/user.dart';
 import 'package:thc/home/profile/account/account_field.dart';
 import 'package:thc/home/profile/account/close_account.dart';
 import 'package:thc/home/profile/profile.dart';
-import 'package:thc/main.dart';
 import 'package:thc/utils/navigator.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
-_showSuccessDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (_) => AlertDialog(
-      title: const Text('Account Closed'),
-      content: const Text('You have successfully closed your account.'),
-      actions: [
-        ElevatedButton(
-          onPressed: () {
-            // go back to the home page
-            navigator.pushReplacement(const ChooseAnyView());
-          },
-          child: const Text('OK'),
-        ),
-      ],
-    ),
-  );
-}
 
 class AccountSettings extends StatefulWidget {
   const AccountSettings({super.key});
@@ -35,18 +14,10 @@ class AccountSettings extends StatefulWidget {
 }
 
 class _AccountSettingsState extends State<AccountSettings> {
-  late TextEditingController _deleteController;
-
   @override
   void initState() {
     super.initState();
     AccountField.reset();
-  }
-
-  @override
-  void dispose() {
-    _deleteController.dispose(); // Dispose of the controller when done
-    super.dispose();
   }
 
   @override

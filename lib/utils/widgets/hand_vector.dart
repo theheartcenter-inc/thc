@@ -9,16 +9,16 @@ String svgPath(String svgFilename) {
 }
 
 class SvgPainter extends CustomPainter {
-  const SvgPainter({required this.fileName, required this.color});
+  const SvgPainter({required this.svgPath, required this.color});
 
-  final String fileName;
+  final String svgPath;
   final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
     final Paint paint = Paint()..color = color;
 
-    final Path path = parseSvgPath(svgPath(fileName));
+    final Path path = parseSvgPath(svgPath);
 
     canvas.drawPath(path, paint);
   }

@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:thc/utils/svg_parsing/svg_paths.dart';
 import 'package:thc/utils/widgets/hand_vector.dart';
 
 class StartScreen extends StatelessWidget {
@@ -22,7 +23,7 @@ class StartScreen extends StatelessWidget {
 class ZaHando extends StatelessWidget {
   const ZaHando({super.key});
 
-  Widget _builder(_, double t, __) {
+  Widget builder(BuildContext context, double t, [_]) {
     final t2 = t * t;
     final t5 = t2 * t2 * t;
     final t10 = t5 * t5;
@@ -31,6 +32,7 @@ class ZaHando extends StatelessWidget {
 
     final hand = HSVColor.fromAHSV(1.0, 180 - t * 60, 1 - t * 0.75, t * 0.8);
 
+    const sunSize = 233.0;
     final sunCenter = HSVColor.fromAHSV(1, t * 30 + 30, 1, (t + 1) / 2);
     final sunOuter = sunCenter.withHue(t * 30 + 20);
     final sunBorder = const Color(0xffffcc00).withOpacity(t10);
@@ -39,12 +41,11 @@ class ZaHando extends StatelessWidget {
     final tScale = Curves.easeOutExpo.transform(max(3 * (t - 1) + 1, 0));
     final scale = 20 * (1 - tScale) + 1.0;
 
-    final tOffset = Curves.ease.transform(t);
-    final offset = Offset(0, 500 * (1 - tOffset) - 100);
+    final tOffset = 1 - Curves.ease.transform(min(t * 1.5, 1));
+    final sunOffset = Offset(0, sunSize * tOffset);
 
     final widget = FittedBox(
       child: Stack(
-        alignment: Alignment.bottomCenter,
         children: [
           if (zaHando)
             Transform.scale(
@@ -52,28 +53,39 @@ class ZaHando extends StatelessWidget {
               scale: scale,
               child: CustomPaint(
                 size: size,
-                painter: SvgPainter(color: hand.toColor(), fileName: 'thc_logo'),
+                painter: SvgPainter(color: hand.toColor(), svgPath: SvgPaths.thcLogo),
+                child: SizedBox.fromSize(size: size),
               ),
             )
           else
             SizedBox.fromSize(size: size),
-          Transform.translate(
-            key: const Key('sun'),
-            offset: offset,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  colors: [
-                    sunCenter.toColor(),
-                    HSVColor.lerp(sunCenter, sunOuter, 1 / 3)!.toColor(),
-                    sunOuter.toColor(),
-                  ],
+          Positioned.fill(
+            child: ClipRect(
+              child: Align(
+                alignment: Alignment.bottomCenter,
+                child: Transform.translate(
+                  key: const Key('sun'),
+                  offset: sunOffset,
+                  child: Padding(
+                    padding: const EdgeInsets.all(25),
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        gradient: RadialGradient(
+                          colors: [
+                            sunCenter.toColor(),
+                            HSVColor.lerp(sunCenter, sunOuter, 1 / 3)!.toColor(),
+                            sunOuter.toColor(),
+                          ],
+                        ),
+                        shape: BoxShape.circle,
+                        border: Border.all(width: 4, color: sunBorder),
+                        boxShadow: [BoxShadow(color: sunGlow, blurRadius: 20)],
+                      ),
+                      child: const SizedBox(width: sunSize, height: sunSize),
+                    ),
+                  ),
                 ),
-                shape: BoxShape.circle,
-                border: Border.all(width: 4, color: sunBorder),
-                boxShadow: [BoxShadow(color: sunGlow, blurRadius: 20)],
               ),
-              child: const SizedBox(width: 233, height: 233),
             ),
           ),
         ],
@@ -111,7 +123,7 @@ class ZaHando extends StatelessWidget {
       child: TweenAnimationBuilder(
         duration: const Duration(seconds: 6),
         tween: Tween(begin: 0.0, end: 1.0),
-        builder: _builder,
+        builder: builder,
       ),
     );
   }
