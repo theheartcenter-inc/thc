@@ -40,6 +40,7 @@ class App extends StatelessWidget {
     return MultiProvider(
       providers: [
         BlocProvider(create: (_) => AppTheme()),
+        BlocProvider(create: (_) => LoginProgressTracker()),
         BlocProvider(create: (_) => NavBarIndex()),
         BlocProvider(create: (_) => MobileEditing()),
         BlocProvider(create: (_) => ValidSurveyQuestions()),
