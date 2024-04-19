@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:thc/firebase/user.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/schedule/edit_schedule/schedule_editor.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/theme.dart';
-import 'package:thc/firebase/user.dart';
 
 class Schedule extends StatelessWidget {
   const Schedule({super.key});

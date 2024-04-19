@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thc/home/home_screen.dart';
 
+late final SharedPreferences _storage;
+
 Future<void> loadFromLocalStorage() async {
   _storage = await SharedPreferences.getInstance();
 }
 
-late final SharedPreferences _storage;
+Future<void> clearLocalStorage() => _storage.clear();
 
 /// {@template StorageKeys}
 /// Local storage supports 5 types:
@@ -16,8 +18,9 @@ late final SharedPreferences _storage;
 /// Other types need to be converted in order to save/load.
 /// {@endtemplate}
 enum StorageKeys {
-  themeMode,
+  loggedIn,
   userId,
+  themeMode,
   navBarState,
   adminWatchLive,
   adminStream,
@@ -25,8 +28,9 @@ enum StorageKeys {
 
   /// {@macro StorageKeys}
   dynamic get initial => switch (this) {
-        themeMode => ThemeMode.system.index,
+        loggedIn => false,
         userId => null,
+        themeMode => ThemeMode.system.index,
         navBarState => 0,
         adminWatchLive || adminStream => false,
       };
@@ -42,9 +46,9 @@ enum StorageKeys {
     final value = fromStorage;
     return switch (this) {
       _ when value == 'null' => null,
+      loggedIn || userId => value,
       themeMode => ThemeMode.values[value],
       navBarState => NavBarButton.values[value],
-      userId => value,
       adminWatchLive || adminStream => value,
     };
   }

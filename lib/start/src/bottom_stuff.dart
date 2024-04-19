@@ -18,7 +18,7 @@ class BottomStuff extends StatelessWidget {
   }
 
   Widget builder(BuildContext context, double t, [_]) {
-    const tLineRatio = 2 / 3;
+    const tLineRatio = 0.5;
     final tLine = Curves.ease.transform(min(t / tLineRatio, 1));
     final tColumns = (t - 1) / (1 - tLineRatio) + 1;
 
@@ -73,7 +73,17 @@ class BottomStuff extends StatelessWidget {
                 LoginMethod.noID => 'sign up without ID',
                 LoginMethod.signIn => 'already registered?',
               },
-              button: _Button(enabled: true, onPressed: () {}, text: 'sign in'),
+              button: _Button(
+                enabled: true,
+                onPressed: () {},
+                text: switch (button2) {
+                  null => 'empty',
+                  LoginMethod.idName =>
+                    throw StateError('pretty sure "id/name" is always button1'),
+                  LoginMethod.noID => 'register',
+                  LoginMethod.signIn => 'sign in',
+                },
+              ),
             ),
           ],
         ),

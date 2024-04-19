@@ -5,8 +5,8 @@ import 'package:agora_uikit/agora_uikit.dart';
 import 'package:flutter/material.dart';
 import 'package:thc/credentials/credentials.dart';
 import 'package:thc/home/home_screen.dart';
-import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/app_config.dart';
+import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/widgets/state_async.dart';
 
 class ActiveStream extends StatefulWidget {

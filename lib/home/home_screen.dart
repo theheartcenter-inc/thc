@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:thc/firebase/user.dart';
 import 'package:thc/home/library/video_library.dart';
 import 'package:thc/home/profile/profile.dart';
 import 'package:thc/home/schedule/schedule.dart';
@@ -10,7 +11,6 @@ import 'package:thc/home/users/manage_users.dart';
 import 'package:thc/home/watch_live/watch_live.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
-import 'package:thc/firebase/user.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
 
 enum NavBarButton with StatelessEnum {

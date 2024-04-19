@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:thc/home/surveys/edit_survey/survey_field_editor.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
+import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/theme.dart';
 
 /// This is meant for demonstration; the survey isn't saved to Firebase or local storage.

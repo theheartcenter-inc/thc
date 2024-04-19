@@ -17,7 +17,7 @@ import 'package:thc/login_register/login.dart';
 /// For times when you want to configure the page route,
 /// you can still use `Navigator.of(context)`.
 /// {@endtemplate}
-final GlobalKey<NavigatorState> navKey = GlobalKey<NavigatorState>();
+GlobalKey<NavigatorState> navKey = GlobalKey<NavigatorState>();
 
 /// {@macro navigator}
 Nav get navigator => Nav(navKey.currentState!);

@@ -5,173 +5,168 @@ import 'package:thc/start/src/progress_tracker.dart';
 import 'package:thc/start/src/start_theme.dart';
 import 'package:thc/start/src/za_hando.dart';
 import 'package:thc/utils/theme.dart';
+import 'package:thc/utils/widgets/enum_widget.dart';
 
-class LoginFields extends StatefulWidget {
-  const LoginFields({super.key});
+enum LoginField with StatelessEnum {
+  top,
+  bottom;
+
+  FocusNode get node => switch (this) { top => nodes.$1, bottom => nodes.$2 };
+  static final nodes = (FocusNode(), FocusNode());
+  Future<void> listener() async {
+    if (node.hasFocus) {
+      LoginProgressTracker.update(focusedField: this);
+      return;
+    }
+    await Future.delayed(const Duration(milliseconds: 50));
+    LoginProgressTracker.unfocus(this);
+  }
+
+  void Function([dynamic])? submit(String? thisVal) {
+    if (thisVal?.isEmpty ?? true) return null;
+    return ([_]) => LoginProgressTracker.submit(this);
+  }
 
   @override
-  State<LoginFields> createState() => _LoginFieldsState();
+  Widget build(BuildContext context) {
+    final LoginProgress(
+      :method,
+      :focusedField,
+      :animation,
+      :fieldValues,
+    ) = LoginProgressTracker.of(context);
+
+    final showBottom = animation >= AnimationProgress.showBottom;
+    final (thisVal, otherVal) = switch (this) {
+      top => fieldValues,
+      bottom => (fieldValues.$2, fieldValues.$1),
+    };
+
+    return TextField(
+      focusNode: node,
+      decoration: InputDecoration(
+        border: InputBorder.none,
+        hoverColor: Colors.transparent,
+        fillColor: Colors.white.withOpacity(focusedField == this ? 0.5 : 0),
+        filled: true,
+        hintText: switch ((this, method)) {
+          _ when !(showBottom || focusedField == LoginField.top) => null,
+          (top, LoginMethod.idName) => 'user ID',
+          (top, LoginMethod.noID) => 'email address',
+          (top, LoginMethod.signIn) => 'user ID or email',
+          (bottom, LoginMethod.idName) => 'First and Last name',
+          (bottom, LoginMethod.noID) => throw StateError('there should only be 1 email field'),
+          (bottom, LoginMethod.signIn) => 'password',
+        },
+      ),
+      onChanged: (value) => LoginProgressTracker.update(
+          fieldValues: switch (this) {
+        top => (value, otherVal),
+        bottom => (otherVal, value),
+      }),
+      onSubmitted: submit(thisVal),
+    );
+  }
 }
 
-class _LoginFieldsState extends State<LoginFields> {
-  Alignment buttonAlignment = Alignment.topRight;
-  late final usernameNode = FocusNode()..addListener(onFocus);
-  final passwordNode = FocusNode();
-  void onFocus() async {
-    final align = usernameNode.hasFocus ? Alignment.topRight : Alignment.bottomRight;
-    setState(() => buttonAlignment = align);
-  }
-
-  String? username, password;
-
-  @override
-  void dispose() {
-    super.dispose();
-    usernameNode.dispose();
-    passwordNode.dispose();
-  }
+class LoginFields extends StatelessWidget {
+  const LoginFields({super.key});
 
   static final continueData = (
     icon: switch (defaultTargetPlatform) {
       TargetPlatform.iOS => Icons.arrow_forward_ios,
       _ => Icons.arrow_forward,
     },
-    iconfg: Color.lerp(StartColors.lightContainer, Colors.white, 0.5),
-    iconbg: StartColors.bg12,
+    iconbg: StartColors.bg38,
   );
   static const doneData = (
     icon: Icons.done,
-    iconfg: null,
     iconbg: ThcColors.green67,
   );
 
-  static const radius = 8.0;
-
   @override
   Widget build(BuildContext context) {
-    final progress = LoginProgressTracker.of(context);
-    final LoginProgress(:method, :twoLoginFields, :showBottom, :pressedStart) = progress;
+    final LoginProgress(
+      :animation,
+      :twoLoginFields,
+      :fieldValues,
+    ) = LoginProgressTracker.of(context);
 
-    void Function([dynamic])? buttonPress;
-    if (username?.isEmpty ?? false) {
-      buttonPress = ([_]) {
-        LoginProgressTracker.update(twoLoginFields: true);
-      };
-    }
+    final expandText = animation >= AnimationProgress.collapseHand;
+    final showBottom = animation >= AnimationProgress.showBottom;
+    final (username, password) = fieldValues;
 
-    final (:icon, :iconfg, :iconbg) = twoLoginFields ? doneData : continueData;
-    final Widget topText = Column(
-      children: [
-        TextField(
-          focusNode: usernameNode,
-          decoration: InputDecoration(
-            border: InputBorder.none,
-            floatingLabelBehavior: FloatingLabelBehavior.never,
-            labelStyle: const TextStyle(color: StartColors.bg),
-            hintText: switch (method) {
-              _ when !pressedStart => null,
-              LoginMethod.idName => 'user ID',
-              LoginMethod.noID => 'email address',
-              LoginMethod.signIn => 'user ID or email',
-            },
-          ),
-          onChanged: (value) => setState(() => username = value),
-          onSubmitted: buttonPress,
-        ),
-        if (twoLoginFields)
-          TextField(
-            focusNode: passwordNode,
-            decoration: InputDecoration(
-              border: InputBorder.none,
-              floatingLabelBehavior: FloatingLabelBehavior.never,
-              labelStyle: const TextStyle(color: StartColors.bg12),
-              hintText: switch (method) {
-                LoginMethod.idName => 'first and last name',
-                LoginMethod.noID => throw Exception('There should only be 1 field right now.'),
-                LoginMethod.signIn => 'password',
-              },
+    late final startButton = TextButton(
+      onPressed: animate,
+      child: AnimatedOpacity(
+        duration: Durations.extralong4,
+        opacity: expandText ? 0 : 1,
+        child: const Center(
+          child: Text(
+            'start',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
+              color: ThcColors.green,
             ),
-            onChanged: (value) => setState(() => username = value),
-            onSubmitted: buttonPress,
           ),
+        ),
+      ),
+    );
+
+    final (:icon, :iconbg) = twoLoginFields ? doneData : continueData;
+    final onPressed =
+        twoLoginFields ? LoginField.bottom.submit(password) : LoginField.top.submit(username);
+    final continueButton = Stack(
+      alignment: Alignment.center,
+      children: [
+        SizedBox(
+          width: 33,
+          height: 33,
+          child: ClipOval(
+            child: AnimatedOpacity(
+              opacity: onPressed == null ? 0.5 : 1,
+              duration: Durations.short1,
+              child: ColoredBox(color: iconbg),
+            ),
+          ),
+        ),
+        IconButton(
+          onPressed: onPressed,
+          icon: Icon(icon, color: Colors.white),
+        )
       ],
     );
 
     final fancyField = Padding(
       padding: const EdgeInsets.only(top: 5, bottom: 10),
-      child: LayoutBuilder(
-        builder: (context, constraints) => AnimatedContainer(
-          duration: Durations.long4,
-          curve: Curves.easeOutCubic,
-          constraints: BoxConstraints(maxWidth: pressedStart ? constraints.maxWidth : 125),
-          decoration: BoxDecoration(
-            border: Border.fromBorderSide(
-              pressedStart
-                  ? BorderSide.none
-                  : const BorderSide(color: ThcColors.green, width: 2.5),
+      child: Stack(
+        alignment: Alignment.bottomRight,
+        children: [
+          AnimatedContainer(
+            duration: Durations.extralong4,
+            curve: Curves.easeInOutQuart,
+            width: expandText ? 400 : 125,
+            decoration: BoxDecoration(
+              border: Border.fromBorderSide(
+                expandText
+                    ? BorderSide.none
+                    : const BorderSide(color: ThcColors.green, width: 2.5),
+              ),
+              borderRadius: BorderRadius.all(Radius.circular(expandText ? 8 : 0x100)),
+              color: Colors.white.withAlpha(expandText ? 0x40 : 0xa0),
             ),
-            borderRadius: BorderRadius.all(Radius.circular(pressedStart ? radius : 0x100)),
-            color: Colors.white.withAlpha(pressedStart ? 0x70 : 0xa0),
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              children: [
+                LoginField.top,
+                if (twoLoginFields) LoginField.bottom,
+              ],
+            ),
           ),
-          padding: EdgeInsets.symmetric(horizontal: pressedStart ? 10 : 0),
-          child: Stack(
-            children: [
-              topText,
-              if (!pressedStart)
-                Positioned.fill(
-                  child: TextButton(
-                    onPressed: () async {
-                      LoginProgressTracker.update(pressedStart: true);
-                      await Future.delayed(ZaHando.transition);
-                      LoginProgressTracker.update(showBottom: true);
-                      await Future.delayed(ZaHando.shrinkDuration);
-                      usernameNode.requestFocus();
-                    },
-                    child: const Center(
-                      child: Text(
-                        'start',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.w600,
-                          color: ThcColors.green,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              if (username != null)
-                Align(
-                  alignment: buttonAlignment,
-                  child: SizedBox(
-                    width: 50,
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          SizedBox(
-                            width: 33,
-                            height: 33,
-                            child: ClipOval(
-                              child: AnimatedOpacity(
-                                opacity: buttonPress == null ? 0.5 : 1,
-                                duration: Durations.short1,
-                                child: ColoredBox(color: iconbg),
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            onPressed: buttonPress,
-                            icon: Icon(icon, color: iconfg),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
+          Positioned.fill(child: showBottom ? const SizedBox.shrink() : startButton),
+          if (username != null) continueButton,
+        ],
       ),
     );
 

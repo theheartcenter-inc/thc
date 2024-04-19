@@ -1,66 +1,119 @@
 // ignore_for_file: sort_constructors_first
 
 import 'package:flutter/widgets.dart';
+import 'package:thc/start/src/login_fields.dart';
 import 'package:thc/utils/bloc.dart';
 
 enum LoginMethod { idName, noID, signIn }
 
-typedef LoginButtonData = (LoginMethod, VoidCallback?);
+enum AnimationProgress implements Comparable<AnimationProgress> {
+  sunrise,
+  pressStart,
+  collapseHand,
+  showBottom;
+
+  @override
+  int compareTo(AnimationProgress other) => index - other.index;
+
+  bool operator >=(AnimationProgress other) => compareTo(other) >= 0;
+}
 
 @immutable
 class LoginProgress {
   const LoginProgress({
+    required this.animation,
     required this.method,
-    required this.pressedStart,
+    required this.focusedField,
     required this.twoLoginFields,
-    required this.showBottom,
+    required this.fieldValues,
   });
 
   const LoginProgress._initial()
       : method = LoginMethod.idName,
-        pressedStart = false,
+        focusedField = null,
+        animation = AnimationProgress.sunrise,
         twoLoginFields = false,
-        showBottom = false;
+        fieldValues = (null, null);
 
   LoginProgress copyWith({
-    LoginMethod? method,
-    bool? pressedStart,
-    bool? twoLoginFields,
-    bool? showBottom,
+    required AnimationProgress? animation,
+    required LoginMethod? method,
+    required LoginField? focusedField,
+    required bool? twoLoginFields,
+    required (String?, String?)? fieldValues,
   }) {
     return LoginProgress(
+      animation: animation ?? this.animation,
       method: method ?? this.method,
-      pressedStart: pressedStart ?? this.pressedStart,
+      focusedField: focusedField ?? this.focusedField,
       twoLoginFields: twoLoginFields ?? this.twoLoginFields,
-      showBottom: showBottom ?? this.showBottom,
+      fieldValues: fieldValues ?? this.fieldValues,
     );
   }
 
+  LoginProgress unfocus() => LoginProgress(
+        animation: animation,
+        method: method,
+        focusedField: null,
+        twoLoginFields: twoLoginFields,
+        fieldValues: fieldValues,
+      );
+
+  final AnimationProgress animation;
   final LoginMethod method;
-  final bool pressedStart;
+  final LoginField? focusedField;
   final bool twoLoginFields;
-  final bool showBottom;
+  final (String?, String?) fieldValues;
 }
 
-class LoginProgressTracker extends Cubit<LoginProgress> {
+final class LoginProgressTracker extends Cubit<LoginProgress> {
   LoginProgressTracker._() : super(const LoginProgress._initial());
 
-  static final _tracker = LoginProgressTracker._();
-  factory LoginProgressTracker.create(_) => _tracker;
+  static LoginProgressTracker? _tracker;
+  static LoginProgress get readState => _tracker!.state;
+
+  factory LoginProgressTracker.create(_) {
+    if (_tracker case final tracker?) return tracker;
+
+    for (final field in LoginField.values) {
+      field.node.addListener(field.listener);
+    }
+
+    return _tracker = LoginProgressTracker._();
+  }
 
   static LoginProgress of(BuildContext context) => context.watch<LoginProgressTracker>().state;
 
   static void update({
     LoginMethod? method,
-    bool? pressedStart,
+    LoginField? focusedField,
+    AnimationProgress? animation,
     bool? twoLoginFields,
-    bool? showBottom,
+    (String?, String?)? fieldValues,
   }) {
-    _tracker.emit(_tracker.state.copyWith(
+    _tracker!.emit(readState.copyWith(
+      animation: animation,
       method: method,
-      pressedStart: pressedStart,
+      focusedField: focusedField,
       twoLoginFields: twoLoginFields,
-      showBottom: showBottom,
+      fieldValues: fieldValues,
     ));
   }
+
+  static void unfocus(LoginField field) {
+    if (readState.focusedField == field) _tracker!.emit(readState.unfocus());
+  }
+
+  static void submit(LoginField field) {
+    switch ((field, readState.method)) {
+      case (LoginField.top, _):
+        update(twoLoginFields: true);
+        LoginField.bottom.node.requestFocus();
+      case (_, final method):
+        throw UnimplementedError('field: $field, method: $method');
+    }
+  }
+
+  static late FocusNode topNode;
+  static late FocusNode bottomNode;
 }

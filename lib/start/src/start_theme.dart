@@ -3,6 +3,9 @@ import 'package:flutter/rendering.dart';
 abstract final class StartColors {
   /// [bg] with 1/8 (12%) opacity.
   static const bg12 = Color(0x20202428);
+
+  /// [bg] with 3/8 (38%) opacity.
+  static const bg38 = Color(0x60202428);
   static const bg = Color(0xff202428);
 
   /// [dullGreen] with 3/8 (38%) opacity.
@@ -13,16 +16,16 @@ abstract final class StartColors {
 }
 
 final class SunColors extends RadialGradient {
-  const SunColors() : super(colors: _colors);
+  const SunColors({super.colors = _colors});
+
+  SunColors.withOpacity(double opacity)
+      : this(colors: [for (final color in _colors) color.withOpacity(opacity)]);
+
   static const _colors = [
     Color(0xffffff00),
     Color(0xfffff000),
     Color(0xffffd500),
   ];
-
-  static RadialGradient withOpacity(double opacity) => RadialGradient(
-        colors: [for (final color in _colors) color.withOpacity(opacity)],
-      );
 
   static const border = Color(0xffffcc00);
   static const glow = Color(0xfffff0e0);

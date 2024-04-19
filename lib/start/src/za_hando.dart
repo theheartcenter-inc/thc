@@ -9,12 +9,27 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:thc/home/profile/choose_any_view/choose_any_view.dart';
 import 'package:thc/start/src/login_fields.dart';
 import 'package:thc/start/src/progress_tracker.dart';
 import 'package:thc/start/src/start_theme.dart';
+import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/svg_parsing/svg_paths.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/hand_vector.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
+/// runs when the user presses "start".
+void animate() async {
+  LoginProgressTracker.update(animation: AnimationProgress.pressStart);
+  await Future.delayed(ZaHando.transition);
+  LoginProgressTracker.update(animation: AnimationProgress.collapseHand);
+  await Future.delayed(ZaHando.shrinkDuration);
+  LoginField.top.node.requestFocus();
+  await Future.delayed(Durations.extralong1);
+  LoginProgressTracker.update(animation: AnimationProgress.showBottom);
+}
 
 /// {@macro za_hando}
 class ZaHando extends StatelessWidget {
@@ -30,16 +45,54 @@ class ZaHando extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final LoginProgress(:pressedStart) = LoginProgressTracker.of(context);
+    final LoginProgress(:animation) = LoginProgressTracker.of(context);
+    final pressedStart = animation >= AnimationProgress.pressStart;
     return Scaffold(
       backgroundColor: StartColors.bg,
-      body: SizedBox.expand(
-        child: TweenAnimationBuilder(
-          key: ValueKey(pressedStart),
-          duration: pressedStart ? _shrinkDuration : duration,
-          tween: Tween(begin: 0.0, end: 1.0),
-          builder: pressedStart ? shrinker : builder,
-          child: const LoginFields(),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Positioned(
+              top: 10,
+              right: 10,
+              child: IconButton.filled(
+                style: IconButton.styleFrom(
+                  backgroundColor: StartColors.lightContainer,
+                  foregroundColor: StartColors.bg38,
+                ),
+                onPressed: () {},
+                icon: SizedBox(
+                  width: 25,
+                  height: 25,
+                  child: SvgPicture.asset(
+                    'assets/svg_files/system_brightness.svg',
+                    colorFilter: const ColorFilter.mode(StartColors.bg38, BlendMode.srcIn),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              bottom: 10,
+              right: 10,
+              child: IconButton.filled(
+                style: IconButton.styleFrom(
+                  backgroundColor: StartColors.lightContainer,
+                  foregroundColor: StartColors.bg38,
+                ),
+                onPressed: () => navigator.push(const ChooseAnyView()),
+                icon: const Icon(Icons.build),
+              ),
+            ),
+            SizedBox.expand(
+              child: TweenAnimationBuilder(
+                key: ValueKey(pressedStart),
+                duration: pressedStart ? _shrinkDuration : duration,
+                tween: Tween(begin: 0.0, end: 1.0),
+                builder: pressedStart ? shrinker : builder,
+                child: const LoginFields(),
+              ),
+            ),
+          ],
         ),
       ),
     );

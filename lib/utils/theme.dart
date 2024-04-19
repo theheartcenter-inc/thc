@@ -55,12 +55,14 @@ extension ThatOneVideo on Set<MaterialState> {
 
 const _iconTheme = IconThemeData(size: 32);
 const _labelTextStyle = TextStyle(fontWeight: FontWeight.w600, fontSize: 12);
+final _lightBackground = Color.lerp(ThcColors.paleAzure, Colors.white, 0.33)!;
 
-ThemeData _generateTheme(bool isLight) {
+ThemeData _generateTheme(Brightness brightness) {
+  final isLight = brightness == Brightness.light;
+
   final textColor = isLight ? Colors.black : ThcColors.paleAzure;
   final slightContrast = isLight ? ThcColors.dullBlue : ThcColors.paleAzure;
   final paleColor = isLight ? Colors.white : ThcColors.paleAzure;
-  final lightBackground = Color.lerp(ThcColors.paleAzure, Colors.white, 0.33)!;
 
   MaterialStateProperty<T> selected<T>(T selected, T unselected) =>
       MaterialStateProperty.resolveWith((states) => states.isSelected ? selected : unselected);
@@ -86,7 +88,7 @@ ThemeData _generateTheme(bool isLight) {
       onError: Colors.white,
       errorContainer: Colors.red.withOpacity(0.33),
       onErrorContainer: Colors.red,
-      background: isLight ? lightBackground : ThcColors.darkBlue,
+      background: isLight ? _lightBackground : ThcColors.darkBlue,
       onBackground: textColor,
       surface: isLight ? ThcColors.tan : ThcColors.dullBlue,
       onSurface: textColor,
@@ -147,12 +149,6 @@ ThemeData _generateTheme(bool isLight) {
   );
 }
 
-/// {@macro colorScheme}
-final lightTheme = _generateTheme(true);
-
-/// {@macro colorScheme}
-final darkTheme = _generateTheme(false);
-
 /// `extension` lets you add methods to a class, as if you were
 /// doing it inside the class definition.
 ///
@@ -180,6 +176,15 @@ extension ThemeGetter on BuildContext {
 
 class AppTheme extends Cubit<ThemeMode> {
   AppTheme() : super(StorageKeys.themeMode());
+
+  static ThemeData of(BuildContext context) {
+    final mode = switch (context.watch<AppTheme>().state) {
+      ThemeMode.light => Brightness.light,
+      ThemeMode.dark => Brightness.dark,
+      ThemeMode.system => MediaQuery.platformBrightnessOf(context),
+    };
+    return _generateTheme(mode);
+  }
 
   void newThemeMode(ThemeMode newTheme) {
     StorageKeys.themeMode.save(newTheme.index);

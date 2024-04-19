@@ -3,13 +3,15 @@ import 'package:provider/provider.dart';
 import 'package:thc/firebase/user.dart';
 import 'package:thc/home/profile/account/account_field.dart';
 import 'package:thc/home/profile/account/account_settings.dart';
+import 'package:thc/home/profile/choose_any_view/choose_any_view.dart';
 import 'package:thc/home/profile/info/heart_center_info.dart';
 import 'package:thc/home/profile/report/issue_report.dart';
 import 'package:thc/home/profile/settings/settings.dart';
+import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 enum ProfileOption with StatelessEnum {
   account(
@@ -34,6 +36,12 @@ enum ProfileOption with StatelessEnum {
     Icons.report_problem,
     label: 'report an issue / send feedback',
     page: IssueReport(),
+  ),
+
+  chooseAnyView(
+    Icons.build,
+    label: 'choose any view',
+    page: ChooseAnyView(),
   );
 
   const ProfileOption(this.icon, {this.label, this.page});
@@ -41,11 +49,11 @@ enum ProfileOption with StatelessEnum {
   final String? label;
   final Widget? page;
 
+  static final count = values.length + (production ? 0 : 1);
+
   VoidCallback get onTap => switch (this) {
-        account || settings || info || report => () => navigator.push(page!),
-        donate => () => launchUrl(
-              Uri.parse('https://secure.givelively.org/donate/heart-center-inc'),
-            ),
+        donate => () => launchUrlString('https://secure.givelively.org/donate/heart-center-inc'),
+        account || settings || info || report || chooseAnyView => () => navigator.push(page!),
       };
 
   @override
@@ -81,7 +89,12 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
 
-    final userWatch = context.watch<AccountFields>().state!;
+    final userWatch = context.watch<AccountFields>().state ??
+        ThcUser(
+          name: 'Not Found',
+          type: UserType.participant,
+          id: '',
+        );
     final linkColor = Color.lerp(ThcColors.dullBlue, ThcColors.teal, 0.25)!;
     final overview = DefaultTextStyle(
       style: TextStyle(height: 1.75, color: context.colorScheme.onBackground),
@@ -90,7 +103,7 @@ class ProfileScreen extends StatelessWidget {
           children: [
             image,
             Text(userWatch.name, style: const TextStyle(fontSize: 28)),
-            if (user!.id case final id?)
+            if (user?.id case final id?)
               Text('user ID: $id', style: const TextStyle(fontWeight: FontWeight.w600)),
             if (userWatch.email case final email?)
               Text(email, style: TextStyle(color: linkColor)),
@@ -102,7 +115,7 @@ class ProfileScreen extends StatelessWidget {
     );
 
     return ProfileListView(
-      itemCount: ProfileOption.values.length + 1,
+      itemCount: ProfileOption.count,
       itemBuilder: (_, index) => switch (index - 1) {
         -1 => overview,
         final i => ProfileOption.values[i],

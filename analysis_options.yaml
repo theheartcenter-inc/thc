@@ -6,6 +6,7 @@ include: package:flutter_lints/flutter.yaml
 linter:
   rules:
     use_build_context_synchronously: false
+    # directives_ordering: true
 
     annotate_redeclares: true
     avoid_escaping_inner_quotes: true
