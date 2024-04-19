@@ -9,7 +9,6 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:thc/home/profile/choose_any_view/choose_any_view.dart';
 import 'package:thc/start/src/login_fields.dart';
 import 'package:thc/start/src/progress_tracker.dart';
@@ -18,7 +17,7 @@ import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/svg_parsing/svg_paths.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/hand_vector.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:thc/utils/widgets/system_theme_icon.dart';
 
 /// runs when the user presses "start".
 void animate() async {
@@ -61,14 +60,7 @@ class ZaHando extends StatelessWidget {
                   foregroundColor: StartColors.bg38,
                 ),
                 onPressed: () {},
-                icon: SizedBox(
-                  width: 25,
-                  height: 25,
-                  child: SvgPicture.asset(
-                    'assets/svg_files/system_brightness.svg',
-                    colorFilter: const ColorFilter.mode(StartColors.bg38, BlendMode.srcIn),
-                  ),
-                ),
+                icon: const SystemThemeIcon(color: StartColors.bg38),
               ),
             ),
             Positioned(
