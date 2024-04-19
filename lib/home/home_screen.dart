@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:thc/home/library/video_library.dart';
 import 'package:thc/home/profile/profile.dart';
 import 'package:thc/home/schedule/schedule.dart';

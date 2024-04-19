@@ -22,21 +22,21 @@
 /// and the [Cubit] class in this file.
 library;
 
-import 'dart:async';
+import 'dart:async' show StreamController;
 
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:provider/provider.dart' show InheritedProvider, InheritedContext;
+export 'package:provider/src/provider.dart' show WatchContext, ReadContext;
 
 /// {@macro bloc}
 ///
 /// This class is a "building bloc" used to define the [Cubit] class.
 abstract class Bloc<S> {
-  final _streamController = StreamController<S>.broadcast();
+  final _controller = StreamController<S>.broadcast();
 
-  /// Sends out a new state using the [_streamController].
+  /// Sends out a new state using the [_controller].
   void _emit(S newState) {
-    if (_streamController.isClosed) throw StateError('cannot emit after stream is closed.');
-    _streamController.add(newState);
+    if (_controller.isClosed) throw StateError('cannot emit after stream is closed.');
+    _controller.add(newState);
   }
 }
 
@@ -85,11 +85,15 @@ class BlocProvider<T extends Bloc> extends InheritedProvider<T> {
   BlocProvider({super.key, required super.create, super.child, super.builder, super.lazy = true})
       : super(startListening: _startListening, dispose: _dispose);
 
-  static VoidCallback _startListening(InheritedContext<Bloc?> context, Bloc value) {
-    final stream = value._streamController.stream;
+  static _CancelStream _startListening(InheritedContext<Bloc?> context, Bloc value) {
+    final subscription = value._controller.stream.listen(
+      (_) => context.markNeedsNotifyDependents(),
+    );
 
-    return stream.listen((_) => context.markNeedsNotifyDependents()).cancel;
+    return subscription.cancel;
   }
 
-  static void _dispose(BuildContext _, Bloc bloc) => bloc._streamController.close();
+  static void _dispose(_, Bloc bloc) => bloc._controller.close();
 }
+
+typedef _CancelStream = Future<void> Function();

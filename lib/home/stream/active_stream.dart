@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:agora_uikit/agora_uikit.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:thc/credentials/credentials.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/utils/bloc.dart';

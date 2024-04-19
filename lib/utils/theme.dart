@@ -24,6 +24,7 @@ import 'package:thc/utils/local_storage.dart';
 /// {@endtemplate}
 abstract final class ThcColors {
   static const green = Color(0xff99cc99);
+  static const green67 = Color(0xaa99cc99);
   static const pink = Color(0xffeecce0);
   static const orange = Color(0xffffa020);
   static const teal = Color(0xff00b0b0);

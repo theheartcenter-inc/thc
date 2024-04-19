@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:thc/firebase/user.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/navigator.dart';

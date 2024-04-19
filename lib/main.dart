@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
@@ -21,12 +20,12 @@ import 'package:thc/firebase/user.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  addKeyboardShortcuts();
 
   final asyncSetup = [
     initFirebase(),
     loadFromLocalStorage(),
   ];
-  HardwareKeyboard.instance.addHandler(shortcuts);
   await Future.wait(asyncSetup);
 
   runApp(const App());
@@ -40,7 +39,6 @@ class App extends StatelessWidget {
     return MultiProvider(
       providers: [
         BlocProvider(create: (_) => AppTheme()),
-        BlocProvider(create: (_) => LoginProgressTracker()),
         BlocProvider(create: (_) => NavBarIndex()),
         BlocProvider(create: (_) => MobileEditing()),
         BlocProvider(create: (_) => ValidSurveyQuestions()),
