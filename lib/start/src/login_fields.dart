@@ -53,9 +53,9 @@ enum LoginField with StatelessEnum {
       decoration: InputDecoration(
         border: InputBorder.none,
         hoverColor: Colors.transparent,
-        fillColor: context
-            .lightDark(Colors.white, StartColors.lightContainer)
-            .withOpacity(focused ? 0.5 : 0),
+        fillColor: focused
+            ? context.lightDark(Colors.white54, StartColors.lightContainer16)
+            : Colors.transparent,
         filled: true,
         hintText: switch ((this, fieldState)) {
           _ when !(showBottom || focusedField == LoginField.top) => null,
@@ -176,7 +176,7 @@ class _Button extends StatelessWidget {
 
   Color _iconbg(bool focused, bool buttonIsGreen, bool isLight, bool disabled) {
     double bgA = 1.0;
-    double bgH = 220.0;
+    double bgH = 210.0;
     double bgS = 0.1;
     double bgL = 0.0;
 
@@ -186,7 +186,7 @@ class _Button extends StatelessWidget {
       bgL = isLight ? 0.7 : 0.75;
     } else if (disabled) {
       bgA = isLight ? 0.125 : 0.5;
-      bgL = focused ? 0.05 : 0.45;
+      bgL = focused ? 0.05 : 1 / 3;
     } else if (isLight) {
       bgA = 0.5;
     }
@@ -231,8 +231,9 @@ class _Button extends StatelessWidget {
     final Color iconfg = switch ((brightness, focused)) {
       (Brightness.light, true) => Colors.white,
       (Brightness.light, false) => const Color(0xffd6e2ec),
-      (Brightness.dark, true) when !buttonIsGreen => const Color(0xff6a727a),
-      (Brightness.dark, true || false) => const Color(0xff0c0d0f),
+      (Brightness.dark, true) when !buttonIsGreen => StartColors.lightContainer16,
+      (Brightness.dark, true) => Colors.black,
+      (Brightness.dark, false) => const Color(0xff0c0d0f),
     };
     return Stack(
       alignment: Alignment.center,

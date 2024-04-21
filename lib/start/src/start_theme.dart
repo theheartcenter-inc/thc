@@ -23,17 +23,14 @@ abstract final class StartColors {
 
   static const dullerGreen = Color(0xff407040);
 
+  /// [lightContainer] with 5/32 (16%) opacity.
+  static const lightContainer16 = Color(0x28c8d8e6);
+
   /// [lightContainer] with 3/8 (38%) opacity.
   static const lightContainer38 = Color(0x60c8d8e6);
 
-  /// [lightContainer] with 1/2 (50%) opacity.
-  static const lightContainer50 = Color(0x80c8d8e6);
-
   /// [lightContainer] with 3/4 (75%) opacity.
   static const lightContainer75 = Color(0xc0c8d8e6);
-
-  /// [lightContainer] with 7/8 (87%) opacity.
-  static const lightContainer87 = Color(0xe0c8d8e6);
 
   static const lightContainer = Color(0xffc8d8e6);
 

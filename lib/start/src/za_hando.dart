@@ -260,9 +260,8 @@ class ZaHando extends StatelessWidget {
     final tMotion = Curves.ease.transform(tMotionLinear);
     final fontSize = 48 - 10 * tMotion;
 
-    final handColor = ThcColors.green.withOpacity(1 - t * t);
-
     final colors = context.colorScheme;
+    final handColor = colors.primary.withOpacity(1 - t * t);
 
     final heartText = Text(
       'THE HEART',
