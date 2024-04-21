@@ -2,8 +2,8 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:thc/start/src/progress_tracker.dart';
-import 'package:thc/start/src/start_theme.dart';
 import 'package:thc/start/src/za_hando.dart';
+import 'package:thc/utils/theme.dart';
 
 class BottomStuff extends StatelessWidget {
   const BottomStuff({super.key});
@@ -22,15 +22,18 @@ class BottomStuff extends StatelessWidget {
     final tLine = Curves.ease.transform(min(t / tLineRatio, 1));
     final tColumns = (t - 1) / (1 - tLineRatio) + 1;
 
-    final LoginProgress(:method, :twoLoginFields) = LoginProgressTracker.of(context);
+    final LoginProgress(:method, :fieldValues) = LoginProgressTracker.of(context);
+    final twoFields = fieldValues.$2 != null;
+    final colors = context.colorScheme;
 
     final button1 = switch (method) {
-      LoginMethod.idName => twoLoginFields ? LoginMethod.signIn : LoginMethod.noID,
+      LoginMethod.choosePassword => null,
+      LoginMethod.idName => twoFields ? LoginMethod.signIn : LoginMethod.noID,
       LoginMethod.signIn || LoginMethod.noID => LoginMethod.idName,
     };
 
     final button2 = switch (method) {
-      _ when twoLoginFields => null,
+      LoginMethod.choosePassword => null,
       LoginMethod.signIn => LoginMethod.noID,
       LoginMethod.idName || LoginMethod.noID => LoginMethod.signIn,
     };
@@ -44,6 +47,7 @@ class BottomStuff extends StatelessWidget {
             _SignInOptions(
               tColumns,
               title: switch (button1) {
+                null || LoginMethod.choosePassword => 'empty',
                 LoginMethod.idName => 'sign up with ID',
                 LoginMethod.noID => 'sign up without ID',
                 LoginMethod.signIn => 'already registered?',
@@ -52,23 +56,24 @@ class BottomStuff extends StatelessWidget {
                 enabled: true,
                 onPressed: () {},
                 text: switch (button1) {
+                  null || LoginMethod.choosePassword => 'empty',
                   LoginMethod.idName => 'return',
                   LoginMethod.noID => 'register',
                   LoginMethod.signIn => 'sign in',
                 },
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 10),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
               child: ColoredBox(
-                color: StartColors.bg12,
-                child: SizedBox(width: 1, height: double.infinity),
+                color: colors.onSurfaceVariant,
+                child: const SizedBox(width: 1, height: double.infinity),
               ),
             ),
             _SignInOptions(
               tColumns,
               title: switch (button2) {
-                null => 'empty',
+                null || LoginMethod.choosePassword => 'empty',
                 LoginMethod.idName => throw StateError('pretty sure "id/name" is always button1'),
                 LoginMethod.noID => 'sign up without ID',
                 LoginMethod.signIn => 'already registered?',
@@ -77,7 +82,7 @@ class BottomStuff extends StatelessWidget {
                 enabled: true,
                 onPressed: () {},
                 text: switch (button2) {
-                  null => 'empty',
+                  null || LoginMethod.choosePassword => 'empty',
                   LoginMethod.idName =>
                     throw StateError('pretty sure "id/name" is always button1'),
                   LoginMethod.noID => 'register',
@@ -112,13 +117,14 @@ class _SignInOptions extends StatelessWidget {
     const timeOffsetRatio = 7 / 8;
     final tTitle = min(t / timeOffsetRatio, 1.0);
     final tButton = max((t - 1) / timeOffsetRatio + 1, 0.0);
+    final colors = context.colorScheme;
 
     final title = Align(
       alignment: Alignment.topCenter,
       child: Text(
         this.title,
         textAlign: TextAlign.center,
-        style: const TextStyle(fontWeight: FontWeight.w600),
+        style: TextStyle(fontWeight: FontWeight.w600, color: colors.outline),
       ),
     );
 
@@ -146,9 +152,6 @@ class _Button extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FilledButton(
-      style: FilledButton.styleFrom(
-        foregroundColor: StartColors.dullGreen,
-      ),
       onPressed: enabled ? onPressed : null,
       child: SizedBox(
         width: double.infinity,

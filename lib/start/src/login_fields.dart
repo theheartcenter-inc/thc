@@ -22,9 +22,15 @@ enum LoginField with StatelessEnum {
     LoginProgressTracker.unfocus(this);
   }
 
-  void Function([dynamic])? submit(String? thisVal) {
-    if (thisVal?.isEmpty ?? true) return null;
-    return ([_]) => LoginProgressTracker.submit(this);
+  void newVal(String value) {
+    final current = LoginProgressTracker.readState.fieldValues;
+    LoginProgressTracker.update(
+      mismatch: false,
+      fieldValues: switch (this) {
+        top => (value, current.$2),
+        bottom => (current.$1, value),
+      },
+    );
   }
 
   @override
@@ -33,38 +39,39 @@ enum LoginField with StatelessEnum {
       :method,
       :focusedField,
       :animation,
-      :fieldValues,
     ) = LoginProgressTracker.of(context);
 
     final showBottom = animation >= AnimationProgress.showBottom;
-    final (thisVal, otherVal) = switch (this) {
-      top => fieldValues,
-      bottom => (fieldValues.$2, fieldValues.$1),
-    };
+    final colors = context.colorScheme;
+    final focused = focusedField == this;
+    final cursorColor = context.lightDark(ThcColors.green67, Colors.black);
+    final blackHint = focused && colors.brightness == Brightness.dark;
 
     return TextField(
       focusNode: node,
+      cursorColor: cursorColor,
       decoration: InputDecoration(
         border: InputBorder.none,
         hoverColor: Colors.transparent,
-        fillColor: Colors.white.withOpacity(focusedField == this ? 0.5 : 0),
+        fillColor: context
+            .lightDark(Colors.white, StartColors.lightContainer)
+            .withOpacity(focused ? 0.5 : 0),
         filled: true,
         hintText: switch ((this, method)) {
           _ when !(showBottom || focusedField == LoginField.top) => null,
           (top, LoginMethod.idName) => 'user ID',
           (top, LoginMethod.noID) => 'email address',
           (top, LoginMethod.signIn) => 'user ID or email',
+          (top, LoginMethod.choosePassword) => 'choose a password',
           (bottom, LoginMethod.idName) => 'First and Last name',
           (bottom, LoginMethod.noID) => throw StateError('there should only be 1 email field'),
           (bottom, LoginMethod.signIn) => 'password',
+          (bottom, LoginMethod.choosePassword) => 're-type your password',
         },
+        hintStyle: TextStyle(color: blackHint ? Colors.black : colors.outline),
       ),
-      onChanged: (value) => LoginProgressTracker.update(
-          fieldValues: switch (this) {
-        top => (value, otherVal),
-        bottom => (otherVal, value),
-      }),
-      onSubmitted: submit(thisVal),
+      onChanged: newVal,
+      onSubmitted: LoginProgressTracker.maybeSubmit(),
     );
   }
 }
@@ -72,29 +79,15 @@ enum LoginField with StatelessEnum {
 class LoginFields extends StatelessWidget {
   const LoginFields({super.key});
 
-  static final continueData = (
-    icon: switch (defaultTargetPlatform) {
-      TargetPlatform.iOS => Icons.arrow_forward_ios,
-      _ => Icons.arrow_forward,
-    },
-    iconbg: StartColors.bg38,
-  );
-  static const doneData = (
-    icon: Icons.done,
-    iconbg: ThcColors.green67,
-  );
-
   @override
   Widget build(BuildContext context) {
-    final LoginProgress(
-      :animation,
-      :twoLoginFields,
-      :fieldValues,
-    ) = LoginProgressTracker.of(context);
+    final LoginProgress(:animation, :fieldValues, :mismatch) = LoginProgressTracker.of(context);
+    final twoFields = fieldValues.$2 != null;
+
+    final colors = context.colorScheme;
 
     final expandText = animation >= AnimationProgress.collapseHand;
     final showBottom = animation >= AnimationProgress.showBottom;
-    final (username, password) = fieldValues;
 
     late final startButton = TextButton(
       onPressed: animate,
@@ -102,44 +95,23 @@ class LoginFields extends StatelessWidget {
         duration: Durations.extralong4,
         opacity: expandText ? 0 : 1,
         child: const Center(
-          child: Text(
-            'start',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w600,
-              color: ThcColors.green,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: 3),
+            child: Text(
+              'start',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w600,
+                color: ThcColors.green,
+              ),
             ),
           ),
         ),
       ),
     );
 
-    final (:icon, :iconbg) = twoLoginFields ? doneData : continueData;
-    final onPressed =
-        twoLoginFields ? LoginField.bottom.submit(password) : LoginField.top.submit(username);
-    final continueButton = Stack(
-      alignment: Alignment.center,
-      children: [
-        SizedBox(
-          width: 33,
-          height: 33,
-          child: ClipOval(
-            child: AnimatedOpacity(
-              opacity: onPressed == null ? 0.5 : 1,
-              duration: Durations.short1,
-              child: ColoredBox(color: iconbg),
-            ),
-          ),
-        ),
-        IconButton(
-          onPressed: onPressed,
-          icon: Icon(icon, color: Colors.white),
-        )
-      ],
-    );
-
     final fancyField = Padding(
-      padding: const EdgeInsets.only(top: 5, bottom: 10),
+      padding: const EdgeInsets.only(top: 5, bottom: 2),
       child: Stack(
         alignment: Alignment.bottomRight,
         children: [
@@ -148,24 +120,28 @@ class LoginFields extends StatelessWidget {
             curve: Curves.easeInOutQuart,
             width: expandText ? 400 : 125,
             decoration: BoxDecoration(
-              border: Border.fromBorderSide(
-                expandText
-                    ? BorderSide.none
-                    : const BorderSide(color: ThcColors.green, width: 2.5),
-              ),
+              border: expandText
+                  ? null
+                  : Border.all(
+                      color: ThcColors.green,
+                      width: 2.5,
+                      strokeAlign: BorderSide.strokeAlignOutside,
+                    ),
               borderRadius: BorderRadius.all(Radius.circular(expandText ? 8 : 0x100)),
-              color: Colors.white.withAlpha(expandText ? 0x40 : 0xa0),
             ),
             clipBehavior: Clip.antiAlias,
-            child: Column(
-              children: [
-                LoginField.top,
-                if (twoLoginFields) LoginField.bottom,
-              ],
+            child: ColoredBox(
+              color: colors.surfaceTint.withAlpha(expandText ? 0x40 : 0xa0),
+              child: Column(
+                children: [
+                  LoginField.top,
+                  if (twoFields) LoginField.bottom,
+                ],
+              ),
             ),
           ),
           Positioned.fill(child: showBottom ? const SizedBox.shrink() : startButton),
-          if (username != null) continueButton,
+          const _Button(),
         ],
       ),
     );
@@ -173,7 +149,105 @@ class LoginFields extends StatelessWidget {
     return Column(
       children: [
         fancyField,
+        AnimatedSize(
+          duration: Durations.medium1,
+          curve: Curves.ease,
+          child: mismatch
+              ? const Text(
+                  'check the above fields and try again.',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12,
+                    color: Color(0xffc00000),
+                  ),
+                )
+              : const SizedBox(width: double.infinity),
+        ),
+        const SizedBox(height: 8),
         if (showBottom) const BottomStuff(),
+      ],
+    );
+  }
+}
+
+class _Button extends StatelessWidget {
+  const _Button();
+
+  Color _iconbg(bool focused, bool buttonIsGreen, bool isLight, bool disabled) {
+    double bgA = 1.0;
+    double bgH = 220.0;
+    double bgS = 0.1;
+    double bgL = 0.0;
+
+    if (buttonIsGreen) {
+      bgH = 120.0;
+      bgS = 1 / 3;
+      bgL = isLight ? 0.7 : 0.75;
+    } else if (disabled) {
+      bgA = isLight ? 0.125 : 0.5;
+      bgL = focused ? 0.05 : 0.45;
+    } else if (isLight) {
+      bgA = 0.5;
+    }
+
+    return HSLColor.fromAHSL(bgA, bgH, bgS, bgL).toColor();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final LoginProgress(:focusedField, :fieldValues) = LoginProgressTracker.of(context);
+    final (username, password) = fieldValues;
+    final twoFields = password != null;
+
+    if (username == null) return const SizedBox.shrink();
+
+    final IconData icon;
+    if (twoFields) {
+      icon = Icons.done;
+    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+      icon = Icons.arrow_forward_ios;
+    } else {
+      icon = Icons.arrow_forward;
+    }
+
+    final focused = switch (focusedField) {
+      LoginField.top => !twoFields,
+      LoginField.bottom => true,
+      null => false,
+    };
+    final onPressed = LoginProgressTracker.maybeSubmit(fieldValues);
+    final buttonIsGreen = twoFields && onPressed != null;
+
+    final brightness = context.theme.brightness;
+
+    final iconbg = _iconbg(
+      focused,
+      buttonIsGreen,
+      brightness == Brightness.light,
+      onPressed == null,
+    );
+
+    final Color iconfg = switch ((brightness, focused)) {
+      (Brightness.light, true) => Colors.white,
+      (Brightness.light, false) => const Color(0xffd6e2ec),
+      (Brightness.dark, true) when !buttonIsGreen => const Color(0xff6a727a),
+      (Brightness.dark, true || false) => const Color(0xff0c0d0f),
+    };
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        DecoratedBox(
+          decoration: BoxDecoration(color: iconbg, shape: BoxShape.circle),
+          child: const SizedBox(width: 33, height: 33),
+        ),
+        IconButton(
+          style: IconButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            foregroundColor: iconfg,
+          ),
+          onPressed: onPressed,
+          icon: Icon(icon, color: iconfg),
+        )
       ],
     );
   }

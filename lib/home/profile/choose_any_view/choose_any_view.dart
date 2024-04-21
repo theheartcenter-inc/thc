@@ -22,9 +22,9 @@ class ChooseAnyView extends StatelessWidget {
       body: Center(
         child: Column(
           children: [
-            const Spacer(flex: 3),
+            const Spacer(flex: 5),
             for (final userType in buttons) ...[const Spacer(), UserButton(userType)],
-            const Spacer(flex: 4),
+            const Spacer(flex: 5),
             info,
             const Spacer(),
           ],

@@ -44,8 +44,8 @@ enum StorageKeys {
   /// This has the advantage of looking really snazzy.
   dynamic call() {
     final value = fromStorage;
+    if (value == 'null') return null;
     return switch (this) {
-      _ when value == 'null' => null,
       loggedIn || userId => value,
       themeMode => ThemeMode.values[value],
       navBarState => NavBarButton.values[value],

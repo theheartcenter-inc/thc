@@ -1,10 +1,11 @@
 // ignore_for_file: sort_constructors_first
 
 import 'package:flutter/widgets.dart';
+import 'package:thc/firebase/user.dart';
 import 'package:thc/start/src/login_fields.dart';
 import 'package:thc/utils/bloc.dart';
 
-enum LoginMethod { idName, noID, signIn }
+enum LoginMethod { idName, noID, signIn, choosePassword }
 
 enum AnimationProgress implements Comparable<AnimationProgress> {
   sunrise,
@@ -24,30 +25,30 @@ class LoginProgress {
     required this.animation,
     required this.method,
     required this.focusedField,
-    required this.twoLoginFields,
     required this.fieldValues,
+    required this.mismatch,
   });
 
   const LoginProgress._initial()
       : method = LoginMethod.idName,
         focusedField = null,
         animation = AnimationProgress.sunrise,
-        twoLoginFields = false,
+        mismatch = false,
         fieldValues = (null, null);
 
   LoginProgress copyWith({
     required AnimationProgress? animation,
     required LoginMethod? method,
     required LoginField? focusedField,
-    required bool? twoLoginFields,
     required (String?, String?)? fieldValues,
+    required bool? mismatch,
   }) {
     return LoginProgress(
       animation: animation ?? this.animation,
       method: method ?? this.method,
       focusedField: focusedField ?? this.focusedField,
-      twoLoginFields: twoLoginFields ?? this.twoLoginFields,
       fieldValues: fieldValues ?? this.fieldValues,
+      mismatch: mismatch ?? this.mismatch,
     );
   }
 
@@ -55,15 +56,15 @@ class LoginProgress {
         animation: animation,
         method: method,
         focusedField: null,
-        twoLoginFields: twoLoginFields,
         fieldValues: fieldValues,
+        mismatch: mismatch,
       );
 
   final AnimationProgress animation;
   final LoginMethod method;
   final LoginField? focusedField;
-  final bool twoLoginFields;
   final (String?, String?) fieldValues;
+  final bool mismatch;
 }
 
 final class LoginProgressTracker extends Cubit<LoginProgress> {
@@ -73,10 +74,9 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
   static LoginProgress get readState => _tracker!.state;
 
   factory LoginProgressTracker.create(_) {
-    if (_tracker case final tracker?) return tracker;
-
     for (final field in LoginField.values) {
-      field.node.addListener(field.listener);
+      // ignore: invalid_use_of_protected_member
+      if (!field.node.hasListeners) field.node.addListener(field.listener);
     }
 
     return _tracker = LoginProgressTracker._();
@@ -88,15 +88,15 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
     LoginMethod? method,
     LoginField? focusedField,
     AnimationProgress? animation,
-    bool? twoLoginFields,
     (String?, String?)? fieldValues,
+    bool? mismatch,
   }) {
     _tracker!.emit(readState.copyWith(
       animation: animation,
       method: method,
       focusedField: focusedField,
-      twoLoginFields: twoLoginFields,
       fieldValues: fieldValues,
+      mismatch: mismatch,
     ));
   }
 
@@ -104,14 +104,31 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
     if (readState.focusedField == field) _tracker!.emit(readState.unfocus());
   }
 
-  static void submit(LoginField field) {
+  static Future<void> submit(LoginField field) async {
     switch ((field, readState.method)) {
       case (LoginField.top, _):
-        update(twoLoginFields: true);
-        LoginField.bottom.node.requestFocus();
+        LoginField.bottom
+          ..newVal('')
+          ..node.requestFocus();
+      case (LoginField.bottom, LoginMethod.idName):
+        final (id, name) = readState.fieldValues;
+        final doc = await UserCollection.unregistered_users.doc(id).get();
+        final match = doc.exists && doc['name'] == name;
+        update(mismatch: !match);
       case (_, final method):
         throw UnimplementedError('field: $field, method: $method');
     }
+  }
+
+  static void Function([dynamic])? maybeSubmit([(String?, String?)? fieldValues]) {
+    final values = fieldValues ?? LoginProgressTracker.readState.fieldValues;
+    final (field, value) = switch (values) {
+      (final value, null) => (LoginField.top, value),
+      (_, final value) => (LoginField.bottom, value),
+    };
+
+    if (value?.isEmpty ?? true) return null;
+    return ([_]) => submit(field);
   }
 
   static late FocusNode topNode;

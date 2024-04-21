@@ -39,7 +39,7 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
 
   @override
   void animate() async {
-    if (useInternet) client.initialize();
+    // if (useInternet) client.initialize();
     sleep(0.5, then: setTimer);
   }
 

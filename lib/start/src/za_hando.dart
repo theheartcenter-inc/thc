@@ -9,15 +9,14 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:thc/home/profile/choose_any_view/choose_any_view.dart';
 import 'package:thc/start/src/login_fields.dart';
 import 'package:thc/start/src/progress_tracker.dart';
 import 'package:thc/start/src/start_theme.dart';
 import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/svg_parsing/svg_paths.dart';
 import 'package:thc/utils/theme.dart';
-import 'package:thc/utils/widgets/hand_vector.dart';
-import 'package:thc/utils/widgets/system_theme_icon.dart';
+import 'package:thc/utils/widgets/theme_mode_picker.dart';
 
 /// runs when the user presses "start".
 void animate() async {
@@ -46,45 +45,55 @@ class ZaHando extends StatelessWidget {
   Widget build(BuildContext context) {
     final LoginProgress(:animation) = LoginProgressTracker.of(context);
     final pressedStart = animation >= AnimationProgress.pressStart;
+    final colors = context.colorScheme;
+    final builder = pressedStart ? collapse : sunrise;
     return Scaffold(
       backgroundColor: StartColors.bg,
       body: SafeArea(
-        child: Stack(
-          children: [
-            Positioned(
-              top: 10,
-              right: 10,
-              child: IconButton.filled(
-                style: IconButton.styleFrom(
-                  backgroundColor: StartColors.lightContainer,
-                  foregroundColor: StartColors.bg38,
-                ),
-                onPressed: () {},
-                icon: const SystemThemeIcon(color: StartColors.bg38),
-              ),
-            ),
-            Positioned(
-              bottom: 10,
-              right: 10,
-              child: IconButton.filled(
-                style: IconButton.styleFrom(
-                  backgroundColor: StartColors.lightContainer,
-                  foregroundColor: StartColors.bg38,
-                ),
-                onPressed: () => navigator.push(const ChooseAnyView()),
-                icon: const Icon(Icons.build),
-              ),
-            ),
-            SizedBox.expand(
-              child: TweenAnimationBuilder(
-                key: ValueKey(pressedStart),
-                duration: pressedStart ? _shrinkDuration : duration,
-                tween: Tween(begin: 0.0, end: 1.0),
-                builder: pressedStart ? shrinker : builder,
-                child: const LoginFields(),
-              ),
-            ),
-          ],
+        child: SizedBox.expand(
+          child: TweenAnimationBuilder(
+            key: ValueKey(pressedStart),
+            duration: pressedStart ? _shrinkDuration : duration,
+            tween: Tween(begin: 0.0, end: 1.0),
+            builder: (context, t, child) {
+              return Stack(
+                children: [
+                  Positioned(
+                    top: 16,
+                    right: 16,
+                    child: _FadeIn(
+                      t,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            width: 48,
+                            height: 48,
+                            child: IconButton.filled(
+                              style: IconButton.styleFrom(
+                                backgroundColor: colors.surface,
+                                foregroundColor: colors.outline,
+                              ),
+                              onPressed: () => navigator.push(const ChooseAnyView()),
+                              icon: const Icon(Icons.build),
+                            ),
+                          ),
+                          const SizedBox(width: 16),
+                          ThemeModePicker(
+                            backgroundColor: colors.surface,
+                            foregroundColor: colors.outline,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  builder(context, t, child),
+                ],
+              );
+            },
+            child: const LoginFields(),
+          ),
         ),
       ),
     );
@@ -95,25 +104,27 @@ class ZaHando extends StatelessWidget {
   static const sunSize = 225.0;
   static const sunPadding = 20.0;
 
-  Widget builder(BuildContext _, double t, Widget? child) {
+  Widget sunrise(BuildContext context, double t, Widget? child) {
     final t2 = t * t;
     final t5 = t2 * t2 * t;
     final t10 = t5 * t5;
     final backgroundGradient = t < 2 / 3;
 
-    final handColor = HSVColor.fromAHSV(1.0, 180 - t * 60, 1 - t * 0.75, t * 0.8);
+    final colors = context.colorScheme;
+    final (tSaturation, tValue) = switch (colors.brightness) {
+      Brightness.light => (1 - t * 0.75, t * 0.8),
+      Brightness.dark => (1 - t * 2 / 3, t * 0.75),
+    };
+    final handHSV = HSVColor.fromAHSV(1.0, 180 - t * 60, tSaturation, tValue);
+    final handColor = t == 1 ? colors.primary : handHSV.toColor();
 
     final tSun = Curves.easeOutSine.transform(t);
     final sunCenter = HSVColor.fromAHSV(1, tSun * 30 + 30, 1, (tSun + 1) / 2);
     final sunOuter = sunCenter.withHue(tSun * 30 + 20);
-    final sunBorder = Border.all(
-      width: 4,
-      color: SunColors.border.withOpacity(t10),
-    );
-    final sunGlow = BoxShadow(
-      color: SunColors.glow.withOpacity(1.4 * (t2 - t10)),
-      blurRadius: 20,
-    );
+    final sunMid = HSVColor.lerp(sunCenter, sunOuter, 1 / 3)!;
+    final sunBorder = Border.all(width: 4, color: SunColors.border.withOpacity(t10));
+    final tGlow = 1.4 * (t2 - t10);
+    final sunGlow = BoxShadow(color: SunColors.glow.withOpacity(tGlow), blurRadius: 20);
 
     final tSunrise = Curves.easeOutSine.transform(min(t * 1.25, 1));
     final sunOffset = Offset(0, (sunSize + sunPadding * 2.5) * (1 - tSunrise));
@@ -123,66 +134,43 @@ class ZaHando extends StatelessWidget {
     final tScale = Curves.easeOutExpo.transform(tContainer);
     final scale = 20 * (1 - tScale) + 1.0;
 
-    final innerHand = Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Transform.scale(
-          scale: 1.2,
-          child: _FadeIn(
-            t,
-            child: const Text(
-              'THE HEART',
-              style: TextStyle(
-                fontSize: 48,
-                fontWeight: FontWeight.bold,
-                color: StartColors.dullGreen38,
-              ),
-            ),
-          ),
-        ),
-        Transform.translate(
-          offset: sunOffset,
-          child: Padding(
-            padding: const EdgeInsets.all(sunPadding),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: RadialGradient(
-                  colors: [
-                    sunCenter.toColor(),
-                    HSVColor.lerp(sunCenter, sunOuter, 1 / 3)!.toColor(),
-                    sunOuter.toColor(),
-                  ],
+    final heartText = Text('THE HEART', style: TextStyle(color: colors.primaryContainer));
+    const centerText = Text('CENTER', style: TextStyle(color: SunColors.overlayText));
+
+    final innerHand = DefaultTextStyle(
+      style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Transform.scale(scale: 1.2, child: _FadeIn(t, child: heartText)),
+          Transform.translate(
+            offset: sunOffset,
+            child: Padding(
+              padding: const EdgeInsets.all(sunPadding),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: RadialGradient(
+                    colors: [sunCenter.toColor(), sunMid.toColor(), sunOuter.toColor()],
+                  ),
+                  shape: BoxShape.circle,
+                  border: sunBorder,
+                  boxShadow: [sunGlow],
                 ),
-                shape: BoxShape.circle,
-                border: sunBorder,
-                boxShadow: [
-                  sunGlow,
-                ],
-              ),
-              child: SizedBox(
-                width: sunSize,
-                height: sunSize,
-                child: Center(
-                  child: Transform.scale(
-                    scaleY: 1.1,
-                    child: _FadeIn(
-                      t,
-                      child: const Text(
-                        'CENTER',
-                        style: TextStyle(
-                          fontSize: 48,
-                          fontWeight: FontWeight.bold,
-                          color: SunColors.overlayText,
-                        ),
-                      ),
+                child: SizedBox(
+                  width: sunSize,
+                  height: sunSize,
+                  child: Center(
+                    child: Transform.scale(
+                      scaleY: 1.1,
+                      child: _FadeIn(t, child: centerText),
                     ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
 
     final zaHando = Center(
@@ -191,7 +179,7 @@ class ZaHando extends StatelessWidget {
           margin: const EdgeInsets.all(25),
           padding: const EdgeInsets.all(25),
           decoration: BoxDecoration(
-            color: StartColors.lightContainer.withOpacity(tContainer * 7 / 8),
+            color: colors.surface.withOpacity(tContainer),
             borderRadius: const BorderRadius.all(Radius.circular(8)),
           ),
           width: 450,
@@ -205,20 +193,10 @@ class ZaHando extends StatelessWidget {
                   child: FittedBox(
                     child: Stack(
                       children: [
-                        if (backgroundGradient)
-                          SizedBox.fromSize(size: handSize)
-                        else
-                          Transform.scale(
-                            scale: scale,
-                            child: CustomPaint(
-                              size: handSize,
-                              painter: SvgPainter(
-                                color: handColor.toColor(),
-                                svgPath: SvgPaths.thcLogo,
-                              ),
-                              child: SizedBox.fromSize(size: handSize),
-                            ),
-                          ),
+                        _HandVector(
+                          scale: scale,
+                          color: backgroundGradient ? null : handColor,
+                        ),
                         Positioned.fill(
                           child: ClipRect(
                             child: Align(
@@ -246,7 +224,7 @@ class ZaHando extends StatelessWidget {
     final tHorizon = (t * 2 - 1 / 3).clamp(0.0, 1.0);
     late final handHorizon = HSVColor.lerp(
       HSVColor.fromAHSV(1.0, 0, 1 - tHorizon * 0.75, tHorizon * 0.8),
-      handColor,
+      handHSV,
       tHorizon,
     )!;
     return Stack(
@@ -257,7 +235,7 @@ class ZaHando extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [handColor.toColor(), if (!kIsWeb) handHorizon.toColor()],
+              colors: [handColor, if (!kIsWeb) handHorizon.toColor()],
             ),
           ),
           child: const SizedBox.expand(),
@@ -272,7 +250,7 @@ class ZaHando extends StatelessWidget {
   static const minScale = 0.8;
   static const motionRatio = 1 - handBounceTime;
 
-  Widget shrinker(BuildContext _, double t, Widget? child) {
+  Widget collapse(BuildContext context, double t, Widget? child) {
     final tHand = min(t / handTotalTime, 1.0);
     final double scale = switch (tHand - handBounceTime) {
       < 0 => 1 - tHand * (1 - minScale) / handBounceTime,
@@ -285,49 +263,60 @@ class ZaHando extends StatelessWidget {
 
     final opacity = 1 - t * t;
 
-    final innerHand = Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Transform.scale(
-          scale: 1.2 - tMotion * 0.2,
-          child: Text(
-            'THE HEART',
-            style: TextStyle(
-              fontSize: fontSize,
-              fontWeight: FontWeight.bold,
-              color: Color.lerp(StartColors.dullGreen38, StartColors.bg12, t),
-            ),
-          ),
-        ),
-        Padding(
-          padding: EdgeInsets.all(sunPadding * (1 - tMotion)),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: SunColors.withOpacity(1 - tHand),
-              shape: BoxShape.circle,
-              border: Border.all(width: 4, color: SunColors.border.withOpacity(1 - tHand)),
-            ),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minWidth: sunSize,
-                minHeight: sunSize * (1 - tMotion),
+    final colors = context.colorScheme;
+
+    final heartText = Text(
+      'THE HEART',
+      style: TextStyle(color: Color.lerp(StartColors.dullGreen38, colors.onSurfaceVariant, t)),
+    );
+    final centerText = Text(
+      'CENTER',
+      style: TextStyle(color: Color.lerp(SunColors.overlayText, colors.onSurfaceVariant, t)),
+    );
+
+    final innerHand = DefaultTextStyle(
+      style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Transform.scale(scale: 1 + 0.2 * (1 - tMotion), child: heartText),
+          Padding(
+            padding: EdgeInsets.all(sunPadding * (1 - tMotion)),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: SunColors.withOpacity(1 - tHand),
+                shape: BoxShape.circle,
+                border: Border.all(width: 4, color: SunColors.border.withOpacity(1 - tHand)),
               ),
-              child: Center(
-                child: Transform.scale(
-                  scaleY: 1.1 - 0.1 * tMotion,
-                  child: Text(
-                    'CENTER',
-                    style: TextStyle(
-                      fontSize: fontSize,
-                      fontWeight: FontWeight.bold,
-                      color: Color.lerp(SunColors.overlayText, StartColors.bg12, t),
-                      shadows: const [Shadow(color: StartColors.bg)],
-                    ),
-                  ),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minWidth: sunSize,
+                  minHeight: sunSize * (1 - tMotion),
+                ),
+                child: Center(
+                  child: Transform.scale(scaleY: 1.1 - 0.1 * tMotion, child: centerText),
                 ),
               ),
             ),
           ),
+        ],
+      ),
+    );
+
+    final zaHando = Stack(
+      alignment: Alignment.topCenter,
+      children: [
+        SizedBox(
+          width: _handWidth,
+          height: _handHeight * (1 - tMotion),
+          child: FittedBox(
+            fit: BoxFit.fitWidth,
+            child: _HandVector(scale: scale, color: ThcColors.green.withOpacity(opacity)),
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(top: 425 * (1 - tMotion), bottom: 20 * tMotion),
+          child: innerHand,
         ),
       ],
     );
@@ -337,9 +326,9 @@ class ZaHando extends StatelessWidget {
         builder: (context, constraints) => Container(
           margin: const EdgeInsets.all(25),
           padding: const EdgeInsets.all(25),
-          decoration: const BoxDecoration(
-            color: StartColors.lightContainer,
-            borderRadius: BorderRadius.all(Radius.circular(8)),
+          decoration: BoxDecoration(
+            color: colors.surface,
+            borderRadius: BorderRadius.circular(8),
           ),
           width: 450,
           clipBehavior: Clip.hardEdge,
@@ -347,49 +336,10 @@ class ZaHando extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: constraints.maxHeight - 400,
-                ),
+                constraints: BoxConstraints(maxHeight: constraints.maxHeight - 400),
                 child: Padding(
                   padding: EdgeInsets.all(25 * (1 - tMotion)).copyWith(top: 0),
-                  child: FittedBox(
-                    child: Stack(
-                      alignment: Alignment.topCenter,
-                      children: [
-                        SizedBox(
-                          width: _handWidth,
-                          height: _handHeight * (1 - tMotion),
-                          child: FittedBox(
-                            fit: BoxFit.fitWidth,
-                            child: Transform.scale(
-                              scale: scale,
-                              child: CustomPaint(
-                                size: handSize,
-                                painter: SvgPainter(
-                                  color: ThcColors.green.withOpacity(opacity),
-                                  svgPath: SvgPaths.thcLogo,
-                                ),
-                                child: SizedBox.fromSize(size: handSize),
-                              ),
-                            ),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(
-                            top: 425 * (1 - tMotion),
-                            bottom: 20 * tMotion,
-                          ),
-                          child: innerHand,
-                        ),
-                        // Positioned.fill(
-                        //   child: Align(
-                        //     alignment: const Alignment(0, 0.8),
-                        //     child: innerHand,
-                        //   ),
-                        // ),
-                      ],
-                    ),
-                  ),
+                  child: FittedBox(child: zaHando),
                 ),
               ),
               child!,
@@ -416,5 +366,27 @@ class _FadeIn extends StatelessWidget {
       curve: Curves.easeOut,
       child: child,
     );
+  }
+}
+
+class _HandVector extends StatelessWidget {
+  const _HandVector({required this.scale, required this.color});
+  final double scale;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget? child;
+    if (color case final color?) {
+      child = Transform.scale(
+        scale: scale,
+        child: SvgPicture.asset(
+          placeholderBuilder: (_) => ColoredBox(color: color),
+          'assets/svg_files/thc_logo.svg',
+          colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+        ),
+      );
+    }
+    return SizedBox(width: 600, height: 800, child: child);
   }
 }

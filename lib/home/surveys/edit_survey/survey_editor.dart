@@ -185,28 +185,24 @@ class _SurveyEditorState extends State<SurveyEditor> {
           ),
         ],
       ),
-      body: GestureDetector(
-        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-        behavior: HitTestBehavior.translucent,
-        child: Center(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                ReorderableListView(
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  buildDefaultDragHandles: false,
-                  onReorder: (oldIndex, newIndex) {
-                    if (newIndex > oldIndex) newIndex--;
-                    setState(() {
-                      keyedQuestions.insert(newIndex, keyedQuestions.removeAt(oldIndex));
-                    });
-                  },
-                  children: editors,
-                ),
-                divider(keyedQuestions.length),
-              ],
-            ),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              ReorderableListView(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                buildDefaultDragHandles: false,
+                onReorder: (oldIndex, newIndex) {
+                  if (newIndex > oldIndex) newIndex--;
+                  setState(() {
+                    keyedQuestions.insert(newIndex, keyedQuestions.removeAt(oldIndex));
+                  });
+                },
+                children: editors,
+              ),
+              divider(keyedQuestions.length),
+            ],
           ),
         ),
       ),

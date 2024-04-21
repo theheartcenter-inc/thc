@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:thc/start/src/start_theme.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
 
@@ -51,6 +52,7 @@ abstract final class ThcColors {
 extension ThatOneVideo on Set<MaterialState> {
   bool get isFocused => contains(MaterialState.focused);
   bool get isSelected => contains(MaterialState.selected);
+  bool get isPressed => contains(MaterialState.pressed);
 }
 
 const _iconTheme = IconThemeData(size: 32);
@@ -77,9 +79,10 @@ ThemeData _generateTheme(Brightness brightness) {
   return ThemeData(
     colorScheme: ColorScheme(
       brightness: isLight ? Brightness.light : Brightness.dark,
-      primary: ThcColors.green,
+      primary: isLight ? ThcColors.green : StartColors.zaHando,
+      primaryContainer: isLight ? StartColors.dullGreen38 : StartColors.dullGreen50,
+      onPrimary: isLight ? StartColors.dullGreen : StartColors.dullerGreen,
       inversePrimary: ThcColors.darkGreen,
-      onPrimary: Colors.white,
       secondary: ThcColors.teal,
       onSecondary: Colors.white,
       tertiary: isLight ? ThcColors.darkMagenta : ThcColors.tan,

@@ -49,6 +49,7 @@ class App extends StatelessWidget {
           BlocProvider(create: (_) => AccountFields()),
         ],
         builder: (context, _) => MaterialApp(
+          themeAnimationCurve: Curves.easeOutSine,
           navigatorKey: navKey,
           theme: AppTheme.of(context),
           debugShowCheckedModeBanner: false,
