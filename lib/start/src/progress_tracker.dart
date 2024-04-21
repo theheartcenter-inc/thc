@@ -75,8 +75,9 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
 
   factory LoginProgressTracker.create(_) {
     for (final field in LoginField.values) {
-      // ignore: invalid_use_of_protected_member
-      if (!field.node.hasListeners) field.node.addListener(field.listener);
+      field.node
+        ..removeListener(field.listener)
+        ..addListener(field.listener);
     }
 
     return _tracker = LoginProgressTracker._();

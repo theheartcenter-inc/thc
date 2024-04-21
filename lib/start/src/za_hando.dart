@@ -9,6 +9,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:thc/home/profile/choose_any_view/choose_any_view.dart';
 import 'package:thc/start/src/login_fields.dart';
@@ -140,7 +141,7 @@ class ZaHando extends StatelessWidget {
     const centerText = Text('CENTER', style: StyleText(color: SunColors.overlayText));
 
     final innerHand = DefaultTextStyle(
-      style: const StyleText(size: 48, weight: FontWeight.bold),
+      style: const StyleText(size: 48, weight: 750),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

@@ -5,7 +5,7 @@ class StyleText extends TextStyle {
   const StyleText({
     double? size,
     bool extraBold = false,
-    this.weight = 400,
+    this.weight,
     super.inherit,
     super.color,
     super.backgroundColor,
@@ -25,7 +25,7 @@ class StyleText extends TextStyle {
     super.debugLabel,
     super.package,
     super.overflow,
-  })  : assert(weight is FontWeight || weight is num),
+  })  : assert(weight == null || weight is FontWeight || weight is num),
         super(
           fontSize: size,
           fontFamily: 'pretendard',
@@ -36,7 +36,7 @@ class StyleText extends TextStyle {
     double? size,
     bool italic = false,
     bool extraBold = false,
-    this.weight = 400,
+    this.weight,
     super.inherit,
     super.color,
     super.backgroundColor,
@@ -56,7 +56,7 @@ class StyleText extends TextStyle {
     super.debugLabel,
     super.package,
     super.overflow,
-  })  : assert(weight is FontWeight || weight is num),
+  })  : assert(weight == null || weight is FontWeight || weight is num),
         super(
           fontSize: size,
           fontStyle: italic ? FontStyle.italic : FontStyle.normal,
@@ -68,15 +68,16 @@ class StyleText extends TextStyle {
   ///
   /// In [Style.mono], the value can range from 100 to 700;
   /// otherwise, it can go from 50 to 1000.
-  final Object weight;
+  final dynamic weight;
 
   @override
   List<FontVariation>? get fontVariations {
+    if (weight == null) return null;
+
     final w = switch (weight) {
       final FontWeight w => w.value,
       final n => n as num,
     };
-
     return [FontVariation.weight(w.toDouble())];
   }
 }
