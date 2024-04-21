@@ -358,43 +358,6 @@ enum SurveyPresets {
         optional: true,
       ),
     ],
-  ),
-
-  /// {@macro totally_not_a_waste_of_time}
-  funQuiz(
-    label: 'personality quiz',
-    questions: [
-      RadioQuestion(
-        "Hey friends, it's Nate—this is something I made for fun.\n\n"
-        'Answer these questions and find out how similar we are!',
-        choices: ['Sounds good!'],
-        optional: true,
-      ),
-      FunQuiz('having a dog 🐕'),
-      FunQuiz('having a cat 🐈'),
-      FunQuiz('creative writing ✍️'),
-      FunQuiz('anime 🍙'),
-      FunQuiz('Sonic the Hedgehog 🦔'),
-      FunQuiz('DIY projects 🛠️'),
-      FunQuiz('vegan diet 🥦'),
-      FunQuiz('margaritas 🍸'),
-      FunQuiz('shrooms 🍄'),
-      FunQuiz('the color "cyan" 🩵'),
-      FunQuiz('the movie "Nimona" 🩷'),
-      FunQuiz('the show "Game of Thrones" ⚔️'),
-      FunQuiz('swimming 🏊'),
-      FunQuiz('cycling 🚲'),
-      FunQuiz('rock climbing 🧗'),
-      FunQuiz('football 🏈'),
-      FunQuiz('traveling ✈️'),
-      FunQuiz('singing 🎤'),
-      FunQuiz('going to concerts ✨'),
-      ScaleQuestion(
-        'how tall? 📏',
-        values: FunQuiz.heights,
-        optional: true,
-      ),
-    ],
   );
 
   /// By defining a constructor inside an enum, we can give it members
@@ -404,24 +367,4 @@ enum SurveyPresets {
   /// Stores the text shown on the button that links to the survey.
   final String label;
   final List<SurveyQuestion> questions;
-}
-
-/// {@macro totally_not_a_waste_of_time}
-class FunQuiz extends ScaleQuestion {
-  /// {@macro totally_not_a_waste_of_time}
-  const FunQuiz(super.description) : super(values: scaleValues, optional: true);
-
-  /// Set to `true` while you're taking the personality quiz.
-  ///
-  /// Changes the survey "submit" button's behavior and a couple of theme colors.
-  static bool inProgress = false;
-  static const scaleValues = ['👎', "don't like", 'neutral', 'enjoy 👍', 'completely obsessed'];
-  static const heights = [
-    ...["4'10", "4'11"],
-    ...["5'0", "5'1", "5'2", "5'3", "5'4", "5'5", "5'6", "5'7", "5'8", "5'9", "5'10", "5'11"],
-    ...["6'0", "6'1", "6'2", "6'3", "6'4", "6'5", "6'6"],
-  ];
-
-  /// Match these values for a "100.0%"!
-  static const myAnswers = [2, 3, 1, 2, 4, 1, 4, 0, 3, 4, 4, 1, 1, 4, 3, 0, 1, 4, 1, 7];
 }

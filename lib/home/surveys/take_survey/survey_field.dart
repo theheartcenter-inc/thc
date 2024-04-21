@@ -54,7 +54,6 @@ extension type SurveyRecord.fromRecord((SurveyQuestion, dynamic) record) {
   SurveyRecord.init(SurveyQuestion question) : this(question, initialAnswer(question));
 
   static initialAnswer(SurveyQuestion question) => switch (question) {
-        FunQuiz() => 2,
         ScaleQuestion() => 0,
         TextPromptQuestion() => '',
         final CheckboxQuestion question => (List.filled(question.totalChoices, false), null),

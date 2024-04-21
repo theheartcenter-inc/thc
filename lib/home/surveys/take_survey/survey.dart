@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
-import 'package:thc/home/surveys/take_survey/fun_quiz.dart';
 import 'package:thc/home/surveys/take_survey/survey_field.dart';
 import 'package:thc/home/surveys/take_survey/survey_theme.dart';
 import 'package:thc/utils/bloc.dart';
@@ -37,10 +36,6 @@ class _SurveyScreenState extends State<SurveyScreen> {
   /// If every non-optional question is answered, this will navigate
   /// to a screen that shows results.
   void validate() {
-    if (FunQuiz.inProgress) {
-      navigator.pushReplacement(FunQuizResults(data.funQuizResults));
-      return;
-    }
     final validation = context.read<ValidSurveyAnswers>();
     if (data.valid) {
       validation.emit(false);
