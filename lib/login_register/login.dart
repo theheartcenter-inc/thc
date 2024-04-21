@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:thc/firebase/user.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/login_register/forgot_password.dart';
 import 'package:thc/login_register/register.dart';
@@ -181,7 +182,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             password: password,
                           );
                           final user = FirebaseAuth.instance.currentUser;
-                          final Map<String, Object> dataToSave = {
+                          final Json dataToSave = {
                             'name': 'random_name',
                             'uid': user!.uid,
                             'role': 'user',

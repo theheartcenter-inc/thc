@@ -1,3 +1,5 @@
+import 'package:thc/firebase/user.dart';
+
 class LiveStreamModel {
   LiveStreamModel({
     required this.liveStreamId,
@@ -29,7 +31,7 @@ class LiveStreamModel {
   String directorId;
   String directorName;
 
-  Map<String, dynamic> toDocument() => {
+  Json get json => {
         'liveStreamId': liveStreamId,
         'title': title,
         'startTime': startTime,

@@ -10,7 +10,7 @@ enum UserType {
   director,
   admin;
 
-  factory UserType.fromJson(Map<String, dynamic> json) {
+  factory UserType.fromJson(Json json) {
     final type = json['type'];
     return values.firstWhere((userType) => userType.toString() == type);
   }
@@ -34,15 +34,23 @@ enum UserType {
       };
 }
 
-// ignore: constant_identifier_names
-enum UserCollection { users, unregistered_users }
+enum UserCollection { users, unregisteredUsers }
 
-extension GetCollection on UserCollection? {
-  DocumentReference<Map<String, dynamic>> doc([String? path]) {
+typedef Json = Map<String, dynamic>;
+
+extension FetchFromFirebaseFirestore on UserCollection? {
+  CollectionReference<Json> get _this {
     final userCollection = this ?? UserCollection.users;
-    final dbCollection = db.collection(userCollection.name);
+    return db.collection(userCollection.name);
+  }
 
-    return dbCollection.doc(path);
+  DocumentReference<Json> doc([String? path]) => _this.doc(path);
+
+  Stream<QuerySnapshot<Json>> snapshots({
+    bool includeMetadataChanges = false,
+    ListenSource source = ListenSource.defaultSource,
+  }) {
+    return _this.snapshots(includeMetadataChanges: includeMetadataChanges, source: source);
   }
 }
 
@@ -108,7 +116,7 @@ sealed class ThcUser {
   }
 
   /// {@macro ThcUser}
-  factory ThcUser.fromJson(Map<String, dynamic> json) {
+  factory ThcUser.fromJson(Json json) {
     return ThcUser(
       name: json['name'],
       type: UserType.fromJson(json),
@@ -161,7 +169,7 @@ sealed class ThcUser {
     );
   }
 
-  Map<String, dynamic> get json => {
+  Json get json => {
         'name': name,
         'type': '$type',
         if (id != null) 'id': id,

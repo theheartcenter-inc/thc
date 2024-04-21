@@ -1,5 +1,4 @@
-/// This file has no imports whatsoever, just pure Dart code. 😎
-library;
+import 'package:thc/firebase/user.dart';
 
 extension ValidAnswer on String? {
   /// If the user just presses the spacebar a couple of times,
@@ -27,7 +26,7 @@ sealed class SurveyQuestion {
   /// [SurveyQuestion] objects, but we still need it for defining the subclasses.
   const SurveyQuestion(this.description, {required this.optional});
 
-  factory SurveyQuestion.fromJson(Map<String, dynamic> json) {
+  factory SurveyQuestion.fromJson(Json json) {
     final String question = json['question'];
     final bool optional = json['optional'] ?? false;
 
@@ -83,7 +82,7 @@ sealed class SurveyQuestion {
   /// It returns `null` if there isn't a valid answer yet.
   String? answerDescription(covariant dynamic answer);
 
-  Map<String, dynamic> get json => {'question': description, if (optional) 'optional': true};
+  Json get json => {'question': description, if (optional) 'optional': true};
 }
 
 /// {@template YesNoQuestion}
@@ -98,7 +97,7 @@ class YesNoQuestion extends SurveyQuestion {
       switch (answer) { true => 'yes', false => 'no', null => null };
 
   @override
-  Map<String, dynamic> get json => {...super.json, 'type': 'yesNo'};
+  Json get json => {...super.json, 'type': 'yesNo'};
 }
 
 /// {@template TextPromptQuestion}
@@ -112,7 +111,7 @@ class TextPromptQuestion extends SurveyQuestion {
   String? answerDescription(String? answer) => answer.validated;
 
   @override
-  Map<String, dynamic> get json => {...super.json, 'type': 'textPrompt'};
+  Json get json => {...super.json, 'type': 'textPrompt'};
 }
 
 /// {@macro sealed_class}
@@ -144,7 +143,7 @@ sealed class MultipleChoice extends SurveyQuestion {
   int? get typingIndex => canType ? choices.length : null;
 
   @override
-  Map<String, dynamic> get json {
+  Json get json {
     final type = switch (this) {
       RadioQuestion() => 'radio',
       CheckboxQuestion() => 'checkbox',
@@ -254,7 +253,7 @@ class ScaleQuestion extends SurveyQuestion {
   String answerDescription(int? answer) => values[answer!];
 
   @override
-  Map<String, dynamic> get json => {
+  Json get json => {
         ...super.json,
         'type': 'scale',
         'values': values,
