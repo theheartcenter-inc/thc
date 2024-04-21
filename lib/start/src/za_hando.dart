@@ -57,6 +57,7 @@ class ZaHando extends StatelessWidget {
             tween: Tween(begin: 0.0, end: 1.0),
             builder: (context, t, child) {
               return Stack(
+                alignment: Alignment.center,
                 children: [
                   Positioned(
                     top: 16,
@@ -173,49 +174,47 @@ class ZaHando extends StatelessWidget {
       ),
     );
 
-    final zaHando = Center(
-      child: LayoutBuilder(
-        builder: (context, constraints) => Container(
-          margin: const EdgeInsets.all(25),
-          padding: const EdgeInsets.all(25),
-          decoration: BoxDecoration(
-            color: colors.surface.withOpacity(tContainer),
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
-          ),
-          width: 450,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ConstrainedBox(
-                constraints: BoxConstraints(maxHeight: constraints.maxHeight - 400),
-                child: Padding(
-                  padding: const EdgeInsets.all(25).copyWith(top: 0),
-                  child: FittedBox(
-                    child: Stack(
-                      children: [
-                        _HandVector(
-                          scale: scale,
-                          color: backgroundGradient ? null : handColor,
-                        ),
-                        Positioned.fill(
-                          child: ClipRect(
-                            child: Align(
-                              alignment: Alignment.topCenter,
-                              child: Padding(
-                                padding: const EdgeInsets.only(top: 425),
-                                child: innerHand,
-                              ),
+    final zaHando = LayoutBuilder(
+      builder: (context, constraints) => Container(
+        margin: const EdgeInsets.all(25),
+        padding: const EdgeInsets.all(25),
+        decoration: BoxDecoration(
+          color: colors.surface.withOpacity(tContainer),
+          borderRadius: const BorderRadius.all(Radius.circular(8)),
+        ),
+        width: 450,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: constraints.maxHeight - 400),
+              child: Padding(
+                padding: const EdgeInsets.all(25).copyWith(top: 0),
+                child: FittedBox(
+                  child: Stack(
+                    children: [
+                      _HandVector(
+                        scale: scale,
+                        color: backgroundGradient ? null : handColor,
+                      ),
+                      Positioned.fill(
+                        child: ClipRect(
+                          child: Align(
+                            alignment: Alignment.topCenter,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 425),
+                              child: innerHand,
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              _FadeIn(t, child: child),
-            ],
-          ),
+            ),
+            _FadeIn(t, child: child),
+          ],
         ),
       ),
     );
@@ -261,7 +260,7 @@ class ZaHando extends StatelessWidget {
     final tMotion = Curves.ease.transform(tMotionLinear);
     final fontSize = 48 - 10 * tMotion;
 
-    final opacity = 1 - t * t;
+    final handColor = ThcColors.green.withOpacity(1 - t * t);
 
     final colors = context.colorScheme;
 
@@ -311,7 +310,7 @@ class ZaHando extends StatelessWidget {
           height: _handHeight * (1 - tMotion),
           child: FittedBox(
             fit: BoxFit.fitWidth,
-            child: _HandVector(scale: scale, color: ThcColors.green.withOpacity(opacity)),
+            child: _HandVector(scale: scale, color: handColor),
           ),
         ),
         Padding(
@@ -321,30 +320,28 @@ class ZaHando extends StatelessWidget {
       ],
     );
 
-    return Center(
-      child: LayoutBuilder(
-        builder: (context, constraints) => Container(
-          margin: const EdgeInsets.all(25),
-          padding: const EdgeInsets.all(25),
-          decoration: BoxDecoration(
-            color: colors.surface,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          width: 450,
-          clipBehavior: Clip.hardEdge,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ConstrainedBox(
-                constraints: BoxConstraints(maxHeight: constraints.maxHeight - 400),
-                child: Padding(
-                  padding: EdgeInsets.all(25 * (1 - tMotion)).copyWith(top: 0),
-                  child: FittedBox(child: zaHando),
-                ),
+    return LayoutBuilder(
+      builder: (_, constraints) => Container(
+        margin: const EdgeInsets.all(25),
+        padding: const EdgeInsets.all(25),
+        decoration: BoxDecoration(
+          color: colors.surface,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        width: 450,
+        clipBehavior: Clip.hardEdge,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: constraints.maxHeight - 400),
+              child: Padding(
+                padding: EdgeInsets.all(25 * (1 - tMotion)).copyWith(top: 0),
+                child: FittedBox(child: zaHando),
               ),
-              child!,
-            ],
-          ),
+            ),
+            child!,
+          ],
         ),
       ),
     );
@@ -376,17 +373,20 @@ class _HandVector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget? child;
-    if (color case final color?) {
-      child = Transform.scale(
-        scale: scale,
-        child: SvgPicture.asset(
-          placeholderBuilder: (_) => ColoredBox(color: color),
-          'assets/svg_files/thc_logo.svg',
-          colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
+    return SizedBox(
+      width: 600,
+      height: 800,
+      child: Opacity(
+        opacity: color == null ? 0 : 1,
+        child: Transform.scale(
+          scale: scale,
+          child: SvgPicture.asset(
+            'assets/svg_files/thc_logo.svg',
+            placeholderBuilder: (_) => const SizedBox.shrink(),
+            colorFilter: color == null ? null : ColorFilter.mode(color!, BlendMode.srcIn),
+          ),
         ),
-      );
-    }
-    return SizedBox(width: 600, height: 800, child: child);
+      ),
+    );
   }
 }

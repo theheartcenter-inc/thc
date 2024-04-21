@@ -22,20 +22,20 @@ class BottomStuff extends StatelessWidget {
     final tLine = Curves.ease.transform(min(t / tLineRatio, 1));
     final tColumns = (t - 1) / (1 - tLineRatio) + 1;
 
-    final LoginProgress(:method, :fieldValues) = LoginProgressTracker.of(context);
+    final LoginProgress(:fieldState, :fieldValues) = LoginProgressTracker.of(context);
     final twoFields = fieldValues.$2 != null;
     final colors = context.colorScheme;
 
-    final button1 = switch (method) {
-      LoginMethod.choosePassword => null,
-      LoginMethod.idName => twoFields ? LoginMethod.signIn : LoginMethod.noID,
-      LoginMethod.signIn || LoginMethod.noID => LoginMethod.idName,
+    final button1 = switch (fieldState) {
+      LoginFieldState.choosePassword => null,
+      LoginFieldState.idName => twoFields ? LoginFieldState.signIn : LoginFieldState.noID,
+      LoginFieldState.signIn || LoginFieldState.noID => LoginFieldState.idName,
     };
 
-    final button2 = switch (method) {
-      LoginMethod.choosePassword => null,
-      LoginMethod.signIn => LoginMethod.noID,
-      LoginMethod.idName || LoginMethod.noID => LoginMethod.signIn,
+    final button2 = switch (fieldState) {
+      LoginFieldState.choosePassword => null,
+      LoginFieldState.signIn => LoginFieldState.noID,
+      LoginFieldState.idName || LoginFieldState.noID => LoginFieldState.signIn,
     };
 
     return Padding(
@@ -47,19 +47,19 @@ class BottomStuff extends StatelessWidget {
             _SignInOptions(
               tColumns,
               title: switch (button1) {
-                null || LoginMethod.choosePassword => 'empty',
-                LoginMethod.idName => 'sign up with ID',
-                LoginMethod.noID => 'sign up without ID',
-                LoginMethod.signIn => 'already registered?',
+                null || LoginFieldState.choosePassword => 'empty',
+                LoginFieldState.idName => 'sign up with ID',
+                LoginFieldState.noID => 'sign up without ID',
+                LoginFieldState.signIn => 'already registered?',
               },
               button: _Button(
                 enabled: true,
                 onPressed: () {},
                 text: switch (button1) {
-                  null || LoginMethod.choosePassword => 'empty',
-                  LoginMethod.idName => 'return',
-                  LoginMethod.noID => 'register',
-                  LoginMethod.signIn => 'sign in',
+                  null || LoginFieldState.choosePassword => 'empty',
+                  LoginFieldState.idName => 'return',
+                  LoginFieldState.noID => 'register',
+                  LoginFieldState.signIn => 'sign in',
                 },
               ),
             ),
@@ -73,20 +73,21 @@ class BottomStuff extends StatelessWidget {
             _SignInOptions(
               tColumns,
               title: switch (button2) {
-                null || LoginMethod.choosePassword => 'empty',
-                LoginMethod.idName => throw StateError('pretty sure "id/name" is always button1'),
-                LoginMethod.noID => 'sign up without ID',
-                LoginMethod.signIn => 'already registered?',
+                null || LoginFieldState.choosePassword => 'empty',
+                LoginFieldState.idName =>
+                  throw StateError('pretty sure "id/name" is always button1'),
+                LoginFieldState.noID => 'sign up without ID',
+                LoginFieldState.signIn => 'already registered?',
               },
               button: _Button(
                 enabled: true,
                 onPressed: () {},
                 text: switch (button2) {
-                  null || LoginMethod.choosePassword => 'empty',
-                  LoginMethod.idName =>
+                  null || LoginFieldState.choosePassword => 'empty',
+                  LoginFieldState.idName =>
                     throw StateError('pretty sure "id/name" is always button1'),
-                  LoginMethod.noID => 'register',
-                  LoginMethod.signIn => 'sign in',
+                  LoginFieldState.noID => 'register',
+                  LoginFieldState.signIn => 'sign in',
                 },
               ),
             ),

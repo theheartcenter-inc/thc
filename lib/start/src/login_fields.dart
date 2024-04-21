@@ -36,7 +36,7 @@ enum LoginField with StatelessEnum {
   @override
   Widget build(BuildContext context) {
     final LoginProgress(
-      :method,
+      :fieldState,
       :focusedField,
       :animation,
     ) = LoginProgressTracker.of(context);
@@ -57,16 +57,17 @@ enum LoginField with StatelessEnum {
             .lightDark(Colors.white, StartColors.lightContainer)
             .withOpacity(focused ? 0.5 : 0),
         filled: true,
-        hintText: switch ((this, method)) {
+        hintText: switch ((this, fieldState)) {
           _ when !(showBottom || focusedField == LoginField.top) => null,
-          (top, LoginMethod.idName) => 'user ID',
-          (top, LoginMethod.noID) => 'email address',
-          (top, LoginMethod.signIn) => 'user ID or email',
-          (top, LoginMethod.choosePassword) => 'choose a password',
-          (bottom, LoginMethod.idName) => 'First and Last name',
-          (bottom, LoginMethod.noID) => throw StateError('there should only be 1 email field'),
-          (bottom, LoginMethod.signIn) => 'password',
-          (bottom, LoginMethod.choosePassword) => 're-type your password',
+          (top, LoginFieldState.idName) => 'user ID',
+          (top, LoginFieldState.noID) => 'email address',
+          (top, LoginFieldState.signIn) => 'user ID or email',
+          (top, LoginFieldState.choosePassword) => 'choose a password',
+          (bottom, LoginFieldState.idName) => 'First and Last name',
+          (bottom, LoginFieldState.noID) =>
+            throw StateError('there should only be 1 email field'),
+          (bottom, LoginFieldState.signIn) => 'password',
+          (bottom, LoginFieldState.choosePassword) => 're-type your password',
         },
         hintStyle: TextStyle(color: blackHint ? Colors.black : colors.outline),
       ),

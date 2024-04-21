@@ -5,7 +5,7 @@ import 'package:thc/firebase/user.dart';
 import 'package:thc/start/src/login_fields.dart';
 import 'package:thc/utils/bloc.dart';
 
-enum LoginMethod { idName, noID, signIn, choosePassword }
+enum LoginFieldState { idName, noID, signIn, choosePassword }
 
 enum AnimationProgress implements Comparable<AnimationProgress> {
   sunrise,
@@ -23,14 +23,14 @@ enum AnimationProgress implements Comparable<AnimationProgress> {
 class LoginProgress {
   const LoginProgress({
     required this.animation,
-    required this.method,
+    required this.fieldState,
     required this.focusedField,
     required this.fieldValues,
     required this.mismatch,
   });
 
   const LoginProgress._initial()
-      : method = LoginMethod.idName,
+      : fieldState = LoginFieldState.idName,
         focusedField = null,
         animation = AnimationProgress.sunrise,
         mismatch = false,
@@ -38,14 +38,14 @@ class LoginProgress {
 
   LoginProgress copyWith({
     required AnimationProgress? animation,
-    required LoginMethod? method,
+    required LoginFieldState? fieldState,
     required LoginField? focusedField,
     required (String?, String?)? fieldValues,
     required bool? mismatch,
   }) {
     return LoginProgress(
       animation: animation ?? this.animation,
-      method: method ?? this.method,
+      fieldState: fieldState ?? this.fieldState,
       focusedField: focusedField ?? this.focusedField,
       fieldValues: fieldValues ?? this.fieldValues,
       mismatch: mismatch ?? this.mismatch,
@@ -54,14 +54,14 @@ class LoginProgress {
 
   LoginProgress unfocus() => LoginProgress(
         animation: animation,
-        method: method,
+        fieldState: fieldState,
         focusedField: null,
         fieldValues: fieldValues,
         mismatch: mismatch,
       );
 
   final AnimationProgress animation;
-  final LoginMethod method;
+  final LoginFieldState fieldState;
   final LoginField? focusedField;
   final (String?, String?) fieldValues;
   final bool mismatch;
@@ -85,7 +85,7 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
   static LoginProgress of(BuildContext context) => context.watch<LoginProgressTracker>().state;
 
   static void update({
-    LoginMethod? method,
+    LoginFieldState? fieldState,
     LoginField? focusedField,
     AnimationProgress? animation,
     (String?, String?)? fieldValues,
@@ -93,7 +93,7 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
   }) {
     _tracker!.emit(readState.copyWith(
       animation: animation,
-      method: method,
+      fieldState: fieldState,
       focusedField: focusedField,
       fieldValues: fieldValues,
       mismatch: mismatch,
@@ -105,29 +105,29 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
   }
 
   static Future<void> submit(LoginField field) async {
-    switch ((field, readState.method)) {
+    switch ((field, readState.fieldState)) {
       case (LoginField.top, _):
         LoginField.bottom
           ..newVal('')
           ..node.requestFocus();
-      case (LoginField.bottom, LoginMethod.idName):
+      case (LoginField.bottom, LoginFieldState.idName):
         final (id, name) = readState.fieldValues;
         final doc = await UserCollection.unregistered_users.doc(id).get();
         final match = doc.exists && doc['name'] == name;
         update(mismatch: !match);
-      case (_, final method):
-        throw UnimplementedError('field: $field, method: $method');
+      case (_, final fieldState):
+        throw UnimplementedError('field: $field, state: $fieldState');
     }
   }
 
   static void Function([dynamic])? maybeSubmit([(String?, String?)? fieldValues]) {
     final values = fieldValues ?? LoginProgressTracker.readState.fieldValues;
-    final (field, value) = switch (values) {
-      (final value, null) => (LoginField.top, value),
-      (_, final value) => (LoginField.bottom, value),
+    final (field, empty) = switch (values) {
+      (final value, null) => (LoginField.top, value?.isEmpty ?? true),
+      (final v1, final v2?) => (LoginField.bottom, v1!.isEmpty || v2.isEmpty),
     };
 
-    if (value?.isEmpty ?? true) return null;
+    if (empty) return null;
     return ([_]) => submit(field);
   }
 
