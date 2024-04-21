@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:thc/home/stream/active_stream.dart';
 import 'package:thc/utils/bloc.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 class CreateLivestream extends StatefulWidget {
@@ -38,7 +39,7 @@ class _CreateLivestreamState extends State<CreateLivestream> {
 
   @override
   Widget build(BuildContext context) {
-    const semiBold = TextStyle(fontWeight: FontWeight.w600);
+    const semiBold = StyleText(weight: 600);
 
     return Center(
       child: Column(
@@ -82,7 +83,7 @@ class _GoLive extends StatelessWidget {
       child: FilledButton(
         onPressed: onPressed,
         style: _buttonStyle,
-        child: const Text('Go Live', style: TextStyle(fontSize: 36)),
+        child: const Text('Go Live', style: StyleText(size: 36)),
       ),
     );
   }

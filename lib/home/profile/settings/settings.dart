@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:thc/firebase/user.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/utils/local_storage.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -16,7 +17,7 @@ class SettingsScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Dark theme?', style: TextStyle(fontSize: 20)),
+            const Text('Dark theme?', style: StyleText(size: 20)),
             const SizedBox(height: 20),
             const _ThemePicker(),
             if (userType.isAdmin) ...const [

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:thc/login_register/login.dart';
 import 'package:thc/login_register/verify_email.dart';
 import 'package:thc/utils/navigator.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/error_dialog.dart';
 
@@ -43,7 +44,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             padding: EdgeInsets.fromLTRB(20, 50, 0, 20),
             child: Text(
               'Register',
-              style: TextStyle(color: ThcColors.darkBlue, fontSize: 40),
+              style: StyleText(size: 40, color: ThcColors.darkBlue),
             ),
           ),
           Expanded(
@@ -84,10 +85,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               controller: _email,
                               decoration: const InputDecoration(
                                 hintText: 'Email',
-                                hintStyle: TextStyle(color: Colors.grey),
+                                hintStyle: StyleText(color: Colors.grey),
                                 border: InputBorder.none,
                               ),
-                              style: const TextStyle(color: Colors.black),
+                              style: const StyleText(color: Colors.black),
                             ),
                           ),
                           Container(
@@ -102,7 +103,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               autocorrect: false,
                               decoration: InputDecoration(
                                 hintText: 'Password',
-                                hintStyle: const TextStyle(color: Colors.grey),
+                                hintStyle: const StyleText(color: Colors.grey),
                                 border: InputBorder.none,
                                 suffixIcon: IconButton(
                                   icon: Icon(
@@ -114,7 +115,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   },
                                 ),
                               ),
-                              style: const TextStyle(color: Colors.black),
+                              style: const StyleText(color: Colors.black),
                             ),
                           ),
                         ],

@@ -30,3 +30,12 @@ flutter:
   assets:
     - assets/
     - assets/svg_files/
+  fonts:
+    - family: roboto mono
+      fonts:
+        - asset: assets/fonts/roboto_mono.ttf
+        - asset: assets/fonts/roboto_mono_italic.ttf
+          style: italic
+    - family: pretendard
+      fonts:
+        - asset: assets/fonts/pretendard.ttf

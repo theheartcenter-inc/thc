@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:thc/start/src/start_theme.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
+import 'package:thc/utils/style_text.dart';
 
 /// {@template colorScheme}
 /// By pulling colors from the [ColorScheme], the color palette can adapt
@@ -14,7 +15,7 @@ import 'package:thc/utils/local_storage.dart';
 ///     color: colorScheme.surface,
 ///     child: Text(
 ///       'Hello World',
-///       style: TextStyle(color: colorScheme.onSurface),
+///       style: StyleText(color: colorScheme.onSurface),
 ///     ),
 ///   );
 /// }
@@ -56,7 +57,7 @@ extension ThatOneVideo on Set<MaterialState> {
 }
 
 const _iconTheme = IconThemeData(size: 32);
-const _labelTextStyle = TextStyle(fontWeight: FontWeight.w600, fontSize: 12);
+const _labelTextStyle = StyleText(size: 12, weight: 600);
 final _lightBackground = Color.lerp(ThcColors.paleAzure, Colors.white, 0.33)!;
 
 ThemeData _generateTheme(Brightness brightness) {
@@ -102,6 +103,7 @@ ThemeData _generateTheme(Brightness brightness) {
       outline: slightContrast,
       outlineVariant: slightContrast.withOpacity(0.25),
     ),
+    fontFamily: 'pretendard',
     materialTapTargetSize: MaterialTapTargetSize.padded,
     switchTheme: SwitchThemeData(
       thumbColor: selected(Colors.white, slightContrast),

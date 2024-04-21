@@ -112,7 +112,7 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
           ..node.requestFocus();
       case (LoginField.bottom, LoginFieldState.idName):
         final (id, name) = readState.fieldValues;
-        final doc = await UserCollection.unregistered_users.doc(id).get();
+        final doc = await UserCollection.unregisteredUsers.doc(id).get();
         final match = doc.exists && doc['name'] == name;
         update(mismatch: !match);
       case (_, final fieldState):

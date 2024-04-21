@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 /// The sunrise/sunset gradient does a couple things:
@@ -92,7 +93,7 @@ class SurveyStyling extends StatelessWidget {
             foregroundColor: isLight ? Colors.black : SurveyColors.maroonSunset,
             shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(25)),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
-            textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            textStyle: const StyleText(size: 16, weight: 600),
             elevation: isLight ? 1 : null,
           ),
         ),

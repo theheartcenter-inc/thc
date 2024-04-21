@@ -3,6 +3,7 @@ import 'package:thc/firebase/user.dart';
 import 'package:thc/main.dart';
 import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/local_storage.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 class ChooseAnyView extends StatelessWidget {
@@ -76,7 +77,7 @@ class UserButton extends StatelessWidget {
             const SizedBox(width: 25, height: 50),
             Text(
               userType?.toString() ?? 'logged out',
-              style: const TextStyle(fontSize: 18),
+              style: const StyleText(size: 18),
             ),
           ],
         ),

@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:thc/start/src/progress_tracker.dart';
 import 'package:thc/start/src/za_hando.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 class BottomStuff extends StatelessWidget {
@@ -125,7 +126,7 @@ class _SignInOptions extends StatelessWidget {
       child: Text(
         this.title,
         textAlign: TextAlign.center,
-        style: TextStyle(fontWeight: FontWeight.w600, color: colors.outline),
+        style: StyleText(weight: 600, color: colors.outline),
       ),
     );
 
@@ -159,7 +160,7 @@ class _Button extends StatelessWidget {
         child: Text(
           text,
           textAlign: TextAlign.center,
-          style: const TextStyle(letterSpacing: 1 / 3),
+          style: const StyleText(letterSpacing: 1 / 3),
         ),
       ),
     );

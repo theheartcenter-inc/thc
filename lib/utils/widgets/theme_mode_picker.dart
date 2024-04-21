@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 class ThemeModePicker extends StatefulWidget {
@@ -101,7 +102,7 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
                       softWrap: false,
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.fade,
-                      style: TextStyle(fontWeight: FontWeight.w600, color: foregroundColor),
+                      style: StyleText(weight: 600, color: foregroundColor),
                     ),
                   ),
                 ),

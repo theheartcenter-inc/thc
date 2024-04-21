@@ -9,6 +9,7 @@ import 'package:thc/home/profile/report/issue_report.dart';
 import 'package:thc/home/profile/settings/settings.dart';
 import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/navigator.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -97,16 +98,16 @@ class ProfileScreen extends StatelessWidget {
         );
     final linkColor = Color.lerp(ThcColors.dullBlue, ThcColors.teal, 0.25)!;
     final overview = DefaultTextStyle(
-      style: TextStyle(height: 1.75, color: context.colorScheme.onBackground),
+      style: StyleText(height: 1.75, color: context.colorScheme.onBackground),
       child: Center(
         child: Column(
           children: [
             image,
-            Text(userWatch.name, style: const TextStyle(fontSize: 28)),
+            Text(userWatch.name, style: const StyleText(size: 28)),
             if (user?.id case final id?)
-              Text('user ID: $id', style: const TextStyle(fontWeight: FontWeight.w600)),
+              Text('user ID: $id', style: const StyleText(weight: 600)),
             if (userWatch.email case final email?)
-              Text(email, style: TextStyle(color: linkColor)),
+              Text(email, style: StyleText(color: linkColor)),
             if (userWatch.phone case final phone?) Opacity(opacity: 0.75, child: Text(phone)),
             const SizedBox(height: 25),
           ],

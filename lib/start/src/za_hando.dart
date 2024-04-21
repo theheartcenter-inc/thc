@@ -15,6 +15,7 @@ import 'package:thc/start/src/login_fields.dart';
 import 'package:thc/start/src/progress_tracker.dart';
 import 'package:thc/start/src/start_theme.dart';
 import 'package:thc/utils/navigator.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/theme_mode_picker.dart';
 
@@ -135,11 +136,11 @@ class ZaHando extends StatelessWidget {
     final tScale = Curves.easeOutExpo.transform(tContainer);
     final scale = 20 * (1 - tScale) + 1.0;
 
-    final heartText = Text('THE HEART', style: TextStyle(color: colors.primaryContainer));
-    const centerText = Text('CENTER', style: TextStyle(color: SunColors.overlayText));
+    final heartText = Text('THE HEART', style: StyleText(color: colors.primaryContainer));
+    const centerText = Text('CENTER', style: StyleText(color: SunColors.overlayText));
 
     final innerHand = DefaultTextStyle(
-      style: const TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
+      style: const StyleText(size: 48, weight: FontWeight.bold),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -265,15 +266,15 @@ class ZaHando extends StatelessWidget {
 
     final heartText = Text(
       'THE HEART',
-      style: TextStyle(color: Color.lerp(StartColors.dullGreen38, colors.onSurfaceVariant, t)),
+      style: StyleText(color: Color.lerp(StartColors.dullGreen38, colors.onSurfaceVariant, t)),
     );
     final centerText = Text(
       'CENTER',
-      style: TextStyle(color: Color.lerp(SunColors.overlayText, colors.onSurfaceVariant, t)),
+      style: StyleText(color: Color.lerp(SunColors.overlayText, colors.onSurfaceVariant, t)),
     );
 
     final innerHand = DefaultTextStyle(
-      style: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold),
+      style: StyleText(size: fontSize, weight: FontWeight.bold),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

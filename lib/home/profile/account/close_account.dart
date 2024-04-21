@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:thc/firebase/user.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/navigator.dart';
+import 'package:thc/utils/style_text.dart';
 
 enum _Progress { notStarted, loading, done }
 
@@ -25,7 +26,7 @@ class _CloseAccountState extends State<CloseAccount> {
       children: [
         const Text(
           'To confirm deletion, please type "DELETE" in the field below and tap "Confirm".',
-          style: TextStyle(fontSize: 16),
+          style: StyleText(size: 16),
         ),
         TextField(
           onChanged: (value) {

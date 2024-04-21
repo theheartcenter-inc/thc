@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/utils/navigator.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/widgets/fun_placeholder.dart';
 
 class WatchingLivestream extends StatefulWidget {
@@ -30,10 +31,7 @@ class _WatchingLivestreamState extends State<WatchingLivestream> {
       bottomNavigationBar: BottomNavigationBar(
         useLegacyColorScheme: false,
         backgroundColor: Colors.black,
-        unselectedLabelStyle: const TextStyle(
-          color: Colors.white70,
-          fontWeight: FontWeight.w600,
-        ),
+        unselectedLabelStyle: const StyleText(color: Colors.white70, weight: 600),
         onTap: (_) {
           timer.cancel();
           navigator.pushReplacement(

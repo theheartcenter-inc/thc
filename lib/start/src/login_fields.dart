@@ -4,6 +4,7 @@ import 'package:thc/start/src/bottom_stuff.dart';
 import 'package:thc/start/src/progress_tracker.dart';
 import 'package:thc/start/src/start_theme.dart';
 import 'package:thc/start/src/za_hando.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
 
@@ -69,7 +70,7 @@ enum LoginField with StatelessEnum {
           (bottom, LoginFieldState.signIn) => 'password',
           (bottom, LoginFieldState.choosePassword) => 're-type your password',
         },
-        hintStyle: TextStyle(color: blackHint ? Colors.black : colors.outline),
+        hintStyle: StyleText(color: blackHint ? Colors.black : colors.outline),
       ),
       onChanged: newVal,
       onSubmitted: LoginProgressTracker.maybeSubmit(),
@@ -100,11 +101,7 @@ class LoginFields extends StatelessWidget {
             padding: EdgeInsets.only(bottom: 3),
             child: Text(
               'start',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w600,
-                color: ThcColors.green,
-              ),
+              style: StyleText(size: 22, weight: 600, color: ThcColors.green),
             ),
           ),
         ),
@@ -156,11 +153,7 @@ class LoginFields extends StatelessWidget {
           child: mismatch
               ? const Text(
                   'check the above fields and try again.',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                    color: Color(0xffc00000),
-                  ),
+                  style: StyleText(size: 12, weight: 600, color: Color(0xffc00000)),
                 )
               : const SizedBox(width: double.infinity),
         ),

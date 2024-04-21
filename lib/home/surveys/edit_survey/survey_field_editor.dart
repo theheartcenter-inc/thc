@@ -5,6 +5,7 @@ import 'package:thc/home/surveys/edit_survey/survey_editor.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey_field.dart';
 import 'package:thc/utils/app_config.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 /// Shows a preview of a [SurveyField] that you can tap to edit.
@@ -432,7 +433,7 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
                     TextField(
                       decoration: InputDecoration(
                         hintText: 'add…',
-                        hintStyle: TextStyle(color: translucent),
+                        hintStyle: StyleText(color: translucent),
                         enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: translucent),
                         ),
@@ -621,7 +622,7 @@ class QuestionTypeIcon extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(5, 0, 5, 3),
             child: Text(
               'text',
-              style: TextStyle(fontSize: 12, color: foregroundColor.withAlpha(0xcc)),
+              style: StyleText(size: 12, color: foregroundColor.withAlpha(0xcc)),
             ),
           ),
         );

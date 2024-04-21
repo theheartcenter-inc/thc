@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:thc/firebase/user.dart';
 import 'package:thc/utils/bloc.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
 
@@ -78,7 +79,7 @@ class _AccountFieldState extends State<AccountField> {
   Widget build(BuildContext context) {
     final colors = context.colorScheme;
 
-    final style = MaterialStateTextStyle.resolveWith((states) => TextStyle(
+    final style = MaterialStateTextStyle.resolveWith((states) => StyleText(
           color: colors.onBackground.withOpacity(states.isFocused ? 1.0 : 0.5),
         ));
     final decoration = InputDecoration(

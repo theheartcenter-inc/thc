@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 /// {@template SurveyField}
@@ -140,9 +141,9 @@ class _QuestionText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colorScheme;
-    final style = TextStyle(
-      fontSize: 16,
-      fontWeight: FontWeight.w500,
+    final style = StyleText(
+      size: 16,
+      weight: 500,
       shadows: [
         if (context.theme.brightness == Brightness.dark)
           Shadow(color: colors.background, blurRadius: 1),
@@ -157,7 +158,7 @@ class _QuestionText extends StatelessWidget {
             if (!question.optional)
               Transform.translate(
                 offset: const Offset(-11, -3),
-                child: Text('*', style: TextStyle(fontSize: 20, color: colors.error)),
+                child: Text('*', style: StyleText(size: 20, color: colors.error)),
               ),
             Text(question.description, style: style),
           ],

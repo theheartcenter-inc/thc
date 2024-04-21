@@ -7,13 +7,14 @@ import 'package:thc/login_register/forgot_password.dart';
 import 'package:thc/login_register/register.dart';
 import 'package:thc/login_register/verify_email.dart';
 import 'package:thc/utils/navigator.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/error_dialog.dart';
 
 class BigButton extends StatelessWidget {
   const BigButton({
     required this.onPressed,
-    this.style = const TextStyle(),
+    this.style = const StyleText(),
     required this.label,
     super.key,
   });
@@ -39,7 +40,7 @@ class BigButton extends StatelessWidget {
           child: Center(
             child: Text(
               label,
-              style: style.merge(const TextStyle(fontWeight: FontWeight.w600)),
+              style: style.merge(const StyleText(weight: 600)),
             ),
           ),
         ),
@@ -85,8 +86,8 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Text('Login', style: TextStyle(color: ThcColors.darkBlue, fontSize: 40)),
-                Text('Welcome Back', style: TextStyle(color: ThcColors.darkBlue, fontSize: 18)),
+                Text('Login', style: StyleText(size: 40, color: ThcColors.darkBlue)),
+                Text('Welcome Back', style: StyleText(size: 18, color: ThcColors.darkBlue)),
               ],
             ),
           ),
@@ -129,11 +130,11 @@ class _LoginScreenState extends State<LoginScreen> {
                               keyboardType: TextInputType.emailAddress,
                               decoration: const InputDecoration(
                                 hintText: 'Email',
-                                hintStyle: TextStyle(color: Colors.grey),
+                                hintStyle: StyleText(color: Colors.grey),
                                 border: InputBorder.none,
-                                labelStyle: TextStyle(color: Colors.black),
+                                labelStyle: StyleText(color: Colors.black),
                               ),
-                              style: const TextStyle(color: Colors.black),
+                              style: const StyleText(color: Colors.black),
                             ),
                           ),
                           Container(
@@ -148,7 +149,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               autocorrect: false,
                               decoration: InputDecoration(
                                 hintText: 'Password',
-                                hintStyle: const TextStyle(color: Colors.grey),
+                                hintStyle: const StyleText(color: Colors.grey),
                                 border: InputBorder.none,
                                 suffixIcon: IconButton(
                                   icon: Icon(
@@ -160,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   },
                                 ),
                               ),
-                              style: const TextStyle(color: Colors.black),
+                              style: const StyleText(color: Colors.black),
                             ),
                           ),
                         ],
@@ -211,7 +212,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           navigator.showDialog(ErrorDialog(e.toString()));
                         }
                       },
-                      style: const TextStyle(color: Colors.white, fontSize: 16),
+                      style: const StyleText(size: 16, color: Colors.white),
                       label: 'Login',
                     ),
                     TextButton(
