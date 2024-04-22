@@ -2,68 +2,125 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:thc/start/src/progress_tracker.dart';
-import 'package:thc/start/src/za_hando.dart';
+import 'package:thc/utils/animation.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
-class BottomStuff extends StatelessWidget {
+class BottomStuff extends StatefulWidget {
   const BottomStuff({super.key});
 
   @override
+  State<BottomStuff> createState() => _BottomStuffState();
+}
+
+class _BottomStuffState extends State<BottomStuff> with SingleTickerProviderStateMixin {
+  LoginFieldState fieldState = LoginFieldState.idName;
+
+  late final controller = AnimationController(
+    duration: Durations.extralong4,
+    reverseDuration: Durations.long2,
+    vsync: this,
+  )..forward();
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return TweenAnimationBuilder(
-      duration: ZaHando.shrinkDuration,
-      tween: Tween(begin: 0.0, end: 1.0),
-      builder: builder,
+    final labelColor = context.colorScheme.outline.withOpacity(0.875);
+    final LoginProgress(:fieldState) = LoginProgressTracker.of(context);
+    final shouldShow = switch (fieldState) {
+      LoginFieldState.idName => true,
+      LoginFieldState.noID => false,
+      LoginFieldState.signIn => true,
+      LoginFieldState.choosePassword => false,
+      LoginFieldState.recovery => false,
+    };
+    if (shouldShow != controller.aimedForward) controller.toggle(shouldReverse: !shouldShow);
+    if (shouldShow && fieldState != this.fieldState) this.fieldState = fieldState;
+
+    return DefaultTextStyle(
+      style: StyleText(weight: 600, color: labelColor),
+      child: AnimatedBuilder(animation: controller, builder: builder),
     );
   }
 
-  Widget builder(BuildContext context, double t, [_]) {
-    const tLineRatio = 0.5;
-    final tLine = Curves.ease.transform(min(t / tLineRatio, 1));
-    final tColumns = (t - 1) / (1 - tLineRatio) + 1;
+  Widget builder(BuildContext context, _) {
+    final t = controller.value;
+    final aimedForward = controller.aimedForward;
 
-    final LoginProgress(:fieldState, :fieldValues) = LoginProgressTracker.of(context);
-    final twoFields = fieldValues.$2 != null;
-    final colors = context.colorScheme;
+    const curve = Curves.ease;
+    final tSeparator = aimedForward ? curve.transform(min(t * 2, 1)) : 1 - curve.transform(1 - t);
+    final tColumns = (t - 1) * (aimedForward ? 2 : 1) + 1;
 
-    final button1 = switch (fieldState) {
-      LoginFieldState.choosePassword => null,
-      LoginFieldState.idName => twoFields ? LoginFieldState.signIn : LoginFieldState.noID,
-      LoginFieldState.signIn || LoginFieldState.noID => LoginFieldState.idName,
-    };
+    Widget fadeSlide(double t, {required Widget child}) {
+      return Transform.translate(
+        offset: Offset(0, (curve.transform(t) - 1) * 10),
+        child: Opacity(opacity: t, child: child),
+      );
+    }
 
-    final button2 = switch (fieldState) {
-      LoginFieldState.choosePassword => null,
-      LoginFieldState.signIn => LoginFieldState.noID,
-      LoginFieldState.idName || LoginFieldState.noID => LoginFieldState.signIn,
-    };
+    Widget button(LoginFieldState? target) {
+      if (tColumns <= 0 || target == null) return const Spacer();
 
-    return Padding(
-      padding: EdgeInsets.only(top: 10 * tLine),
-      child: SizedBox(
-        height: 88 * tLine,
-        child: Row(
+      const timeOffsetRatio = 7 / 8;
+      final tTitle = min(tColumns / timeOffsetRatio, 1.0);
+      final tButton = max((tColumns - 1) / timeOffsetRatio + 1, 0.0);
+
+      final (:label, :text) = target.buttonData!;
+
+      final title = Text(label, textAlign: TextAlign.center);
+
+      final Widget button = Padding(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            _SignInOptions(
-              tColumns,
-              title: switch (button1) {
-                null || LoginFieldState.choosePassword => 'empty',
-                LoginFieldState.idName => 'sign up with ID',
-                LoginFieldState.noID => 'sign up without ID',
-                LoginFieldState.signIn => 'already registered?',
-              },
-              button: _Button(
+            fadeSlide(tTitle, child: title),
+            const Spacer(),
+            fadeSlide(
+              tButton,
+              child: _Button(
                 enabled: true,
-                onPressed: () {},
-                text: switch (button1) {
-                  null || LoginFieldState.choosePassword => 'empty',
-                  LoginFieldState.idName => 'return',
-                  LoginFieldState.noID => 'register',
-                  LoginFieldState.signIn => 'sign in',
-                },
+                onPressed: LoginFieldState.goto(target),
+                text: text,
               ),
             ),
+          ],
+        ),
+      );
+
+      if (aimedForward) return Expanded(child: button);
+
+      return Expanded(
+        child: LayoutBuilder(builder: (context, constraints) {
+          return FittedBox(
+            alignment: Alignment.topCenter,
+            fit: BoxFit.fitWidth,
+            child: SizedBox(
+              width: constraints.maxWidth,
+              height: 88,
+              child: button,
+            ),
+          );
+        }),
+      );
+    }
+
+    final colors = context.colorScheme;
+
+    final (button1, button2) = fieldState.otherOptions!;
+
+    return Padding(
+      padding: EdgeInsets.only(top: 20 * tSeparator),
+      child: SizedBox(
+        height: 88 * tSeparator,
+        child: Row(
+          children: [
+            button(button1),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: ColoredBox(
@@ -71,73 +128,7 @@ class BottomStuff extends StatelessWidget {
                 child: const SizedBox(width: 1, height: double.infinity),
               ),
             ),
-            _SignInOptions(
-              tColumns,
-              title: switch (button2) {
-                null || LoginFieldState.choosePassword => 'empty',
-                LoginFieldState.idName =>
-                  throw StateError('pretty sure "id/name" is always button1'),
-                LoginFieldState.noID => 'sign up without ID',
-                LoginFieldState.signIn => 'already registered?',
-              },
-              button: _Button(
-                enabled: true,
-                onPressed: () {},
-                text: switch (button2) {
-                  null || LoginFieldState.choosePassword => 'empty',
-                  LoginFieldState.idName =>
-                    throw StateError('pretty sure "id/name" is always button1'),
-                  LoginFieldState.noID => 'register',
-                  LoginFieldState.signIn => 'sign in',
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SignInOptions extends StatelessWidget {
-  const _SignInOptions(this.t, {required this.title, required this.button});
-  final double t;
-  final String title;
-  final _Button button;
-
-  Widget fadeSlide(double t, {required Widget child}) {
-    return Transform.translate(
-      offset: Offset(0, (Curves.ease.transform(t) - 1) * 10),
-      child: Opacity(opacity: t, child: child),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (t < 0) return const Spacer();
-
-    const timeOffsetRatio = 7 / 8;
-    final tTitle = min(t / timeOffsetRatio, 1.0);
-    final tButton = max((t - 1) / timeOffsetRatio + 1, 0.0);
-    final colors = context.colorScheme;
-
-    final title = Align(
-      alignment: Alignment.topCenter,
-      child: Text(
-        this.title,
-        textAlign: TextAlign.center,
-        style: StyleText(weight: 600, color: colors.outline),
-      ),
-    );
-
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 10),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Expanded(child: fadeSlide(tTitle, child: title)),
-            fadeSlide(tButton, child: button),
+            button(button2),
           ],
         ),
       ),

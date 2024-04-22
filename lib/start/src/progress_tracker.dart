@@ -1,11 +1,65 @@
 // ignore_for_file: sort_constructors_first
 
-import 'package:flutter/widgets.dart';
+import 'package:email_validator/email_validator.dart';
+import 'package:flutter/material.dart';
 import 'package:thc/firebase/user.dart';
 import 'package:thc/start/src/login_fields.dart';
 import 'package:thc/utils/bloc.dart';
 
-enum LoginFieldState { idName, noID, signIn, choosePassword }
+enum LoginFieldState {
+  idName(
+    topHint: 'user ID',
+    bottomHint: 'First and Last name',
+    buttonData: (label: 'sign up with ID', text: 'register'),
+  ),
+  noID(
+    topHint: 'email address',
+    buttonData: (label: "don't have an ID?", text: 'register (no ID)'),
+  ),
+  signIn(
+    topHint: 'user ID or email',
+    bottomHint: 'password',
+    buttonData: (label: 'already registered?', text: 'sign in'),
+  ),
+  choosePassword(
+    topHint: 'choose a password',
+    bottomHint: 're-type your password',
+  ),
+  recovery(
+    topHint: 'enter your email',
+    buttonData: (label: 'having trouble?', text: 'account recovery'),
+  );
+
+  const LoginFieldState({required this.topHint, this.bottomHint, this.buttonData});
+
+  final String topHint;
+  final String? bottomHint;
+  final ({String label, String text})? buttonData;
+
+  bool get just1field => bottomHint == null;
+
+  (LoginFieldState, LoginFieldState)? get otherOptions => switch (this) {
+        idName => (noID, signIn),
+        noID => (idName, signIn),
+        signIn => (recovery, noID),
+        choosePassword || recovery => null,
+      };
+
+  LoginFieldState? get back => switch (this) {
+        idName => null,
+        noID || signIn => idName,
+        choosePassword => null,
+        recovery => signIn,
+      };
+
+  static Future<void> Function() goto(LoginFieldState? target) => () async {
+        if (target == null) return;
+        LoginProgressTracker.update(fieldState: target);
+        await Future.delayed(Durations.medium1);
+        if (target.just1field) LoginField.bottom.newVal(null);
+        LoginField.top.node.requestFocus();
+      };
+}
 
 enum AnimationProgress implements Comparable<AnimationProgress> {
   sunrise,
@@ -106,23 +160,38 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
   }
 
   static Future<void> submit(LoginField field) async {
-    switch ((field, readState.fieldState)) {
-      case (LoginField.top, _):
-        LoginField.bottom
-          ..newVal('')
-          ..node.requestFocus();
-      case (LoginField.bottom, LoginFieldState.idName):
-        final (id, name) = readState.fieldValues;
+    final LoginProgress(:fieldState, :fieldValues) = readState;
+
+    if (field == LoginField.top && !fieldState.just1field) {
+      LoginField.bottom
+        ..newVal('')
+        ..node.requestFocus();
+      return;
+    }
+
+    switch (fieldState) {
+      case LoginFieldState.idName:
+        final (id, name) = fieldValues;
         final doc = await UserCollection.unregisteredUsers.doc(id).get();
         final match = doc.exists && doc['name'] == name;
         update(mismatch: !match);
-      case (_, final fieldState):
+      case LoginFieldState.noID:
+        final maybeEmail = fieldValues.$1!.toLowerCase();
+        final valid = EmailValidator.validate(maybeEmail);
+        if (!valid) {
+          update(mismatch: true);
+          return;
+        }
+
+      case final fieldState:
         throw UnimplementedError('field: $field, state: $fieldState');
     }
   }
 
-  static void Function([dynamic])? maybeSubmit([(String?, String?)? fieldValues]) {
-    final values = fieldValues ?? LoginProgressTracker.readState.fieldValues;
+  static MaybeSubmit maybeSubmit([(String?, String?)? fieldValues, bool? mismatch]) {
+    if (mismatch ?? readState.mismatch) return null;
+
+    final values = fieldValues ?? readState.fieldValues;
     final (field, empty) = switch (values) {
       (final value, null) => (LoginField.top, value?.isEmpty ?? true),
       (final v1, final v2?) => (LoginField.bottom, v1!.isEmpty || v2.isEmpty),
@@ -135,3 +204,5 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
   static late FocusNode topNode;
   static late FocusNode bottomNode;
 }
+
+typedef MaybeSubmit = Future<void> Function([dynamic])?;

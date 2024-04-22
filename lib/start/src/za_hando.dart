@@ -9,7 +9,6 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:thc/home/profile/choose_any_view/choose_any_view.dart';
 import 'package:thc/start/src/login_fields.dart';
@@ -47,58 +46,19 @@ class ZaHando extends StatelessWidget {
   Widget build(BuildContext context) {
     final LoginProgress(:animation) = LoginProgressTracker.of(context);
     final pressedStart = animation >= AnimationProgress.pressStart;
-    final colors = context.colorScheme;
-    final builder = pressedStart ? collapse : sunrise;
+
+    Widget contents = TweenAnimationBuilder(
+      key: ValueKey(pressedStart),
+      duration: pressedStart ? _shrinkDuration : duration,
+      tween: Tween(begin: 0.0, end: 1.0),
+      builder: pressedStart ? collapse : sunrise,
+      child: const LoginFields(),
+    );
+    if (pressedStart) contents = _TopButtons(child: contents);
+
     return Scaffold(
       backgroundColor: StartColors.bg,
-      body: SafeArea(
-        child: SizedBox.expand(
-          child: TweenAnimationBuilder(
-            key: ValueKey(pressedStart),
-            duration: pressedStart ? _shrinkDuration : duration,
-            tween: Tween(begin: 0.0, end: 1.0),
-            builder: (context, t, child) {
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  Positioned(
-                    top: 16,
-                    right: 16,
-                    child: _FadeIn(
-                      t,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          SizedBox(
-                            width: 48,
-                            height: 48,
-                            child: IconButton.filled(
-                              style: IconButton.styleFrom(
-                                backgroundColor: colors.surface,
-                                foregroundColor: colors.outline,
-                              ),
-                              onPressed: () => navigator.push(const ChooseAnyView()),
-                              icon: const Icon(Icons.build),
-                            ),
-                          ),
-                          const SizedBox(width: 16),
-                          ThemeModePicker(
-                            backgroundColor: colors.surface,
-                            foregroundColor: colors.outline,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  builder(context, t, child),
-                ],
-              );
-            },
-            child: const LoginFields(),
-          ),
-        ),
-      ),
+      body: SafeArea(child: SizedBox.expand(child: contents)),
     );
   }
 
@@ -141,7 +101,7 @@ class ZaHando extends StatelessWidget {
     const centerText = Text('CENTER', style: StyleText(color: SunColors.overlayText));
 
     final innerHand = DefaultTextStyle(
-      style: const StyleText(size: 48, weight: 750),
+      style: const StyleText(size: 48, weight: 720),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -215,12 +175,12 @@ class ZaHando extends StatelessWidget {
                 ),
               ),
             ),
-            _FadeIn(t, child: child),
+            _FadeIn(t, child: child!),
           ],
         ),
       ),
     );
-    if (!backgroundGradient) return zaHando;
+    if (!backgroundGradient) return _TopButtons(t: t, child: zaHando);
 
     final tHorizon = (t * 2 - 1 / 3).clamp(0.0, 1.0);
     late final handHorizon = HSVColor.lerp(
@@ -275,7 +235,7 @@ class ZaHando extends StatelessWidget {
     );
 
     final innerHand = DefaultTextStyle(
-      style: StyleText(size: fontSize, weight: FontWeight.bold),
+      style: StyleText(size: fontSize, weight: 720),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -322,28 +282,32 @@ class ZaHando extends StatelessWidget {
     );
 
     return LayoutBuilder(
-      builder: (_, constraints) => Container(
-        margin: const EdgeInsets.all(25),
-        padding: const EdgeInsets.all(25),
-        decoration: BoxDecoration(
-          color: colors.surface,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        width: 450,
-        clipBehavior: Clip.hardEdge,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: constraints.maxHeight - 400),
-              child: Padding(
-                padding: EdgeInsets.all(25 * (1 - tMotion)).copyWith(top: 0),
-                child: FittedBox(child: zaHando),
-              ),
+      builder: (_, constraints) => Stack(
+        children: [
+          Container(
+            margin: const EdgeInsets.all(25),
+            padding: const EdgeInsets.all(25),
+            decoration: BoxDecoration(
+              color: colors.surface,
+              borderRadius: BorderRadius.circular(8),
             ),
-            child!,
-          ],
-        ),
+            width: 450,
+            clipBehavior: Clip.hardEdge,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: constraints.maxHeight - 400),
+                  child: Padding(
+                    padding: EdgeInsets.all(25 * (1 - tMotion)).copyWith(top: 0),
+                    child: FittedBox(child: zaHando),
+                  ),
+                ),
+                child!,
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -353,16 +317,70 @@ class _FadeIn extends StatelessWidget {
   const _FadeIn(this.t, {required this.child});
 
   final double t;
-  final Widget? child;
+  final Widget child;
   static const duration = Duration(milliseconds: 1250);
 
   @override
   Widget build(BuildContext context) {
     return AnimatedOpacity(
+      key: Key('$child opacity'),
       opacity: t.floorToDouble(),
       duration: duration,
       curve: Curves.easeOut,
       child: child,
+    );
+  }
+}
+
+class _TopButtons extends StatelessWidget {
+  const _TopButtons({this.t, required this.child});
+
+  final double? t;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colorScheme;
+
+    final row = Row(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(
+          width: 48,
+          height: 48,
+          child: GoBack(),
+        ),
+        const Spacer(),
+        SizedBox(
+          width: 48,
+          height: 48,
+          child: IconButton.filled(
+            style: IconButton.styleFrom(
+              backgroundColor: colors.surface,
+              foregroundColor: colors.outline,
+            ),
+            onPressed: () => navigator.push(const ChooseAnyView()),
+            icon: const Icon(Icons.build),
+          ),
+        ),
+        const SizedBox(width: 16),
+        ThemeModePicker(
+          backgroundColor: colors.surface,
+          foregroundColor: colors.outline,
+        ),
+      ],
+    );
+
+    return Stack(
+      alignment: Alignment.center,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: SizedBox.expand(child: t == null ? row : _FadeIn(t!, child: row)),
+        ),
+        child,
+      ],
     );
   }
 }

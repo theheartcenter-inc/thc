@@ -4,7 +4,6 @@ import 'package:flutter/widgets.dart';
 class StyleText extends TextStyle {
   const StyleText({
     double? size,
-    bool extraBold = false,
     this.weight,
     super.inherit,
     super.color,
@@ -22,21 +21,14 @@ class StyleText extends TextStyle {
     super.decorationColor,
     super.decorationStyle,
     super.decorationThickness,
-    super.debugLabel,
-    super.package,
     super.overflow,
   })  : assert(weight == null || weight is FontWeight || weight is num),
-        super(
-          fontSize: size,
-          fontFamily: 'pretendard',
-          fontWeight: extraBold ? FontWeight.bold : FontWeight.normal,
-        );
+        super(fontSize: size, fontFamily: 'pretendard');
 
   const StyleText.mono({
     double? size,
-    bool italic = false,
-    bool extraBold = false,
     this.weight,
+    super.fontStyle,
     super.inherit,
     super.color,
     super.backgroundColor,
@@ -53,16 +45,9 @@ class StyleText extends TextStyle {
     super.decorationColor,
     super.decorationStyle,
     super.decorationThickness,
-    super.debugLabel,
-    super.package,
     super.overflow,
   })  : assert(weight == null || weight is FontWeight || weight is num),
-        super(
-          fontSize: size,
-          fontStyle: italic ? FontStyle.italic : FontStyle.normal,
-          fontFamily: 'roboto mono',
-          fontWeight: extraBold ? FontWeight.bold : FontWeight.normal,
-        );
+        super(fontSize: size, fontFamily: 'roboto mono');
 
   /// The type should either be [FontWeight] or [double].
   ///

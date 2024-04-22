@@ -34,7 +34,6 @@ abstract final class ThcColors {
   static const gray = Color(0xff4b4f58);
   static const dullBlue = Color(0xff364764);
   static const darkBlue = Color(0xff151c28);
-  static const dullGreen = Color(0xff608060);
   static const darkGreen = Color(0xff003300);
   static const darkMagenta = Color(0xff663366);
   static const paleAzure = Color(0xffddeeff);
@@ -82,7 +81,7 @@ ThemeData _generateTheme(Brightness brightness) {
       brightness: isLight ? Brightness.light : Brightness.dark,
       primary: isLight ? ThcColors.green : StartColors.zaHando,
       primaryContainer: isLight ? StartColors.dullGreen38 : StartColors.dullGreen50,
-      onPrimary: isLight ? StartColors.dullGreen : StartColors.dullerGreen,
+      onPrimary: StartColors.dullerGreen,
       inversePrimary: ThcColors.darkGreen,
       secondary: ThcColors.teal,
       onSecondary: Colors.white,

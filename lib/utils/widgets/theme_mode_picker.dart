@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:thc/utils/animation.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/style_text.dart';
@@ -24,10 +25,7 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
   }
 
   Future<void> toggle([ThemeMode? mode]) async {
-    reversing = switch (controller.status) {
-      AnimationStatus.forward || AnimationStatus.completed => true,
-      AnimationStatus.reverse || AnimationStatus.dismissed => false,
-    };
+    reversing = controller.aimedForward;
     if (reversing && mode != null) {
       context.read<AppTheme>().emit(mode);
       StorageKeys.themeMode.save(mode.index);
