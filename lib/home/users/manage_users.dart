@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/users/permissions.dart';
+import 'package:thc/utils/navigator.dart';
 
 class ManageUsers extends StatelessWidget {
   const ManageUsers({super.key});
@@ -29,15 +30,8 @@ class ManageUsers extends StatelessWidget {
                   IconButton.filled(
                     icon: const Icon(Icons.edit),
                     onPressed: () {
-                      print(user.id);
-                      final Map<String, dynamic> userData =
-                          user.data() as Map<String, dynamic>;
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Permissions(user: userData),
-                        ),
-                      );
+                      final userData = user.data() as Map<String, dynamic>;
+                      navigator.push(Permissions(user: userData));
                     },
                   ),
                 ),

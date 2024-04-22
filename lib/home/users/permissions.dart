@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:thc/firebase/firebase.dart';
+import 'package:thc/firebase/user.dart';
+import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/theme.dart';
+import 'package:thc/utils/widgets/error_dialog.dart';
 
 class Permissions extends StatelessWidget {
   const Permissions({Key? key, required this.user}) : super(key: key);
@@ -20,64 +23,52 @@ class RadioGroup extends StatefulWidget {
   final Map<String, dynamic> user;
 
   @override
-  _RadioGroupState createState() => _RadioGroupState();
+  State<RadioGroup> createState() => _RadioGroupState();
 }
 
 class _RadioGroupState extends State<RadioGroup> {
-  late String _selectedRadio;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedRadio = widget.user['type'];
-  }
+  late UserType _selectedRadio = UserType.fromJson(widget.user);
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
         const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
+          padding: EdgeInsets.all(16.0),
           child: Text(
             'User Permissions',
-            style: TextStyle(
-              fontSize: 16.0,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
           ),
         ),
-        buildRadioListTile('Participant', 'Participants can do 123'),
-        buildRadioListTile('Admin', 'Admin can do 456'),
-        buildRadioListTile('Director', 'Directors can do 789'),
+        for (final userType in UserType.values)
+          RadioListTile<UserType>(
+            title: Text('$userType'),
+            subtitle: Text(
+              switch (userType) {
+                UserType.participant => 'Participants can do 123',
+                UserType.director => 'Directors can do 456',
+                UserType.admin => 'Admin can do 789',
+              },
+              style: const TextStyle(color: ThcColors.gray),
+            ),
+            value: userType,
+            groupValue: _selectedRadio,
+            onChanged: (newValue) {
+              if (newValue != null) {
+                setState(() => _selectedRadio = newValue);
+                updatePermissions(widget.user['id'], newValue);
+              }
+            },
+          ),
       ],
     );
   }
 
-  RadioListTile<String> buildRadioListTile(String title, String subtitle) {
-    return RadioListTile<String>(
-      title: Text(title),
-      subtitle: Text(
-        subtitle,
-        style: const TextStyle(color: ThcColors.gray),
-      ),
-      value: title,
-      groupValue: _selectedRadio,
-      onChanged: (newValue) {
-        if (newValue != null) {
-          setState(() {
-            _selectedRadio = newValue;
-            updatePermissions(widget.user['id'], newValue);
-          });
-        }
-      },
-    );
-  }
-
-  Future<void> updatePermissions(String userId, String newName) async {
+  Future<void> updatePermissions(String userId, UserType newType) async {
     try {
-      await FirebaseFirestore.instance.collection('users').doc(userId).update({'type': newName});
+      await db.collection('users').doc(userId).update({'type': '$newType'});
     } catch (e) {
-      print('Error updating permissions: $e');
+      navigator.showDialog(builder: (context) => ErrorDialog('Error updating permissions: $e'));
     }
   }
 }
