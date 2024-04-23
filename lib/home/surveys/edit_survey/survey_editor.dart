@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:thc/home/surveys/edit_survey/survey_field_editor.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
+import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/theme.dart';
 
 /// This is meant for demonstration; the survey isn't saved to Firebase or local storage.
@@ -171,11 +170,9 @@ class _SurveyEditorState extends State<SurveyEditor> {
 
     Widget? editButton;
     if (mobileDevice && keyedQuestions.isNotEmpty) {
-      editButton = BlocConsumer<MobileEditing>(
-        (_, value, __) => IconButton.filled(
-          icon: Icon(value.icon, color: Colors.black87),
-          onPressed: value.toggle,
-        ),
+      editButton = IconButton.filled(
+        icon: Icon(context.watch<MobileEditing>().icon, color: Colors.black87),
+        onPressed: context.read<MobileEditing>().toggle,
       );
     }
     return Scaffold(
@@ -188,28 +185,24 @@ class _SurveyEditorState extends State<SurveyEditor> {
           ),
         ],
       ),
-      body: GestureDetector(
-        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-        behavior: HitTestBehavior.translucent,
-        child: Center(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                ReorderableListView(
-                  physics: const NeverScrollableScrollPhysics(),
-                  shrinkWrap: true,
-                  buildDefaultDragHandles: false,
-                  onReorder: (oldIndex, newIndex) {
-                    if (newIndex > oldIndex) newIndex--;
-                    setState(() {
-                      keyedQuestions.insert(newIndex, keyedQuestions.removeAt(oldIndex));
-                    });
-                  },
-                  children: editors,
-                ),
-                divider(keyedQuestions.length),
-              ],
-            ),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              ReorderableListView(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                buildDefaultDragHandles: false,
+                onReorder: (oldIndex, newIndex) {
+                  if (newIndex > oldIndex) newIndex--;
+                  setState(() {
+                    keyedQuestions.insert(newIndex, keyedQuestions.removeAt(oldIndex));
+                  });
+                },
+                children: editors,
+              ),
+              divider(keyedQuestions.length),
+            ],
           ),
         ),
       ),

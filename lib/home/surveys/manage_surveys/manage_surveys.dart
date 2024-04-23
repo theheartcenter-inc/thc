@@ -3,6 +3,7 @@ import 'package:thc/home/surveys/edit_survey/survey_editor.dart';
 import 'package:thc/home/surveys/manage_surveys/survey_responses.dart';
 import 'package:thc/home/surveys/take_survey/survey_theme.dart';
 import 'package:thc/utils/navigator.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 class ManageSurveys extends StatelessWidget {
@@ -17,7 +18,7 @@ class ManageSurveys extends StatelessWidget {
           FilledButton(
             style: FilledButton.styleFrom(backgroundColor: SurveyColors.orangeSunset),
             onPressed: () => navigator.push(const SurveyResponseScreen()),
-            child: const Text('survey response summary', style: TextStyle(height: 5)),
+            child: const Text('survey response summary', style: StyleText(height: 5)),
           ),
           const CustomSurveyButtons(),
         ],
@@ -43,7 +44,7 @@ class CustomSurveyButtons extends StatelessWidget {
           children: [
             const Text(
               'custom survey',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              style: StyleText(size: 18, weight: 600),
             ),
             const SizedBox(width: 25),
             Column(

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
-import 'package:thc/home/surveys/take_survey/fun_quiz.dart';
 import 'package:thc/home/surveys/take_survey/survey_field.dart';
 import 'package:thc/home/surveys/take_survey/survey_theme.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/navigator.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 /// {@template SurveyScreen}
@@ -38,10 +37,6 @@ class _SurveyScreenState extends State<SurveyScreen> {
   /// If every non-optional question is answered, this will navigate
   /// to a screen that shows results.
   void validate() {
-    if (FunQuiz.inProgress) {
-      navigator.pushReplacement(FunQuizResults(data.funQuizResults));
-      return;
-    }
     final validation = context.read<ValidSurveyAnswers>();
     if (data.valid) {
       validation.emit(false);
@@ -113,15 +108,15 @@ class Submitted extends StatelessWidget {
           children: [
             TextSpan(
               text: 'Thank you!\n',
-              style: TextStyle(fontSize: 56, letterSpacing: 0.5),
+              style: StyleText(size: 56, letterSpacing: 0.5),
             ),
             TextSpan(
               text: 'your response has been recorded.\n',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              style: StyleText(size: 16, weight: FontWeight.w600),
             ),
             TextSpan(
               text: "(just kidding, it hasn't)\n\n\n",
-              style: TextStyle(fontSize: 13, letterSpacing: 0.33),
+              style: StyleText(size: 13, letterSpacing: 0.33),
             ),
           ],
         ),
@@ -142,13 +137,13 @@ class Submitted extends StatelessWidget {
               for (final (question, answer) in summary) ...[
                 Text(
                   question,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  style: const StyleText(size: 16, weight: 600),
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 5, 0, 50),
                   child: Text(
                     answer ?? '(no answer)',
-                    style: answer == null ? TextStyle(color: translucent) : null,
+                    style: answer == null ? StyleText(color: translucent) : null,
                   ),
                 ),
               ],

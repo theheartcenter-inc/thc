@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 class PasswordResetSentScreen extends StatelessWidget {
@@ -18,7 +19,7 @@ class PasswordResetSentScreen extends StatelessWidget {
               children: <Widget>[
                 Text(
                   'Check your inbox',
-                  style: TextStyle(color: ThcColors.darkBlue, fontSize: 40),
+                  style: StyleText(size: 40, color: ThcColors.darkBlue),
                 ),
               ],
             ),
@@ -31,7 +32,7 @@ class PasswordResetSentScreen extends StatelessWidget {
                 Text(
                   'If your email is associated with an account, '
                   'you will recived an email with a link to reset your password in your inbox.',
-                  style: TextStyle(color: ThcColors.darkBlue, fontSize: 20),
+                  style: StyleText(size: 20, color: ThcColors.darkBlue),
                 ),
               ],
             ),

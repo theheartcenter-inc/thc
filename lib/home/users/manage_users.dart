@@ -10,7 +10,7 @@ class ManageUsers extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dataTable = StreamBuilder<QuerySnapshot>(
-      stream: db.collection('users').snapshots(),
+      stream: Firestore.users.snapshots(),
       builder: (context, snapshot) => DataTable(
         sortColumnIndex: 0,
         columns: const [
@@ -30,7 +30,7 @@ class ManageUsers extends StatelessWidget {
                   IconButton.filled(
                     icon: const Icon(Icons.edit),
                     onPressed: () {
-                      final userData = user.data() as Map<String, dynamic>;
+                      final userData = user.data() as Json;
                       navigator.push(Permissions(user: userData));
                     },
                   ),

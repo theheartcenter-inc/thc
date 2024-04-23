@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:thc/login_register/login.dart';
 import 'package:thc/login_register/password_reset_sent.dart';
 import 'package:thc/utils/navigator.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/error_dialog.dart';
 
@@ -38,17 +39,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             padding: EdgeInsets.all(20),
             child: Text(
               'Forgot Password?',
-              style: TextStyle(color: ThcColors.darkBlue, fontSize: 40),
+              style: StyleText(size: 40, color: ThcColors.darkBlue),
             ),
           ),
           const Padding(
             padding: EdgeInsets.all(20),
             child: Text(
               'We will send you a link to reset your password.',
-              style: TextStyle(
-                color: ThcColors.darkBlue,
-                fontSize: 20,
-              ),
+              style: StyleText(size: 20, color: ThcColors.darkBlue),
             ),
           ),
           Padding(
@@ -69,11 +67,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     controller: _email,
                     decoration: const InputDecoration(
                       hintText: 'Email',
-                      hintStyle: TextStyle(color: Colors.grey),
+                      hintStyle: StyleText(color: Colors.grey),
                       border: InputBorder.none,
-                      labelStyle: TextStyle(color: Colors.black),
+                      labelStyle: StyleText(color: Colors.black),
                     ),
-                    style: const TextStyle(color: Colors.black),
+                    style: const StyleText(color: Colors.black),
                   ),
                 ),
                 Padding(
@@ -90,9 +88,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           'invalid-email' => 'Please enter a valid email.',
                           _ => 'Error: ${e.code}',
                         };
-                        navigator.showDialog(builder: (_) => ErrorDialog(errorMessage));
+                        navigator.showDialog(ErrorDialog(errorMessage));
                       } catch (e) {
-                        navigator.showDialog(builder: (_) => ErrorDialog(e.toString()));
+                        navigator.showDialog(ErrorDialog(e.toString()));
                       }
                     },
                     label: 'Reset Password',

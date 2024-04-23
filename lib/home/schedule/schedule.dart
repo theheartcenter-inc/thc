@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/schedule/edit_schedule/schedule_editor.dart';
 import 'package:thc/utils/navigator.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
-import 'package:thc/firebase/user.dart';
 
 class Schedule extends StatelessWidget {
   const Schedule({super.key});
@@ -14,7 +15,7 @@ class Schedule extends StatelessWidget {
     final colors = context.colorScheme;
 
     Widget? editButton;
-    if (userType.isAdmin) {
+    if (user.isAdmin) {
       editButton = IconButton.filled(
         icon: const Icon(Icons.edit),
         onPressed: () => navigator.push(const ScheduleEditor()),
@@ -28,10 +29,10 @@ class Schedule extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
               child: Text(
                 'Active Livestream',
-                style: TextStyle(
-                  fontSize: 24.0,
+                style: StyleText(
+                  size: 24.0,
                   color: colors.inverseSurface,
-                  fontWeight: FontWeight.bold,
+                  weight: FontWeight.bold,
                 ),
               ),
             ),
@@ -49,11 +50,11 @@ class Schedule extends StatelessWidget {
                   leading: const FlutterLogo(size: 56.0),
                   title: const Text(
                     'Active Livestream',
-                    style: TextStyle(color: Colors.black),
+                    style: StyleText(color: Colors.black),
                   ),
                   subtitle: const Text(
                     'April 3, 2024 12:00PM EST',
-                    style: TextStyle(color: Colors.black),
+                    style: StyleText(color: Colors.black),
                   ),
                 ),
               ),
@@ -62,10 +63,10 @@ class Schedule extends StatelessWidget {
               padding: const EdgeInsets.all(16.0),
               child: Text(
                 'Upcoming Livestreams',
-                style: TextStyle(
-                  fontSize: 24.0,
+                style: StyleText(
+                  size: 24.0,
                   color: colors.inverseSurface,
-                  fontWeight: FontWeight.bold,
+                  weight: FontWeight.bold,
                 ),
               ),
             ),
@@ -80,11 +81,11 @@ class Schedule extends StatelessWidget {
                       leading: FlutterLogo(size: 56.0),
                       title: Text(
                         'Upcoming Livestream A',
-                        style: TextStyle(color: Colors.black),
+                        style: StyleText(color: Colors.black),
                       ),
                       subtitle: Text(
                         'June 5, 2024 7:00PM EST',
-                        style: TextStyle(color: Colors.black),
+                        style: StyleText(color: Colors.black),
                       ),
                     ),
                   ),
@@ -95,11 +96,11 @@ class Schedule extends StatelessWidget {
                       leading: FlutterLogo(size: 56.0),
                       title: Text(
                         'Upcoming Livestream B',
-                        style: TextStyle(color: Colors.black),
+                        style: StyleText(color: Colors.black),
                       ),
                       subtitle: Text(
                         'June 10, 2024 7:00PM EST',
-                        style: TextStyle(color: Colors.black),
+                        style: StyleText(color: Colors.black),
                       ),
                     ),
                   ),
@@ -110,11 +111,11 @@ class Schedule extends StatelessWidget {
                       leading: FlutterLogo(size: 56.0),
                       title: Text(
                         'Upcoming Livestream C',
-                        style: TextStyle(color: Colors.black),
+                        style: StyleText(color: Colors.black),
                       ),
                       subtitle: Text(
                         'June 15, 2024 12:00PM EST',
-                        style: TextStyle(color: Colors.black),
+                        style: StyleText(color: Colors.black),
                       ),
                     ),
                   ),
@@ -125,11 +126,11 @@ class Schedule extends StatelessWidget {
                       leading: FlutterLogo(size: 56.0),
                       title: Text(
                         'Upcoming Livestream D',
-                        style: TextStyle(color: Colors.black),
+                        style: StyleText(color: Colors.black),
                       ),
                       subtitle: Text(
                         'June 20, 2024 2:00PM EST',
-                        style: TextStyle(color: Colors.black),
+                        style: StyleText(color: Colors.black),
                       ),
                     ),
                   ),
@@ -140,11 +141,11 @@ class Schedule extends StatelessWidget {
                       leading: FlutterLogo(size: 56.0),
                       title: Text(
                         'Upcoming Livestream E',
-                        style: TextStyle(color: Colors.black),
+                        style: StyleText(color: Colors.black),
                       ),
                       subtitle: Text(
                         'June 25, 2024 4:00PM EST',
-                        style: TextStyle(color: Colors.black),
+                        style: StyleText(color: Colors.black),
                       ),
                     ),
                   ),

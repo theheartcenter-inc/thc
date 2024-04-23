@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/utils/local_storage.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
-import 'package:thc/firebase/user.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -16,13 +17,13 @@ class SettingsScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Dark theme?', style: TextStyle(fontSize: 20)),
+            const Text('Dark theme?', style: StyleText(size: 20)),
             const SizedBox(height: 20),
             const _ThemePicker(),
-            if (userType.isAdmin) ...const [
+            if (user.isAdmin) ...const [
               SizedBox(height: 50),
-              NavBarSwitch(StorageKeys.adminWatchLive),
-              NavBarSwitch(StorageKeys.adminStream),
+              NavBarSwitch(LocalStorage.adminWatchLive),
+              NavBarSwitch(LocalStorage.adminStream),
             ],
           ],
         ),
@@ -33,7 +34,7 @@ class SettingsScreen extends StatelessWidget {
 
 class NavBarSwitch extends StatefulWidget {
   const NavBarSwitch(this.storageKey, {super.key});
-  final StorageKeys storageKey;
+  final LocalStorage storageKey;
 
   @override
   State<NavBarSwitch> createState() => _NavBarSwitchState();
@@ -45,8 +46,8 @@ class _NavBarSwitchState extends State<NavBarSwitch> {
   Widget build(BuildContext context) {
     return SwitchListTile.adaptive(
       title: Text(switch (widget.storageKey) {
-        StorageKeys.adminWatchLive => 'show "watch live"',
-        StorageKeys.adminStream || _ => 'show "stream"',
+        LocalStorage.adminWatchLive => 'show "watch live"',
+        LocalStorage.adminStream || _ => 'show "stream"',
       }),
       value: value,
       onChanged: (newValue) {

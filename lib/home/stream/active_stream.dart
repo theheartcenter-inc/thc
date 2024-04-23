@@ -3,11 +3,11 @@ import 'dart:math';
 
 import 'package:agora_uikit/agora_uikit.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:thc/credentials/credentials.dart';
 import 'package:thc/home/home_screen.dart';
-import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/app_config.dart';
+import 'package:thc/utils/bloc.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/widgets/state_async.dart';
 
 class ActiveStream extends StatefulWidget {
@@ -40,7 +40,7 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
 
   @override
   void animate() async {
-    if (useInternet) client.initialize();
+    // if (useInternet) client.initialize();
     sleep(0.5, then: setTimer);
   }
 
@@ -97,7 +97,7 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
               )
             else
               const Center(
-                child: Text('making a livestream!', style: TextStyle(color: Colors.white)),
+                child: Text('making a livestream!', style: StyleText(color: Colors.white)),
               ),
             NavBar.of(context, belowPage: true),
           ],
@@ -187,7 +187,7 @@ class _ViewCount extends StatelessWidget {
       padding: const EdgeInsets.all(15),
       child: Text(
         '$peopleWatching watching',
-        style: const TextStyle(color: Colors.white),
+        style: const StyleText(color: Colors.white),
       ),
     );
   }

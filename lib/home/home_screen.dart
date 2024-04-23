@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/library/video_library.dart';
 import 'package:thc/home/profile/profile.dart';
 import 'package:thc/home/schedule/schedule.dart';
@@ -11,7 +11,6 @@ import 'package:thc/home/users/manage_users.dart';
 import 'package:thc/home/watch_live/watch_live.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
-import 'package:thc/firebase/user.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
 
 enum NavBarButton with StatelessEnum {
@@ -89,11 +88,11 @@ enum NavBarButton with StatelessEnum {
   /// Not every button should be enabled for every user,
   /// e.g. participants and directors don't have access to the admin portal.
   bool get enabled {
-    final bool isAdmin = userType.isAdmin;
+    final isAdmin = user.isAdmin;
     return switch (this) {
-      watchLive when isAdmin => StorageKeys.adminWatchLive(),
-      stream when isAdmin => StorageKeys.adminStream(),
-      stream => userType.canLivestream,
+      watchLive when isAdmin => LocalStorage.adminWatchLive(),
+      stream when isAdmin => LocalStorage.adminStream(),
+      stream => user.canLivestream,
       users || surveys => isAdmin,
       watchLive || schedule || library || profile => true,
     };
@@ -122,6 +121,10 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (user.id == null) {
+      return const Scaffold(body: SafeArea(child: ProfileScreen()));
+    }
+
     final navBar = NavBar.of(context);
 
     return Scaffold(
@@ -184,7 +187,7 @@ class NavBarIndex extends Cubit<int> {
   NavBarIndex() : super(_initial);
 
   static int get _initial {
-    final NavBarButton fromStorage = StorageKeys.navBarState();
+    final NavBarButton fromStorage = LocalStorage.navBarState();
     return fromStorage.navIndex;
   }
 
@@ -192,17 +195,18 @@ class NavBarIndex extends Cubit<int> {
   /// 1. `index`: its index in [NavBarButton.values]
   /// 2. `navIndex`: its index in [NavigationBar.destinations]
   ///
-  /// `index` is used in [StorageKeys], and `navIndex` is used in the [NavBar].
+  /// `index` is used in [LocalStorage], and `navIndex` is used in the [NavBar].
   void selectIndex(int navIndex) {
     final newButton = NavBarButton.enabledValues[navIndex];
-    StorageKeys.navBarState.save(newButton.index);
+    LocalStorage.navBarState.save(newButton.index);
     emit(navIndex);
   }
 
   /// Similar to [selectIndex], but you can pass in the desired button directly.
   void selectButton(NavBarButton button) {
     return switch (NavBarButton.enabledValues.indexOf(button)) {
-      < 0 => throw UnsupportedError('"$userType" does not currently have access to "$button".'),
+      < 0 =>
+        throw UnsupportedError('"${user.type}" does not currently have access to "$button".'),
       final int navIndex => selectIndex(navIndex),
     };
   }

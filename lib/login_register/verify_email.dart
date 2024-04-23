@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:thc/login_register/login.dart';
 import 'package:thc/utils/navigator.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 class VerifyEmailScreen extends StatelessWidget {
@@ -20,7 +21,7 @@ class VerifyEmailScreen extends StatelessWidget {
               padding: EdgeInsets.all(20),
               child: Text(
                 'Verify Email',
-                style: TextStyle(color: ThcColors.darkBlue, fontSize: 40),
+                style: StyleText(size: 40, color: ThcColors.darkBlue),
               ),
             ),
             const Padding(
@@ -29,7 +30,7 @@ class VerifyEmailScreen extends StatelessWidget {
                 child: Text(
                   "We've sent you an email verification. Please open it to verify your account.\n\n"
                   "If you haven't received your verification email yet, press the button below.",
-                  style: TextStyle(color: ThcColors.darkBlue, fontSize: 20),
+                  style: StyleText(size: 20, color: ThcColors.darkBlue),
                 ),
               ),
             ),
