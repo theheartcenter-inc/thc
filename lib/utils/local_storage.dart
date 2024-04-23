@@ -28,8 +28,7 @@ enum LocalStorage {
   themeMode,
   navBarState,
   adminWatchLive,
-  adminStream,
-  ;
+  adminStream;
 
   /// {@macro StorageKeys}
   dynamic get initial => switch (this) {

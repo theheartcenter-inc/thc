@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/firebase/firebase_setup.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/profile/account/account_field.dart';
@@ -16,13 +15,14 @@ import 'package:thc/utils/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  addKeyboardShortcuts();
 
-  await Future.wait([
+  final asyncSetup = [
     initFirebase(),
     loadFromLocalStorage(),
-  ]);
-  await ThcUser.loadfromLocalStorage();
+  ];
+  addKeyboardShortcuts();
+  await Future.wait(asyncSetup);
+  loadUser();
 
   runApp(const App());
 }

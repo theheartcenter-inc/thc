@@ -6,11 +6,7 @@ import 'package:thc/utils/navigator.dart';
 void addKeyboardShortcuts() {
   HardwareKeyboard.instance.addHandler((event) {
     if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
-      if (LocalStorage.loggedIn()) {
-        navigator.pop();
-      } else {
-        LoginProgressTracker.pop();
-      }
+      LocalStorage.loggedIn() ? navigator.pop() : LoginProgressTracker.pop();
       return true;
     }
     return false;

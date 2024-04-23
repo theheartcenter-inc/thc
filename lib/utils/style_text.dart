@@ -51,7 +51,7 @@ class StyleText extends TextStyle {
 
   /// The type should either be [FontWeight] or [double].
   ///
-  /// In [Style.mono], the value can range from 100 to 700;
+  /// In [StyleText.mono], the value can range from 100 to 700;
   /// otherwise, it can go from 50 to 1000.
   final dynamic weight;
 

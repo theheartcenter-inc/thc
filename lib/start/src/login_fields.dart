@@ -37,7 +37,6 @@ enum LoginField with StatelessEnum {
   void newVal(String? value) {
     final current = LoginProgressTracker.readState.fieldValues;
     LoginProgressTracker.update(
-      mismatch: false,
       fieldValues: switch (this) {
         top => (value, current.$2),
         bottom => (current.$1, value),
@@ -113,7 +112,7 @@ class LoginFields extends StatelessWidget {
       :animation,
       :labels,
       :fieldValues,
-      :mismatch,
+      :errorMessage,
     ) = LoginProgressTracker.of(context);
 
     final colors = context.colorScheme;
@@ -172,15 +171,11 @@ class LoginFields extends StatelessWidget {
     );
 
     final Widget helpText;
-    if (mismatch) {
-      final String text;
-      if (labels.choosingPassword && fieldValues.$1 != fieldValues.$2) {
-        text = "it looks like these passwords don't match.";
-      } else {
-        text = 'check the above field${labels.just1field ? "" : "s"} and try again.';
-      }
+    if (errorMessage != null) {
       helpText = Text(
-        text,
+        errorMessage.isNotEmpty
+            ? errorMessage
+            : 'check the above field${labels.just1field ? "" : "s"} and try again.',
         textAlign: TextAlign.center,
         style: const StyleText(size: 12, weight: 600, color: Color(0xffc00000)),
       );
@@ -237,7 +232,7 @@ class _TextFieldButton extends StatelessWidget {
       :focusedField,
       :fieldValues,
       :labels,
-      :mismatch,
+      :errorMessage,
       :showPassword,
     ) = LoginProgressTracker.of(context);
     final (username, password) = fieldValues;
@@ -254,7 +249,7 @@ class _TextFieldButton extends StatelessWidget {
 
     final onPressed = passwordVisibility
         ? LoginProgressTracker.toggleShowPassword
-        : LoginProgressTracker.maybeSubmit(labels, fieldValues, mismatch);
+        : LoginProgressTracker.maybeSubmit(labels, fieldValues, errorMessage != null);
 
     final IconData icon;
     if (passwordVisibility) {

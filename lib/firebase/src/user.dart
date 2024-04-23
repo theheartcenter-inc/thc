@@ -72,24 +72,6 @@ sealed class ThcUser {
 
   static ThcUser? instance;
 
-  static Future<void> loadfromLocalStorage() async {
-    if (!LocalStorage.loggedIn()) return;
-
-    final String? id = LocalStorage.userId();
-    if (useInternet && id != null) {
-      // let's add a try/catch block here soon
-      user = await download(id);
-      return;
-    }
-
-    final String name = LocalStorage.firstLastName();
-    assert(name.isNotEmpty);
-    final UserType? type = LocalStorage.userType();
-    final String? email = LocalStorage.email();
-
-    user = ThcUser(name: name, type: type, id: id, email: email);
-  }
-
   /// {@macro ThcUser}
   static Future<ThcUser> download(String id, {Firestore? collection}) async {
     if (!useInternet) {

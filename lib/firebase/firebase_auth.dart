@@ -1,6 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
@@ -30,13 +29,13 @@ extension EmailSyntax on String {
 
 String authId(String id) => 'userid_$id@theheartcenter.one';
 
-Future<String?> register(String email, String password) async {
+Future<String?> register() async {
+  final id = LocalStorage.userId();
   try {
     await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
+      email: id != null ? authId(id) : LocalStorage.email(),
+      password: LocalStorage.password(),
     );
-    return null;
   } on FirebaseAuthException catch (e) {
     return switch (e.code) {
       'weak-password' =>
@@ -46,28 +45,9 @@ Future<String?> register(String email, String password) async {
       _ => 'Error: ${e.code}',
     };
   }
-}
-
-Future<String?> registerId(String userId, String password) async {
-  if (await register(authId(userId), password) case final error?) return error;
-
-  user = await ThcUser.download(userId, collection: Firestore.unregistered)
-    ..upload();
-  Firestore.unregistered.doc(userId).delete();
-
-  LocalStorage.userId.save(userId);
-  LocalStorage.password.save(password);
   LocalStorage.loggedIn.save(true);
-
   navigator
     ..pushReplacement(const HomeScreen())
     ..push(SurveyScreen(questions: SurveyPresets.intro.questions));
-  return null;
-}
-
-Future<String?> registerEmail(String email, String password) async {
-  if (await register(email, password) case final error?) return error;
-
-  // TODO: verify email
   return null;
 }

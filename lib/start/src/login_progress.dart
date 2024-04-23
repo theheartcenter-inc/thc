@@ -86,7 +86,7 @@ class LoginProgress {
     required this.labels,
     required this.focusedField,
     required this.fieldValues,
-    required this.mismatch,
+    required this.errorMessage,
     required this.showPassword,
   });
 
@@ -94,7 +94,7 @@ class LoginProgress {
       : labels = LoginLabels.withId,
         focusedField = null,
         animation = AnimationProgress.sunrise,
-        mismatch = false,
+        errorMessage = null,
         showPassword = false,
         fieldValues = (null, null);
 
@@ -103,7 +103,7 @@ class LoginProgress {
     required LoginLabels? labels,
     required LoginField? focusedField,
     required (String?, String?)? fieldValues,
-    required bool? mismatch,
+    required String? errorMessage,
     required bool? showPassword,
   }) {
     return LoginProgress(
@@ -111,7 +111,7 @@ class LoginProgress {
       labels: labels ?? this.labels,
       focusedField: focusedField ?? this.focusedField,
       fieldValues: fieldValues ?? this.fieldValues,
-      mismatch: mismatch ?? this.mismatch,
+      errorMessage: errorMessage ?? this.errorMessage,
       showPassword: showPassword ?? this.showPassword,
     );
   }
@@ -121,7 +121,16 @@ class LoginProgress {
         labels: labels,
         focusedField: null,
         fieldValues: fieldValues,
-        mismatch: mismatch,
+        errorMessage: errorMessage,
+        showPassword: showPassword,
+      );
+
+  LoginProgress resolveError() => LoginProgress(
+        animation: animation,
+        labels: labels,
+        focusedField: focusedField,
+        fieldValues: fieldValues,
+        errorMessage: null,
         showPassword: showPassword,
       );
 
@@ -129,7 +138,7 @@ class LoginProgress {
   final LoginLabels labels;
   final LoginField? focusedField;
   final (String?, String?) fieldValues;
-  final bool mismatch;
+  final String? errorMessage;
   final bool showPassword;
 }
 
@@ -156,7 +165,7 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
     LoginField? focusedField,
     AnimationProgress? animation,
     (String?, String?)? fieldValues,
-    bool? mismatch,
+    String? errorMessage,
     bool? showPassword,
   }) {
     if (labels != null && labels != readState.labels) {
@@ -165,15 +174,20 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
         ..$2.clear();
       fieldValues = ('', '');
     }
-    _tracker!.emit(readState.copyWith(
+
+    final progress = fieldValues == null ? readState : readState.resolveError();
+
+    _tracker!.emit(progress.copyWith(
       animation: animation,
       labels: labels,
       focusedField: focusedField,
       fieldValues: fieldValues,
-      mismatch: mismatch,
+      errorMessage: errorMessage,
       showPassword: showPassword,
     ));
   }
+
+  static void mismatch([String? message]) => update(errorMessage: message ?? '');
 
   static void toggleShowPassword() => update(showPassword: !readState.showPassword);
 
@@ -199,24 +213,30 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
       case LoginLabels.withId:
         final (id, name) = fieldValues;
         final doc = await Firestore.unregistered.doc(id).get();
-        final match = doc.exists && doc['name'] == name;
-        if (match) {
-          LocalStorage.userId.save(id);
-          LocalStorage.firstLastName.save(name);
-        }
-        update(mismatch: !match, labels: match ? LoginLabels.choosePassword : null);
+
+        if (!doc.exists || doc['name'] != name) return update(errorMessage: '');
+
+        LocalStorage.userId.save(id);
+        LocalStorage.firstLastName.save(name);
+        update(labels: LoginLabels.choosePassword);
       case LoginLabels.noId:
         final (email!, name!) = fieldValues;
 
-        if (!EmailValidator.validate(email)) return update(mismatch: true);
+        if (!EmailValidator.validate(email)) {
+          return update(errorMessage: 'double-check the email address and try again.');
+        }
 
-        LocalStorage.firstLastName.save(name);
         LocalStorage.email.save(email);
+        LocalStorage.firstLastName.save(name);
       case LoginLabels.choosePassword:
         final (password!, retype) = fieldValues;
-        if (password != retype) return update(mismatch: true);
+        if (password != retype) {
+          return update(errorMessage: "it looks like these passwords don't match.");
+        }
 
-        if (LocalStorage.userId() case final id?) await auth.registerId(id, password);
+        if (await auth.register() case final errorMessage?) {
+          return update(errorMessage: errorMessage);
+        }
       case final labels:
         throw UnimplementedError('field: $field, labels: $labels');
     }
@@ -225,10 +245,10 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
   static Future<void> Function([dynamic])? maybeSubmit([
     LoginLabels? labels,
     (String?, String?)? fieldValues,
-    bool? mismatch,
+    bool? error,
   ]) {
     late final state = readState;
-    if (mismatch ?? state.mismatch) return null;
+    if (error ?? state.errorMessage != null) return null;
 
     final values = fieldValues ?? state.fieldValues;
 
