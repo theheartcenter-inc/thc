@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thc/firebase/src/user_type.dart';
 import 'package:thc/home/home_screen.dart';
+
+late final SharedPreferences _storage;
 
 Future<void> loadFromLocalStorage() async {
   _storage = await SharedPreferences.getInstance();
 }
 
-late final SharedPreferences _storage;
+Future<void> clearLocalStorage() => _storage.clear();
 
 /// {@template StorageKeys}
 /// Local storage supports 5 types:
@@ -15,18 +18,24 @@ late final SharedPreferences _storage;
 /// ```
 /// Other types need to be converted in order to save/load.
 /// {@endtemplate}
-enum StorageKeys {
-  themeMode,
+enum LocalStorage {
+  loggedIn,
   userId,
+  userType,
+  email,
+  password,
+  firstLastName,
+  themeMode,
   navBarState,
   adminWatchLive,
-  adminStream,
-  ;
+  adminStream;
 
   /// {@macro StorageKeys}
   dynamic get initial => switch (this) {
+        loggedIn => false,
+        userId || userType || email => null,
+        password || firstLastName => '',
         themeMode => ThemeMode.system.index,
-        userId => null,
         navBarState => 0,
         adminWatchLive || adminStream => false,
       };
@@ -40,11 +49,13 @@ enum StorageKeys {
   /// This has the advantage of looking really snazzy.
   dynamic call() {
     final value = fromStorage;
+    if (value == 'null') return null;
     return switch (this) {
-      _ when value == 'null' => null,
+      loggedIn || userId || email || password || firstLastName => value,
+      userType when value == null => null,
+      userType => UserType.values[value],
       themeMode => ThemeMode.values[value],
       navBarState => NavBarButton.values[value],
-      userId => value,
       adminWatchLive || adminStream => value,
     };
   }

@@ -5,6 +5,7 @@ import 'package:thc/home/surveys/edit_survey/survey_editor.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey_field.dart';
 import 'package:thc/utils/app_config.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 /// Shows a preview of a [SurveyField] that you can tap to edit.
@@ -180,8 +181,7 @@ enum EditorMode {
   /// to make an animation when it's being added or deleted.
   collapsed;
 
-  factory EditorMode.update(List<FocusNode> nodes) =>
-      nodes.any((node) => node.hasFocus) ? edit : view;
+  factory EditorMode.update(FocusNode node) => node.hasFocus ? edit : view;
 }
 
 class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
@@ -265,6 +265,10 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
   FocusOnKeyEventCallback keyboardShortcuts(TextFieldData option) => (node, event) {
         if (event is KeyUpEvent) return KeyEventResult.ignored;
         int index = choices.indexOf(option);
+        late final noDelete = option.controller.text.isNotEmpty ||
+            choices.length == 1 ||
+            (index == 0 && event.logicalKey == LogicalKeyboardKey.backspace);
+
         switch (event.logicalKey) {
           case LogicalKeyboardKey.arrowUp when index > 0:
             choices[index - 1].node.requestFocus();
@@ -272,11 +276,8 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
             choices[index + 1].node.requestFocus();
 
           case LogicalKeyboardKey.delete || LogicalKeyboardKey.backspace:
-            if (option.controller.text.isNotEmpty ||
-                choices.length == 1 ||
-                (index == 0 && event.logicalKey == LogicalKeyboardKey.backspace)) {
-              return KeyEventResult.ignored;
-            }
+            if (noDelete) return KeyEventResult.ignored;
+
             setState(() => choices.removeAt(index));
             if (event.logicalKey == LogicalKeyboardKey.backspace || index == choices.length) {
               index--;
@@ -300,24 +301,20 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
       final MultipleChoice q => q.choices.toList(),
       final ScaleQuestion q => q.values.toList(),
     };
-    choices = [
-      for (final option in options) TextFieldData(option, keyboardShortcuts),
-    ];
+    choices = [for (final option in options) TextFieldData(option, keyboardShortcuts)];
 
     // when nothing in this editor is focused, we should return to "view" mode.
-    for (final node in allNodes) {
-      node.addListener(() {
-        if (mode == EditorMode.collapsed) return;
-        final newState = EditorMode.update(allNodes);
-        if (mode != newState) {
-          setState(() {
-            mode = newState;
-            if (showButtons) showButtons = false;
-          });
-          if (newState == EditorMode.view) widget.update(updatedQuestion);
-        }
-      });
-    }
+    mainNode.addListener(() {
+      if (mode == EditorMode.collapsed) return;
+      final newState = EditorMode.update(mainNode);
+      if (mode != newState) {
+        setState(() {
+          mode = newState;
+          if (showButtons) showButtons = false;
+        });
+        if (newState == EditorMode.view) widget.update(updatedQuestion);
+      }
+    });
 
     // we need to delay this,
     // since there wouldn't be any animation if we just set the value immediately.
@@ -436,7 +433,7 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
                     TextField(
                       decoration: InputDecoration(
                         hintText: 'add…',
-                        hintStyle: TextStyle(color: translucent),
+                        hintStyle: StyleText(color: translucent),
                         enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: translucent),
                         ),
@@ -552,18 +549,17 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
     }
 
     if (content != null) {
-      content = Column(
-        children: [
-          widget.divider,
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: GestureDetector(
-              onTap: () {},
-              behavior: HitTestBehavior.translucent,
+      content = TapRegion(
+        onTapOutside: (_) => mainNode.unfocus(),
+        child: Column(
+          children: [
+            widget.divider,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Focus(focusNode: mainNode, child: content),
             ),
-          ),
-        ],
+          ],
+        ),
       );
     }
 
@@ -626,7 +622,7 @@ class QuestionTypeIcon extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(5, 0, 5, 3),
             child: Text(
               'text',
-              style: TextStyle(fontSize: 12, color: foregroundColor.withAlpha(0xcc)),
+              style: StyleText(size: 12, color: foregroundColor.withAlpha(0xcc)),
             ),
           ),
         );

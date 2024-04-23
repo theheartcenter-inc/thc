@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:thc/start/src/start_theme.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
+import 'package:thc/utils/style_text.dart';
 
 /// {@template colorScheme}
 /// By pulling colors from the [ColorScheme], the color palette can adapt
@@ -13,7 +15,7 @@ import 'package:thc/utils/local_storage.dart';
 ///     color: colorScheme.surface,
 ///     child: Text(
 ///       'Hello World',
-///       style: TextStyle(color: colorScheme.onSurface),
+///       style: StyleText(color: colorScheme.onSurface),
 ///     ),
 ///   );
 /// }
@@ -24,12 +26,13 @@ import 'package:thc/utils/local_storage.dart';
 /// {@endtemplate}
 abstract final class ThcColors {
   static const green = Color(0xff99cc99);
+  static const green67 = Color(0xaa99cc99);
   static const pink = Color(0xffeecce0);
   static const orange = Color(0xffffa020);
   static const teal = Color(0xff00b0b0);
   static const tan = Color(0xfff8f0e0);
-  static const dullBlue = Color(0xff364764);
   static const gray = Color(0xff4b4f58);
+  static const dullBlue = Color(0xff364764);
   static const darkBlue = Color(0xff151c28);
   static const darkGreen = Color(0xff003300);
   static const darkMagenta = Color(0xff663366);
@@ -46,19 +49,25 @@ abstract final class ThcColors {
 /// ```dart
 /// states = {MaterialState.hovered, MaterialState.selected};
 /// ```
+///
+/// I made this extension because of [that one video](https://youtu.be/CylXr3AF3uU?t=449)
+/// that told me to.
 extension ThatOneVideo on Set<MaterialState> {
   bool get isFocused => contains(MaterialState.focused);
   bool get isSelected => contains(MaterialState.selected);
+  bool get isPressed => contains(MaterialState.pressed);
 }
 
 const _iconTheme = IconThemeData(size: 32);
-const _labelTextStyle = TextStyle(fontWeight: FontWeight.w600, fontSize: 12);
+const _labelTextStyle = StyleText(size: 12, weight: 600);
+final _lightBackground = Color.lerp(ThcColors.paleAzure, Colors.white, 0.33)!;
 
-ThemeData _generateTheme(bool isLight) {
+ThemeData _generateTheme(Brightness brightness) {
+  final isLight = brightness == Brightness.light;
+
   final textColor = isLight ? Colors.black : ThcColors.paleAzure;
   final slightContrast = isLight ? ThcColors.dullBlue : ThcColors.paleAzure;
   final paleColor = isLight ? Colors.white : ThcColors.paleAzure;
-  final lightBackground = Color.lerp(ThcColors.paleAzure, Colors.white, 0.33)!;
 
   MaterialStateProperty<T> selected<T>(T selected, T unselected) =>
       MaterialStateProperty.resolveWith((states) => states.isSelected ? selected : unselected);
@@ -73,9 +82,10 @@ ThemeData _generateTheme(bool isLight) {
   return ThemeData(
     colorScheme: ColorScheme(
       brightness: isLight ? Brightness.light : Brightness.dark,
-      primary: ThcColors.green,
+      primary: isLight ? ThcColors.green : StartColors.zaHando,
+      primaryContainer: isLight ? StartColors.dullGreen38 : StartColors.dullGreen50,
+      onPrimary: StartColors.dullerGreen,
       inversePrimary: ThcColors.darkGreen,
-      onPrimary: Colors.white,
       secondary: ThcColors.teal,
       onSecondary: Colors.white,
       tertiary: isLight ? ThcColors.darkMagenta : ThcColors.tan,
@@ -84,7 +94,7 @@ ThemeData _generateTheme(bool isLight) {
       onError: Colors.white,
       errorContainer: Colors.red.withOpacity(0.33),
       onErrorContainer: Colors.red,
-      background: isLight ? lightBackground : ThcColors.darkBlue,
+      background: isLight ? _lightBackground : ThcColors.darkBlue,
       onBackground: textColor,
       surface: isLight ? ThcColors.tan : ThcColors.dullBlue,
       onSurface: textColor,
@@ -95,6 +105,7 @@ ThemeData _generateTheme(bool isLight) {
       outline: slightContrast,
       outlineVariant: slightContrast.withOpacity(0.25),
     ),
+    fontFamily: 'pretendard',
     materialTapTargetSize: MaterialTapTargetSize.padded,
     switchTheme: SwitchThemeData(
       thumbColor: selected(Colors.white, slightContrast),
@@ -104,8 +115,11 @@ ThemeData _generateTheme(bool isLight) {
         ThcColors.dullBlue.withOpacity(isLight ? 0.33 : 1),
       ),
     ),
-    filledButtonTheme: const FilledButtonThemeData(
-      style: ButtonStyle(shape: MaterialStatePropertyAll(BeveledRectangleBorder())),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        shape: const BeveledRectangleBorder(),
+        textStyle: const StyleText(weight: 600),
+      ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -145,12 +159,6 @@ ThemeData _generateTheme(bool isLight) {
   );
 }
 
-/// {@macro colorScheme}
-final lightTheme = _generateTheme(true);
-
-/// {@macro colorScheme}
-final darkTheme = _generateTheme(false);
-
 /// `extension` lets you add methods to a class, as if you were
 /// doing it inside the class definition.
 ///
@@ -177,10 +185,19 @@ extension ThemeGetter on BuildContext {
 }
 
 class AppTheme extends Cubit<ThemeMode> {
-  AppTheme() : super(StorageKeys.themeMode());
+  AppTheme() : super(LocalStorage.themeMode());
+
+  static ThemeData of(BuildContext context) {
+    final mode = switch (context.watch<AppTheme>().state) {
+      ThemeMode.light => Brightness.light,
+      ThemeMode.dark => Brightness.dark,
+      ThemeMode.system => MediaQuery.platformBrightnessOf(context),
+    };
+    return _generateTheme(mode);
+  }
 
   void newThemeMode(ThemeMode newTheme) {
-    StorageKeys.themeMode.save(newTheme.index);
+    LocalStorage.themeMode.save(newTheme.index);
     emit(newTheme);
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:thc/home/surveys/survey_questions.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 /// The sunrise/sunset gradient does a couple things:
@@ -39,11 +39,7 @@ class SurveyStyling extends StatelessWidget {
     final brightness = context.theme.brightness;
     final isLight = brightness == Brightness.light;
     final blackAndWhite = isLight ? Colors.white : Colors.black;
-    final textColor = isLight
-        ? Colors.black
-        : FunQuiz.inProgress
-            ? const Color(0xffddeeee)
-            : SurveyColors.orangeWhite;
+    final textColor = isLight ? Colors.black : SurveyColors.orangeWhite;
     final error = isLight ? SurveyColors.vibrantRed : Colors.redAccent;
     final paleColor = isLight ? SurveyColors.yellowSunrise : SurveyColors.orangeWhite;
     final colors = ColorScheme(
@@ -97,7 +93,7 @@ class SurveyStyling extends StatelessWidget {
             foregroundColor: isLight ? Colors.black : SurveyColors.maroonSunset,
             shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(25)),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
-            textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            textStyle: const StyleText(size: 16, weight: 600),
             elevation: isLight ? 1 : null,
           ),
         ),
@@ -105,20 +101,13 @@ class SurveyStyling extends StatelessWidget {
       child: Scaffold(
         body: SingleChildScrollView(
           child: Container(
-            decoration: FunQuiz.inProgress
-                ? BoxDecoration(
-                    color: context.lightDark(
-                      const Color(0xffccffff),
-                      const Color(0xff000808),
-                    ),
-                  )
-                : BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: const Alignment(-0.25, -1.0),
-                      end: const Alignment(0.25, 1.0),
-                      colors: [colors.surface, colors.background],
-                    ),
-                  ),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: const Alignment(-0.25, -1.0),
+                end: const Alignment(0.25, 1.0),
+                colors: [colors.surface, colors.background],
+              ),
+            ),
             constraints: BoxConstraints(minWidth: size.width, minHeight: size.height),
             padding: const EdgeInsets.all(20),
             child: SafeArea(child: child),

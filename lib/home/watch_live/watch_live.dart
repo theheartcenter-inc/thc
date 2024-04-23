@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:thc/home/watch_live/watching_livestream.dart';
 import 'package:thc/utils/navigator.dart';
+import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 class WatchLive extends StatelessWidget {
@@ -19,7 +20,7 @@ class WatchLive extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // will eventually show current stream info
-            const Text('This is the Stream Title', style: TextStyle(fontSize: 24)),
+            const Text('This is the Stream Title', style: StyleText(size: 24)),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () => navigator.push(const LobbyScreen()),
