@@ -3,11 +3,14 @@ import 'package:thc/firebase/user.dart';
 import 'package:thc/main.dart';
 import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/local_storage.dart';
+import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 class ChooseAnyView extends StatelessWidget {
   const ChooseAnyView({super.key});
+
+  const factory ChooseAnyView.button({Key? key}) = _ButtonFromLoginScreen;
 
   @override
   Widget build(BuildContext context) {
@@ -35,6 +38,23 @@ class ChooseAnyView extends StatelessWidget {
   }
 }
 
+class _ButtonFromLoginScreen extends ChooseAnyView {
+  const _ButtonFromLoginScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colorScheme;
+    return IconButton.filled(
+      style: IconButton.styleFrom(
+        backgroundColor: colors.surface,
+        foregroundColor: colors.outline,
+      ),
+      onPressed: () => navigator.push(const ChooseAnyView()),
+      icon: const Icon(Icons.build),
+    );
+  }
+}
+
 class UserButton extends StatelessWidget {
   const UserButton(this.userType, {super.key});
   final UserType? userType;
@@ -46,8 +66,8 @@ class UserButton extends StatelessWidget {
         await clearLocalStorage();
         if (userType case final userType?) {
           await Future.wait([
-            StorageKeys.loggedIn.save(true),
-            StorageKeys.userId.save(userType.testId),
+            LocalStorage.loggedIn.save(true),
+            LocalStorage.userId.save(userType.testId),
           ]);
           user = useInternet ? await ThcUser.download(userType.testId) : userType.testUser;
         } else {

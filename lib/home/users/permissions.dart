@@ -7,7 +7,7 @@ import 'package:thc/utils/widgets/error_dialog.dart';
 
 class Permissions extends StatelessWidget {
   const Permissions({Key? key, required this.user}) : super(key: key);
-  final Map<String, dynamic> user;
+  final Json user;
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +20,7 @@ class Permissions extends StatelessWidget {
 
 class RadioGroup extends StatefulWidget {
   const RadioGroup({Key? key, required this.user}) : super(key: key);
-  final Map<String, dynamic> user;
+  final Json user;
 
   @override
   State<RadioGroup> createState() => _RadioGroupState();

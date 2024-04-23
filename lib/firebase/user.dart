@@ -40,8 +40,8 @@ typedef Json = Map<String, dynamic>;
 
 extension FetchFromFirebaseFirestore on UserCollection? {
   CollectionReference<Json> get _this {
-    final userCollection = this ?? UserCollection.users;
-    return db.collection(userCollection.name);
+    final collection = this ?? UserCollection.users;
+    return db.collection(collection.name);
   }
 
   DocumentReference<Json> doc([String? path]) => _this.doc(path);
@@ -67,7 +67,7 @@ ThcUser? user;
 
 UserType? get userType => user?.type;
 
-String? get userId => StorageKeys.userId();
+String? get userId => LocalStorage.userId();
 
 /// {@template ThcUser}
 /// We can't just call this class `User`, since that's one of the Firebase classes.
@@ -76,15 +76,6 @@ String? get userId => StorageKeys.userId();
 /// {@macro sealed_class}
 @immutable
 sealed class ThcUser {
-  /// {@macro ThcUser}
-  const ThcUser._({
-    required this.name,
-    required this.type,
-    this.id,
-    this.email,
-    this.phone,
-  }) : assert((id ?? email ?? phone) != null);
-
   /// {@macro ThcUser}
   factory ThcUser({
     required String name,
@@ -116,6 +107,15 @@ sealed class ThcUser {
   }
 
   /// {@macro ThcUser}
+  const ThcUser._({
+    required this.name,
+    required this.type,
+    this.id,
+    this.email,
+    this.phone,
+  }) : assert((id ?? email ?? phone) != null);
+
+  /// {@macro ThcUser}
   factory ThcUser.fromJson(Json json) {
     return ThcUser(
       name: json['name'],
@@ -135,22 +135,56 @@ sealed class ThcUser {
   /// Used for password recovery.
   final String? email, phone;
 
+  static Future<void> loadfromLocalStorage() async {
+    final id = LocalStorage.userId();
+    if (useInternet && id != null) {
+      // let's add a try/catch block here soon
+      user = await download(id);
+      return;
+    }
+
+    final type = LocalStorage.userType();
+    if (type == null) return;
+    final email = LocalStorage.email();
+    final name = LocalStorage.firstLastName();
+
+    user = ThcUser(name: name, type: type, id: id, email: email);
+  }
+
   /// {@macro ThcUser}
-  static Future<ThcUser> download(String id, {UserCollection? userCollection}) async {
+  static Future<ThcUser> download(String id, {UserCollection? collection}) async {
     if (!useInternet) {
       return UserType.values.firstWhere((value) => id.contains(value.name)).testUser;
     }
 
-    final snapshot = await userCollection.doc(id).get();
+    final snapshot = await collection.doc(id).get();
     return ThcUser.fromJson(snapshot.data()!);
   }
 
-  static Future<void> remove(String id, {UserCollection? userCollection}) {
+  static Future<void> remove(String id, {UserCollection? collection}) {
     return switch (useInternet && !UserType._testIds.contains(id)) {
-      true => userCollection.doc(id).delete(),
+      true => collection.doc(id).delete(),
       false => Future.delayed(const Duration(seconds: 3)),
     };
   }
+
+  /// Saves the current user data to Firebase.
+  Future<void> upload({UserCollection? collection, bool saveLocally = true}) async {
+    await collection.doc(id).set(json);
+    if (!saveLocally) return;
+
+    LocalStorage.email.save(email);
+    LocalStorage.firstLastName.save(name);
+  }
+
+  /// Removes this user from the database.
+  ///
+  /// Any function that calls this method should also call `navigator.logout()`
+  /// to return to the login screen.
+  Future<void> yeet() => Future.wait([
+        if (FirebaseAuth.instance.currentUser case final user?) user.delete(),
+        if (id case final id?) remove(id),
+      ]);
 
   /// {@macro ThcUser}
   ThcUser copyWith({
@@ -176,18 +210,6 @@ sealed class ThcUser {
         if (email != null) 'email': email,
         if (phone != null) 'phone': phone,
       };
-
-  /// Saves the current user data to Firebase.
-  Future<void> upload({UserCollection? userCollection}) => userCollection.doc(id).set(json);
-
-  /// Removes this user from the database.
-  ///
-  /// Any function that calls this method should also call `navigator.logout()`
-  /// to return to the login screen.
-  Future<void> yeet() => Future.wait([
-        if (FirebaseAuth.instance.currentUser case final user?) user.delete(),
-        if (id case final id?) remove(id),
-      ]);
 
   @override
   bool operator ==(Object other) {

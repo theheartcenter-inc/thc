@@ -10,6 +10,3 @@ final mobileDevice = switch (defaultTargetPlatform) {
 /// Set this to `false` if you're just working on frontend stuff
 /// and you don't want to worry about connecting with Agora or Firebase.
 const useInternet = true;
-
-/// Controls whether the "choose any view" option is shown.
-const production = false;

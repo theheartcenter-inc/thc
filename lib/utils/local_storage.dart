@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:thc/firebase/user.dart';
 import 'package:thc/home/home_screen.dart';
 
 late final SharedPreferences _storage;
@@ -17,9 +18,13 @@ Future<void> clearLocalStorage() => _storage.clear();
 /// ```
 /// Other types need to be converted in order to save/load.
 /// {@endtemplate}
-enum StorageKeys {
+enum LocalStorage {
   loggedIn,
   userId,
+  userType,
+  email,
+  password,
+  firstLastName,
   themeMode,
   navBarState,
   adminWatchLive,
@@ -29,7 +34,8 @@ enum StorageKeys {
   /// {@macro StorageKeys}
   dynamic get initial => switch (this) {
         loggedIn => false,
-        userId => null,
+        userId || userType || email => null,
+        password || firstLastName => '',
         themeMode => ThemeMode.system.index,
         navBarState => 0,
         adminWatchLive || adminStream => false,
@@ -46,7 +52,9 @@ enum StorageKeys {
     final value = fromStorage;
     if (value == 'null') return null;
     return switch (this) {
-      loggedIn || userId => value,
+      loggedIn || userId || email || password || firstLastName => value,
+      userType when value == null => null,
+      userType => UserType.values[value],
       themeMode => ThemeMode.values[value],
       navBarState => NavBarButton.values[value],
       adminWatchLive || adminStream => value,

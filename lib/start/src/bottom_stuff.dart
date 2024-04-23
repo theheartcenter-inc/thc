@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:thc/start/src/progress_tracker.dart';
+import 'package:thc/start/src/login_progress.dart';
 import 'package:thc/utils/animation.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
@@ -14,7 +14,7 @@ class BottomStuff extends StatefulWidget {
 }
 
 class _BottomStuffState extends State<BottomStuff> with SingleTickerProviderStateMixin {
-  LoginFieldState fieldState = LoginFieldState.idName;
+  LoginLabels labels = LoginLabels.withId;
 
   late final controller = AnimationController(
     duration: Durations.extralong4,
@@ -31,16 +31,16 @@ class _BottomStuffState extends State<BottomStuff> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     final labelColor = context.colorScheme.outline.withOpacity(0.875);
-    final LoginProgress(:fieldState) = LoginProgressTracker.of(context);
-    final shouldShow = switch (fieldState) {
-      LoginFieldState.idName => true,
-      LoginFieldState.noID => false,
-      LoginFieldState.signIn => true,
-      LoginFieldState.choosePassword => false,
-      LoginFieldState.recovery => false,
+    final LoginProgress(labels: labels) = LoginProgressTracker.of(context);
+    final shouldShow = switch (labels) {
+      LoginLabels.withId => true,
+      LoginLabels.noId => false,
+      LoginLabels.signIn => true,
+      LoginLabels.choosePassword => false,
+      LoginLabels.recovery => false,
     };
     if (shouldShow != controller.aimedForward) controller.toggle(shouldReverse: !shouldShow);
-    if (shouldShow && fieldState != this.fieldState) this.fieldState = fieldState;
+    if (shouldShow && labels != this.labels) this.labels = labels;
 
     return DefaultTextStyle(
       style: StyleText(weight: 600, color: labelColor),
@@ -63,7 +63,7 @@ class _BottomStuffState extends State<BottomStuff> with SingleTickerProviderStat
       );
     }
 
-    Widget button(LoginFieldState? target) {
+    Widget button(LoginLabels? target) {
       if (tColumns <= 0 || target == null) return const Spacer();
 
       const timeOffsetRatio = 7 / 8;
@@ -85,7 +85,7 @@ class _BottomStuffState extends State<BottomStuff> with SingleTickerProviderStat
               tButton,
               child: _Button(
                 enabled: true,
-                onPressed: LoginFieldState.goto(target),
+                onPressed: LoginLabels.goto(target),
                 text: text,
               ),
             ),
@@ -112,7 +112,7 @@ class _BottomStuffState extends State<BottomStuff> with SingleTickerProviderStat
 
     final colors = context.colorScheme;
 
-    final (button1, button2) = fieldState.otherOptions!;
+    final (button1, button2) = labels.otherOptions!;
 
     return Padding(
       padding: EdgeInsets.only(top: 20 * tSeparator),

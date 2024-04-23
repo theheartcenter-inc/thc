@@ -22,8 +22,8 @@ class SettingsScreen extends StatelessWidget {
             const _ThemePicker(),
             if (userType.isAdmin) ...const [
               SizedBox(height: 50),
-              NavBarSwitch(StorageKeys.adminWatchLive),
-              NavBarSwitch(StorageKeys.adminStream),
+              NavBarSwitch(LocalStorage.adminWatchLive),
+              NavBarSwitch(LocalStorage.adminStream),
             ],
           ],
         ),
@@ -34,7 +34,7 @@ class SettingsScreen extends StatelessWidget {
 
 class NavBarSwitch extends StatefulWidget {
   const NavBarSwitch(this.storageKey, {super.key});
-  final StorageKeys storageKey;
+  final LocalStorage storageKey;
 
   @override
   State<NavBarSwitch> createState() => _NavBarSwitchState();
@@ -46,8 +46,8 @@ class _NavBarSwitchState extends State<NavBarSwitch> {
   Widget build(BuildContext context) {
     return SwitchListTile.adaptive(
       title: Text(switch (widget.storageKey) {
-        StorageKeys.adminWatchLive => 'show "watch live"',
-        StorageKeys.adminStream || _ => 'show "stream"',
+        LocalStorage.adminWatchLive => 'show "watch live"',
+        LocalStorage.adminStream || _ => 'show "stream"',
       }),
       value: value,
       onChanged: (newValue) {

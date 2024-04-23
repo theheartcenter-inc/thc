@@ -1,19 +1,30 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:thc/start/src/bottom_stuff.dart';
-import 'package:thc/start/src/progress_tracker.dart';
+import 'package:thc/start/src/login_progress.dart';
 import 'package:thc/start/src/start_theme.dart';
 import 'package:thc/start/src/za_hando.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
 
+extension LoginFieldStuff<T> on (T, T) {
+  T get(LoginField field) => switch (field) {
+        LoginField.top => $1,
+        LoginField.bottom => $2,
+      };
+}
+
 enum LoginField with StatelessEnum {
   top,
   bottom;
 
-  FocusNode get node => switch (this) { top => nodes.$1, bottom => nodes.$2 };
+  static final controllers = (TextEditingController(), TextEditingController());
   static final nodes = (FocusNode(), FocusNode());
+
+  TextEditingController get controller => controllers.get(this);
+  FocusNode get node => nodes.get(this);
+
   Future<void> listener() async {
     if (node.hasFocus) {
       LoginProgressTracker.update(focusedField: this);
@@ -37,18 +48,23 @@ enum LoginField with StatelessEnum {
   @override
   Widget build(BuildContext context) {
     final LoginProgress(
-      :fieldState,
+      :labels,
       :focusedField,
       :animation,
       :fieldValues,
+      :showPassword,
     ) = LoginProgressTracker.of(context);
 
     final colors = context.colorScheme;
     final focused = focusedField == this;
     final cursorColor = context.lightDark(ThcColors.green67, Colors.black);
     final blackHint = focused && colors.brightness == Brightness.dark;
+    final hintText = animation >= AnimationProgress.showBottom || focusedField != null
+        ? switch (this) { top => labels.topHint, bottom => labels.bottomHint }
+        : null;
 
-    final field = TextField(
+    final textField = TextField(
+      controller: controller,
       focusNode: node,
       cursorColor: cursorColor,
       decoration: InputDecoration(
@@ -58,27 +74,32 @@ enum LoginField with StatelessEnum {
             ? context.lightDark(Colors.white54, StartColors.lightContainer16)
             : Colors.transparent,
         filled: true,
-        hintText: animation >= AnimationProgress.showBottom || focusedField != null
-            ? switch (this) { top => fieldState.topHint, bottom => fieldState.bottomHint }
-            : null,
+        hintText: hintText,
         hintStyle: StyleText(color: blackHint ? Colors.black : colors.outline),
       ),
+      obscureText: !(this == top && showPassword) && (hintText?.contains('password') ?? false),
       onChanged: newVal,
       onSubmitted: LoginProgressTracker.maybeSubmit(),
     );
 
-    if (this == top) return field;
+    if (this == top) return textField;
 
     return LayoutBuilder(
-      builder: (context, constraints) => AnimatedContainer(
-        duration: Durations.medium1,
-        curve: Curves.ease,
-        height: fieldValues.$2 == null || fieldState.just1field ? 0 : 48,
-        child: FittedBox(
-          fit: BoxFit.fitWidth,
-          child: SizedBox(width: constraints.maxWidth, child: field),
-        ),
-      ),
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        const height = 48.0;
+        return AnimatedContainer(
+          duration: Durations.medium1,
+          curve: Curves.ease,
+          height: fieldValues.$2 == null || labels.just1field ? 0 : height,
+          width: width,
+          child: FittedBox(
+            alignment: Alignment.topCenter,
+            fit: BoxFit.fitWidth,
+            child: SizedBox(width: width, height: height, child: textField),
+          ),
+        );
+      },
     );
   }
 }
@@ -88,7 +109,12 @@ class LoginFields extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final LoginProgress(:animation, :fieldState, :mismatch) = LoginProgressTracker.of(context);
+    final LoginProgress(
+      :animation,
+      :labels,
+      :fieldValues,
+      :mismatch,
+    ) = LoginProgressTracker.of(context);
 
     final colors = context.colorScheme;
 
@@ -138,19 +164,27 @@ class LoginFields extends StatelessWidget {
             ),
           ),
           Positioned.fill(child: showBottom ? const SizedBox.shrink() : startButton),
-          const _Button(),
+          const _TextFieldButton(),
+          if (labels.choosingPassword && fieldValues.$1!.isNotEmpty)
+            const _TextFieldButton.passwordVisibility(),
         ],
       ),
     );
 
     final Widget helpText;
     if (mismatch) {
+      final String text;
+      if (labels.choosingPassword && fieldValues.$1 != fieldValues.$2) {
+        text = "it looks like these passwords don't match.";
+      } else {
+        text = 'check the above field${labels.just1field ? "" : "s"} and try again.';
+      }
       helpText = Text(
-        'check the above field${fieldState.just1field ? "" : "s"} and try again.',
+        text,
         textAlign: TextAlign.center,
         style: const StyleText(size: 12, weight: 600, color: Color(0xffc00000)),
       );
-    } else if (fieldState == LoginFieldState.recovery) {
+    } else if (labels == LoginLabels.recovery) {
       helpText = Text(
         "If you don't have a connected email,\ncontact the person who provided your user ID.",
         textAlign: TextAlign.center,
@@ -170,22 +204,26 @@ class LoginFields extends StatelessWidget {
   }
 }
 
-class _Button extends StatelessWidget {
-  const _Button();
+class _TextFieldButton extends StatelessWidget {
+  const _TextFieldButton() : passwordVisibility = false;
+  const _TextFieldButton.passwordVisibility() : passwordVisibility = true;
 
-  Color _iconbg(bool focused, bool checkButton, bool isLight, bool disabled) {
+  final bool passwordVisibility;
+  static final node = FocusNode(canRequestFocus: false, skipTraversal: true);
+
+  Color _iconbg(bool focused, bool checkButton, bool isLight, bool enabled) {
     double bgA = 1.0;
     double bgH = 210.0;
     double bgS = 0.1;
     double bgL = 0.0;
 
-    if (disabled) {
+    if (!enabled) {
       bgA = isLight ? 0.125 : 0.5;
       bgL = focused ? 0.05 : 1 / 3;
     } else if (checkButton) {
       bgH = 120.0;
       bgS = 1 / 3;
-      bgL = isLight ? 0.7 : 0.75;
+      bgL = isLight ? 0.7 : 0.63;
     } else if (isLight) {
       bgA = 0.5;
     }
@@ -198,25 +236,30 @@ class _Button extends StatelessWidget {
     final LoginProgress(
       :focusedField,
       :fieldValues,
-      :fieldState,
+      :labels,
       :mismatch,
+      :showPassword,
     ) = LoginProgressTracker.of(context);
     final (username, password) = fieldValues;
 
     if (username == null) return const SizedBox.shrink();
 
     final (bool checkButton, bool focused) = switch (focusedField) {
-      LoginField.top when fieldState.just1field => (true, true),
+      LoginField.top when labels.just1field => (true, true),
       LoginField.top when password == null => (false, true),
-      LoginField.top => (true, false),
-      LoginField.bottom => (true, true),
-      null => (fieldState.just1field || password != null, false),
+      LoginField.top => (true, passwordVisibility),
+      LoginField.bottom => (true, !passwordVisibility),
+      null => (labels.just1field || password != null, false),
     };
 
-    final onPressed = LoginProgressTracker.maybeSubmit(fieldValues, mismatch);
+    final onPressed = passwordVisibility
+        ? LoginProgressTracker.toggleShowPassword
+        : LoginProgressTracker.maybeSubmit(labels, fieldValues, mismatch);
 
     final IconData icon;
-    if (checkButton) {
+    if (passwordVisibility) {
+      icon = showPassword ? Icons.visibility : Icons.visibility_off;
+    } else if (checkButton) {
       icon = Icons.done;
     } else if (defaultTargetPlatform == TargetPlatform.iOS) {
       icon = Icons.arrow_forward_ios;
@@ -228,19 +271,21 @@ class _Button extends StatelessWidget {
 
     final iconbg = _iconbg(
       focused,
-      checkButton,
+      passwordVisibility ? false : checkButton,
       brightness == Brightness.light,
-      onPressed == null,
+      passwordVisibility ? showPassword : onPressed != null,
     );
 
     final Color iconfg = switch ((brightness, focused)) {
       (Brightness.light, true) => Colors.white,
       (Brightness.light, false) => const Color(0xffd6e2ec),
+      (Brightness.dark, _) when passwordVisibility && showPassword => const Color(0xff2d3136),
       (Brightness.dark, true) when !checkButton => StartColors.lightContainer16,
       (Brightness.dark, true) => Colors.black,
       (Brightness.dark, false) => const Color(0xff0c0d0f),
     };
-    return Stack(
+
+    final button = Stack(
       alignment: Alignment.center,
       children: [
         DecoratedBox(
@@ -248,6 +293,7 @@ class _Button extends StatelessWidget {
           child: const SizedBox(width: 33, height: 33),
         ),
         IconButton(
+          focusNode: node,
           style: IconButton.styleFrom(
             backgroundColor: Colors.transparent,
             foregroundColor: iconfg,
@@ -257,6 +303,8 @@ class _Button extends StatelessWidget {
         )
       ],
     );
+
+    return passwordVisibility ? Positioned(top: 0, right: 0, child: button) : button;
   }
 }
 
@@ -265,8 +313,8 @@ class GoBack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final LoginProgress(:fieldState) = LoginProgressTracker.of(context);
-    final target = fieldState.back;
+    final LoginProgress(:labels) = LoginProgressTracker.of(context);
+    final target = labels.back;
     return SizedBox(
       width: 48,
       height: 48,
@@ -275,7 +323,7 @@ class GoBack extends StatelessWidget {
         duration: Durations.medium1,
         curve: Curves.ease,
         child: IconButton(
-          onPressed: LoginFieldState.goto(target),
+          onPressed: LoginLabels.goto(target),
           icon: Icon(
             defaultTargetPlatform == TargetPlatform.iOS ? Icons.arrow_back_ios : Icons.arrow_back,
             size: 28,

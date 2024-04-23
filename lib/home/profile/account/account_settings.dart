@@ -5,6 +5,7 @@ import 'package:thc/home/profile/account/account_field.dart';
 import 'package:thc/home/profile/account/close_account.dart';
 import 'package:thc/home/profile/profile.dart';
 import 'package:thc/utils/navigator.dart';
+import 'package:thc/utils/style_text.dart';
 
 class AccountSettings extends StatefulWidget {
   const AccountSettings({super.key});
@@ -31,7 +32,7 @@ class _AccountSettingsState extends State<AccountSettings> {
                 setState(AccountField.reset);
               }
             : null,
-        child: const Text('save changes'),
+        child: const Text('save changes', style: StyleText(weight: 520)),
       ),
     );
 

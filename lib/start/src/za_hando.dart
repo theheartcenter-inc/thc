@@ -12,9 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:thc/home/profile/choose_any_view/choose_any_view.dart';
 import 'package:thc/start/src/login_fields.dart';
-import 'package:thc/start/src/progress_tracker.dart';
+import 'package:thc/start/src/login_progress.dart';
 import 'package:thc/start/src/start_theme.dart';
-import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/theme_mode_picker.dart';
@@ -54,6 +53,7 @@ class ZaHando extends StatelessWidget {
       builder: pressedStart ? collapse : sunrise,
       child: const LoginFields(),
     );
+
     if (pressedStart) contents = _TopButtons(child: contents);
 
     return Scaffold(
@@ -149,7 +149,7 @@ class ZaHando extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: constraints.maxHeight - 400),
+              constraints: BoxConstraints(maxHeight: constraints.maxHeight - 275),
               child: Padding(
                 padding: const EdgeInsets.all(25).copyWith(top: 0),
                 child: FittedBox(
@@ -346,25 +346,12 @@ class _TopButtons extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(
-          width: 48,
-          height: 48,
-          child: GoBack(),
-        ),
+        const SizedBox(width: 48, height: 48, child: GoBack()),
         const Spacer(),
-        SizedBox(
-          width: 48,
-          height: 48,
-          child: IconButton.filled(
-            style: IconButton.styleFrom(
-              backgroundColor: colors.surface,
-              foregroundColor: colors.outline,
-            ),
-            onPressed: () => navigator.push(const ChooseAnyView()),
-            icon: const Icon(Icons.build),
-          ),
-        ),
-        const SizedBox(width: 16),
+        if (kDebugMode) ...[
+          const SizedBox(width: 48, height: 48, child: ChooseAnyView.button()),
+          const SizedBox(width: 16),
+        ],
         ThemeModePicker(
           backgroundColor: colors.surface,
           foregroundColor: colors.outline,

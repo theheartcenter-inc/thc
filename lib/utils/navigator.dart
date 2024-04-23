@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:thc/login_register/login.dart';
+import 'package:thc/utils/local_storage.dart';
 
 /// {@template navigator}
 /// We can make navigation a little cleaner with a global key and an extension type:
@@ -51,9 +52,12 @@ extension type Nav(NavigatorState navigator) {
   /// Adds a new screen in place of the current screen.
   ///
   /// {@macro navigator_example}
-  Future<void> pushReplacement(Widget destination) => navigator.pushReplacement<void, void>(
-        MaterialPageRoute<void>(builder: (context) => destination),
-      );
+  Future<T?> pushReplacement<T, TO>(Widget destination, {TO? result}) {
+    return navigator.pushReplacement<T, TO>(
+      MaterialPageRoute<T>(builder: (context) => destination),
+      result: result,
+    );
+  }
 
   /// Removes the current screen from the route.
   ///
@@ -72,7 +76,7 @@ extension type Nav(NavigatorState navigator) {
 
   /// Creates a pop-up dialog.
   ///
-  /// The [builder] should return an [AlertDialog] or something similar.
+  /// The [dialog] should be an [AlertDialog] or something similar.
   Future<T?> showDialog<T>(
     Widget dialog, {
     bool? barrierDismissible,
@@ -91,6 +95,10 @@ extension type Nav(NavigatorState navigator) {
       ScaffoldMessenger.of(navigator.context).showSnackBar(snackBar);
 
   void logout() {
+    LocalStorage.loggedIn.save(false);
+    LocalStorage.userId.save(null);
+    LocalStorage.firstLastName.save('');
+
     navigator.popUntil((_) => !navigator.canPop());
     pushReplacement(const LoginScreen());
   }

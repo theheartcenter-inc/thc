@@ -49,6 +49,9 @@ abstract final class ThcColors {
 /// ```dart
 /// states = {MaterialState.hovered, MaterialState.selected};
 /// ```
+///
+/// I made this extension because of [that one video](https://youtu.be/CylXr3AF3uU?t=449)
+/// that told me to.
 extension ThatOneVideo on Set<MaterialState> {
   bool get isFocused => contains(MaterialState.focused);
   bool get isSelected => contains(MaterialState.selected);
@@ -112,8 +115,11 @@ ThemeData _generateTheme(Brightness brightness) {
         ThcColors.dullBlue.withOpacity(isLight ? 0.33 : 1),
       ),
     ),
-    filledButtonTheme: const FilledButtonThemeData(
-      style: ButtonStyle(shape: MaterialStatePropertyAll(BeveledRectangleBorder())),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        shape: const BeveledRectangleBorder(),
+        textStyle: const StyleText(weight: 600),
+      ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
@@ -179,7 +185,7 @@ extension ThemeGetter on BuildContext {
 }
 
 class AppTheme extends Cubit<ThemeMode> {
-  AppTheme() : super(StorageKeys.themeMode());
+  AppTheme() : super(LocalStorage.themeMode());
 
   static ThemeData of(BuildContext context) {
     final mode = switch (context.watch<AppTheme>().state) {
@@ -191,7 +197,7 @@ class AppTheme extends Cubit<ThemeMode> {
   }
 
   void newThemeMode(ThemeMode newTheme) {
-    StorageKeys.themeMode.save(newTheme.index);
+    LocalStorage.themeMode.save(newTheme.index);
     emit(newTheme);
   }
 }

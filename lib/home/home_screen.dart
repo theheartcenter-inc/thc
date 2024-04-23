@@ -90,8 +90,8 @@ enum NavBarButton with StatelessEnum {
   bool get enabled {
     final bool isAdmin = userType.isAdmin;
     return switch (this) {
-      watchLive when isAdmin => StorageKeys.adminWatchLive(),
-      stream when isAdmin => StorageKeys.adminStream(),
+      watchLive when isAdmin => LocalStorage.adminWatchLive(),
+      stream when isAdmin => LocalStorage.adminStream(),
       stream => userType.canLivestream,
       users || surveys => isAdmin,
       watchLive || schedule || library || profile => true,
@@ -183,7 +183,7 @@ class NavBarIndex extends Cubit<int> {
   NavBarIndex() : super(_initial);
 
   static int get _initial {
-    final NavBarButton fromStorage = StorageKeys.navBarState();
+    final NavBarButton fromStorage = LocalStorage.navBarState();
     return fromStorage.navIndex;
   }
 
@@ -191,10 +191,10 @@ class NavBarIndex extends Cubit<int> {
   /// 1. `index`: its index in [NavBarButton.values]
   /// 2. `navIndex`: its index in [NavigationBar.destinations]
   ///
-  /// `index` is used in [StorageKeys], and `navIndex` is used in the [NavBar].
+  /// `index` is used in [LocalStorage], and `navIndex` is used in the [NavBar].
   void selectIndex(int navIndex) {
     final newButton = NavBarButton.enabledValues[navIndex];
-    StorageKeys.navBarState.save(newButton.index);
+    LocalStorage.navBarState.save(newButton.index);
     emit(navIndex);
   }
 

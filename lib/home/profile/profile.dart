@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/firebase/user.dart';
@@ -7,7 +8,6 @@ import 'package:thc/home/profile/choose_any_view/choose_any_view.dart';
 import 'package:thc/home/profile/info/heart_center_info.dart';
 import 'package:thc/home/profile/report/issue_report.dart';
 import 'package:thc/home/profile/settings/settings.dart';
-import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
@@ -50,7 +50,7 @@ enum ProfileOption with StatelessEnum {
   final String? label;
   final Widget? page;
 
-  static final count = values.length + (production ? 0 : 1);
+  static final count = values.length + (kDebugMode ? 1 : 0);
 
   VoidCallback get onTap => switch (this) {
         donate => () => launchUrlString('https://secure.givelively.org/donate/heart-center-inc'),

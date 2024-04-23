@@ -30,7 +30,7 @@ class ManageUsers extends StatelessWidget {
                   IconButton.filled(
                     icon: const Icon(Icons.edit),
                     onPressed: () {
-                      final userData = user.data() as Map<String, dynamic>;
+                      final userData = user.data() as Json;
                       navigator.push(Permissions(user: userData));
                     },
                   ),

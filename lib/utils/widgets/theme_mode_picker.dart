@@ -28,7 +28,7 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
     reversing = controller.aimedForward;
     if (reversing && mode != null) {
       context.read<AppTheme>().emit(mode);
-      StorageKeys.themeMode.save(mode.index);
+      LocalStorage.themeMode.save(mode.index);
     }
     return reversing ? controller.reverse(from: 1) : controller.forward(from: 0);
   }
