@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:thc/firebase/user.dart';
+import 'package:thc/firebase/firebase.dart';
 import 'package:thc/main.dart';
 import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/local_storage.dart';

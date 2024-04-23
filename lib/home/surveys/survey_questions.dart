@@ -1,4 +1,4 @@
-import 'package:thc/firebase/user.dart';
+import 'package:thc/firebase/firebase.dart';
 
 extension ValidAnswer on String? {
   /// If the user just presses the spacebar a couple of times,
@@ -32,10 +32,10 @@ sealed class SurveyQuestion {
 
     final String type = json['type'];
     switch (type.split(' ')) {
-      case ['yesNo']:
+      case ['yes/no']:
         return YesNoQuestion(question, optional: optional);
 
-      case ['textPrompt']:
+      case ['text prompt']:
         return TextPromptQuestion(question, optional: optional);
 
       case [final choicesType, 'multiple', 'choice']:
@@ -97,7 +97,7 @@ class YesNoQuestion extends SurveyQuestion {
       switch (answer) { true => 'yes', false => 'no', null => null };
 
   @override
-  Json get json => {...super.json, 'type': 'yesNo'};
+  Json get json => {...super.json, 'type': 'yes/no'};
 }
 
 /// {@template TextPromptQuestion}
@@ -111,7 +111,7 @@ class TextPromptQuestion extends SurveyQuestion {
   String? answerDescription(String? answer) => answer.validated;
 
   @override
-  Json get json => {...super.json, 'type': 'textPrompt'};
+  Json get json => {...super.json, 'type': 'text prompt'};
 }
 
 /// {@macro sealed_class}

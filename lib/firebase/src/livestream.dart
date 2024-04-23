@@ -1,4 +1,4 @@
-import 'package:thc/firebase/user.dart';
+import 'package:thc/firebase/firebase.dart';
 
 class LiveStreamModel {
   LiveStreamModel({
@@ -11,15 +11,15 @@ class LiveStreamModel {
     required this.directorName,
   });
 
-  factory LiveStreamModel.fromSnapshot(/*DocumentSnapshot*/ dynamic snapshot) {
+  factory LiveStreamModel.fromJson(Json json) {
     return LiveStreamModel(
-      liveStreamId: snapshot['liveStreamId'],
-      title: snapshot['title'],
-      startTime: snapshot['startTime'] /*as Timestamp*/ .toDate(),
-      channelId: snapshot['channelId'],
-      directorId: snapshot['directorId'],
-      directorName: snapshot['directorName'],
-      viewers: snapshot['viewers'],
+      liveStreamId: json['liveStreamId'],
+      title: json['title'],
+      startTime: json['startTime'], // as Timestamp.toDate(),
+      channelId: json['channelId'],
+      directorId: json['directorId'],
+      directorName: json['directorName'],
+      viewers: json['viewers'],
     );
   }
 

@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:thc/firebase/user.dart';
+import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/library/video_library.dart';
 import 'package:thc/home/profile/profile.dart';
 import 'package:thc/home/schedule/schedule.dart';
@@ -88,11 +88,11 @@ enum NavBarButton with StatelessEnum {
   /// Not every button should be enabled for every user,
   /// e.g. participants and directors don't have access to the admin portal.
   bool get enabled {
-    final bool isAdmin = userType.isAdmin;
+    final isAdmin = user.isAdmin;
     return switch (this) {
       watchLive when isAdmin => LocalStorage.adminWatchLive(),
       stream when isAdmin => LocalStorage.adminStream(),
-      stream => userType.canLivestream,
+      stream => user.canLivestream,
       users || surveys => isAdmin,
       watchLive || schedule || library || profile => true,
     };
@@ -201,7 +201,8 @@ class NavBarIndex extends Cubit<int> {
   /// Similar to [selectIndex], but you can pass in the desired button directly.
   void selectButton(NavBarButton button) {
     return switch (NavBarButton.enabledValues.indexOf(button)) {
-      < 0 => throw UnsupportedError('"$userType" does not currently have access to "$button".'),
+      < 0 =>
+        throw UnsupportedError('"${user.type}" does not currently have access to "$button".'),
       final int navIndex => selectIndex(navIndex),
     };
   }

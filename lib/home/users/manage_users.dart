@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:thc/firebase/user.dart';
+import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/users/permissions.dart';
 import 'package:thc/utils/navigator.dart';
 
@@ -10,7 +10,7 @@ class ManageUsers extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dataTable = StreamBuilder<QuerySnapshot>(
-      stream: UserCollection.users.snapshots(),
+      stream: Firestore.users.snapshots(),
       builder: (context, snapshot) => DataTable(
         sortColumnIndex: 0,
         columns: const [

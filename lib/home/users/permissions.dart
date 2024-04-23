@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:thc/firebase/firebase.dart';
-import 'package:thc/firebase/user.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/error_dialog.dart';
@@ -27,7 +26,7 @@ class RadioGroup extends StatefulWidget {
 }
 
 class _RadioGroupState extends State<RadioGroup> {
-  late UserType _selectedRadio = UserType.fromJson(widget.user);
+  late UserType _selectedRadio = UserType.fromJson(widget.user)!;
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +65,7 @@ class _RadioGroupState extends State<RadioGroup> {
 
   Future<void> updatePermissions(String userId, UserType newType) async {
     try {
-      await db.collection('users').doc(userId).update({'type': '$newType'});
+      await Firestore.users.doc(userId).update({'type': '$newType'});
     } catch (e) {
       navigator.showDialog(ErrorDialog('Error updating permissions: $e'));
     }

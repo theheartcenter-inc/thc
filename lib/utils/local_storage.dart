@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:thc/firebase/user.dart';
+import 'package:thc/firebase/src/user_type.dart';
 import 'package:thc/home/home_screen.dart';
 
 late final SharedPreferences _storage;

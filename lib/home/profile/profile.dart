@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:thc/firebase/user.dart';
+import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/profile/account/account_field.dart';
 import 'package:thc/home/profile/account/account_settings.dart';
 import 'package:thc/home/profile/choose_any_view/choose_any_view.dart';
@@ -91,11 +91,7 @@ class ProfileScreen extends StatelessWidget {
     );
 
     final userWatch = context.watch<AccountFields>().state ??
-        ThcUser(
-          name: 'Not Found',
-          type: UserType.participant,
-          id: '',
-        );
+        ThcUser(name: 'Not Found', type: UserType.participant, id: '');
     final linkColor = Color.lerp(ThcColors.dullBlue, ThcColors.teal, 0.25)!;
     final overview = DefaultTextStyle(
       style: StyleText(height: 1.75, color: context.colorScheme.onBackground),
@@ -104,11 +100,9 @@ class ProfileScreen extends StatelessWidget {
           children: [
             image,
             Text(userWatch.name, style: const StyleText(size: 28)),
-            if (user?.id case final id?)
-              Text('user ID: $id', style: const StyleText(weight: 600)),
+            if (user.id case final id?) Text('user ID: $id', style: const StyleText(weight: 600)),
             if (userWatch.email case final email?)
               Text(email, style: StyleText(color: linkColor)),
-            if (userWatch.phone case final phone?) Opacity(opacity: 0.75, child: Text(phone)),
             const SizedBox(height: 25),
           ],
         ),

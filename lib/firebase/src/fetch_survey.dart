@@ -18,8 +18,7 @@ class SurveySnapshot {
 
 // Firebase service to interact with Firestore
 Stream<List<SurveySnapshot>> getSurveyQuestionsForParticipant(String participantId) {
-  return db
-      .collection('users')
+  return Firestore.users
       .doc(participantId)
       .collection('survey_questions')
       .snapshots()

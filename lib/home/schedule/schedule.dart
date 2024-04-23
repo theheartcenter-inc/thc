@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:thc/firebase/user.dart';
+import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/schedule/edit_schedule/schedule_editor.dart';
 import 'package:thc/utils/navigator.dart';
@@ -15,7 +15,7 @@ class Schedule extends StatelessWidget {
     final colors = context.colorScheme;
 
     Widget? editButton;
-    if (userType.isAdmin) {
+    if (user.isAdmin) {
       editButton = IconButton.filled(
         icon: const Icon(Icons.edit),
         onPressed: () => navigator.push(const ScheduleEditor()),

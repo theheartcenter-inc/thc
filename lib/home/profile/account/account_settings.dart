@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:thc/firebase/user.dart';
+import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/profile/account/account_field.dart';
 import 'package:thc/home/profile/account/close_account.dart';
 import 'package:thc/home/profile/profile.dart';
@@ -37,7 +37,7 @@ class _AccountSettingsState extends State<AccountSettings> {
     );
 
     return PopScope(
-      onPopInvoked: (_) => context.read<AccountFields>().emit(user!),
+      onPopInvoked: (_) => context.read<AccountFields>().emit(user),
       child: Scaffold(
         appBar: AppBar(title: const Text('Account')),
         body: ProfileListView(

@@ -1,31 +1,14 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
-import 'package:thc/credentials/credentials.dart';
-import 'package:thc/utils/app_config.dart';
+import 'package:thc/firebase/src/user.dart';
 
-/// If there's an error here, check out the
-/// [Private Credentials wiki page](https://github.com/theheartcenter-one/thc/wiki/Private-Credentials)
-/// for a solution.
-Future<void> initFirebase() async {
-  if (!useInternet) return;
+export 'src/fetch_survey.dart';
+export 'src/livestream.dart';
+export 'src/user.dart';
+export 'src/user_type.dart';
+export 'src/cloud_firestore.dart';
 
-  final options = switch (defaultTargetPlatform) {
-    TargetPlatform() when kIsWeb => FirebaseCredentials.web,
-    TargetPlatform.android => FirebaseCredentials.android,
-    TargetPlatform.iOS => FirebaseCredentials.ios,
-    TargetPlatform.macOS => FirebaseCredentials.macos,
-    TargetPlatform.linux || TargetPlatform.windows => FirebaseCredentials.web,
-    TargetPlatform.fuchsia => throw Exception("(I don't think we'll be supporting Fuchsia)"),
-  };
-
-  final firebaseApp = await Firebase.initializeApp(options: options);
-  db = FirebaseFirestore.instanceFor(app: firebaseApp);
-
-  // This is just a one-time setup: uncomment if there's a change to testUser or Firebase
-  // for (final userType in UserType.values) {
-  //   userType.testUser.upload();
-  // }
+ThcUser get user => ThcUser.instance!;
+set user(ThcUser? updated) {
+  ThcUser.instance = updated;
 }
 
-late final FirebaseFirestore db;
+typedef Json = Map<String, dynamic>;

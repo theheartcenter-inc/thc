@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
-import 'package:thc/firebase/user.dart';
+import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
@@ -9,14 +9,17 @@ import 'package:thc/utils/navigator.dart';
 
 extension EmailSyntax on String {
   String get emailValidated {
+    const zero = 48, nine = 57, a = 97, z = 122;
+    const period = 46, underscore = 95;
+
     final s = toLowerCase();
     String newAndImproved = '';
 
     for (final (index, char) in characters.indexed) {
       newAndImproved += switch (s.codeUnitAt(index)) {
-        >= 48 && <= 57 => char, // 0-9
-        >= 97 && <= 122 => char, // a-z
-        45 || 46 || 95 => char, // "-", ".", "_"
+        >= zero && <= nine || >= a && <= z => char,
+        period || underscore => char,
+        _ when newAndImproved.endsWith('-') => '',
         _ => '-',
       };
     }
@@ -48,11 +51,9 @@ Future<String?> register(String email, String password) async {
 Future<String?> registerId(String userId, String password) async {
   if (await register(authId(userId), password) case final error?) return error;
 
-  const collection = UserCollection.unregisteredUsers;
-
-  user = await ThcUser.download(userId, collection: collection)
+  user = await ThcUser.download(userId, collection: Firestore.unregistered)
     ..upload();
-  collection.doc(userId).delete();
+  Firestore.unregistered.doc(userId).delete();
 
   LocalStorage.userId.save(userId);
   LocalStorage.password.save(password);

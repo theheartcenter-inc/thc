@@ -4,8 +4,8 @@ import 'dart:math';
 
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:thc/firebase/firebase.dart';
 import 'package:thc/firebase/firebase_auth.dart' as auth;
-import 'package:thc/firebase/user.dart';
 import 'package:thc/start/src/login_fields.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
@@ -198,7 +198,7 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
     switch (labels) {
       case LoginLabels.withId:
         final (id, name) = fieldValues;
-        final doc = await UserCollection.unregisteredUsers.doc(id).get();
+        final doc = await Firestore.unregistered.doc(id).get();
         final match = doc.exists && doc['name'] == name;
         if (match) {
           LocalStorage.userId.save(id);

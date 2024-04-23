@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:thc/firebase/user.dart';
+import 'package:thc/firebase/firebase.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/style_text.dart';
@@ -115,7 +115,7 @@ class _Deleting extends Cubit<_Progress> {
 
   Future<void> delete() async {
     emit(_Progress.loading);
-    await user!.yeet();
+    await user.yeet();
     emit(_Progress.done);
   }
 }

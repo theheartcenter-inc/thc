@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:thc/firebase/user.dart';
+import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/style_text.dart';
@@ -20,7 +20,7 @@ class SettingsScreen extends StatelessWidget {
             const Text('Dark theme?', style: StyleText(size: 20)),
             const SizedBox(height: 20),
             const _ThemePicker(),
-            if (userType.isAdmin) ...const [
+            if (user.isAdmin) ...const [
               SizedBox(height: 50),
               NavBarSwitch(LocalStorage.adminWatchLive),
               NavBarSwitch(LocalStorage.adminStream),

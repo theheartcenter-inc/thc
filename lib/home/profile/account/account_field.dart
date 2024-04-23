@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:thc/firebase/user.dart';
+import 'package:thc/firebase/firebase.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
@@ -13,12 +13,7 @@ enum AccountField with StatefulEnum {
   /// The user's email.
   ///
   /// (Eventually, we should probably verify the email whenever it's updated.)
-  email,
-
-  /// The user's phone number.
-  ///
-  /// (Eventually, we should probably verify the phone number whenever it's updated.)
-  phone;
+  email;
 
   /// The current values in the [TextField]s.
   static final List<String> textValues = List.filled(values.length, '');
@@ -26,9 +21,8 @@ enum AccountField with StatefulEnum {
 
   /// The value of this field before any editing occurred.
   String? get current => switch (this) {
-        name => user!.name,
-        email => user!.email,
-        phone => user!.phone,
+        name => user.name,
+        email => user.email,
       };
 
   /// The new [TextField] value that the user typed in.
@@ -40,10 +34,9 @@ enum AccountField with StatefulEnum {
   }
 
   /// A [ThcUser] object, updated to match the current [TextField] content.
-  static ThcUser get updatedUser => user!.copyWith(
+  static ThcUser get updatedUser => user.copyWith(
         name: name.updated,
         email: email.updated,
-        phone: phone.updated,
       );
 
   /// Changes all [textValues] to match the current [user].
@@ -148,7 +141,7 @@ class AccountFields extends Cubit<ThcUser?> {
   }
 
   Future<void> yeet(AccountField field) async {
-    final data = user!.json..remove(field.name);
+    final data = user.json..remove(field.name);
     await save(ThcUser.fromJson(data));
   }
 }
