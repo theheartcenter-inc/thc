@@ -46,8 +46,8 @@ class _AccountSettingsState extends State<AccountSettings> {
           itemBuilder: (_, index) => switch (index) {
             0 => Column(children: [...AccountField.values, saveButton]),
             1 => ListTile(
-                leading: Icon(Icons.lock_outline),
-                title: Text('change password'),
+                leading: const Icon(Icons.lock_outline),
+                title: const Text('change password'),
                 onTap: () => navigator.showDialog(
                   AlertDialog.adaptive(
                     title: const Text('Change Password'),
@@ -56,18 +56,13 @@ class _AccountSettingsState extends State<AccountSettings> {
                       "You'll need to enter your current password & new password to change.",
                     ),
                     actions: [
+                      ElevatedButton(onPressed: navigator.pop, child: const Text('No')),
                       ElevatedButton(
-                          onPressed: navigator.pop, child: const Text('No')),
-                      ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      const ChangePasswordScreen()),
-                            );
-                          },
-                          child: const Text('Yes')),
+                        onPressed: () => navigator
+                          ..pop()
+                          ..push(const ChangePasswordScreen()),
+                        child: const Text('Yes'),
+                      ),
                     ],
                     actionsAlignment: MainAxisAlignment.spaceEvenly,
                   ),
@@ -84,11 +79,8 @@ class _AccountSettingsState extends State<AccountSettings> {
                       "You'll need to enter your email & password to sign back in.",
                     ),
                     actions: [
-                      ElevatedButton(
-                          onPressed: navigator.pop, child: const Text('back')),
-                      ElevatedButton(
-                          onPressed: navigator.logout,
-                          child: const Text('sign out')),
+                      ElevatedButton(onPressed: navigator.pop, child: const Text('back')),
+                      ElevatedButton(onPressed: navigator.logout, child: const Text('sign out')),
                     ],
                     actionsAlignment: MainAxisAlignment.spaceEvenly,
                   ),
