@@ -41,10 +41,8 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
     );
   }
 
-  Widget builder(BuildContext context, _) {
-    final themeMode = context.watch<AppTheme>().state;
-
-    final t = controller.value;
+  Widget? button(
+      ThemeMode buttonMode, ThemeMode themeMode, double t, double width, double height) {
     const curve = Curves.ease;
     final tCurve = reversing ? 1 - curve.transform(1 - t) : curve.transform(t);
 
@@ -54,62 +52,67 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
 
     final normalRadius = Radius.circular((1 - tCurve) * 24);
     final cornerRadius = Radius.circular((1 - tCurve) * 16 + 8);
+    final active = buttonMode == themeMode;
+    if (t == 0 && !active) return null;
+
+    final iconfg = foregroundColor.withOpacity(fgOpacity * (active ? 1 : tCurve));
+
+    return Positioned.fill(
+      key: ValueKey(buttonMode),
+      top: tCurve * buttonMode.index * (height + 48) / 3,
+      bottom: tCurve * (2 - buttonMode.index) * (height + 48) / 3,
+      child: Material(
+        animationDuration: Duration.zero,
+        borderRadius: switch (buttonMode) {
+          ThemeMode.light => BorderRadius.all(normalRadius),
+          ThemeMode.dark => BorderRadius.vertical(top: normalRadius, bottom: cornerRadius),
+          ThemeMode.system => BorderRadius.vertical(top: cornerRadius, bottom: normalRadius),
+        },
+        color: widget.backgroundColor,
+        clipBehavior: Clip.hardEdge,
+        child: InkWell(
+          key: ValueKey(buttonMode),
+          onTap: t.remainder(1) == 0 ? () => toggle(buttonMode) : null,
+          overlayColor: MaterialStateProperty.resolveWith(
+            (states) => states.isPressed && t < 1 ? Colors.transparent : splashColor,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              switch (buttonMode) {
+                ThemeMode.system => SystemThemeIcon(color: iconfg),
+                ThemeMode.light => Icon(Icons.light_mode, color: iconfg),
+                ThemeMode.dark => Icon(Icons.dark_mode, color: iconfg),
+              },
+              SizedBox(
+                width: width,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Text(
+                    buttonMode.name,
+                    softWrap: false,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.fade,
+                    style: StyleText(weight: 600, color: foregroundColor),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget builder(BuildContext context, _) {
+    final themeMode = context.watch<AppTheme>().state;
+
+    final t = controller.value;
+    const curve = Curves.ease;
+    final tCurve = reversing ? 1 - curve.transform(1 - t) : curve.transform(t);
 
     final width = 72 * tCurve;
     final height = 80 * tCurve;
-
-    Widget? button(ThemeMode mode) {
-      final active = mode == themeMode;
-      if (t == 0 && !active) return null;
-
-      final iconfg = foregroundColor.withOpacity(fgOpacity * (active ? 1 : tCurve));
-
-      return Positioned.fill(
-        key: ValueKey(mode),
-        top: tCurve * mode.index * (height + 48) / 3,
-        bottom: tCurve * (2 - mode.index) * (height + 48) / 3,
-        child: Material(
-          animationDuration: Duration.zero,
-          borderRadius: switch (mode) {
-            ThemeMode.light => BorderRadius.all(normalRadius),
-            ThemeMode.dark => BorderRadius.vertical(top: normalRadius, bottom: cornerRadius),
-            ThemeMode.system => BorderRadius.vertical(top: cornerRadius, bottom: normalRadius),
-          },
-          color: widget.backgroundColor,
-          clipBehavior: Clip.hardEdge,
-          child: InkWell(
-            key: ValueKey(mode),
-            onTap: t.remainder(1) == 0 ? () => toggle(mode) : null,
-            overlayColor: MaterialStateProperty.resolveWith(
-              (states) => states.isPressed && t < 1 ? Colors.transparent : splashColor,
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                switch (mode) {
-                  ThemeMode.system => SystemThemeIcon(color: iconfg),
-                  ThemeMode.light => Icon(Icons.light_mode, color: iconfg),
-                  ThemeMode.dark => Icon(Icons.dark_mode, color: iconfg),
-                },
-                SizedBox(
-                  width: width,
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Text(
-                      mode.name,
-                      softWrap: false,
-                      textAlign: TextAlign.center,
-                      overflow: TextOverflow.fade,
-                      style: StyleText(weight: 600, color: foregroundColor),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
 
     final stacked = [...ThemeMode.values.where((value) => value != themeMode), themeMode];
 
@@ -119,7 +122,7 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
       child: Stack(
         children: [
           for (final mode in stacked)
-            if (button(mode) case final button?) button,
+            if (button(mode, themeMode, t, width, height) case final button?) button,
         ],
       ),
     );

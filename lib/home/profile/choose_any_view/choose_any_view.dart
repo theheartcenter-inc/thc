@@ -68,6 +68,8 @@ class UserButton extends StatelessWidget {
           await Future.wait([
             LocalStorage.loggedIn.save(true),
             LocalStorage.userId.save(userType.testId),
+            LocalStorage.userType.save(userType.index),
+            LocalStorage.firstLastName.save('First Lastname'),
           ]);
           user = useInternet ? await ThcUser.download(userType.testId) : userType.testUser;
         } else {
