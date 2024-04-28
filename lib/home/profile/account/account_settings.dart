@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/profile/account/account_field.dart';
+import 'package:thc/home/profile/account/change_password.dart';
 import 'package:thc/home/profile/account/close_account.dart';
 import 'package:thc/home/profile/profile.dart';
 import 'package:thc/utils/navigator.dart';
@@ -44,10 +45,28 @@ class _AccountSettingsState extends State<AccountSettings> {
           itemCount: 4,
           itemBuilder: (_, index) => switch (index) {
             0 => Column(children: [...AccountField.values, saveButton]),
-            1 => const ListTile(
-                leading: Icon(Icons.lock_outline),
-                title: Text('change password'),
-                // onTap: () {},
+            1 => ListTile(
+                leading: const Icon(Icons.lock_outline),
+                title: const Text('change password'),
+                onTap: () => navigator.showDialog(
+                  AlertDialog.adaptive(
+                    title: const Text('Change Password'),
+                    content: const Text(
+                      'Are you sure you want to change the password?\n'
+                      "You'll need to enter your current password & new password to change.",
+                    ),
+                    actions: [
+                      ElevatedButton(onPressed: navigator.pop, child: const Text('No')),
+                      ElevatedButton(
+                        onPressed: () => navigator
+                          ..pop()
+                          ..push(const ChangePasswordScreen()),
+                        child: const Text('Yes'),
+                      ),
+                    ],
+                    actionsAlignment: MainAxisAlignment.spaceEvenly,
+                  ),
+                ),
               ),
             2 => ListTile(
                 leading: const Icon(Icons.logout),
