@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:thc/login_register/login.dart';
+import 'package:thc/start/start.dart';
 import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/widgets/lerpy_hero.dart';
 
@@ -115,6 +115,6 @@ extension type Nav(NavigatorState navigator) {
     LocalStorage.firstLastName.save('');
 
     navigator.popUntil((_) => !navigator.canPop());
-    pushReplacement(const LoginScreen());
+    pushReplacement(const StartScreen());
   }
 }
