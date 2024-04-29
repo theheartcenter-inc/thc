@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+/// The [Lerpy] type can be as simple as a [Color] (using [Color.lerp]),
+/// or you can go wild with [Record]s, extension types, and custom classes.
 abstract class LerpyHero<Lerpy> extends StatelessWidget {
   const LerpyHero({required this.tag, this.child, super.key});
 
@@ -11,10 +13,11 @@ abstract class LerpyHero<Lerpy> extends StatelessWidget {
   ///
   /// In general, you would do this using [Theme.of] or with a [Provider].
   Lerpy fromContext(BuildContext context);
-  Lerpy lerp(Lerpy a, Lerpy b, double t);
+  Lerpy lerp(Lerpy a, Lerpy b, double t, HeroFlightDirection direction);
   Widget builder(BuildContext context, Lerpy value, Widget? child);
 
   @override
+  @protected
   Widget build(BuildContext context) {
     return Hero(
       tag: tag,
@@ -29,7 +32,7 @@ abstract class LerpyHero<Lerpy> extends StatelessWidget {
         return AnimatedBuilder(
           animation: animation,
           builder: (context, child) {
-            return builder(context, lerp(from, to, animation.value), child);
+            return builder(context, lerp(from, to, animation.value, direction), child);
           },
           child: child,
         );

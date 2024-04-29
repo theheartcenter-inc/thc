@@ -95,12 +95,26 @@ class _GoLive extends StatelessWidget {
   }
 }
 
+extension Cube on double {
+  double get cubed => this * this * this;
+}
+
 class GoLive extends LerpyHero<ShapeDecoration> {
   const GoLive({super.key, super.child}) : super(tag: 'go live');
 
   @override
-  ShapeDecoration lerp(ShapeDecoration a, ShapeDecoration b, double t) =>
-      ShapeDecoration.lerp(a, b, t * t)!;
+  ShapeDecoration lerp(
+    ShapeDecoration a,
+    ShapeDecoration b,
+    double t,
+    HeroFlightDirection direction,
+  ) {
+    final tLerp = switch (direction) {
+      HeroFlightDirection.push => t.cubed,
+      HeroFlightDirection.pop => 1 - (1 - t).cubed,
+    };
+    return ShapeDecoration.lerp(a, b, tLerp)!;
+  }
 
   @override
   ShapeDecoration fromContext(BuildContext context) {

@@ -229,6 +229,7 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
 
         LocalStorage.email.save(email);
         LocalStorage.firstLastName.save(name);
+        update(labels: LoginLabels.choosePassword);
       case LoginLabels.choosePassword:
         final (password!, retype) = fieldValues;
         if (password != retype) {
@@ -251,8 +252,11 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
         if (await auth.signIn() case final errorMessage?) {
           return update(errorMessage: errorMessage);
         }
-      case final labels:
-        throw UnimplementedError('field: $field, labels: $labels');
+      case LoginLabels.recovery:
+        await LocalStorage.email.save(fieldValues.$1!);
+        if (await auth.resetPassword() case final errorMessage?) {
+          return update(errorMessage: errorMessage);
+        }
     }
 
     for (final field in LoginField.values) {

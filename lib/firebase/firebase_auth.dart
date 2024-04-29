@@ -66,10 +66,15 @@ Future<String?> signIn() async {
     } else {
       loadUser();
     }
+  } else if (useInternet) {
+    user = await ThcUser.download(
+      LocalStorage.email(),
+      collection: Firestore.awaitingApproval,
+    );
   }
   LocalStorage.loggedIn.save(true);
-  LocalStorage.firstLastName.save(user.name);
-  LocalStorage.userType.save(user.type?.index);
+  LocalStorage.firstLastName.save(ThcUser.instance?.name);
+  LocalStorage.userType.save(ThcUser.instance?.type?.index);
   navigator.pushReplacement(const HomeScreen());
   return null;
 }
@@ -94,6 +99,11 @@ Future<String?> register() async {
     } else {
       loadUser();
     }
+  } else {
+    final String name = LocalStorage.firstLastName();
+    final String email = LocalStorage.email();
+    user = ThcUser(name: name, email: email);
+    Firestore.awaitingApproval.doc(email).set(user.json);
   }
   LocalStorage.loggedIn.save(true);
   LocalStorage.userType.save(ThcUser.instance?.type);
@@ -101,4 +111,19 @@ Future<String?> register() async {
   await Future.delayed(Durations.short2);
   navigator.push(SurveyScreen(questions: SurveyPresets.intro.questions));
   return null;
+}
+
+Future<String?> resetPassword() async {
+  try {
+    await FirebaseAuth.instance.sendPasswordResetEmail(email: LocalStorage.email()!);
+    navigator.showSnackBar(
+      const SnackBar(content: Text('check your email for a password reset link!')),
+    );
+    return null;
+  } on FirebaseAuthException catch (e) {
+    return switch (e.code) {
+      'invalid-email' => 'Please enter a valid email.',
+      _ => 'Error: ${e.code}',
+    };
+  }
 }

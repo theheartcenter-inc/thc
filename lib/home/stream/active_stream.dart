@@ -194,6 +194,7 @@ class _EndButton extends FilledButton {
   static const _style = ButtonStyle(
     backgroundColor: MaterialStatePropertyAll(Colors.red),
     foregroundColor: MaterialStatePropertyAll(Colors.white),
+    overlayColor: MaterialStatePropertyAll(Colors.white10),
     padding: MaterialStatePropertyAll(EdgeInsets.symmetric(horizontal: 25, vertical: 20)),
     shape: MaterialStatePropertyAll(StadiumBorder()),
   );

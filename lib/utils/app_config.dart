@@ -27,7 +27,7 @@ class ErrorIfStrict extends Error {
 }
 
 /// Set this to `true` to print to the console each time we connect with Firebase.
-const backendPrints = true;
+const backendPrints = false;
 
 void backendPrint(dynamic message) {
   if (backendPrints) if (kDebugMode) print(message);

@@ -75,34 +75,34 @@ extension type Nav(NavigatorState navigator) {
     replacing ? navigator.pushReplacement(route) : navigator.push(route);
   }
 
-  static const smoothFlight = Key('smooth flight');
+  static const lerpy = Key('smooth flight');
 
   /// Creates a pop-up dialog.
   ///
-  /// The [destination] should be an [AlertDialog] or something similar.
+  /// The [dialog] should be an [AlertDialog] or something similar.
   Future<T?> showDialog<T>(
-    Widget destination, {
+    Widget dialog, {
     bool barrierDismissible = true,
     Color? barrierColor,
     Duration? transitionDuration,
   }) {
-    Widget builder(_) => destination;
-    if (destination.key == smoothFlight) {
-      return navigator.push<T>(
-        LerpyHeroRoute(
-          barrierColor: barrierColor,
-          transitionDuration: transitionDuration,
-          builder: builder,
-        ),
-      );
-    }
+    Widget builder(_) => dialog;
 
-    return showAdaptiveDialog<T>(
-      context: navigator.context,
-      builder: builder,
-      barrierColor: barrierColor,
-      barrierDismissible: barrierDismissible,
-    );
+    return dialog.key == lerpy
+        ? navigator.push<T>(
+            LerpyHeroRoute(
+              barrierColor: barrierColor,
+              transitionDuration: transitionDuration,
+              barrierDismissible: barrierDismissible,
+              builder: builder,
+            ),
+          )
+        : showAdaptiveDialog<T>(
+            context: navigator.context,
+            barrierColor: barrierColor,
+            barrierDismissible: barrierDismissible,
+            builder: builder,
+          );
   }
 
   /// Shows a fun little bar of text at the bottom of the screen.

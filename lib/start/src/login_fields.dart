@@ -248,6 +248,7 @@ class _TextFieldButton extends StatelessWidget {
     if (username == null) return const SizedBox.shrink();
 
     final bool submitButton = type == _TextFieldButtonType.submit;
+    final bool autofill = type == _TextFieldButtonType.autofill;
 
     final (bool checkButton, bool focused) = switch (focusedField) {
       LoginField.top when labels.just1field => (true, true),
@@ -261,7 +262,7 @@ class _TextFieldButton extends StatelessWidget {
       _TextFieldButtonType.submit =>
         LoginProgressTracker.maybeSubmit(labels, fieldValues, errorMessage != null),
       _TextFieldButtonType.showPassword => LoginProgressTracker.toggleShowPassword,
-      _TextFieldButtonType.autofill => null, // unused
+      _TextFieldButtonType.autofill => () {}, // unused
     };
 
     final IconData icon;
@@ -299,9 +300,10 @@ class _TextFieldButton extends StatelessWidget {
       (Brightness.light, true || false) when onPressed != null => Colors.white,
       (Brightness.light, true) => Colors.white,
       (Brightness.light, false) => const Color(0xffd6e2ec),
-      (Brightness.dark, _) when !submitButton && showPassword => const Color(0xff2d3136),
-      (Brightness.dark, true) when !checkButton => StartColors.lightContainer16,
-      (Brightness.dark, true) => Colors.black,
+      (Brightness.dark, _) when autofill || !submitButton && showPassword =>
+        const Color(0xff2d3136),
+      (Brightness.dark, true) when checkButton => Colors.black,
+      (Brightness.dark, true) => StartColors.lightContainer16,
       (Brightness.dark, false) => const Color(0xff0c0d0f),
     };
 
@@ -390,7 +392,7 @@ class GoBack extends StatelessWidget {
 }
 
 class AutofillMenu extends StatelessWidget {
-  const AutofillMenu() : super(key: Nav.smoothFlight);
+  const AutofillMenu() : super(key: Nav.lerpy);
 
   static const width = 300.0;
 
@@ -400,56 +402,60 @@ class AutofillMenu extends StatelessWidget {
       child: SizedBox(
         width: width,
         child: StartTheme(
-          child: Builder(builder: (context) {
-            final title = _AutofillIcon(
-              child: Padding(
-                padding: const EdgeInsets.all(25),
-                child: Column(
-                  children: [
-                    for (final userType in UserType.values)
-                      FilledButton(
-                        onPressed: () {
-                          navigator.pop();
-                          final id = userType.testId;
-                          LoginProgressTracker.update(fieldValues: (id, id));
-                          for (final field in LoginField.values) {
-                            field.controller.text = id;
-                          }
-                        },
-                        style: FilledButton.styleFrom(
-                          shape: const StadiumBorder(),
-                          backgroundColor: StartColors.bg,
-                          foregroundColor: context.colorScheme.surface,
-                          padding: EdgeInsets.zero,
-                          visualDensity: const VisualDensity(vertical: 1),
-                        ),
-                        child: SizedBox(
-                          width: 150,
-                          child: Text(
-                            '$userType',
-                            textAlign: TextAlign.center,
-                            style: const StyleText.mono(weight: 500),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            );
-            return Padding(
-              padding: const EdgeInsets.all(25),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  const Positioned.fill(
-                    child: _AutofillBackground(),
-                  ),
-                  title,
-                ],
-              ),
-            );
-          }),
+          child: Builder(builder: _builder),
         ),
+      ),
+    );
+  }
+
+  Widget _builder(BuildContext context) {
+    final bool isLight = context.theme.brightness == Brightness.light;
+    final buttons = [
+      for (final userType in UserType.values)
+        FilledButton(
+          onPressed: () {
+            navigator.pop();
+            final id = userType.testId;
+            LoginProgressTracker.update(fieldValues: (id, id));
+            for (final field in LoginField.values) {
+              field.controller.text = id;
+            }
+          },
+          style: FilledButton.styleFrom(
+            shape: const StadiumBorder(),
+            backgroundColor: StartColors.bg,
+            foregroundColor: context.colorScheme.surface,
+            padding: EdgeInsets.zero,
+            visualDensity: const VisualDensity(vertical: 1),
+          ),
+          child: SizedBox(
+            width: 150,
+            child: Text(
+              '$userType',
+              textAlign: TextAlign.center,
+              style: StyleText.mono(
+                weight: isLight ? 500 : 700,
+                color: isLight ? null : Colors.black,
+              ),
+            ),
+          ),
+        ),
+    ];
+
+    final title = _AutofillIcon(
+      child: Padding(
+        padding: const EdgeInsets.all(25),
+        child: Column(children: buttons),
+      ),
+    );
+    return Padding(
+      padding: const EdgeInsets.all(25),
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          const Positioned.fill(child: _AutofillBackground()),
+          title,
+        ],
       ),
     );
   }
@@ -459,14 +465,16 @@ abstract class _SmoothColor extends LerpyHero<Color> {
   const _SmoothColor({required super.tag, super.child});
 
   @override
-  Color lerp(Color a, Color b, double t) => Color.lerp(a, b, t)!;
+  Color lerp(Color a, Color b, double t, HeroFlightDirection direction) => Color.lerp(a, b, t)!;
 }
 
 class _AutofillBackground extends _SmoothColor {
   const _AutofillBackground() : super(tag: 'autofill background');
 
   @override
-  Color fromContext(BuildContext context) => context.colorScheme.surface;
+  Color fromContext(BuildContext context) {
+    return context.lightDark(StartColors.lightContainer, Colors.black);
+  }
 
   @override
   Widget builder(BuildContext context, Color value, Widget? child) {
@@ -483,7 +491,7 @@ class _AutofillIcon extends _SmoothColor {
   const _AutofillIcon({super.child}) : super(tag: 'autofill icon');
 
   @override
-  Color fromContext(BuildContext context) => context.colorScheme.onSurface;
+  Color fromContext(BuildContext context) => context.colorScheme.outline;
 
   @override
   Widget builder(BuildContext context, Color value, Widget? child) {
@@ -505,11 +513,15 @@ class _AutofillIcon extends _SmoothColor {
                   children: [
                     icon,
                     const Spacer(),
-                    const Expanded(
+                    Expanded(
                       flex: 20,
                       child: Text(
                         'Autofill',
-                        style: StyleText(size: 24, weight: 550, color: StartColors.bg),
+                        style: StyleText(
+                          size: 24,
+                          weight: 550,
+                          color: context.colorScheme.outline,
+                        ),
                       ),
                     ),
                   ],
