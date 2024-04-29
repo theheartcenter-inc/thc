@@ -5,9 +5,12 @@ extension ToggleController on Animation {
         AnimationStatus.forward || AnimationStatus.completed => true,
         AnimationStatus.reverse || AnimationStatus.dismissed => false,
       };
-  void toggle({bool? shouldReverse, double? from}) {
+
+  TickerFuture toggle({bool? shouldReverse, double? from}) {
     final animation = this;
     if (animation is! AnimationController) throw UnimplementedError();
-    shouldReverse ?? aimedForward ? animation.reverse(from: from) : animation.forward(from: from);
+    return (shouldReverse ?? aimedForward)
+        ? animation.reverse(from: from)
+        : animation.forward(from: from);
   }
 }

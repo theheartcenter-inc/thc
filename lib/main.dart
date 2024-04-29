@@ -63,6 +63,8 @@ class App extends StatelessWidget {
   }
 }
 
+/// If you change a widget's key (using [State.setState] or a [Provider]),
+/// Flutter will rebuild the whole widget!
 class _AppKey extends Cubit<Key> {
   _AppKey() : super(UniqueKey());
 }

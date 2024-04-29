@@ -9,11 +9,18 @@ abstract class LerpyHero<Lerpy> extends StatelessWidget {
   final String tag;
   final Widget? child;
 
-  /// A way to get the [Lerpy] value using the current [BuildContext].
+  /// Fetch the [Lerpy] value using the current [BuildContext].
   ///
   /// In general, you would do this using [Theme.of] or with a [Provider].
   Lerpy fromContext(BuildContext context);
+
+  /// "Lerp" is short for "linear interpolation".
+  ///
+  /// But feel free to do a non-linear interpolation if you want :)
   Lerpy lerp(Lerpy a, Lerpy b, double t, HeroFlightDirection direction);
+
+  /// This is a [ValueWidgetBuilder]—it creates a widget
+  /// based on the current progress of the animation.
   Widget builder(BuildContext context, Lerpy value, Widget? child);
 
   @override
@@ -43,7 +50,9 @@ abstract class LerpyHero<Lerpy> extends StatelessWidget {
   }
 }
 
+/// Enables hero transitions to/from dialogs.
 class LerpyHeroRoute<T> extends PageRoute<T> {
+  /// Enables hero transitions to/from dialogs.
   LerpyHeroRoute({
     required this.builder,
     super.settings,

@@ -135,10 +135,8 @@ class _Backdrop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = context.theme;
-    final colors = theme.colorScheme;
     return Theme(
-      data: context.theme.copyWith(colorScheme: colors.copyWith(secondary: Colors.black)),
+      data: context.editScheme(secondary: Colors.black),
       child: const GoLive(),
     );
   }

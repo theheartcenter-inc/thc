@@ -1,7 +1,13 @@
 import 'package:flutter/painting.dart';
 import 'package:flutter/widgets.dart';
 
+/// We're storing fonts in the `assets/` folder
+/// to keep the app appearance consistent across devices.
+///
+/// Both "pretendard" and "roboto mono" are open-source fonts with variable weight.
 class StyleText extends TextStyle {
+  /// "Pretendard" is almost exactly like the default Apple fonts,
+  /// but it's open-source and free to use!
   const StyleText({
     double? size,
     this.weight,
@@ -25,6 +31,8 @@ class StyleText extends TextStyle {
   })  : assert(weight == null || weight is FontWeight || weight is num),
         super(fontSize: size, fontFamily: 'pretendard');
 
+  /// "Roboto mono" is a monospace font,
+  /// i.e. a font you'd see with typewriters and code editors.
   const StyleText.mono({
     double? size,
     this.weight,
@@ -63,6 +71,7 @@ class StyleText extends TextStyle {
       final FontWeight w => w.value,
       final n => n as num,
     };
+
     return [FontVariation.weight(w.toDouble())];
   }
 }

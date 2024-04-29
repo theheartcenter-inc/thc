@@ -18,21 +18,21 @@ abstract final class SurveyColors {
   static const vibrantRed = Color(0xffff0000);
   static const sunriseError = Color(0x40ff0000);
   static const sunsetError = Color(0x50600000);
+  static const darkGray = Color(0xff202020);
 }
 
-/// {@template SurveyStyling}
+/// {@template SurveyTheme}
 /// Rather than going to the hassle of changing the app theme,
 /// we can just wrap the survey screen in this widget.
 ///
 /// We can also set custom theme data for sliders, buttons,
 /// and text fields that show up as survey UI components.
 /// {@endtemplate}
-class SurveyStyling extends StatelessWidget {
-  /// {@macro SurveyStyling}
-  const SurveyStyling({required this.child, super.key});
+class SurveyTheme extends StatelessWidget {
+  /// {@macro SurveyTheme}
+  const SurveyTheme({required this.surveyContent, super.key});
 
-  /// The survey content.
-  final Widget child;
+  final Widget surveyContent;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +47,7 @@ class SurveyStyling extends StatelessWidget {
       primary: SurveyColors.veridian,
       primaryContainer: isLight ? SurveyColors.veridian : SurveyColors.orangeWhite,
       onPrimary: blackAndWhite,
-      secondary: SurveyColors.maroon,
+      secondary: isLight ? SurveyColors.darkGray : SurveyColors.maroon,
       onSecondary: blackAndWhite,
       error: error,
       onError: blackAndWhite,
@@ -58,8 +58,8 @@ class SurveyStyling extends StatelessWidget {
       surface: isLight ? SurveyColors.orangeSunrise : SurveyColors.orangeSunset,
       onSurface: textColor,
     );
-    final size = MediaQuery.of(context).size;
-    return Theme(
+    return AnimatedTheme(
+      curve: Curves.easeOutSine,
       data: ThemeData(
         colorScheme: colors,
         inputDecorationTheme: InputDecorationTheme(
@@ -82,9 +82,10 @@ class SurveyStyling extends StatelessWidget {
           style: SegmentedButton.styleFrom(
             side: BorderSide.none,
             backgroundColor: paleColor.withOpacity(0.5),
-            foregroundColor: isLight ? SurveyColors.veridian : SurveyColors.maroon,
-            selectedBackgroundColor: SurveyColors.veridian,
-            selectedForegroundColor: paleColor,
+            foregroundColor: colors.secondary,
+            selectedBackgroundColor: colors.secondary,
+            selectedForegroundColor: paleColor.withOpacity(isLight ? 1 : 0.9),
+            padding: const EdgeInsets.only(bottom: 10),
           ),
         ),
         filledButtonTheme: FilledButtonThemeData(
@@ -99,18 +100,28 @@ class SurveyStyling extends StatelessWidget {
         ),
       ),
       child: Scaffold(
-        body: SingleChildScrollView(
-          child: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: const Alignment(-0.25, -1.0),
-                end: const Alignment(0.25, 1.0),
-                colors: [colors.surface, colors.background],
-              ),
-            ),
-            constraints: BoxConstraints(minWidth: size.width, minHeight: size.height),
-            padding: const EdgeInsets.all(20),
-            child: SafeArea(child: child),
+        body: SafeArea(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final colors = context.colorScheme;
+              return SingleChildScrollView(
+                child: Container(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: const Alignment(-0.25, -1.0),
+                      end: const Alignment(0.25, 1.0),
+                      colors: [colors.surface, colors.background],
+                    ),
+                  ),
+                  constraints: BoxConstraints(
+                    minWidth: constraints.maxWidth,
+                    minHeight: constraints.maxHeight,
+                  ),
+                  padding: const EdgeInsets.all(20),
+                  child: SafeArea(child: surveyContent),
+                ),
+              );
+            },
           ),
         ),
       ),

@@ -1,49 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:thc/utils/theme.dart';
 
+/// This class copies [Colors] and has numbered names for different opacities:
+///
+/// - 12% – 1/8
+/// - 16% – 5/32
+/// - 38% – 3/8
+/// - 50% – 1/2
+/// - 75% – 3/4
 abstract final class StartColors {
-  /// [bg] with 1/8 (12%) opacity.
+  static const bg = Color(0xff202428);
   static const bg12 = Color(0x20202428);
-
-  /// [bg] with 3/8 (38%) opacity.
-  static const bg38 = Color(0x60202428);
-
-  /// [bg] with 3/4 (75%) opacity.
   static const bg75 = Color(0xc0202428);
 
-  static const bg = Color(0xff202428);
-
-  /// [dullGreen] with 3/8 (38%) opacity.
-  static const dullGreen38 = Color(0x6060a060);
-
-  /// [dullGreen] with 1/2 (50%) opacity.
-  static const dullGreen50 = Color(0x8060a060);
+  static const zaHando = Color(0xff80c080);
 
   static const dullGreen = Color(0xff60a060);
+  static const dullGreen38 = Color(0x6060a060);
+  static const dullGreen50 = Color(0x8060a060);
 
   static const dullerGreen = Color(0xff407040);
 
-  /// [lightContainer] with 5/32 (16%) opacity.
+  static const lightContainer = Color(0xffc8d8e6);
   static const lightContainer16 = Color(0x28c8d8e6);
-
-  /// [lightContainer] with 3/8 (38%) opacity.
   static const lightContainer38 = Color(0x60c8d8e6);
-
-  /// [lightContainer] with 3/4 (75%) opacity.
   static const lightContainer75 = Color(0xc0c8d8e6);
 
-  static const lightContainer = Color(0xffc8d8e6);
-
   static const darkContainer = Color(0xff101214);
-
-  static const zaHando = Color(0xff80c080);
 }
 
+/// This class is pretty epic: you can fetch the `static` values just like in [StartColors],
+/// and you can also use the constructor to get
 final class SunColors extends RadialGradient {
-  const SunColors({super.colors = _colors});
+  SunColors.hsv(List<HSVColor> colors) : super(colors: [for (final hsv in colors) hsv.toColor()]);
 
   SunColors.withOpacity(double opacity)
-      : this(colors: [for (final color in _colors) color.withOpacity(opacity)]);
+      : super(colors: [for (final color in _colors) color.withOpacity(opacity)]);
 
   static const _colors = [
     Color(0xffffff00),
@@ -51,16 +43,20 @@ final class SunColors extends RadialGradient {
     Color(0xffffd500),
   ];
 
+  /// I tried to figure out how to do [BlendMode.multiply] with [Colors.amber],
+  /// but a low-opacity red is both easier and more efficient.
+  static const overlayText = Color(0x20ff0000);
   static const border = Color(0xffffcc00);
   static const glow = Color(0xfffff0e0);
-  static const overlayText = Color(0x20ff0000);
 }
 
 class StartTheme extends StatelessWidget {
+  /// Wraps any widget with the "start theme" [data].
   const StartTheme({required this.child, super.key});
 
   final Widget child;
 
+  /// The theme data that we're using for the login/register screen.
   static ThemeData data(ThemeData current) {
     final isLight = current.brightness == Brightness.light;
 

@@ -7,19 +7,14 @@ import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/lerpy_hero.dart';
 
-class CreateLivestream extends StatefulWidget {
+class CreateLivestream extends StatelessWidget {
   const CreateLivestream({super.key});
 
-  @override
-  State<CreateLivestream> createState() => _CreateLivestreamState();
-}
-
-class _CreateLivestreamState extends State<CreateLivestream> {
   DateTime get nextStream => DateTime.now();
   String get scheduledFor => 'Scheduled for: '
       '${nextStream.month}/${nextStream.day}/${nextStream.year} '
       '${nextStream.hour}:${nextStream.minute}';
-  int numberInLobby = Random().nextBool() ? 69 : 420;
+  int get numberInLobby => Random().nextBool() ? 69 : 420;
   String get people => numberInLobby == 1 ? 'person' : 'people';
 
   @override

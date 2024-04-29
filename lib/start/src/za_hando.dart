@@ -34,7 +34,7 @@ class ZaHando extends StatelessWidget {
   /// {@macro za_hando}
   const ZaHando({super.key});
 
-  static const duration = Duration(seconds: 5);
+  static const sunriseDuration = Duration(seconds: 5);
   static const _shrinkMs = 1500;
   static const _shrinkDuration = Duration(milliseconds: _shrinkMs);
 
@@ -48,7 +48,7 @@ class ZaHando extends StatelessWidget {
 
     Widget contents = TweenAnimationBuilder(
       key: ValueKey(pressedStart),
-      duration: pressedStart ? _shrinkDuration : duration,
+      duration: pressedStart ? _shrinkDuration : sunriseDuration,
       tween: Tween(begin: 0.0, end: 1.0),
       builder: pressedStart ? collapse : sunrise,
       child: const LoginFields(),
@@ -112,9 +112,7 @@ class ZaHando extends StatelessWidget {
               padding: const EdgeInsets.all(sunPadding),
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  gradient: RadialGradient(
-                    colors: [sunCenter.toColor(), sunMid.toColor(), sunOuter.toColor()],
-                  ),
+                  gradient: SunColors.hsv([sunCenter, sunMid, sunOuter]),
                   shape: BoxShape.circle,
                   border: sunBorder,
                   boxShadow: [sunGlow],
@@ -338,6 +336,10 @@ class _FadeIn extends StatelessWidget {
 }
 
 class _TopButtons extends StatelessWidget {
+  /// The "top buttons" include:
+  /// - [ThemeModePicker]
+  /// - [ChooseAnyView] button (if in debug mode)
+  /// - [BackButton] (if applicable to the current [LoginLabels])
   const _TopButtons({this.t, required this.child});
 
   final double? t;

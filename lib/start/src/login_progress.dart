@@ -3,33 +3,46 @@
 import 'dart:math';
 
 import 'package:email_validator/email_validator.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/firebase/firebase_auth.dart' as auth;
+import 'package:thc/start/src/bottom_stuff.dart';
 import 'package:thc/start/src/login_fields.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
 
+/// {@template LoginLabels}
+/// Stores [LoginField] hint text & [BottomStuff] labels,
+/// and determines the functionality of [LoginProgressTracker.submit].
+/// {@endtemplate}
 enum LoginLabels {
+  /// Register using your user ID and first/last name.
   withId(
     topHint: 'user ID',
     bottomHint: 'First and Last name',
     buttonData: (label: 'sign up with ID', text: 'register'),
   ),
+
+  /// Register using your email address and first/last name.
   noId(
     topHint: 'email address',
     bottomHint: 'your name',
     buttonData: (label: "don't have an ID?", text: 'register (no ID)'),
   ),
+
+  /// Sign into your account with your user ID (or email) and your password.
   signIn(
     topHint: 'user ID or email',
     bottomHint: 'password',
     buttonData: (label: 'already registered?', text: 'sign in'),
   ),
+
   choosePassword(
     topHint: 'choose a password (at least 8 characters)',
     bottomHint: 're-type your password',
   ),
+
   recovery(
     topHint: 'enter your email',
     buttonData: (label: 'having trouble?', text: 'account recovery'),
@@ -59,6 +72,7 @@ enum LoginLabels {
         recovery => signIn,
       };
 
+  /// Updates the [LoginProgressTracker] with the relevant [LoginLabels].
   static Future<void> Function() goto(LoginLabels? target) => () async {
         if (target == null) return;
         LoginProgressTracker.update(labels: target);
@@ -68,6 +82,10 @@ enum LoginLabels {
       };
 }
 
+/// {@template start.AnimationProgress}
+/// Tracks the state of the animation, from when the app boots up
+/// to when the user can type in their info.
+/// {@endtemplate}
 enum AnimationProgress implements Comparable<AnimationProgress> {
   sunrise,
   pressStart,
@@ -117,6 +135,8 @@ class LoginProgress {
     );
   }
 
+  /// Passing a `null` value into [copyWith] means "don't update this value",
+  /// so we gotta make a special function for nulling out the [focusedField].
   LoginProgress unfocus() => LoginProgress(
         animation: animation,
         labels: labels,
@@ -126,6 +146,8 @@ class LoginProgress {
         showPassword: showPassword,
       );
 
+  /// Passing a `null` value into [copyWith] means "don't update this value",
+  /// so we gotta make a special function for nulling out the [errorMessage].
   LoginProgress resolveError() => LoginProgress(
         animation: animation,
         labels: labels,
@@ -135,18 +157,34 @@ class LoginProgress {
         showPassword: showPassword,
       );
 
+  /// {@macro start.AnimationProgress}
   final AnimationProgress animation;
+
+  /// {@macro LoginLabels}
   final LoginLabels labels;
+
   final LoginField? focusedField;
+
+  /// Stores what the user typed into the [LoginField]s.
   final (String?, String?) fieldValues;
+
+  /// If hitting the submit button didn't work, this lets the user know what went wrong.
   final String? errorMessage;
+
+  /// While the user is choosing their password,
+  /// this value determines whether the text in [LoginField.top] is shown.
   final bool showPassword;
 }
 
+/// This is a "singleton class", so it's marked as `final`
+/// and has a private constructor to discourage multiple instances.
 final class LoginProgressTracker extends Cubit<LoginProgress> {
   LoginProgressTracker._() : super(const LoginProgress._initial());
 
   static LoginProgressTracker? _tracker;
+
+  /// Accessing the state without a [BuildContext] is super convenient,
+  /// but it doesn't trigger a rebuild when something changes.
   static LoginProgress get readState => _tracker!.state;
 
   factory LoginProgressTracker.create(_) {
@@ -159,8 +197,12 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
     return _tracker = LoginProgressTracker._();
   }
 
+  /// This makes retrieving the state from the current [BuildContext] slightly more concise.
   static LoginProgress of(BuildContext context) => context.watch<LoginProgressTracker>().state;
 
+  /// Causes the tracker to [emit] a new progress state.
+  ///
+  /// And it's accessible without needing a [BuildContext]!
   static void update({
     LoginLabels? labels,
     LoginField? focusedField,
@@ -196,10 +238,21 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
     if (readState.focusedField == field) _tracker!.emit(readState.unfocus());
   }
 
+  /// The current "page" is determined by the [LoginLabels] rather than a [NavigatorState],
+  /// so this class has its own `pop()` method.
   static void pop() {
     if (readState.labels.back case final target?) update(labels: target);
   }
 
+  /// The good stuff 😏
+  ///
+  /// This functionality depends on what the user typed into the [LoginField]s
+  /// as well as the current state of the [LoginLabels].
+  ///
+  /// Usually it involves connecting to Firebase using a function from the [auth] file.
+  ///
+  /// If something goes wrong, a summary of the issue is sent to [LoginProgress.errorMessage]
+  /// for the user to see.
   static Future<void> submit(LoginField field) async {
     final LoginProgress(:labels, :fieldValues) = readState;
 
@@ -220,6 +273,7 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
         LocalStorage.userId.save(id);
         LocalStorage.firstLastName.save(name);
         update(labels: LoginLabels.choosePassword);
+
       case LoginLabels.noId:
         final (email!, name!) = fieldValues;
 
@@ -230,6 +284,7 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
         LocalStorage.email.save(email);
         LocalStorage.firstLastName.save(name);
         update(labels: LoginLabels.choosePassword);
+
       case LoginLabels.choosePassword:
         final (password!, retype) = fieldValues;
         if (password != retype) {
@@ -240,6 +295,7 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
         if (await auth.register() case final errorMessage?) {
           return update(errorMessage: errorMessage);
         }
+
       case LoginLabels.signIn:
         final (username!, password!) = fieldValues;
         await Future.wait([
@@ -252,6 +308,7 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
         if (await auth.signIn() case final errorMessage?) {
           return update(errorMessage: errorMessage);
         }
+
       case LoginLabels.recovery:
         await LocalStorage.email.save(fieldValues.$1!);
         if (await auth.resetPassword() case final errorMessage?) {
@@ -264,7 +321,12 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
     }
   }
 
-  static Future<void> Function([dynamic])? maybeSubmit([
+  /// Calls [submit] if there's stuff typed into the [LoginField]s;
+  /// otherwise does nothing.
+  ///
+  /// The function parameters are optional since we can just get them from [readState],
+  /// but passing them in allows button to rebuild when its enabled/disabled state changes.
+  static MaybeSubmit maybeSubmit([
     LoginLabels? labels,
     (String?, String?)? fieldValues,
     bool? error,
@@ -289,3 +351,9 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
     return ([_]) => submit(field);
   }
 }
+
+/// I made a `typedef` here since `Future<void> Function([dynamic])?` is a lot to type each time.
+///
+/// It's the same as [AsyncCallback], but it has a single optional parameter that gets ignored
+/// to match the function signature for [TextField.onSubmitted].
+typedef MaybeSubmit = Future<void> Function([dynamic _])?;

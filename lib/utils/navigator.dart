@@ -75,7 +75,7 @@ extension type Nav(NavigatorState navigator) {
     replacing ? navigator.pushReplacement(route) : navigator.push(route);
   }
 
-  static const lerpy = Key('smooth flight');
+  static const lerpy = Key("it's a LerpyHero!");
 
   /// Creates a pop-up dialog.
   ///

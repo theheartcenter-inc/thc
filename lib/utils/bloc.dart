@@ -24,6 +24,7 @@ library;
 
 import 'dart:async' show StreamController;
 
+import 'package:flutter/foundation.dart' show AsyncCallback;
 import 'package:provider/provider.dart' show InheritedProvider, InheritedContext;
 export 'package:provider/src/provider.dart' show WatchContext, ReadContext;
 
@@ -85,7 +86,7 @@ class BlocProvider<T extends Bloc> extends InheritedProvider<T> {
   BlocProvider({super.key, required super.create, super.child, super.builder, super.lazy = true})
       : super(startListening: _startListening, dispose: _dispose);
 
-  static _CancelStream _startListening(InheritedContext<Bloc?> context, Bloc value) {
+  static AsyncCallback _startListening(InheritedContext<Bloc?> context, Bloc value) {
     final subscription = value._controller.stream.listen(
       (_) => context.markNeedsNotifyDependents(),
     );
@@ -95,5 +96,3 @@ class BlocProvider<T extends Bloc> extends InheritedProvider<T> {
 
   static void _dispose(_, Bloc bloc) => bloc._controller.close();
 }
-
-typedef _CancelStream = Future<void> Function();

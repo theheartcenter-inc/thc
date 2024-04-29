@@ -7,6 +7,13 @@ final mobileDevice = switch (defaultTargetPlatform) {
   _ => false,
 };
 
+/// Use `if (appleDevice)` when you want stuff to look differently
+/// on iOS/MacOS.
+final appleDevice = switch (defaultTargetPlatform) {
+  TargetPlatform.iOS || TargetPlatform.macOS => true,
+  _ => false,
+};
+
 /// Set this to `false` if you're just working on frontend stuff
 /// and you don't want to worry about connecting with Agora or Firebase.
 const useInternet = true;

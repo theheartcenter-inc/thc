@@ -1,18 +1,25 @@
-import 'dart:math';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:thc/firebase/firebase.dart';
+import 'package:thc/start/src/autofill.dart';
 import 'package:thc/start/src/bottom_stuff.dart';
 import 'package:thc/start/src/login_progress.dart';
 import 'package:thc/start/src/start_theme.dart';
 import 'package:thc/start/src/za_hando.dart';
-import 'package:thc/utils/navigator.dart';
+import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
+import 'package:thc/utils/widgets/clip_height.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
-import 'package:thc/utils/widgets/lerpy_hero.dart';
 
+/// We could have done something like
+///
+/// ```dart
+/// final nodes = [FocusNode(), FocusNode()];
+/// FocusNode get node => nodes[index];
+/// ```
+///
+/// but I like how [Record] types are immutable
+/// (and I'm pretty sure they have better performance).
 extension LoginFieldStuff<T> on (T, T) {
   T get(LoginField field) => switch (field) {
         LoginField.top => $1,
@@ -20,6 +27,8 @@ extension LoginFieldStuff<T> on (T, T) {
       };
 }
 
+/// Holds UI/state management data for the username & password fields
+/// (or whatever the currently applicable [LoginLabels] are).
 enum LoginField with StatelessEnum {
   top,
   bottom;
@@ -30,6 +39,8 @@ enum LoginField with StatelessEnum {
   TextEditingController get controller => controllers.get(this);
   FocusNode get node => nodes.get(this);
 
+  /// This listener is added to each node when the [LoginProgressTracker] bloc
+  /// is first created.
   Future<void> listener() async {
     if (node.hasFocus) {
       LoginProgressTracker.update(focusedField: this);
@@ -59,6 +70,13 @@ enum LoginField with StatelessEnum {
       :showPassword,
     ) = LoginProgressTracker.of(context);
 
+    final maybeSubmit = this == bottom || labels.just1field
+        ? LoginProgressTracker.maybeSubmit()
+        : ([_]) async {
+            await Future.delayed(Durations.short1);
+            bottom.node.requestFocus();
+          };
+
     final colors = context.colorScheme;
     final focused = focusedField == this;
     final cursorColor = context.lightDark(ThcColors.green67, Colors.black);
@@ -83,32 +101,28 @@ enum LoginField with StatelessEnum {
       ),
       obscureText: !(this == top && showPassword) && (hintText?.contains('password') ?? false),
       onChanged: newVal,
-      onSubmitted: LoginProgressTracker.maybeSubmit(),
+      onSubmitted: maybeSubmit,
     );
 
     if (this == top) return textField;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        const height = 48.0;
-        return AnimatedContainer(
-          duration: Durations.medium1,
-          curve: Curves.ease,
-          height: fieldValues.$2 == null || labels.just1field ? 0 : height,
-          width: width,
-          child: FittedBox(
-            alignment: Alignment.topCenter,
-            fit: BoxFit.fitWidth,
-            child: SizedBox(width: width, height: height, child: textField),
-          ),
-        );
-      },
+    const height = 48.0;
+    return AnimatedContainer(
+      duration: Durations.medium1,
+      curve: Curves.ease,
+      height: fieldValues.$2 == null || labels.just1field ? 0 : height,
+      width: double.infinity,
+      child: ClipHeight(childHeight: height, child: textField),
     );
   }
 }
 
+/// {@template LoginFields}
+/// This widget holds everything in the main UI box,
+/// including the [LoginField]s and the [BottomStuff].
+/// {@endtemplate}
 class LoginFields extends StatelessWidget {
+  /// {@macro LoginFields}
   const LoginFields({super.key});
 
   @override
@@ -208,31 +222,40 @@ class LoginFields extends StatelessWidget {
 
 enum _TextFieldButtonType { submit, showPassword, autofill }
 
+/// A button for the [LoginFields] with adaptive foreground/background colors.
 class _TextFieldButton extends StatelessWidget {
+  /// Checkmark button—submit the text currently in the fields.
   const _TextFieldButton() : type = _TextFieldButtonType.submit;
+
+  /// Show/hide the password.
   const _TextFieldButton.passwordVisibility() : type = _TextFieldButtonType.showPassword;
+
+  /// During development, we can tap this guy to autofill the username/password.
   const _TextFieldButton.autofill() : type = _TextFieldButtonType.autofill;
 
   final _TextFieldButtonType type;
+
+  /// This node ensures that pressing 'Tab' takes you straight to the next field,
+  /// not to the [_TextFieldButton].
   static final node = FocusNode(canRequestFocus: false, skipTraversal: true);
 
   Color _iconbg(bool focused, bool checkButton, bool isLight, bool enabled) {
-    double bgA = 1.0;
+    double bgA = 0.5;
     const bgH = 210.0;
     const bgS = 0.1;
     double bgL = 0.0;
 
     if (!enabled) {
-      bgA = isLight ? 0.125 : 0.5;
+      if (isLight) bgA = 0.125;
       bgL = focused ? 0.05 : 1 / 3;
     } else if (checkButton) {
       return isLight ? ThcColors.green : StartColors.zaHando;
-    } else if (isLight) {
-      bgA = 0.5;
     }
 
     return HSLColor.fromAHSL(bgA, bgH, bgS, bgL).toColor();
   }
+
+  static final continueIcon = appleDevice ? Icons.arrow_forward_ios : Icons.arrow_forward;
 
   @override
   Widget build(BuildContext context) {
@@ -262,26 +285,15 @@ class _TextFieldButton extends StatelessWidget {
       _TextFieldButtonType.submit =>
         LoginProgressTracker.maybeSubmit(labels, fieldValues, errorMessage != null),
       _TextFieldButtonType.showPassword => LoginProgressTracker.toggleShowPassword,
-      _TextFieldButtonType.autofill => () {}, // unused
+      _TextFieldButtonType.autofill => () {}, // autofill doesn't use this variable
     };
 
-    final IconData icon;
-    switch (type) {
-      case _TextFieldButtonType.submit:
-        if (checkButton) {
-          icon = Icons.done;
-        } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-          icon = Icons.arrow_forward_ios;
-        } else {
-          icon = Icons.arrow_forward;
-        }
-
-      case _TextFieldButtonType.showPassword:
-        icon = showPassword ? Icons.visibility : Icons.visibility_off;
-
-      case _TextFieldButtonType.autofill:
-        icon = Icons.build;
-    }
+    final IconData icon = switch (type) {
+      _TextFieldButtonType.submit => checkButton ? Icons.done : continueIcon,
+      _TextFieldButtonType.showPassword when showPassword => Icons.visibility,
+      _TextFieldButtonType.showPassword => Icons.visibility_off,
+      _TextFieldButtonType.autofill => Icons.build,
+    };
 
     final brightness = context.theme.brightness;
 
@@ -296,50 +308,19 @@ class _TextFieldButton extends StatelessWidget {
       },
     );
 
-    final Color iconfg = switch ((brightness, focused)) {
+    final justUseTheDangColor = autofill || !submitButton && showPassword;
+    final iconfg = switch ((brightness, focused)) {
       (Brightness.light, true || false) when onPressed != null => Colors.white,
       (Brightness.light, true) => Colors.white,
       (Brightness.light, false) => const Color(0xffd6e2ec),
-      (Brightness.dark, _) when autofill || !submitButton && showPassword =>
-        const Color(0xff2d3136),
+      (Brightness.dark, _) when justUseTheDangColor => const Color(0xff2d3136),
       (Brightness.dark, true) when checkButton => Colors.black,
       (Brightness.dark, true) => StartColors.lightContainer16,
       (Brightness.dark, false) => const Color(0xff0c0d0f),
     };
 
     if (type == _TextFieldButtonType.autofill) {
-      final theme = context.theme;
-      final colors = theme.colorScheme;
-      final themeData = theme.copyWith(
-        colorScheme: colors.copyWith(surface: iconbg, onSurface: iconfg),
-      );
-      return Positioned(
-        top: 0,
-        right: 0,
-        child: Theme(
-          data: themeData,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              const SizedBox.square(
-                dimension: 33,
-                child: _AutofillBackground(),
-              ),
-              IconButton(
-                focusNode: node,
-                style: IconButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  foregroundColor: colors.onSurface,
-                ),
-                onPressed: () {
-                  navigator.showDialog(const AutofillMenu());
-                },
-                icon: const _AutofillIcon(),
-              )
-            ],
-          ),
-        ),
-      );
+      return AutofillButton(iconbg, iconfg, node);
     }
 
     final button = Stack(
@@ -365,7 +346,12 @@ class _TextFieldButton extends StatelessWidget {
   }
 }
 
+/// {@template start.GoBack}
+/// When you tap one of the [BottomStuff] buttons,
+/// this button appears in the top left to take you back where you came from.
+/// {@endtemplate}
 class GoBack extends StatelessWidget {
+  /// {@macro start.GoBack}
   const GoBack({super.key});
 
   @override
@@ -387,156 +373,6 @@ class GoBack extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-class AutofillMenu extends StatelessWidget {
-  const AutofillMenu() : super(key: Nav.lerpy);
-
-  static const width = 300.0;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: SizedBox(
-        width: width,
-        child: StartTheme(
-          child: Builder(builder: _builder),
-        ),
-      ),
-    );
-  }
-
-  Widget _builder(BuildContext context) {
-    final bool isLight = context.theme.brightness == Brightness.light;
-    final buttons = [
-      for (final userType in UserType.values)
-        FilledButton(
-          onPressed: () {
-            navigator.pop();
-            final id = userType.testId;
-            LoginProgressTracker.update(fieldValues: (id, id));
-            for (final field in LoginField.values) {
-              field.controller.text = id;
-            }
-          },
-          style: FilledButton.styleFrom(
-            shape: const StadiumBorder(),
-            backgroundColor: StartColors.bg,
-            foregroundColor: context.colorScheme.surface,
-            padding: EdgeInsets.zero,
-            visualDensity: const VisualDensity(vertical: 1),
-          ),
-          child: SizedBox(
-            width: 150,
-            child: Text(
-              '$userType',
-              textAlign: TextAlign.center,
-              style: StyleText.mono(
-                weight: isLight ? 500 : 700,
-                color: isLight ? null : Colors.black,
-              ),
-            ),
-          ),
-        ),
-    ];
-
-    final title = _AutofillIcon(
-      child: Padding(
-        padding: const EdgeInsets.all(25),
-        child: Column(children: buttons),
-      ),
-    );
-    return Padding(
-      padding: const EdgeInsets.all(25),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          const Positioned.fill(child: _AutofillBackground()),
-          title,
-        ],
-      ),
-    );
-  }
-}
-
-abstract class _SmoothColor extends LerpyHero<Color> {
-  const _SmoothColor({required super.tag, super.child});
-
-  @override
-  Color lerp(Color a, Color b, double t, HeroFlightDirection direction) => Color.lerp(a, b, t)!;
-}
-
-class _AutofillBackground extends _SmoothColor {
-  const _AutofillBackground() : super(tag: 'autofill background');
-
-  @override
-  Color fromContext(BuildContext context) {
-    return context.lightDark(StartColors.lightContainer, Colors.black);
-  }
-
-  @override
-  Widget builder(BuildContext context, Color value, Widget? child) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: value,
-        borderRadius: const BorderRadius.all(Radius.circular(16)),
-      ),
-    );
-  }
-}
-
-class _AutofillIcon extends _SmoothColor {
-  const _AutofillIcon({super.child}) : super(tag: 'autofill icon');
-
-  @override
-  Color fromContext(BuildContext context) => context.colorScheme.outline;
-
-  @override
-  Widget builder(BuildContext context, Color value, Widget? child) {
-    final icon = Icon(Icons.build, color: value, size: 20);
-    if (child == null) return icon;
-    return DefaultTextStyle(
-      style: context.theme.textTheme.bodyMedium!,
-      softWrap: false,
-      overflow: TextOverflow.fade,
-      child: LayoutBuilder(builder: (context, constraints) {
-        return SingleChildScrollView(
-          physics: const NeverScrollableScrollPhysics(),
-          child: Column(
-            children: [
-              const SizedBox(height: 24),
-              SizedBox(
-                width: min(110, constraints.maxWidth),
-                child: Row(
-                  children: [
-                    icon,
-                    const Spacer(),
-                    Expanded(
-                      flex: 20,
-                      child: Text(
-                        'Autofill',
-                        style: StyleText(
-                          size: 24,
-                          weight: 550,
-                          color: context.colorScheme.outline,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                width: constraints.maxWidth,
-                child: FittedBox(
-                  child: SizedBox(width: AutofillMenu.width - 50, child: child),
-                ),
-              ),
-            ],
-          ),
-        );
-      }),
     );
   }
 }
