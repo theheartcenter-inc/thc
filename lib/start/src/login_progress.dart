@@ -43,6 +43,7 @@ enum LoginLabels {
 
   bool get just1field => bottomHint == null;
   bool get choosingPassword => this == choosePassword;
+  bool get signingIn => this == signIn;
 
   (LoginLabels, LoginLabels)? get otherOptions => switch (this) {
         withId => (noId, signIn),
@@ -233,12 +234,29 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
         if (password != retype) {
           return update(errorMessage: "it looks like these passwords don't match.");
         }
+        await LocalStorage.password.save(password);
 
         if (await auth.register() case final errorMessage?) {
           return update(errorMessage: errorMessage);
         }
+      case LoginLabels.signIn:
+        final (username!, password!) = fieldValues;
+        await Future.wait([
+          if (username.contains('@'))
+            LocalStorage.email.save(username)
+          else
+            LocalStorage.userId.save(username),
+          LocalStorage.password.save(password),
+        ]);
+        if (await auth.signIn() case final errorMessage?) {
+          return update(errorMessage: errorMessage);
+        }
       case final labels:
         throw UnimplementedError('field: $field, labels: $labels');
+    }
+
+    for (final field in LoginField.values) {
+      field.controller.text = '';
     }
   }
 

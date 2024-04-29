@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:thc/login_register/login.dart';
 import 'package:thc/utils/local_storage.dart';
+import 'package:thc/utils/widgets/lerpy_hero.dart';
 
 /// {@template navigator}
 /// We can make navigation a little cleaner with a global key and an extension type:
@@ -74,17 +75,31 @@ extension type Nav(NavigatorState navigator) {
     replacing ? navigator.pushReplacement(route) : navigator.push(route);
   }
 
+  static const smoothFlight = Key('smooth flight');
+
   /// Creates a pop-up dialog.
   ///
-  /// The [dialog] should be an [AlertDialog] or something similar.
+  /// The [destination] should be an [AlertDialog] or something similar.
   Future<T?> showDialog<T>(
-    Widget dialog, {
-    bool? barrierDismissible,
+    Widget destination, {
+    bool barrierDismissible = true,
     Color? barrierColor,
+    Duration? transitionDuration,
   }) {
+    Widget builder(_) => destination;
+    if (destination.key == smoothFlight) {
+      return navigator.push<T>(
+        LerpyHeroRoute(
+          barrierColor: barrierColor,
+          transitionDuration: transitionDuration,
+          builder: builder,
+        ),
+      );
+    }
+
     return showAdaptiveDialog<T>(
       context: navigator.context,
-      builder: (_) => dialog,
+      builder: builder,
       barrierColor: barrierColor,
       barrierDismissible: barrierDismissible,
     );

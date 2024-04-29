@@ -1,12 +1,17 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:thc/firebase/firebase.dart';
 import 'package:thc/start/src/bottom_stuff.dart';
 import 'package:thc/start/src/login_progress.dart';
 import 'package:thc/start/src/start_theme.dart';
 import 'package:thc/start/src/za_hando.dart';
+import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
+import 'package:thc/utils/widgets/lerpy_hero.dart';
 
 extension LoginFieldStuff<T> on (T, T) {
   T get(LoginField field) => switch (field) {
@@ -121,7 +126,7 @@ class LoginFields extends StatelessWidget {
     final showBottom = animation >= AnimationProgress.showBottom;
 
     late final startButton = TextButton(
-      onPressed: animate,
+      onPressed: animation >= AnimationProgress.pressStart ? null : animate,
       child: AnimatedOpacity(
         duration: Durations.extralong4,
         opacity: expandText ? 0 : 1,
@@ -165,7 +170,9 @@ class LoginFields extends StatelessWidget {
           Positioned.fill(child: showBottom ? const SizedBox.shrink() : startButton),
           const _TextFieldButton(),
           if (labels.choosingPassword && fieldValues.$1!.isNotEmpty)
-            const _TextFieldButton.passwordVisibility(),
+            const _TextFieldButton.passwordVisibility()
+          else if (labels.signingIn && kDebugMode)
+            const _TextFieldButton.autofill(),
         ],
       ),
     );
@@ -199,26 +206,27 @@ class LoginFields extends StatelessWidget {
   }
 }
 
-class _TextFieldButton extends StatelessWidget {
-  const _TextFieldButton() : passwordVisibility = false;
-  const _TextFieldButton.passwordVisibility() : passwordVisibility = true;
+enum _TextFieldButtonType { submit, showPassword, autofill }
 
-  final bool passwordVisibility;
+class _TextFieldButton extends StatelessWidget {
+  const _TextFieldButton() : type = _TextFieldButtonType.submit;
+  const _TextFieldButton.passwordVisibility() : type = _TextFieldButtonType.showPassword;
+  const _TextFieldButton.autofill() : type = _TextFieldButtonType.autofill;
+
+  final _TextFieldButtonType type;
   static final node = FocusNode(canRequestFocus: false, skipTraversal: true);
 
   Color _iconbg(bool focused, bool checkButton, bool isLight, bool enabled) {
     double bgA = 1.0;
-    double bgH = 210.0;
-    double bgS = 0.1;
+    const bgH = 210.0;
+    const bgS = 0.1;
     double bgL = 0.0;
 
     if (!enabled) {
       bgA = isLight ? 0.125 : 0.5;
       bgL = focused ? 0.05 : 1 / 3;
     } else if (checkButton) {
-      bgH = 120.0;
-      bgS = 1 / 3;
-      bgL = isLight ? 0.7 : 0.63;
+      return isLight ? ThcColors.green : StartColors.zaHando;
     } else if (isLight) {
       bgA = 0.5;
     }
@@ -239,46 +247,98 @@ class _TextFieldButton extends StatelessWidget {
 
     if (username == null) return const SizedBox.shrink();
 
+    final bool submitButton = type == _TextFieldButtonType.submit;
+
     final (bool checkButton, bool focused) = switch (focusedField) {
       LoginField.top when labels.just1field => (true, true),
       LoginField.top when password == null => (false, true),
-      LoginField.top => (true, passwordVisibility),
-      LoginField.bottom => (true, !passwordVisibility),
+      LoginField.top => (true, !submitButton),
+      LoginField.bottom => (true, submitButton),
       null => (labels.just1field || password != null, false),
     };
 
-    final onPressed = passwordVisibility
-        ? LoginProgressTracker.toggleShowPassword
-        : LoginProgressTracker.maybeSubmit(labels, fieldValues, errorMessage != null);
+    final onPressed = switch (type) {
+      _TextFieldButtonType.submit =>
+        LoginProgressTracker.maybeSubmit(labels, fieldValues, errorMessage != null),
+      _TextFieldButtonType.showPassword => LoginProgressTracker.toggleShowPassword,
+      _TextFieldButtonType.autofill => null, // unused
+    };
 
     final IconData icon;
-    if (passwordVisibility) {
-      icon = showPassword ? Icons.visibility : Icons.visibility_off;
-    } else if (checkButton) {
-      icon = Icons.done;
-    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-      icon = Icons.arrow_forward_ios;
-    } else {
-      icon = Icons.arrow_forward;
+    switch (type) {
+      case _TextFieldButtonType.submit:
+        if (checkButton) {
+          icon = Icons.done;
+        } else if (defaultTargetPlatform == TargetPlatform.iOS) {
+          icon = Icons.arrow_forward_ios;
+        } else {
+          icon = Icons.arrow_forward;
+        }
+
+      case _TextFieldButtonType.showPassword:
+        icon = showPassword ? Icons.visibility : Icons.visibility_off;
+
+      case _TextFieldButtonType.autofill:
+        icon = Icons.build;
     }
 
     final brightness = context.theme.brightness;
 
     final iconbg = _iconbg(
       focused,
-      passwordVisibility ? false : checkButton,
+      submitButton ? checkButton : false,
       brightness == Brightness.light,
-      passwordVisibility ? showPassword : onPressed != null,
+      switch (type) {
+        _TextFieldButtonType.submit => onPressed != null,
+        _TextFieldButtonType.showPassword => showPassword,
+        _TextFieldButtonType.autofill => true,
+      },
     );
 
     final Color iconfg = switch ((brightness, focused)) {
+      (Brightness.light, true || false) when onPressed != null => Colors.white,
       (Brightness.light, true) => Colors.white,
       (Brightness.light, false) => const Color(0xffd6e2ec),
-      (Brightness.dark, _) when passwordVisibility && showPassword => const Color(0xff2d3136),
+      (Brightness.dark, _) when !submitButton && showPassword => const Color(0xff2d3136),
       (Brightness.dark, true) when !checkButton => StartColors.lightContainer16,
       (Brightness.dark, true) => Colors.black,
       (Brightness.dark, false) => const Color(0xff0c0d0f),
     };
+
+    if (type == _TextFieldButtonType.autofill) {
+      final theme = context.theme;
+      final colors = theme.colorScheme;
+      final themeData = theme.copyWith(
+        colorScheme: colors.copyWith(surface: iconbg, onSurface: iconfg),
+      );
+      return Positioned(
+        top: 0,
+        right: 0,
+        child: Theme(
+          data: themeData,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              const SizedBox.square(
+                dimension: 33,
+                child: _AutofillBackground(),
+              ),
+              IconButton(
+                focusNode: node,
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: colors.onSurface,
+                ),
+                onPressed: () {
+                  navigator.showDialog(const AutofillMenu());
+                },
+                icon: const _AutofillIcon(),
+              )
+            ],
+          ),
+        ),
+      );
+    }
 
     final button = Stack(
       alignment: Alignment.center,
@@ -299,7 +359,7 @@ class _TextFieldButton extends StatelessWidget {
       ],
     );
 
-    return passwordVisibility ? Positioned(top: 0, right: 0, child: button) : button;
+    return submitButton ? button : Positioned(top: 0, right: 0, child: button);
   }
 }
 
@@ -325,6 +385,146 @@ class GoBack extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class AutofillMenu extends StatelessWidget {
+  const AutofillMenu() : super(key: Nav.smoothFlight);
+
+  static const width = 300.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: SizedBox(
+        width: width,
+        child: StartTheme(
+          child: Builder(builder: (context) {
+            final title = _AutofillIcon(
+              child: Padding(
+                padding: const EdgeInsets.all(25),
+                child: Column(
+                  children: [
+                    for (final userType in UserType.values)
+                      FilledButton(
+                        onPressed: () {
+                          navigator.pop();
+                          final id = userType.testId;
+                          LoginProgressTracker.update(fieldValues: (id, id));
+                          for (final field in LoginField.values) {
+                            field.controller.text = id;
+                          }
+                        },
+                        style: FilledButton.styleFrom(
+                          shape: const StadiumBorder(),
+                          backgroundColor: StartColors.bg,
+                          foregroundColor: context.colorScheme.surface,
+                          padding: EdgeInsets.zero,
+                          visualDensity: const VisualDensity(vertical: 1),
+                        ),
+                        child: SizedBox(
+                          width: 150,
+                          child: Text(
+                            '$userType',
+                            textAlign: TextAlign.center,
+                            style: const StyleText.mono(weight: 500),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            );
+            return Padding(
+              padding: const EdgeInsets.all(25),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  const Positioned.fill(
+                    child: _AutofillBackground(),
+                  ),
+                  title,
+                ],
+              ),
+            );
+          }),
+        ),
+      ),
+    );
+  }
+}
+
+abstract class _SmoothColor extends LerpyHero<Color> {
+  const _SmoothColor({required super.tag, super.child});
+
+  @override
+  Color lerp(Color a, Color b, double t) => Color.lerp(a, b, t)!;
+}
+
+class _AutofillBackground extends _SmoothColor {
+  const _AutofillBackground() : super(tag: 'autofill background');
+
+  @override
+  Color fromContext(BuildContext context) => context.colorScheme.surface;
+
+  @override
+  Widget builder(BuildContext context, Color value, Widget? child) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: value,
+        borderRadius: const BorderRadius.all(Radius.circular(16)),
+      ),
+    );
+  }
+}
+
+class _AutofillIcon extends _SmoothColor {
+  const _AutofillIcon({super.child}) : super(tag: 'autofill icon');
+
+  @override
+  Color fromContext(BuildContext context) => context.colorScheme.onSurface;
+
+  @override
+  Widget builder(BuildContext context, Color value, Widget? child) {
+    final icon = Icon(Icons.build, color: value, size: 20);
+    if (child == null) return icon;
+    return DefaultTextStyle(
+      style: context.theme.textTheme.bodyMedium!,
+      softWrap: false,
+      overflow: TextOverflow.fade,
+      child: LayoutBuilder(builder: (context, constraints) {
+        return SingleChildScrollView(
+          physics: const NeverScrollableScrollPhysics(),
+          child: Column(
+            children: [
+              const SizedBox(height: 24),
+              SizedBox(
+                width: min(110, constraints.maxWidth),
+                child: Row(
+                  children: [
+                    icon,
+                    const Spacer(),
+                    const Expanded(
+                      flex: 20,
+                      child: Text(
+                        'Autofill',
+                        style: StyleText(size: 24, weight: 550, color: StartColors.bg),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(
+                width: constraints.maxWidth,
+                child: FittedBox(
+                  child: SizedBox(width: AutofillMenu.width - 50, child: child),
+                ),
+              ),
+            ],
+          ),
+        );
+      }),
     );
   }
 }

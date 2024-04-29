@@ -61,41 +61,40 @@ class StartTheme extends StatelessWidget {
 
   final Widget child;
 
-  @override
-  Widget build(BuildContext context) {
-    final current = context.theme;
+  static ThemeData data(ThemeData current) {
     final isLight = current.brightness == Brightness.light;
 
     final container = isLight ? StartColors.lightContainer : StartColors.darkContainer;
-    return AnimatedTheme(
-      curve: Curves.easeOutSine,
-      data: current.copyWith(
-        colorScheme: current.colorScheme.copyWith(
-          background: StartColors.bg,
-          surface: container,
-          onSurface: isLight ? Colors.black : StartColors.lightContainer,
-          surfaceTint: isLight ? Colors.white : Colors.black,
-          onSurfaceVariant: isLight ? StartColors.bg12 : StartColors.lightContainer38,
-          outline: isLight ? StartColors.bg75 : StartColors.lightContainer75,
-        ),
-        filledButtonTheme: FilledButtonThemeData(
-          style: FilledButton.styleFrom(
-            shape: LinearBorder.none,
-            backgroundColor: current.colorScheme.primary,
-            foregroundColor: current.colorScheme.onPrimary,
-          ),
-        ),
-        iconButtonTheme: IconButtonThemeData(
-          style: IconButton.styleFrom(
-            backgroundColor: container,
-            foregroundColor: isLight ? StartColors.bg75 : StartColors.lightContainer75,
-          ),
-        ),
-        iconTheme: IconThemeData(
-          color: isLight ? StartColors.bg75 : StartColors.lightContainer,
+    return current.copyWith(
+      colorScheme: current.colorScheme.copyWith(
+        background: StartColors.bg,
+        surface: container,
+        onSurface: isLight ? Colors.black : StartColors.lightContainer,
+        surfaceTint: isLight ? Colors.white : Colors.black,
+        onSurfaceVariant: isLight ? StartColors.bg12 : StartColors.lightContainer38,
+        outline: isLight ? StartColors.bg75 : StartColors.lightContainer75,
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          shape: LinearBorder.none,
+          backgroundColor: current.colorScheme.primary,
+          foregroundColor: current.colorScheme.onPrimary,
         ),
       ),
-      child: child,
+      iconButtonTheme: IconButtonThemeData(
+        style: IconButton.styleFrom(
+          backgroundColor: container,
+          foregroundColor: isLight ? StartColors.bg75 : StartColors.lightContainer75,
+        ),
+      ),
+      iconTheme: IconThemeData(
+        color: isLight ? StartColors.bg75 : StartColors.lightContainer,
+      ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedTheme(curve: Curves.easeOutSine, data: data(context.theme), child: child);
   }
 }

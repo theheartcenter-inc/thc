@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase_setup.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/profile/account/account_field.dart';
+import 'package:thc/home/stream/create_livestream.dart';
 import 'package:thc/home/surveys/edit_survey/survey_editor.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/start/start.dart';
@@ -44,6 +45,7 @@ class App extends StatelessWidget {
         providers: [
           BlocProvider(create: (_) => AppTheme()),
           BlocProvider(create: (_) => NavBarIndex()),
+          BlocProvider(create: (_) => LivestreamEnabled()),
           BlocProvider(create: (_) => MobileEditing()),
           BlocProvider(create: (_) => ValidSurveyQuestions()),
           BlocProvider(create: (_) => ValidSurveyAnswers()),
