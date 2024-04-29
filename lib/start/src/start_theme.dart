@@ -30,7 +30,7 @@ abstract final class StartColors {
 }
 
 /// This class is pretty epic: you can fetch the `static` values just like in [StartColors],
-/// and you can also use the constructor to get
+/// and you can also use the constructors to create the gradient for the sun's [Decoration].
 final class SunColors extends RadialGradient {
   SunColors.hsv(List<HSVColor> colors) : super(colors: [for (final hsv in colors) hsv.toColor()]);
 

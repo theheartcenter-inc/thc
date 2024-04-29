@@ -7,7 +7,6 @@ import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/clip_height.dart';
 
-/// Controls the 2 buttons that are shown at the bottom of the main UI box.
 class BottomStuff extends StatefulWidget {
   /// Controls the 2 buttons that are shown at the bottom of the main UI box.
   const BottomStuff({super.key});

@@ -53,19 +53,17 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
     const curve = Curves.ease;
     final tCurve = aimedForward ? curve.transform(t) : 1 - curve.transform(1 - t);
 
+    final foregroundColor = widget.foregroundColor ?? IconTheme.of(context).color ?? Colors.white;
+    final fgOpacity = foregroundColor.opacity;
+    final splashColor = foregroundColor.withOpacity(fgOpacity / 4);
+
+    final normalRadius = Radius.circular((1 - tCurve) * 24);
+    final cornerRadius = Radius.circular((1 - tCurve) * 16 + 8);
+
     final width = 72 * tCurve;
     final height = 80 * tCurve;
 
-    final stacked = [...ThemeMode.values.where((value) => value != themeMode), themeMode];
-
     Widget? button(ThemeMode buttonMode) {
-      final foregroundColor =
-          widget.foregroundColor ?? IconTheme.of(context).color ?? Colors.white;
-      final fgOpacity = foregroundColor.opacity;
-      final splashColor = foregroundColor.withOpacity(fgOpacity / 4);
-
-      final normalRadius = Radius.circular((1 - tCurve) * 24);
-      final cornerRadius = Radius.circular((1 - tCurve) * 16 + 8);
       final active = buttonMode == themeMode;
       if (t == 0 && !active) return null;
 
@@ -117,6 +115,8 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
         ),
       );
     }
+
+    final stacked = [...ThemeMode.values.where((value) => value != themeMode), themeMode];
 
     return SizedBox(
       width: width + 48,

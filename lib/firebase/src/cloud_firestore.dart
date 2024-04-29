@@ -23,7 +23,7 @@ extension FetchFromFirebaseFirestore on Firestore? {
     return FirebaseFirestore.instance.collection(collection);
   }
 
-  FirestoreDoc<Json> doc([String? path]) => FirestoreDoc(_this.doc(path));
+  DocumentReference<Json> doc([String? path]) => _this.doc(path);
 
   Stream<QuerySnapshot<Json>> snapshots({
     bool includeMetadataChanges = false,
@@ -33,12 +33,12 @@ extension FetchFromFirebaseFirestore on Firestore? {
   }
 }
 
-extension type FirestoreDoc<T>(DocumentReference<T> doc) implements DocumentReference<T> {
+extension GetData<T> on DocumentReference<T> {
   Future<T?> getData() async {
     T? data;
     try {
-      final docFuture = doc.get();
-      final result = await docFuture;
+      final result = await get();
+      backendPrint('result: $result');
       data = result.data();
     } catch (e) {
       backendPrint('got an error (type ${e.runtimeType})');

@@ -125,12 +125,12 @@ class AdaptiveInput extends StatelessWidget {
   }
 }
 
-/// {@template views.create_livestream.Backdrop}
+/// {@template Backdrop}
 /// The [Hero] widget gives the "Go Live" button a fun little animation
 /// as it expands into this black backdrop.
 /// {@endtemplate}
 class _Backdrop extends StatelessWidget {
-  /// {@macro views.create_livestream.Backdrop}
+  /// {@macro Backdrop}
   const _Backdrop();
 
   @override
@@ -160,12 +160,12 @@ class _StreamingCamera extends StatelessWidget {
   }
 }
 
-/// {@template views.create_livestream.ViewCount}
+/// {@template ViewCount}
 /// The view has an [AnimatedOpacity] based on
 /// whether the overlay is being shown.
 /// {@endtemplate}
 class _ViewCount extends StatelessWidget {
-  /// {@macro views.create_livestream.ViewCount}
+  /// {@macro ViewCount}
   const _ViewCount();
 
   int get peopleWatching => Random().nextBool() ? 69 : 420;
@@ -198,6 +198,7 @@ class _EndButton extends FilledButton {
   );
 }
 
+/// {@template StreamOverlay}
 /// Without this widget, things would be kind of ugly:
 ///
 /// ```dart
@@ -216,10 +217,14 @@ class _EndButton extends FilledButton {
 ///
 /// But since [_EndButton] disappears by sliding, we need
 /// [value] to have a more flexible type.
+/// {@endtemplate}
 class StreamOverlay extends StatelessWidget {
+  /// {@macro StreamOverlay}
   const StreamOverlay(this.value, {super.key, required this.child})
       : assert(value is Offset || value is double);
 
+  /// Since the buttons disappear by sliding, we need
+  /// [value] to have a flexible type.
   final dynamic value;
   final Widget child;
 

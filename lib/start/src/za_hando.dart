@@ -187,18 +187,15 @@ class ZaHando extends StatelessWidget {
       tHorizon,
     )!;
 
-    final BoxDecoration decoration;
-    if (kIsWeb) {
-      decoration = BoxDecoration(color: handColor);
-    } else {
-      decoration = BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [handColor, handHorizon.toColor()],
-        ),
-      );
-    }
+    final BoxDecoration decoration = kIsWeb
+        ? BoxDecoration(color: handColor)
+        : BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [handColor, handHorizon.toColor()],
+            ),
+          );
 
     return Stack(
       alignment: Alignment.center,

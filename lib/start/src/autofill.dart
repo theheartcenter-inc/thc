@@ -2,6 +2,7 @@
 /// During development, it's nice to have an option to autofill the user ID/password
 /// rather than needing to type it in each time.
 /// {@endtemplate}
+library;
 
 import 'dart:math';
 

@@ -100,29 +100,25 @@ class SurveyTheme extends StatelessWidget {
         ),
       ),
       child: Scaffold(
-        body: SafeArea(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final colors = context.colorScheme;
-              return SingleChildScrollView(
-                child: Container(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: const Alignment(-0.25, -1.0),
-                      end: const Alignment(0.25, 1.0),
-                      colors: [colors.surface, colors.background],
-                    ),
+        body: Builder(
+          builder: (context) {
+            final colors = context.colorScheme;
+            final size = MediaQuery.sizeOf(context);
+            return SingleChildScrollView(
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: const Alignment(-0.25, -1.0),
+                    end: const Alignment(0.25, 1.0),
+                    colors: [colors.surface, colors.background],
                   ),
-                  constraints: BoxConstraints(
-                    minWidth: constraints.maxWidth,
-                    minHeight: constraints.maxHeight,
-                  ),
-                  padding: const EdgeInsets.all(20),
-                  child: SafeArea(child: surveyContent),
                 ),
-              );
-            },
-          ),
+                constraints: BoxConstraints(minWidth: size.width, minHeight: size.height),
+                padding: const EdgeInsets.all(20),
+                child: SafeArea(child: surveyContent),
+              ),
+            );
+          },
         ),
       ),
     );

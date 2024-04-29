@@ -5,7 +5,7 @@ import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/error_dialog.dart';
 
 class Permissions extends StatelessWidget {
-  const Permissions({Key? key, required this.user}) : super(key: key);
+  const Permissions({super.key, required this.user});
   final Json user;
 
   @override
@@ -18,7 +18,7 @@ class Permissions extends StatelessWidget {
 }
 
 class RadioGroup extends StatefulWidget {
-  const RadioGroup({Key? key, required this.user}) : super(key: key);
+  const RadioGroup({super.key, required this.user});
   final Json user;
 
   @override

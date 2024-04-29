@@ -82,8 +82,7 @@ sealed class ThcUser {
     backendPrint('id: $id');
     final doc = collection.doc(id);
     backendPrint('doc: $doc');
-    final dataFuture = doc.getData();
-    final data = await dataFuture;
+    final data = await doc.getData();
     if (data == null) throw Exception("snapshot of $collection/$id doesn't exist");
     return ThcUser.fromJson(data);
   }
