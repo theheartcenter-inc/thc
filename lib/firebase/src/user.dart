@@ -53,6 +53,7 @@ sealed class ThcUser {
 
   /// {@macro ThcUser}
   factory ThcUser.fromJson(Json json) {
+    backendPrint(json);
     return ThcUser(
       name: json['name'],
       type: UserType.fromJson(json),
@@ -78,8 +79,12 @@ sealed class ThcUser {
       return UserType.values.firstWhere((value) => id.contains(value.name)).testUser;
     }
 
-    final snapshot = await collection.doc(id).get();
-    return ThcUser.fromJson(snapshot.data()!);
+    backendPrint('id: $id');
+    final doc = collection.doc(id);
+    backendPrint('doc: $doc');
+    final data = await doc.getData();
+    if (data == null) throw Exception("snapshot of $collection/$id doesn't exist");
+    return ThcUser.fromJson(data);
   }
 
   static Future<void> remove(String id, {Firestore? collection}) {

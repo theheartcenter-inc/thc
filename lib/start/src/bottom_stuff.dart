@@ -5,8 +5,10 @@ import 'package:thc/start/src/login_progress.dart';
 import 'package:thc/utils/animation.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
+import 'package:thc/utils/widgets/clip_height.dart';
 
 class BottomStuff extends StatefulWidget {
+  /// Controls the 2 buttons that are shown at the bottom of the main UI box.
   const BottomStuff({super.key});
 
   @override
@@ -44,7 +46,17 @@ class _BottomStuffState extends State<BottomStuff> with SingleTickerProviderStat
 
     return DefaultTextStyle(
       style: StyleText(weight: 600, color: labelColor),
+      textAlign: TextAlign.center,
       child: AnimatedBuilder(animation: controller, builder: builder),
+    );
+  }
+
+  static const curve = Curves.ease;
+
+  Widget fadeSlide(double t, {required Widget child}) {
+    return Transform.translate(
+      offset: Offset(0, (curve.transform(t) - 1) * 10),
+      child: Opacity(opacity: t, child: child),
     );
   }
 
@@ -52,16 +64,8 @@ class _BottomStuffState extends State<BottomStuff> with SingleTickerProviderStat
     final t = controller.value;
     final aimedForward = controller.aimedForward;
 
-    const curve = Curves.ease;
     final tSeparator = aimedForward ? curve.transform(min(t * 2, 1)) : 1 - curve.transform(1 - t);
     final tColumns = (t - 1) * (aimedForward ? 2 : 1) + 1;
-
-    Widget fadeSlide(double t, {required Widget child}) {
-      return Transform.translate(
-        offset: Offset(0, (curve.transform(t) - 1) * 10),
-        child: Opacity(opacity: t, child: child),
-      );
-    }
 
     Widget button(LoginLabels? target) {
       if (tColumns <= 0 || target == null) return const Spacer();
@@ -72,46 +76,37 @@ class _BottomStuffState extends State<BottomStuff> with SingleTickerProviderStat
 
       final (:label, :text) = target.buttonData!;
 
-      final title = Text(label, textAlign: TextAlign.center);
+      final button = FilledButton(
+        onPressed: LoginLabels.goto(target),
+        child: SizedBox(
+          width: double.infinity,
+          child: Text(
+            text,
+            textAlign: TextAlign.center,
+            style: const StyleText(letterSpacing: 1 / 3),
+          ),
+        ),
+      );
 
-      final Widget button = Padding(
+      Widget buttonStuff = Padding(
         padding: const EdgeInsets.symmetric(vertical: 10),
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           children: [
-            fadeSlide(tTitle, child: title),
+            fadeSlide(tTitle, child: Text(label)),
             const Spacer(),
-            fadeSlide(
-              tButton,
-              child: _Button(
-                enabled: true,
-                onPressed: LoginLabels.goto(target),
-                text: text,
-              ),
-            ),
+            fadeSlide(tButton, child: button),
           ],
         ),
       );
 
-      if (aimedForward) return Expanded(child: button);
+      if (!aimedForward) {
+        buttonStuff = ClipHeight(childHeight: 88, child: buttonStuff);
+      }
 
-      return Expanded(
-        child: LayoutBuilder(builder: (context, constraints) {
-          return FittedBox(
-            alignment: Alignment.topCenter,
-            fit: BoxFit.fitWidth,
-            child: SizedBox(
-              width: constraints.maxWidth,
-              height: 88,
-              child: button,
-            ),
-          );
-        }),
-      );
+      return Expanded(child: buttonStuff);
     }
 
     final colors = context.colorScheme;
-
     final (button1, button2) = labels.otherOptions!;
 
     return Padding(
@@ -130,28 +125,6 @@ class _BottomStuffState extends State<BottomStuff> with SingleTickerProviderStat
             ),
             button(button2),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _Button extends StatelessWidget {
-  const _Button({required this.enabled, required this.onPressed, required this.text});
-  final bool enabled;
-  final VoidCallback? onPressed;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return FilledButton(
-      onPressed: enabled ? onPressed : null,
-      child: SizedBox(
-        width: double.infinity,
-        child: Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const StyleText(letterSpacing: 1 / 3),
         ),
       ),
     );

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/main.dart';
-import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/style_text.dart';
@@ -63,16 +62,7 @@ class UserButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return FilledButton(
       onPressed: () async {
-        await clearLocalStorage();
-        if (userType case final userType?) {
-          await Future.wait([
-            LocalStorage.loggedIn.save(true),
-            LocalStorage.userId.save(userType.testId),
-          ]);
-          user = useInternet ? await ThcUser.download(userType.testId) : userType.testUser;
-        } else {
-          user = null;
-        }
+        await resetLocalStorage(userType);
         App.relaunch();
       },
       style: FilledButton.styleFrom(

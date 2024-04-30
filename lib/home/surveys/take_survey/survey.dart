@@ -70,8 +70,8 @@ class _SurveyScreenState extends State<SurveyScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SurveyStyling(
-      child: Column(
+    return SurveyTheme(
+      surveyContent: Column(
         children: [
           const DarkModeSwitch(),
           const SizedBox(height: 20),

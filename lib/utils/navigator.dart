@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:thc/login_register/login.dart';
+import 'package:thc/start/start.dart';
 import 'package:thc/utils/local_storage.dart';
+import 'package:thc/utils/widgets/lerpy_hero.dart';
 
 /// {@template navigator}
 /// We can make navigation a little cleaner with a global key and an extension type:
@@ -74,20 +75,34 @@ extension type Nav(NavigatorState navigator) {
     replacing ? navigator.pushReplacement(route) : navigator.push(route);
   }
 
+  static const lerpy = Key("it's a LerpyHero!");
+
   /// Creates a pop-up dialog.
   ///
   /// The [dialog] should be an [AlertDialog] or something similar.
   Future<T?> showDialog<T>(
     Widget dialog, {
-    bool? barrierDismissible,
+    bool barrierDismissible = true,
     Color? barrierColor,
+    Duration? transitionDuration,
   }) {
-    return showAdaptiveDialog<T>(
-      context: navigator.context,
-      builder: (_) => dialog,
-      barrierColor: barrierColor,
-      barrierDismissible: barrierDismissible,
-    );
+    Widget builder(_) => dialog;
+
+    return dialog.key == lerpy
+        ? navigator.push<T>(
+            LerpyHeroRoute(
+              barrierColor: barrierColor,
+              transitionDuration: transitionDuration,
+              barrierDismissible: barrierDismissible,
+              builder: builder,
+            ),
+          )
+        : showAdaptiveDialog<T>(
+            context: navigator.context,
+            barrierColor: barrierColor,
+            barrierDismissible: barrierDismissible,
+            builder: builder,
+          );
   }
 
   /// Shows a fun little bar of text at the bottom of the screen.
@@ -100,6 +115,6 @@ extension type Nav(NavigatorState navigator) {
     LocalStorage.firstLastName.save('');
 
     navigator.popUntil((_) => !navigator.canPop());
-    pushReplacement(const LoginScreen());
+    pushReplacement(const StartScreen());
   }
 }

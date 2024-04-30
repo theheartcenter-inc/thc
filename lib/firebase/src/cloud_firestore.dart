@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:thc/firebase/firebase.dart';
+import 'package:thc/utils/app_config.dart';
 
 enum Firestore {
   users,
@@ -18,6 +19,7 @@ enum Firestore {
 extension FetchFromFirebaseFirestore on Firestore? {
   CollectionReference<Json> get _this {
     final collection = '${this ?? Firestore.users}';
+    backendPrint('collection: $collection');
     return FirebaseFirestore.instance.collection(collection);
   }
 
@@ -28,5 +30,20 @@ extension FetchFromFirebaseFirestore on Firestore? {
     ListenSource source = ListenSource.defaultSource,
   }) {
     return _this.snapshots(includeMetadataChanges: includeMetadataChanges, source: source);
+  }
+}
+
+extension GetData<T> on DocumentReference<T> {
+  Future<T?> getData() async {
+    T? data;
+    try {
+      final result = await get();
+      backendPrint('result: $result');
+      data = result.data();
+    } catch (e) {
+      backendPrint('got an error (type ${e.runtimeType})');
+      if (superStrict) rethrow;
+    }
+    return data;
   }
 }

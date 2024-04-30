@@ -1,15 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:thc/firebase/src/user_type.dart';
+import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
+import 'package:thc/utils/app_config.dart';
 
 late final SharedPreferences _storage;
 
 Future<void> loadFromLocalStorage() async {
   _storage = await SharedPreferences.getInstance();
+  // await _storage.clear();
 }
 
-Future<void> clearLocalStorage() => _storage.clear();
+Future<dynamic> resetLocalStorage([UserType? userType]) async {
+  await _storage.clear();
+
+  if (userType == null) return user = null;
+
+  final List<Future<dynamic>> futures = [
+    for (final MapEntry(key: storageKey, :value) in userType.testUserSaveData.entries)
+      storageKey.save(value),
+  ];
+  if (useInternet) {
+    futures.add(ThcUser.download(userType.testId).then((value) => user = value));
+  } else {
+    user = userType.testUser;
+  }
+  await Future.wait(futures);
+}
 
 /// {@template StorageKeys}
 /// Local storage supports 5 types:

@@ -5,51 +5,30 @@ import 'package:thc/home/stream/active_stream.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
+import 'package:thc/utils/widgets/lerpy_hero.dart';
 
-class CreateLivestream extends StatefulWidget {
+class CreateLivestream extends StatelessWidget {
   const CreateLivestream({super.key});
 
-  @override
-  State<CreateLivestream> createState() => _CreateLivestreamState();
-}
-
-/// controls whether the "Go Live" button is enabled.
-bool aboutToStart = true;
-
-class _CreateLivestreamState extends State<CreateLivestream> {
   DateTime get nextStream => DateTime.now();
   String get scheduledFor => 'Scheduled for: '
       '${nextStream.month}/${nextStream.day}/${nextStream.year} '
       '${nextStream.hour}:${nextStream.minute}';
-  int numberInLobby = Random().nextBool() ? 69 : 420;
+  int get numberInLobby => Random().nextBool() ? 69 : 420;
   String get people => numberInLobby == 1 ? 'person' : 'people';
-
-  void startStreaming() {
-    setState(() => aboutToStart = false);
-    Navigator.of(context).push(
-      PageRouteBuilder(
-        transitionDuration: Durations.long2,
-        pageBuilder: (_, animation, __) => BlocProvider(
-          create: (_) => StreamOverlayFadeIn(animation),
-          child: const ActiveStream(),
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
     const semiBold = StyleText(weight: 600);
-
     return Center(
       child: Column(
         children: [
           const Spacer(),
-          _StartSwitch((value) => setState(() => aboutToStart = value)),
+          _StartSwitch(context.read<LivestreamEnabled>().emit),
           const Spacer(flex: 20),
           Text(scheduledFor),
           const Spacer(flex: 2),
-          _GoLive(onPressed: aboutToStart ? startStreaming : null),
+          const _GoLive(),
           const Spacer(flex: 2),
           Text('$numberInLobby $people waiting', style: semiBold),
           const Spacer(),
@@ -59,32 +38,97 @@ class _CreateLivestreamState extends State<CreateLivestream> {
   }
 }
 
-/// When styling a button, you can use [FilledButton.styleFrom]
-/// (other buttons have equivalent class methods, e.g. [OutlinedButton.styleFrom]),
-/// or you can use the [ButtonStyle] class.
-///
-/// Using [ButtonStyle] usually involves creating a [MaterialPropertyResolver],
-/// whereas the class method is a bit more simple.
-final _buttonStyle = FilledButton.styleFrom(
-  backgroundColor: ThcColors.teal,
-  foregroundColor: Colors.black,
-  shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(30)),
-  padding: const EdgeInsets.fromLTRB(30, 15, 30, 18),
-);
-
 class _GoLive extends StatelessWidget {
-  const _GoLive({required this.onPressed});
-  final VoidCallback? onPressed;
+  const _GoLive();
 
   @override
   Widget build(BuildContext context) {
-    return Hero(
-      tag: 'go live',
-      child: FilledButton(
-        onPressed: onPressed,
-        style: _buttonStyle,
-        child: const Text('Go Live', style: StyleText(size: 36)),
+    final enabled = context.watch<LivestreamEnabled>().state;
+    return AnimatedOpacity(
+      duration: Durations.long1,
+      opacity: enabled ? 1 : 1 / 3,
+      child: SizedBox(
+        width: 175,
+        height: 75,
+        child: GoLive(
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              overlayColor: const MaterialStatePropertyAll(Colors.black12),
+              onTap: enabled
+                  ? () async {
+                      const duration = Durations.extralong1;
+                      await Navigator.of(context).push(
+                        PageRouteBuilder(
+                          transitionDuration: duration,
+                          reverseTransitionDuration: duration,
+                          pageBuilder: (_, animation, __) => BlocProvider(
+                            create: (_) => StreamOverlayFadeIn(animation),
+                            child: const ActiveStream(),
+                          ),
+                        ),
+                      );
+                      await Future.delayed(duration);
+                      context.read<LivestreamEnabled>().emit(false);
+                    }
+                  : null,
+              child: Center(
+                child: Text(
+                  'Go Live',
+                  style: StyleText(
+                    weight: 600,
+                    size: 32,
+                    color: enabled ? Colors.black : ThcColors.gray,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
+    );
+  }
+}
+
+extension Cube on double {
+  double get cubed => this * this * this;
+}
+
+class GoLive extends LerpyHero<ShapeDecoration> {
+  const GoLive({super.key, super.child}) : super(tag: 'go live');
+
+  @override
+  ShapeDecoration lerp(
+    ShapeDecoration a,
+    ShapeDecoration b,
+    double t,
+    HeroFlightDirection direction,
+  ) {
+    final tLerp = switch (direction) {
+      HeroFlightDirection.push => t.cubed,
+      HeroFlightDirection.pop => 1 - (1 - t).cubed,
+    };
+    return ShapeDecoration.lerp(a, b, tLerp)!;
+  }
+
+  @override
+  ShapeDecoration fromContext(BuildContext context) {
+    final secondary = context.colorScheme.secondary;
+    final lightness = HSLColor.fromColor(secondary).lightness;
+    return ShapeDecoration(
+      color: secondary,
+      shape: ContinuousRectangleBorder(
+        borderRadius: BorderRadius.circular(lightness * 0x80),
+      ),
+    );
+  }
+
+  @override
+  Widget builder(BuildContext context, ShapeDecoration value, Widget? child) {
+    return Container(
+      decoration: value,
+      clipBehavior: Clip.antiAlias,
+      child: child,
     );
   }
 }
@@ -97,6 +141,7 @@ class _StartSwitch extends StatelessWidget {
   final ValueChanged<bool> onChanged;
   @override
   Widget build(BuildContext context) {
+    final aboutToStart = context.watch<LivestreamEnabled>().state;
     return SizedBox(
       width: 300,
       child: ColoredBox(
@@ -111,4 +156,10 @@ class _StartSwitch extends StatelessWidget {
       ),
     );
   }
+}
+
+/// controls whether the "Go Live" button is enabled.
+class LivestreamEnabled extends Cubit<bool> {
+  /// controls whether the "Go Live" button is enabled.
+  LivestreamEnabled() : super(true);
 }

@@ -14,6 +14,7 @@ linter:
     avoid_redundant_argument_values: true
     avoid_types_on_closure_parameters: true
     cascade_invocations: true
+    cast_nullable_to_non_nullable: true
     join_return_with_assignment: true
     noop_primitive_operations: true
     only_throw_errors: true

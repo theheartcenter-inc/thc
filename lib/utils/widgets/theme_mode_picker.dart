@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:thc/start/start.dart';
 import 'package:thc/utils/animation.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
+/// {@template ThemeModePicker}
+/// An animated button shown in the [StartScreen] used to set the [ThemeMode].
+/// {@endtemplate}
 class ThemeModePicker extends StatefulWidget {
+  /// {@macro ThemeModePicker}
   const ThemeModePicker({this.backgroundColor, this.foregroundColor, super.key});
   final Color? backgroundColor, foregroundColor;
 
@@ -15,7 +20,6 @@ class ThemeModePicker extends StatefulWidget {
 }
 
 class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProviderStateMixin {
-  bool reversing = true;
   late final controller = AnimationController(vsync: this, duration: Durations.short3);
 
   @override
@@ -25,7 +29,7 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
   }
 
   Future<void> toggle([ThemeMode? mode]) async {
-    reversing = controller.aimedForward;
+    final reversing = controller.aimedForward;
     if (reversing && mode != null) {
       context.read<AppTheme>().emit(mode);
       LocalStorage.themeMode.save(mode.index);
@@ -36,7 +40,7 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     return TapRegion(
-      onTapOutside: (_) => reversing ? null : toggle(),
+      onTapOutside: (_) => controller.aimedForward ? toggle() : null,
       child: AnimatedBuilder(animation: controller, builder: builder),
     );
   }
@@ -45,8 +49,9 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
     final themeMode = context.watch<AppTheme>().state;
 
     final t = controller.value;
+    final aimedForward = controller.aimedForward;
     const curve = Curves.ease;
-    final tCurve = reversing ? 1 - curve.transform(1 - t) : curve.transform(t);
+    final tCurve = aimedForward ? curve.transform(t) : 1 - curve.transform(1 - t);
 
     final foregroundColor = widget.foregroundColor ?? IconTheme.of(context).color ?? Colors.white;
     final fgOpacity = foregroundColor.opacity;
@@ -58,19 +63,19 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
     final width = 72 * tCurve;
     final height = 80 * tCurve;
 
-    Widget? button(ThemeMode mode) {
-      final active = mode == themeMode;
+    Widget? button(ThemeMode buttonMode) {
+      final active = buttonMode == themeMode;
       if (t == 0 && !active) return null;
 
       final iconfg = foregroundColor.withOpacity(fgOpacity * (active ? 1 : tCurve));
 
       return Positioned.fill(
-        key: ValueKey(mode),
-        top: tCurve * mode.index * (height + 48) / 3,
-        bottom: tCurve * (2 - mode.index) * (height + 48) / 3,
+        key: ValueKey(buttonMode),
+        top: tCurve * buttonMode.index * (height + 48) / 3,
+        bottom: tCurve * (2 - buttonMode.index) * (height + 48) / 3,
         child: Material(
           animationDuration: Duration.zero,
-          borderRadius: switch (mode) {
+          borderRadius: switch (buttonMode) {
             ThemeMode.light => BorderRadius.all(normalRadius),
             ThemeMode.dark => BorderRadius.vertical(top: normalRadius, bottom: cornerRadius),
             ThemeMode.system => BorderRadius.vertical(top: cornerRadius, bottom: normalRadius),
@@ -78,15 +83,15 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
           color: widget.backgroundColor,
           clipBehavior: Clip.hardEdge,
           child: InkWell(
-            key: ValueKey(mode),
-            onTap: t.remainder(1) == 0 ? () => toggle(mode) : null,
+            key: ValueKey(buttonMode),
+            onTap: t.remainder(1) == 0 ? () => toggle(buttonMode) : null,
             overlayColor: MaterialStateProperty.resolveWith(
               (states) => states.isPressed && t < 1 ? Colors.transparent : splashColor,
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                switch (mode) {
+                switch (buttonMode) {
                   ThemeMode.system => SystemThemeIcon(color: iconfg),
                   ThemeMode.light => Icon(Icons.light_mode, color: iconfg),
                   ThemeMode.dark => Icon(Icons.dark_mode, color: iconfg),
@@ -96,7 +101,7 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 4),
                     child: Text(
-                      mode.name,
+                      buttonMode.name,
                       softWrap: false,
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.fade,
@@ -126,6 +131,8 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
   }
 }
 
+/// The ["routine" icon](https://fonts.google.com/icons?selected=Material%20Symbols%20Outlined%3Aroutine%3AFILL%401%3Bwght%40400%3BGRAD%400%3Bopsz%4024)
+/// isn't part of Flutter's [Icons] collection yet, so we gotta use an svg for now.
 class SystemThemeIcon extends StatelessWidget {
   const SystemThemeIcon({required this.color, this.size = 24.0, super.key});
   final Color color;

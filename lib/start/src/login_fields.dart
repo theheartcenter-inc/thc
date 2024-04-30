@@ -1,13 +1,25 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:thc/start/src/autofill.dart';
 import 'package:thc/start/src/bottom_stuff.dart';
 import 'package:thc/start/src/login_progress.dart';
 import 'package:thc/start/src/start_theme.dart';
 import 'package:thc/start/src/za_hando.dart';
+import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
+import 'package:thc/utils/widgets/clip_height.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
 
+/// We could have done something like
+///
+/// ```dart
+/// final nodes = [FocusNode(), FocusNode()];
+/// FocusNode get node => nodes[index];
+/// ```
+///
+/// but I like how [Record] types are immutable
+/// (and I'm pretty sure they have better performance).
 extension LoginFieldStuff<T> on (T, T) {
   T get(LoginField field) => switch (field) {
         LoginField.top => $1,
@@ -15,6 +27,8 @@ extension LoginFieldStuff<T> on (T, T) {
       };
 }
 
+/// Holds UI/state management data for the username & password fields
+/// (or whatever the currently applicable [LoginLabels] are).
 enum LoginField with StatelessEnum {
   top,
   bottom;
@@ -25,6 +39,8 @@ enum LoginField with StatelessEnum {
   TextEditingController get controller => controllers.get(this);
   FocusNode get node => nodes.get(this);
 
+  /// This listener is added to each node when the [LoginProgressTracker] bloc
+  /// is first created.
   Future<void> listener() async {
     if (node.hasFocus) {
       LoginProgressTracker.update(focusedField: this);
@@ -54,6 +70,13 @@ enum LoginField with StatelessEnum {
       :showPassword,
     ) = LoginProgressTracker.of(context);
 
+    final maybeSubmit = this == bottom || labels.just1field
+        ? LoginProgressTracker.maybeSubmit()
+        : ([_]) async {
+            await Future.delayed(Durations.short1);
+            bottom.node.requestFocus();
+          };
+
     final colors = context.colorScheme;
     final focused = focusedField == this;
     final cursorColor = context.lightDark(ThcColors.green67, Colors.black);
@@ -78,32 +101,28 @@ enum LoginField with StatelessEnum {
       ),
       obscureText: !(this == top && showPassword) && (hintText?.contains('password') ?? false),
       onChanged: newVal,
-      onSubmitted: LoginProgressTracker.maybeSubmit(),
+      onSubmitted: maybeSubmit,
     );
 
     if (this == top) return textField;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        const height = 48.0;
-        return AnimatedContainer(
-          duration: Durations.medium1,
-          curve: Curves.ease,
-          height: fieldValues.$2 == null || labels.just1field ? 0 : height,
-          width: width,
-          child: FittedBox(
-            alignment: Alignment.topCenter,
-            fit: BoxFit.fitWidth,
-            child: SizedBox(width: width, height: height, child: textField),
-          ),
-        );
-      },
+    const height = 48.0;
+    return AnimatedContainer(
+      duration: Durations.medium1,
+      curve: Curves.ease,
+      height: fieldValues.$2 == null || labels.just1field ? 0 : height,
+      width: double.infinity,
+      child: ClipHeight(childHeight: height, child: textField),
     );
   }
 }
 
+/// {@template LoginFields}
+/// This widget holds everything in the main UI box,
+/// including the [LoginField]s and the [BottomStuff].
+/// {@endtemplate}
 class LoginFields extends StatelessWidget {
+  /// {@macro LoginFields}
   const LoginFields({super.key});
 
   @override
@@ -121,7 +140,7 @@ class LoginFields extends StatelessWidget {
     final showBottom = animation >= AnimationProgress.showBottom;
 
     late final startButton = TextButton(
-      onPressed: animate,
+      onPressed: animation >= AnimationProgress.pressStart ? null : animate,
       child: AnimatedOpacity(
         duration: Durations.extralong4,
         opacity: expandText ? 0 : 1,
@@ -165,7 +184,9 @@ class LoginFields extends StatelessWidget {
           Positioned.fill(child: showBottom ? const SizedBox.shrink() : startButton),
           const _TextFieldButton(),
           if (labels.choosingPassword && fieldValues.$1!.isNotEmpty)
-            const _TextFieldButton.passwordVisibility(),
+            const _TextFieldButton.passwordVisibility()
+          else if (labels.signingIn && kDebugMode)
+            const _TextFieldButton.autofill(),
         ],
       ),
     );
@@ -199,32 +220,42 @@ class LoginFields extends StatelessWidget {
   }
 }
 
-class _TextFieldButton extends StatelessWidget {
-  const _TextFieldButton() : passwordVisibility = false;
-  const _TextFieldButton.passwordVisibility() : passwordVisibility = true;
+enum _TextFieldButtonType { submit, showPassword, autofill }
 
-  final bool passwordVisibility;
+/// A button for the [LoginFields] with adaptive foreground/background colors.
+class _TextFieldButton extends StatelessWidget {
+  /// Checkmark button—submit the text currently in the fields.
+  const _TextFieldButton() : type = _TextFieldButtonType.submit;
+
+  /// Show/hide the password.
+  const _TextFieldButton.passwordVisibility() : type = _TextFieldButtonType.showPassword;
+
+  /// During development, we can tap this guy to autofill the username/password.
+  const _TextFieldButton.autofill() : type = _TextFieldButtonType.autofill;
+
+  final _TextFieldButtonType type;
+
+  /// This node ensures that pressing 'Tab' takes you straight to the next field,
+  /// not to the [_TextFieldButton].
   static final node = FocusNode(canRequestFocus: false, skipTraversal: true);
 
   Color _iconbg(bool focused, bool checkButton, bool isLight, bool enabled) {
-    double bgA = 1.0;
-    double bgH = 210.0;
-    double bgS = 0.1;
+    double bgA = 0.5;
+    const bgH = 210.0;
+    const bgS = 0.1;
     double bgL = 0.0;
 
     if (!enabled) {
-      bgA = isLight ? 0.125 : 0.5;
+      if (isLight) bgA = 0.125;
       bgL = focused ? 0.05 : 1 / 3;
     } else if (checkButton) {
-      bgH = 120.0;
-      bgS = 1 / 3;
-      bgL = isLight ? 0.7 : 0.63;
-    } else if (isLight) {
-      bgA = 0.5;
+      return isLight ? ThcColors.green : StartColors.zaHando;
     }
 
     return HSLColor.fromAHSL(bgA, bgH, bgS, bgL).toColor();
   }
+
+  static final continueIcon = appleDevice ? Icons.arrow_forward_ios : Icons.arrow_forward;
 
   @override
   Widget build(BuildContext context) {
@@ -239,46 +270,58 @@ class _TextFieldButton extends StatelessWidget {
 
     if (username == null) return const SizedBox.shrink();
 
+    final bool submitButton = type == _TextFieldButtonType.submit;
+    final bool autofill = type == _TextFieldButtonType.autofill;
+
     final (bool checkButton, bool focused) = switch (focusedField) {
       LoginField.top when labels.just1field => (true, true),
       LoginField.top when password == null => (false, true),
-      LoginField.top => (true, passwordVisibility),
-      LoginField.bottom => (true, !passwordVisibility),
+      LoginField.top => (true, !submitButton),
+      LoginField.bottom => (true, submitButton),
       null => (labels.just1field || password != null, false),
     };
 
-    final onPressed = passwordVisibility
-        ? LoginProgressTracker.toggleShowPassword
-        : LoginProgressTracker.maybeSubmit(labels, fieldValues, errorMessage != null);
+    final onPressed = switch (type) {
+      _TextFieldButtonType.submit =>
+        LoginProgressTracker.maybeSubmit(labels, fieldValues, errorMessage != null),
+      _TextFieldButtonType.showPassword => LoginProgressTracker.toggleShowPassword,
+      _TextFieldButtonType.autofill => () {}, // autofill doesn't use this variable
+    };
 
-    final IconData icon;
-    if (passwordVisibility) {
-      icon = showPassword ? Icons.visibility : Icons.visibility_off;
-    } else if (checkButton) {
-      icon = Icons.done;
-    } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-      icon = Icons.arrow_forward_ios;
-    } else {
-      icon = Icons.arrow_forward;
-    }
+    final IconData icon = switch (type) {
+      _TextFieldButtonType.submit => checkButton ? Icons.done : continueIcon,
+      _TextFieldButtonType.showPassword when showPassword => Icons.visibility,
+      _TextFieldButtonType.showPassword => Icons.visibility_off,
+      _TextFieldButtonType.autofill => Icons.build,
+    };
 
     final brightness = context.theme.brightness;
 
     final iconbg = _iconbg(
       focused,
-      passwordVisibility ? false : checkButton,
+      submitButton ? checkButton : false,
       brightness == Brightness.light,
-      passwordVisibility ? showPassword : onPressed != null,
+      switch (type) {
+        _TextFieldButtonType.submit => onPressed != null,
+        _TextFieldButtonType.showPassword => showPassword,
+        _TextFieldButtonType.autofill => true,
+      },
     );
 
-    final Color iconfg = switch ((brightness, focused)) {
+    final justUseTheDangColor = autofill || !submitButton && showPassword;
+    final iconfg = switch ((brightness, focused)) {
+      (Brightness.light, true || false) when onPressed != null => Colors.white,
       (Brightness.light, true) => Colors.white,
       (Brightness.light, false) => const Color(0xffd6e2ec),
-      (Brightness.dark, _) when passwordVisibility && showPassword => const Color(0xff2d3136),
-      (Brightness.dark, true) when !checkButton => StartColors.lightContainer16,
-      (Brightness.dark, true) => Colors.black,
+      (Brightness.dark, _) when justUseTheDangColor => const Color(0xff2d3136),
+      (Brightness.dark, true) when checkButton => Colors.black,
+      (Brightness.dark, true) => StartColors.lightContainer16,
       (Brightness.dark, false) => const Color(0xff0c0d0f),
     };
+
+    if (type == _TextFieldButtonType.autofill) {
+      return AutofillButton(iconbg, iconfg, node);
+    }
 
     final button = Stack(
       alignment: Alignment.center,
@@ -299,11 +342,16 @@ class _TextFieldButton extends StatelessWidget {
       ],
     );
 
-    return passwordVisibility ? Positioned(top: 0, right: 0, child: button) : button;
+    return submitButton ? button : Positioned(top: 0, right: 0, child: button);
   }
 }
 
+/// {@template start.GoBack}
+/// When you tap one of the [BottomStuff] buttons,
+/// this button appears in the top left to take you back where you came from.
+/// {@endtemplate}
 class GoBack extends StatelessWidget {
+  /// {@macro start.GoBack}
   const GoBack({super.key});
 
   @override
