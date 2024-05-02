@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+
 // i am not sure what this functionality filters/ searches for?? videos? users? livestream?
 class Video {
-  final String title;
-  final String url;
-  final String category;
-
   const Video({
     required this.title,
     required this.url,
     required this.category,
   });
+  final String title;
+  final String url;
+  final String category;
 }
+
 //I am unsure about what needs to happen here: Import the data maybe?
 const List<Video> allVideos = [
   Video(
@@ -27,6 +28,8 @@ const List<Video> allVideos = [
 ];
 
 class MainPage extends StatefulWidget {
+  const MainPage({super.key});
+
   @override
   State<MainPage> createState() => _MainPageState();
 }
@@ -53,7 +56,6 @@ class _MainPageState extends State<MainPage> {
                 hintText: 'Search here',
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8),
-                  borderSide: const BorderSide(),
                 ),
               ),
               onChanged: searchVideo,
@@ -129,9 +131,8 @@ class _MainPageState extends State<MainPage> {
 }
 
 class VideoPage extends StatelessWidget {
+  const VideoPage({super.key, required this.video});
   final Video video;
-
-  const VideoPage({Key? key, required this.video}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +140,7 @@ class VideoPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(video.title),
       ),
-      body: Center(
+      body: const Center(
         child: Text('Watch Video here'),
       ),
     );
