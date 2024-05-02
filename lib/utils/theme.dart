@@ -66,8 +66,10 @@ ThemeData _generateTheme(Brightness brightness) {
   final isLight = brightness == Brightness.light;
 
   final textColor = isLight ? Colors.black : ThcColors.paleAzure;
-  final slightContrast = isLight ? ThcColors.dullBlue : ThcColors.paleAzure;
   final paleColor = isLight ? Colors.white : ThcColors.paleAzure;
+  final slightContrast = isLight ? ThcColors.dullBlue : ThcColors.paleAzure;
+  final contrast13 = slightContrast.withOpacity(0.125);
+  final contrast25 = slightContrast.withOpacity(0.25);
 
   MaterialStateProperty<T> selected<T>(T selected, T unselected) =>
       MaterialStateProperty.resolveWith((states) => states.isSelected ? selected : unselected);
@@ -103,10 +105,13 @@ ThemeData _generateTheme(Brightness brightness) {
       surfaceVariant: ThcColors.dullBlue,
       onSurfaceVariant: paleColor,
       outline: slightContrast,
-      outlineVariant: slightContrast.withOpacity(0.25),
+      outlineVariant: contrast25,
     ),
     fontFamily: 'pretendard',
     materialTapTargetSize: MaterialTapTargetSize.padded,
+    highlightColor: contrast13,
+    hoverColor: contrast13,
+    splashColor: contrast13,
     switchTheme: SwitchThemeData(
       thumbColor: selected(Colors.white, slightContrast),
       trackOutlineColor: selected(ThcColors.green, slightContrast),

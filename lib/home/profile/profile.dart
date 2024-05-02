@@ -60,11 +60,8 @@ enum ProfileOption with StatelessEnum {
   @override
   Widget build(BuildContext context) {
     const padding = EdgeInsets.only(left: 16);
-    final inkColor = context.colorScheme.outlineVariant;
 
     return ListTile(
-      splashColor: inkColor,
-      hoverColor: inkColor,
       contentPadding: padding,
       leading: Icon(icon),
       title: Padding(padding: padding, child: Text(label ?? name)),
