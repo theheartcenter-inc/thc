@@ -28,7 +28,7 @@ const List<Video> allVideos = [
 
 class MainPage extends StatefulWidget {
   @override
-  _MainPageState createState() => _MainPageState();
+  State<MainPage> createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
@@ -97,13 +97,14 @@ class _MainPageState extends State<MainPage> {
   }
 
   List<DropdownMenuItem<String>> _buildCategoryDropdownItems() {
-    List<DropdownMenuItem<String>> items = ['All'] + allVideos.map((video) => video.category).toSet().toList()
-      ..sort()
-      .map((category) => DropdownMenuItem(
-            value: category,
-            child: Text(category),
-          ))
-      .toList();
+    final categories = {
+      'All',
+      for (final video in allVideos) video.category,
+    };
+    final items = [
+      for (final category in categories.toList()..sort())
+        DropdownMenuItem<String>(value: category, child: Text(category)),
+    ];
     return items;
   }
 
