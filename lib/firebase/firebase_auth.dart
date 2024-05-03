@@ -30,26 +30,23 @@ extension EmailSyntax on String {
   }
 }
 
-String get _email {
-  final String? id = LocalStorage.userId();
-  if (id == null) return LocalStorage.email()!;
-  final idEmail = 'userid_$id@theheartcenter.one';
-  backendPrint('id: $id, authenticating as $idEmail');
-  return idEmail;
-}
+Future<UserCredential> authenticate({bool registering = false}) {
+  final callback = registering
+      ? FirebaseAuth.instance.createUserWithEmailAndPassword
+      : FirebaseAuth.instance.signInWithEmailAndPassword;
 
-Future<UserCredential> _fbSignIn() => FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: _email,
-      password: LocalStorage.password(),
-    );
-Future<UserCredential> _fbRegister() => FirebaseAuth.instance.createUserWithEmailAndPassword(
-      email: _email,
-      password: LocalStorage.password(),
-    );
+  final email = switch (LocalStorage.userId()) {
+    final id? => 'userid_$id@theheartcenter.one',
+    null => LocalStorage.email()!,
+  };
+  backendPrint('authenticating as "$email"');
+
+  return callback(email: email, password: LocalStorage.password()!);
+}
 
 Future<String?> signIn() async {
   try {
-    await _fbSignIn();
+    await authenticate();
   } on FirebaseAuthException catch (e) {
     return switch (e.code) {
       'invalid-credential' => 'Wrong credentials.',
@@ -67,21 +64,18 @@ Future<String?> signIn() async {
       loadUser();
     }
   } else if (useInternet) {
-    user = await ThcUser.download(
-      LocalStorage.email(),
-      collection: Firestore.awaitingApproval,
-    );
+    user = await ThcUser.download(LocalStorage.email());
   }
   LocalStorage.loggedIn.save(true);
   LocalStorage.firstLastName.save(ThcUser.instance?.name);
-  LocalStorage.userType.save(ThcUser.instance?.type?.index);
+  LocalStorage.userType.save(ThcUser.instance?.type.index);
   navigator.pushReplacement(const HomeScreen());
   return null;
 }
 
 Future<String?> register() async {
   try {
-    await _fbRegister();
+    await authenticate(registering: true);
   } on FirebaseAuthException catch (e) {
     return switch (e.code) {
       'weak-password' =>
@@ -102,8 +96,8 @@ Future<String?> register() async {
   } else {
     final String name = LocalStorage.firstLastName();
     final String email = LocalStorage.email();
-    user = ThcUser(name: name, email: email);
-    Firestore.awaitingApproval.doc(email).set(user.json);
+    user = ThcUser(name: name, email: email, type: UserType.participant);
+    Firestore.users.doc(email).set(user.json);
   }
   LocalStorage.loggedIn.save(true);
   LocalStorage.userType.save(ThcUser.instance?.type);

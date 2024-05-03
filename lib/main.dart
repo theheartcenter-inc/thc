@@ -31,7 +31,7 @@ class App extends StatelessWidget {
   const App() : super(key: null);
 
   static final _key = _AppKey();
-  static void relaunch() {
+  static void relaunch([_]) {
     navKey = GlobalKey<NavigatorState>();
     _key.emit(UniqueKey());
   }

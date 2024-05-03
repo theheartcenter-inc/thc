@@ -61,10 +61,7 @@ class UserButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FilledButton(
-      onPressed: () async {
-        await resetLocalStorage(userType);
-        App.relaunch();
-      },
+      onPressed: () => resetLocalStorage(userType).then(App.relaunch),
       style: FilledButton.styleFrom(
         backgroundColor: switch (userType) {
           null => context.lightDark(Colors.black26, Colors.white24),

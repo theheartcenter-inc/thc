@@ -121,10 +121,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (user.id == null) {
-      return const Scaffold(body: SafeArea(child: ProfileScreen()));
-    }
-
     final navBar = NavBar.of(context);
 
     return Scaffold(

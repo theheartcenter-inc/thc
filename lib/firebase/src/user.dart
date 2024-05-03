@@ -14,17 +14,13 @@ sealed class ThcUser {
   /// {@macro ThcUser}
   factory ThcUser({
     required String name,
-    UserType? type,
+    required UserType type,
     String? id,
     String? email,
   }) {
     assert((id ?? email) != null);
 
     return switch (type) {
-      null => AwaitingApproval(
-          name: name,
-          email: email,
-        ),
       UserType.participant => Participant(
           name: name,
           id: id,
@@ -46,7 +42,7 @@ sealed class ThcUser {
   /// {@macro ThcUser}
   const ThcUser._({
     required this.name,
-    this.type,
+    required this.type,
     this.id,
     this.email,
   }) : assert((id ?? email) != null);
@@ -63,7 +59,7 @@ sealed class ThcUser {
   }
 
   final String name;
-  final UserType? type;
+  final UserType type;
 
   /// A unique string to identify the user, probably chosen by an admin.
   final String? id;
@@ -137,7 +133,7 @@ sealed class ThcUser {
       };
 
   bool get canLivestream => switch (type) {
-        UserType.participant || null => false,
+        UserType.participant => false,
         UserType.director || UserType.admin => true,
       };
 
@@ -154,13 +150,6 @@ sealed class ThcUser {
 
   @override
   int get hashCode => Object.hash(runtimeType, id, name, email);
-}
-
-class AwaitingApproval extends ThcUser {
-  const AwaitingApproval({
-    required super.name,
-    super.email,
-  }) : super._(type: null);
 }
 
 class Participant extends ThcUser {

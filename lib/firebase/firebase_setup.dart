@@ -34,18 +34,14 @@ void loadUser() {
   }
 
   String? id = LocalStorage.userId();
-  final nullId = id == null;
   UserType? type = LocalStorage.userType();
   final String? email = LocalStorage.email();
-  if (nullId != (type == null)) {
-    ErrorIfStrict(
-      "${nullId ? 'ID' : 'userType'} is null, but ${!nullId ? 'ID' : 'userType'} isn't.",
-    );
-    id ??= 'test_participant';
+  if (type == null) {
+    ErrorIfStrict("Apparently we're logged in without a UserType.");
     type ??= UserType.participant;
   }
   if ((id ?? email) == null) {
-    ErrorIfStrict('loggedIn is true, but ID and email are both null.');
+    ErrorIfStrict("Apparently we're logged in without an email or user ID.");
     id ??= 'test_participant';
   }
 

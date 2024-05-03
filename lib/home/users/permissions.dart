@@ -26,7 +26,7 @@ class RadioGroup extends StatefulWidget {
 }
 
 class _RadioGroupState extends State<RadioGroup> {
-  late UserType _selectedRadio = UserType.fromJson(widget.user)!;
+  late UserType selected = UserType.fromJson(widget.user);
 
   @override
   Widget build(BuildContext context) {
@@ -51,10 +51,10 @@ class _RadioGroupState extends State<RadioGroup> {
               style: const TextStyle(color: ThcColors.gray),
             ),
             value: userType,
-            groupValue: _selectedRadio,
+            groupValue: selected,
             onChanged: (newValue) {
               if (newValue != null) {
-                setState(() => _selectedRadio = newValue);
+                setState(() => selected = newValue);
                 updatePermissions(widget.user['id'], newValue);
               }
             },
