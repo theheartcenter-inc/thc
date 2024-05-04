@@ -18,10 +18,13 @@ enum Firestore {
   DocumentReference<Json> doc([String? path]) => _collection.doc(path);
 
   Stream<QuerySnapshot<Json>> snapshots({
-    bool includeMetadataChanges = false,
     ListenSource source = ListenSource.defaultSource,
+    bool includeMetadataChanges = false,
   }) {
-    return _collection.snapshots(includeMetadataChanges: includeMetadataChanges, source: source);
+    return _collection.snapshots(
+      source: source,
+      includeMetadataChanges: includeMetadataChanges,
+    );
   }
 }
 
