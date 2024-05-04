@@ -100,7 +100,7 @@ Future<String?> register() async {
     Firestore.users.doc(email).set(user.json);
   }
   LocalStorage.loggedIn.save(true);
-  LocalStorage.userType.save(ThcUser.instance?.type);
+  LocalStorage.userType.save(ThcUser.instance?.type.index);
   navigator.pushReplacement(const HomeScreen());
   await Future.delayed(Durations.short2);
   navigator.push(SurveyScreen(questions: SurveyPresets.intro.questions));

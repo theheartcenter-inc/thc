@@ -32,11 +32,9 @@ class SurveyTheme extends StatelessWidget {
   /// {@macro SurveyTheme}
   const SurveyTheme({required this.surveyContent, super.key});
 
-  final Widget surveyContent;
-
-  @override
-  Widget build(BuildContext context) {
-    final brightness = context.theme.brightness;
+  static ThemeData of(BuildContext context) {
+    final theme = context.theme;
+    final brightness = theme.brightness;
     final isLight = brightness == Brightness.light;
     final blackAndWhite = isLight ? Colors.white : Colors.black;
     final textColor = isLight ? Colors.black : SurveyColors.orangeWhite;
@@ -58,67 +56,81 @@ class SurveyTheme extends StatelessWidget {
       surface: isLight ? SurveyColors.orangeSunrise : SurveyColors.orangeSunset,
       onSurface: textColor,
     );
-    return AnimatedTheme(
-      curve: Curves.easeOutSine,
-      data: ThemeData(
-        colorScheme: colors,
-        inputDecorationTheme: InputDecorationTheme(
-          enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: textColor)),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: colors.primaryContainer, width: 1.5),
-          ),
-        ),
-        textSelectionTheme: TextSelectionThemeData(
-          cursorColor: SurveyColors.veridian,
-          selectionHandleColor: SurveyColors.veridian,
-          selectionColor: SurveyColors.veridian.withOpacity(0.5),
-        ),
-        sliderTheme: SliderThemeData(
-          trackHeight: 12,
-          thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
-          activeTickMarkColor: isLight ? SurveyColors.veridian.withOpacity(0.25) : Colors.black12,
-        ),
-        segmentedButtonTheme: SegmentedButtonThemeData(
-          style: SegmentedButton.styleFrom(
-            side: BorderSide.none,
-            backgroundColor: paleColor.withOpacity(0.5),
-            foregroundColor: colors.secondary,
-            selectedBackgroundColor: colors.secondary,
-            selectedForegroundColor: paleColor.withOpacity(isLight ? 1 : 0.9),
-            padding: const EdgeInsets.only(bottom: 10),
-          ),
-        ),
-        filledButtonTheme: FilledButtonThemeData(
-          style: FilledButton.styleFrom(
-            backgroundColor: paleColor,
-            foregroundColor: isLight ? Colors.black : SurveyColors.maroonSunset,
-            shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(25)),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
-            textStyle: const StyleText(size: 16, weight: 600),
-            elevation: isLight ? 1 : null,
-          ),
+
+    return theme.copyWith(
+      colorScheme: colors,
+      inputDecorationTheme: InputDecorationTheme(
+        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: textColor)),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: colors.primaryContainer, width: 1.5),
         ),
       ),
-      child: Scaffold(
-        body: Builder(
-          builder: (context) {
-            final colors = context.colorScheme;
-            final size = MediaQuery.sizeOf(context);
-            return SingleChildScrollView(
-              child: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: const Alignment(-0.25, -1.0),
-                    end: const Alignment(0.25, 1.0),
-                    colors: [colors.surface, colors.background],
-                  ),
-                ),
-                constraints: BoxConstraints(minWidth: size.width, minHeight: size.height),
-                padding: const EdgeInsets.all(20),
-                child: SafeArea(child: surveyContent),
-              ),
-            );
-          },
+      textSelectionTheme: TextSelectionThemeData(
+        cursorColor: SurveyColors.veridian,
+        selectionHandleColor: SurveyColors.veridian,
+        selectionColor: SurveyColors.veridian.withOpacity(0.5),
+      ),
+      sliderTheme: SliderThemeData(
+        trackHeight: 12,
+        thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
+        activeTickMarkColor: isLight ? SurveyColors.veridian.withOpacity(0.25) : Colors.black12,
+      ),
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: SegmentedButton.styleFrom(
+          side: BorderSide.none,
+          backgroundColor: paleColor.withOpacity(0.5),
+          foregroundColor: colors.secondary,
+          selectedBackgroundColor: colors.secondary,
+          selectedForegroundColor: paleColor.withOpacity(isLight ? 1 : 0.9),
+          padding: const EdgeInsets.only(bottom: 10),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: paleColor,
+          foregroundColor: isLight ? Colors.black : SurveyColors.maroonSunset,
+          shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(25)),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
+          textStyle: const StyleText(size: 16, weight: 600),
+          elevation: isLight ? 1 : null,
+        ),
+      ),
+    );
+  }
+
+  final Widget surveyContent;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedTheme(
+      curve: Curves.easeOutSine,
+      data: of(context),
+      child: _SurveySunrise(child: surveyContent),
+    );
+  }
+}
+
+class _SurveySunrise extends StatelessWidget {
+  const _SurveySunrise({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colorScheme;
+    final size = MediaQuery.sizeOf(context);
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: const Alignment(-0.25, -1.0),
+              end: const Alignment(0.25, 1.0),
+              colors: [colors.surface, colors.background],
+            ),
+          ),
+          constraints: BoxConstraints(minWidth: size.width, minHeight: size.height),
+          padding: const EdgeInsets.all(20),
+          child: SafeArea(child: child),
         ),
       ),
     );

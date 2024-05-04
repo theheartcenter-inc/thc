@@ -15,10 +15,19 @@ class ManageSurveys extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: SurveyColors.orangeSunset),
-            onPressed: () => navigator.push(const SurveyResponseScreen()),
-            child: const Text('survey response summary', style: StyleText(height: 5)),
+          Theme(
+            data: SurveyTheme.of(context),
+            child: Builder(
+              builder: (context) => FilledButton(
+                style: FilledButton.styleFrom(
+                  backgroundColor: context.colorScheme.surface,
+                  foregroundColor: Colors.black,
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 33),
+                ),
+                onPressed: () => navigator.push(const SurveyResponseScreen()),
+                child: const Text('survey response summary'),
+              ),
+            ),
           ),
           const CustomSurveyButtons(),
         ],

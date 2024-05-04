@@ -92,7 +92,7 @@ sealed class ThcUser {
 
   /// Saves the current user data to Firebase.
   Future<void> upload({Firestore? collection, bool saveLocally = true}) async {
-    await collection.doc(id).set(json);
+    await collection.doc(id ?? email!).set(json);
     if (!saveLocally) return;
 
     LocalStorage.email.save(email);
@@ -106,7 +106,7 @@ sealed class ThcUser {
   Future<void> yeet() => Future.wait([
         // need to delete both user ID & email authentication
         if (FirebaseAuth.instance.currentUser case final user?) user.delete(),
-        if (id case final id?) remove(id),
+        remove(id ?? email!),
       ]);
 
   /// {@macro ThcUser}
