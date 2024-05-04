@@ -5,14 +5,13 @@ import 'package:thc/utils/app_config.dart';
 enum Firestore {
   users,
   unregistered,
-  awaitingApproval,
+  streams,
   surveys;
 
   @override
   String toString() => switch (this) {
-        users || surveys => name,
+        users || surveys || streams => name,
         unregistered => 'users (not registered)',
-        awaitingApproval => 'users (awaiting approval)',
       };
 }
 
