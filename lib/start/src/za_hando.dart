@@ -73,7 +73,7 @@ class ZaHando extends StatelessWidget {
     final t10 = t5 * t5;
     final backgroundGradient = t < 2 / 3;
 
-    final colors = context.colorScheme;
+    final colors = ThcColors.of(context);
     final (tSaturation, tValue) = switch (colors.brightness) {
       Brightness.light => (1 - t * 0.75, t * 0.8),
       Brightness.dark => (1 - t * 2 / 3, t * 0.75),
@@ -222,7 +222,7 @@ class ZaHando extends StatelessWidget {
     final tMotion = Curves.ease.transform(tMotionLinear);
     final fontSize = 48 - 10 * tMotion;
 
-    final colors = context.colorScheme;
+    final colors = ThcColors.of(context);
     final handColor = colors.primary.withOpacity(1 - t * t);
 
     final heartText = Text(
@@ -344,7 +344,7 @@ class _TopButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colorScheme;
+    final colors = ThcColors.of(context);
 
     final row = Row(
       mainAxisSize: MainAxisSize.min,

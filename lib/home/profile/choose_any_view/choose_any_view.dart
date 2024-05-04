@@ -42,7 +42,7 @@ class _ButtonFromLoginScreen extends ChooseAnyView {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colorScheme;
+    final colors = ThcColors.of(context);
     return IconButton.filled(
       style: IconButton.styleFrom(
         backgroundColor: colors.surface,

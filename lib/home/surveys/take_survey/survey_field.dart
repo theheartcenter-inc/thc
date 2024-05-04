@@ -119,7 +119,7 @@ class _ErrorBox extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 30),
       child: ColoredBox(
-        color: valid ? Colors.transparent : context.colorScheme.errorContainer,
+        color: valid ? Colors.transparent : ThcColors.of(context).errorContainer,
         child: Padding(
           padding: const EdgeInsets.only(bottom: 20),
           child: child,
@@ -140,13 +140,12 @@ class _QuestionText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colorScheme;
+    final colors = ThcColors.of(context);
     final style = StyleText(
       size: 16,
       weight: 500,
       shadows: [
-        if (context.theme.brightness == Brightness.dark)
-          Shadow(color: colors.background, blurRadius: 1),
+        if (colors.brightness == Brightness.dark) Shadow(color: colors.background, blurRadius: 1),
       ],
     );
     return Padding(
@@ -180,7 +179,7 @@ class _MultipleChoiceTyping extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colorScheme;
+    final colors = ThcColors.of(context);
     final enabled = BorderSide(color: colors.onBackground);
     final focused = BorderSide(color: colors.primaryContainer, width: 1.5);
     return Row(
@@ -342,9 +341,9 @@ class _Scale extends SurveyBuilder<ScaleQuestion> {
   Widget buildAnswer(context, update, question, int value) {
     final divisions = question.values.length - 1;
     return LayoutBuilder(builder: (context, constraints) {
+      final colors = ThcColors.of(context);
       final sliderWidth = constraints.maxWidth - 100;
       final labelOffset = Offset(sliderWidth / 2 - 25, 0);
-      final colors = context.colorScheme;
       final double spacing = question.endpoints == null ? 0 : 10;
 
       return Stack(
@@ -356,7 +355,7 @@ class _Scale extends SurveyBuilder<ScaleQuestion> {
                 offset: labelOffset * shift,
                 child: Text(
                   shift < 0 ? ends.$1 : ends.$2,
-                  style: context.theme.textTheme.labelMedium,
+                  style: Theme.of(context).textTheme.labelMedium,
                 ),
               ),
           Padding(
@@ -378,7 +377,7 @@ class _Scale extends SurveyBuilder<ScaleQuestion> {
           ),
           Padding(
             padding: EdgeInsets.only(top: 45 + spacing),
-            child: Text(question.values[value], style: context.theme.textTheme.labelLarge),
+            child: Text(question.values[value], style: Theme.of(context).textTheme.labelLarge),
           ),
         ],
       );

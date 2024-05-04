@@ -77,7 +77,7 @@ enum LoginField with StatelessEnum {
             bottom.node.requestFocus();
           };
 
-    final colors = context.colorScheme;
+    final colors = ThcColors.of(context);
     final focused = focusedField == this;
     final cursorColor = context.lightDark(ThcColors.green67, Colors.black);
     final blackHint = focused && colors.brightness == Brightness.dark;
@@ -134,7 +134,7 @@ class LoginFields extends StatelessWidget {
       :errorMessage,
     ) = LoginProgressTracker.of(context);
 
-    final colors = context.colorScheme;
+    final colors = ThcColors.of(context);
 
     final expandText = animation >= AnimationProgress.collapseHand;
     final showBottom = animation >= AnimationProgress.showBottom;
@@ -295,7 +295,7 @@ class _TextFieldButton extends StatelessWidget {
       _TextFieldButtonType.autofill => Icons.build,
     };
 
-    final brightness = context.theme.brightness;
+    final brightness = Theme.of(context).brightness;
 
     final iconbg = _iconbg(
       focused,

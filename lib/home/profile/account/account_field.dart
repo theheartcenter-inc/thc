@@ -70,7 +70,7 @@ class _AccountFieldState extends State<AccountField> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colorScheme;
+    final colors = ThcColors.of(context);
 
     final style = MaterialStateTextStyle.resolveWith((states) => StyleText(
           color: colors.onBackground.withOpacity(states.isFocused ? 1.0 : 0.5),

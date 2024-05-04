@@ -37,6 +37,8 @@ abstract final class ThcColors {
   static const darkGreen = Color(0xff003300);
   static const darkMagenta = Color(0xff663366);
   static const paleAzure = Color(0xffddeeff);
+
+  static ColorScheme of(BuildContext context) => Theme.of(context).colorScheme;
 }
 
 /// [MaterialStateProperty] is pretty neat: you can have different styles
@@ -176,14 +178,9 @@ ThemeData _generateTheme(Brightness brightness) {
 /// ```
 /// {@endtemplate}
 extension ThemeGetter on BuildContext {
-  ThemeData get theme => Theme.of(this);
-
-  /// {@macro ThemeGetter}
-  ColorScheme get colorScheme => theme.colorScheme;
-
   /// The displayed color will be [light] or [dark] based on
   /// whether we're currently in dark mode.
-  Color lightDark(Color light, Color dark) => switch (theme.brightness) {
+  Color lightDark(Color light, Color dark) => switch (Theme.of(this).brightness) {
         Brightness.light => light,
         Brightness.dark => dark,
       };
@@ -222,41 +219,41 @@ extension ThemeGetter on BuildContext {
     Color? surfaceTint,
   }) {
     final theme = Theme.of(this);
-    final colors = theme.colorScheme;
-    final newScheme = colors.copyWith(
-      brightness: brightness,
-      primary: primary,
-      onPrimary: onPrimary,
-      primaryContainer: primaryContainer,
-      onPrimaryContainer: onPrimaryContainer,
-      secondary: secondary,
-      onSecondary: onSecondary,
-      secondaryContainer: secondaryContainer,
-      onSecondaryContainer: onSecondaryContainer,
-      tertiary: tertiary,
-      onTertiary: onTertiary,
-      tertiaryContainer: tertiaryContainer,
-      onTertiaryContainer: onTertiaryContainer,
-      error: error,
-      onError: onError,
-      errorContainer: errorContainer,
-      onErrorContainer: onErrorContainer,
-      background: background,
-      onBackground: onBackground,
-      surface: surface,
-      onSurface: onSurface,
-      surfaceVariant: surfaceVariant,
-      onSurfaceVariant: onSurfaceVariant,
-      outline: outline,
-      outlineVariant: outlineVariant,
-      shadow: shadow,
-      scrim: scrim,
-      inverseSurface: inverseSurface,
-      onInverseSurface: onInverseSurface,
-      inversePrimary: inversePrimary,
-      surfaceTint: surfaceTint,
+    return theme.copyWith(
+      colorScheme: theme.colorScheme.copyWith(
+        brightness: brightness,
+        primary: primary,
+        onPrimary: onPrimary,
+        primaryContainer: primaryContainer,
+        onPrimaryContainer: onPrimaryContainer,
+        secondary: secondary,
+        onSecondary: onSecondary,
+        secondaryContainer: secondaryContainer,
+        onSecondaryContainer: onSecondaryContainer,
+        tertiary: tertiary,
+        onTertiary: onTertiary,
+        tertiaryContainer: tertiaryContainer,
+        onTertiaryContainer: onTertiaryContainer,
+        error: error,
+        onError: onError,
+        errorContainer: errorContainer,
+        onErrorContainer: onErrorContainer,
+        background: background,
+        onBackground: onBackground,
+        surface: surface,
+        onSurface: onSurface,
+        surfaceVariant: surfaceVariant,
+        onSurfaceVariant: onSurfaceVariant,
+        outline: outline,
+        outlineVariant: outlineVariant,
+        shadow: shadow,
+        scrim: scrim,
+        inverseSurface: inverseSurface,
+        onInverseSurface: onInverseSurface,
+        inversePrimary: inversePrimary,
+        surfaceTint: surfaceTint,
+      ),
     );
-    return theme.copyWith(colorScheme: newScheme);
   }
 }
 

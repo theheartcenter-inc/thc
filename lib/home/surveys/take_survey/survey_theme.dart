@@ -33,7 +33,7 @@ class SurveyTheme extends StatelessWidget {
   const SurveyTheme({required this.surveyContent, super.key});
 
   static ThemeData of(BuildContext context) {
-    final theme = context.theme;
+    final theme = Theme.of(context);
     final brightness = theme.brightness;
     final isLight = brightness == Brightness.light;
     final blackAndWhite = isLight ? Colors.white : Colors.black;
@@ -116,7 +116,7 @@ class _SurveySunrise extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colorScheme;
+    final colors = ThcColors.of(context);
     final size = MediaQuery.sizeOf(context);
     return Scaffold(
       body: SingleChildScrollView(
@@ -146,7 +146,7 @@ class DarkModeSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colorScheme;
+    final colors = ThcColors.of(context);
     final bool isLight = colors.brightness == Brightness.light;
     return Align(
       alignment: Alignment.topRight,

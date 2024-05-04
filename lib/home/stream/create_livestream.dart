@@ -113,7 +113,7 @@ class GoLive extends LerpyHero<ShapeDecoration> {
 
   @override
   ShapeDecoration fromContext(BuildContext context) {
-    final secondary = context.colorScheme.secondary;
+    final secondary = ThcColors.of(context).secondary;
     final lightness = HSLColor.fromColor(secondary).lightness;
     return ShapeDecoration(
       color: secondary,

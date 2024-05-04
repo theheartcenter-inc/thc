@@ -32,7 +32,7 @@ class _BottomStuffState extends State<BottomStuff> with SingleTickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final labelColor = context.colorScheme.outline.withOpacity(0.875);
+    final labelColor = ThcColors.of(context).outline.withOpacity(0.875);
     final LoginProgress(labels: labels) = LoginProgressTracker.of(context);
     final shouldShow = switch (labels) {
       LoginLabels.withId => true,
@@ -106,7 +106,6 @@ class _BottomStuffState extends State<BottomStuff> with SingleTickerProviderStat
       return Expanded(child: buttonStuff);
     }
 
-    final colors = context.colorScheme;
     final (button1, button2) = labels.otherOptions!;
 
     return Padding(
@@ -119,7 +118,7 @@ class _BottomStuffState extends State<BottomStuff> with SingleTickerProviderStat
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: ColoredBox(
-                color: colors.onSurfaceVariant,
+                color: ThcColors.of(context).onSurfaceVariant,
                 child: const SizedBox(width: 1, height: double.infinity),
               ),
             ),

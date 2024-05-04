@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:thc/utils/theme.dart';
 
 /// This class copies [Colors] and has numbered names for different opacities:
 ///
@@ -51,13 +50,14 @@ final class SunColors extends RadialGradient {
 }
 
 class StartTheme extends StatelessWidget {
-  /// Wraps any widget with the "start theme" [data].
+  /// Wraps any widget with the "start theme".
   const StartTheme({required this.child, super.key});
 
   final Widget child;
 
   /// The theme data that we're using for the login/register screen.
-  static ThemeData data(ThemeData current) {
+  static ThemeData of(BuildContext context) {
+    final current = Theme.of(context);
     final isLight = current.brightness == Brightness.light;
 
     final container = isLight ? StartColors.lightContainer : StartColors.darkContainer;
@@ -91,6 +91,6 @@ class StartTheme extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedTheme(curve: Curves.easeOutSine, data: data(context.theme), child: child);
+    return AnimatedTheme(curve: Curves.easeOutSine, data: of(context), child: child);
   }
 }

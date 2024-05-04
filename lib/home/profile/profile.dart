@@ -94,7 +94,7 @@ class ProfileScreen extends StatelessWidget {
         ThcUser(name: 'Not Found', type: UserType.participant, id: '');
     final linkColor = Color.lerp(ThcColors.dullBlue, ThcColors.teal, 0.25)!;
     final overview = DefaultTextStyle(
-      style: StyleText(height: 1.75, color: context.colorScheme.onBackground),
+      style: StyleText(height: 1.75, color: ThcColors.of(context).onBackground),
       child: Center(
         child: Column(
           children: [

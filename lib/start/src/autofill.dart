@@ -36,7 +36,8 @@ class AutofillMenu extends StatelessWidget {
   }
 
   Widget _builder(BuildContext context) {
-    final bool isLight = context.theme.brightness == Brightness.light;
+    final colors = ThcColors.of(context);
+    final bool isLight = colors.brightness == Brightness.light;
     final buttons = [
       for (final userType in UserType.values)
         FilledButton(
@@ -51,7 +52,7 @@ class AutofillMenu extends StatelessWidget {
           style: FilledButton.styleFrom(
             shape: const StadiumBorder(),
             backgroundColor: StartColors.bg,
-            foregroundColor: context.colorScheme.surface,
+            foregroundColor: colors.surface,
             padding: EdgeInsets.zero,
             visualDensity: const VisualDensity(vertical: 1),
           ),
@@ -113,7 +114,7 @@ class AutofillButton extends StatelessWidget {
               focusNode: node,
               style: IconButton.styleFrom(
                 backgroundColor: Colors.transparent,
-                foregroundColor: context.colorScheme.onSurface,
+                foregroundColor: ThcColors.of(context).onSurface,
               ),
               onPressed: () {
                 navigator.showDialog(const AutofillMenu());
@@ -157,14 +158,14 @@ class _AutofillIcon extends _SmoothColor {
   const _AutofillIcon({super.child}) : super(tag: 'autofill icon');
 
   @override
-  Color fromContext(BuildContext context) => context.colorScheme.outline;
+  Color fromContext(BuildContext context) => ThcColors.of(context).outline;
 
   @override
   Widget builder(BuildContext context, Color value, Widget? child) {
     final icon = Icon(Icons.build, color: value, size: 20);
     if (child == null) return icon;
     return DefaultTextStyle(
-      style: context.theme.textTheme.bodyMedium!,
+      style: Theme.of(context).textTheme.bodyMedium!,
       softWrap: false,
       overflow: TextOverflow.fade,
       child: LayoutBuilder(
@@ -186,7 +187,7 @@ class _AutofillIcon extends _SmoothColor {
                         style: StyleText(
                           size: 24,
                           weight: 550,
-                          color: context.colorScheme.outline,
+                          color: ThcColors.of(context).outline,
                         ),
                       ),
                     ),

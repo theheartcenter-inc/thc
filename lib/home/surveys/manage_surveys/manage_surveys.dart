@@ -20,7 +20,7 @@ class ManageSurveys extends StatelessWidget {
             child: Builder(
               builder: (context) => FilledButton(
                 style: FilledButton.styleFrom(
-                  backgroundColor: context.colorScheme.surface,
+                  backgroundColor: ThcColors.of(context).surface,
                   foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 33),
                 ),
