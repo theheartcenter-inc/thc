@@ -14,6 +14,8 @@ enum Firestore {
       };
 }
 
+typedef Snapshot = QuerySnapshot<Json>;
+
 extension FetchFromFirebaseFirestore on Firestore? {
   CollectionReference<Json> get _this {
     final collection = '${this ?? Firestore.users}';

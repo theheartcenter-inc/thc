@@ -125,6 +125,8 @@ sealed class ThcUser {
     );
   }
 
+  bool matches(String key) => key == id || key == name;
+
   Json get json => {
         'name': name,
         'type': '$type',

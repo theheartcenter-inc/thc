@@ -6,6 +6,7 @@ import 'package:thc/home/profile/account/account_field.dart';
 import 'package:thc/home/stream/create_livestream.dart';
 import 'package:thc/home/surveys/edit_survey/survey_editor.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
+import 'package:thc/home/users/all_users.dart';
 import 'package:thc/start/start.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/keyboard_shortcuts.dart';
@@ -50,6 +51,7 @@ class App extends StatelessWidget {
           BlocProvider(create: (_) => ValidSurveyQuestions()),
           BlocProvider(create: (_) => ValidSurveyAnswers()),
           BlocProvider(create: (_) => AccountFields()),
+          ChangeNotifierProvider(create: (_) => AllUsers()),
         ],
         builder: (context, _) => MaterialApp(
           themeAnimationCurve: Curves.easeOutSine,
