@@ -3,35 +3,29 @@ import 'package:thc/firebase/firebase.dart';
 import 'package:thc/utils/app_config.dart';
 
 enum Firestore {
-  users,
-  unregistered,
-  surveys;
+  streams,
+  surveys,
+  users;
 
   @override
-  String toString() => switch (this) {
-        users || surveys => name,
-        unregistered => 'users (not registered)',
-      };
-}
+  String toString() => name;
 
-typedef Snapshot = QuerySnapshot<Json>;
-
-extension FetchFromFirebaseFirestore on Firestore? {
-  CollectionReference<Json> get _this {
-    final collection = '${this ?? Firestore.users}';
-    backendPrint('collection: $collection');
-    return FirebaseFirestore.instance.collection(collection);
+  CollectionReference<Json> get _collection {
+    backendPrint('collection: $this');
+    return FirebaseFirestore.instance.collection('$this');
   }
 
-  DocumentReference<Json> doc([String? path]) => _this.doc(path);
+  DocumentReference<Json> doc([String? path]) => _collection.doc(path);
 
   Stream<QuerySnapshot<Json>> snapshots({
     bool includeMetadataChanges = false,
     ListenSource source = ListenSource.defaultSource,
   }) {
-    return _this.snapshots(includeMetadataChanges: includeMetadataChanges, source: source);
+    return _collection.snapshots(includeMetadataChanges: includeMetadataChanges, source: source);
   }
 }
+
+typedef Snapshot = QuerySnapshot<Json>;
 
 extension GetData<T> on DocumentReference<T> {
   Future<T?> getData() async {

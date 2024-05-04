@@ -86,12 +86,11 @@ class SurveyTheme extends StatelessWidget {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: paleColor,
-          foregroundColor: isLight ? Colors.black : SurveyColors.maroonSunset,
+          backgroundColor: isLight ? SurveyColors.darkGray : SurveyColors.orangeWhite,
+          foregroundColor: isLight ? SurveyColors.yellowSunrise : SurveyColors.maroonSunset,
           shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(25)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
           textStyle: const StyleText(size: 16, weight: 600),
-          elevation: isLight ? 1 : null,
         ),
       ),
     );

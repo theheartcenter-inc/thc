@@ -5,7 +5,7 @@ import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/error_dialog.dart';
 
 class Permissions extends StatefulWidget {
-  const Permissions({super.key, required this.user});
+  const Permissions(this.user, {super.key});
   final ThcUser user;
 
   @override

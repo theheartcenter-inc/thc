@@ -8,30 +8,7 @@ class ManageUsers extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final users = AllUsers.of(context);
-    final dataTable = DataTable(
-      sortColumnIndex: 0,
-      columns: const [
-        DataColumn(label: Text('Id')),
-        DataColumn(label: Text('Name')),
-        DataColumn(label: Text('Type')),
-        DataColumn(label: Text('Actions')),
-      ],
-      rows: [
-        for (final user in users)
-          DataRow(cells: [
-            DataCell(Text(user.id ?? '')),
-            DataCell(Text(user.name)),
-            DataCell(Text('${user.type}')),
-            DataCell(
-              IconButton.filled(
-                icon: const Icon(Icons.edit),
-                onPressed: () => navigator.push(Permissions(user: user)),
-              ),
-            ),
-          ]),
-      ],
-    );
+    final users = ThcUsers.of(context);
 
     return LayoutBuilder(
       builder: (context, constraints) => SingleChildScrollView(
@@ -41,7 +18,29 @@ class ManageUsers extends StatelessWidget {
             constraints: BoxConstraints(minWidth: constraints.maxWidth),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
-              child: dataTable,
+              child: DataTable(
+                sortColumnIndex: 0,
+                columns: const [
+                  DataColumn(label: Text('Id')),
+                  DataColumn(label: Text('Name')),
+                  DataColumn(label: Text('Type')),
+                  DataColumn(label: Text('Actions')),
+                ],
+                rows: [
+                  for (final user in users)
+                    DataRow(cells: [
+                      DataCell(Text(user.firestoreId)),
+                      DataCell(Text(user.name)),
+                      DataCell(Text(user.type.toString())),
+                      DataCell(
+                        IconButton.filled(
+                          icon: const Icon(Icons.edit),
+                          onPressed: () => navigator.push(Permissions(user)),
+                        ),
+                      ),
+                    ]),
+                ],
+              ),
             ),
           ),
         ),

@@ -253,22 +253,28 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
   ///
   /// If something goes wrong, a summary of the issue is sent to [LoginProgress.errorMessage]
   /// for the user to see.
-  static Future<void> submit(LoginField field) async {
+  static Future<String?> submit(LoginField field) async {
     final LoginProgress(:labels, :fieldValues) = readState;
 
     if (field == LoginField.top && !labels.just1field) {
       LoginField.bottom
         ..newVal('')
         ..node.requestFocus();
-      return;
+      return null;
     }
 
     switch (labels) {
       case LoginLabels.withId:
-        final (id, name) = fieldValues;
-        final doc = await Firestore.unregistered.doc(id).get();
+        final (id!, name!) = fieldValues;
 
-        if (!doc.exists || doc['name'] != name) return update(errorMessage: '');
+        try {
+          final user = await ThcUser.download(id);
+          if (user.name != name) return '';
+          if (user.registered) return 'this user ID is already registered to an account.';
+          user.upload();
+        } catch (error) {
+          return '$error';
+        }
 
         LocalStorage.userId.save(id);
         LocalStorage.firstLastName.save(name);
@@ -278,7 +284,7 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
         final (email!, name!) = fieldValues;
 
         if (!EmailValidator.validate(email)) {
-          return update(errorMessage: 'double-check the email address and try again.');
+          return 'double-check the email address and try again.';
         }
 
         LocalStorage.email.save(email);
@@ -288,13 +294,11 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
       case LoginLabels.choosePassword:
         final (password!, retype) = fieldValues;
         if (password != retype) {
-          return update(errorMessage: "it looks like these passwords don't match.");
+          return "it looks like these passwords don't match.";
         }
         await LocalStorage.password.save(password);
 
-        if (await auth.register() case final errorMessage?) {
-          return update(errorMessage: errorMessage);
-        }
+        if (await auth.register() case final errorMessage?) return errorMessage;
 
       case LoginLabels.signIn:
         final (username!, password!) = fieldValues;
@@ -305,20 +309,17 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
             LocalStorage.userId.save(username),
           LocalStorage.password.save(password),
         ]);
-        if (await auth.signIn() case final errorMessage?) {
-          return update(errorMessage: errorMessage);
-        }
+        if (await auth.signIn() case final errorMessage?) return errorMessage;
 
       case LoginLabels.recovery:
         await LocalStorage.email.save(fieldValues.$1!);
-        if (await auth.resetPassword() case final errorMessage?) {
-          return update(errorMessage: errorMessage);
-        }
+        if (await auth.resetPassword() case final errorMessage?) return errorMessage;
     }
 
     for (final field in LoginField.values) {
       field.controller.text = '';
     }
+    return null;
   }
 
   /// Calls [submit] if there's stuff typed into the [LoginField]s;
@@ -348,7 +349,9 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
     };
 
     if (empty) return null;
-    return ([_]) => submit(field);
+    return ([_]) async {
+      if (await submit(field) case final errorMessage?) update(errorMessage: errorMessage);
+    };
   }
 }
 

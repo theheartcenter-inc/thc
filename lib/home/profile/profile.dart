@@ -8,6 +8,7 @@ import 'package:thc/home/profile/choose_any_view/choose_any_view.dart';
 import 'package:thc/home/profile/info/heart_center_info.dart';
 import 'package:thc/home/profile/report/issue_report.dart';
 import 'package:thc/home/profile/settings/settings.dart';
+import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
@@ -90,8 +91,9 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
 
-    final userWatch = context.watch<AccountFields>().state ??
-        ThcUser(name: 'Not Found', type: UserType.participant, id: '');
+    final userWatch = context.watch<AccountFields>().state ?? ThcUser(name: 'Not Found', id: '');
+    if (userWatch.name == 'Not Found') ErrorIfStrict("couldn't get AccountFields data");
+
     final linkColor = Color.lerp(ThcColors.dullBlue, ThcColors.teal, 0.25)!;
     final overview = DefaultTextStyle(
       style: StyleText(height: 1.75, color: ThcColors.of(context).onBackground),

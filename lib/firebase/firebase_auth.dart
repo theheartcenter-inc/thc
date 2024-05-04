@@ -87,8 +87,7 @@ Future<String?> register() async {
   }
   if (LocalStorage.userId() case final id?) {
     if (useInternet) {
-      user = await ThcUser.download(id, collection: Firestore.unregistered);
-      Firestore.unregistered.doc(id).delete();
+      user = await ThcUser.download(id);
       user.upload();
     } else {
       loadUser();
@@ -96,7 +95,7 @@ Future<String?> register() async {
   } else {
     final String name = LocalStorage.firstLastName();
     final String email = LocalStorage.email();
-    user = ThcUser(name: name, email: email, type: UserType.participant);
+    user = ThcUser(name: name, email: email);
     Firestore.users.doc(email).set(user.json);
   }
   LocalStorage.loggedIn.save(true);

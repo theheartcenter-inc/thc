@@ -10,6 +10,8 @@ import 'package:thc/utils/bloc.dart';
 extension type ThcUsers.fromList(List<ThcUser> users) implements Iterable<ThcUser> {
   ThcUsers() : this.fromList([]);
 
+  factory ThcUsers.of(BuildContext context) => context.watch<AllUsers>().users;
+
   int index(Object key) {
     return switch (key) {
       int() when key >= 0 && key < users.length => key,
@@ -24,6 +26,7 @@ extension type ThcUsers.fromList(List<ThcUser> users) implements Iterable<ThcUse
 
   void operator []=(dynamic key, ThcUser updated) {
     final i = index(key);
+    backendPrint('index: $i, key: $key (type ${key.runtimeType})');
     if (i.isNegative) {
       users.add(updated);
     } else {
@@ -55,8 +58,6 @@ class AllUsers with ChangeNotifier {
       notifyListeners();
     }, onError: backendPrint);
   }
-
-  static ThcUsers of(BuildContext context) => context.watch<AllUsers>().users;
 
   final users = ThcUsers();
   final stream = Firestore.users.snapshots();
