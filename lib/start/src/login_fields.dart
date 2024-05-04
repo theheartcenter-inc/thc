@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:thc/start/src/autofill.dart';
 import 'package:thc/start/src/bottom_stuff.dart';
 import 'package:thc/start/src/login_progress.dart';
-import 'package:thc/start/src/start_theme.dart';
 import 'package:thc/start/src/za_hando.dart';
 import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/style_text.dart';
@@ -93,7 +92,7 @@ enum LoginField with StatelessEnum {
         border: InputBorder.none,
         hoverColor: Colors.transparent,
         fillColor: focused
-            ? context.lightDark(Colors.white54, StartColors.lightContainer16)
+            ? context.lightDark(Colors.white54, ThcColors.lightContainer16)
             : Colors.transparent,
         filled: true,
         hintText: hintText,
@@ -249,7 +248,7 @@ class _TextFieldButton extends StatelessWidget {
       if (isLight) bgA = 0.125;
       bgL = focused ? 0.05 : 1 / 3;
     } else if (checkButton) {
-      return isLight ? ThcColors.green : StartColors.zaHando;
+      return isLight ? ThcColors.green : ThcColors.zaHando;
     }
 
     return HSLColor.fromAHSL(bgA, bgH, bgS, bgL).toColor();
@@ -315,7 +314,7 @@ class _TextFieldButton extends StatelessWidget {
       (Brightness.light, false) => const Color(0xffd6e2ec),
       (Brightness.dark, _) when justUseTheDangColor => const Color(0xff2d3136),
       (Brightness.dark, true) when checkButton => Colors.black,
-      (Brightness.dark, true) => StartColors.lightContainer16,
+      (Brightness.dark, true) => ThcColors.lightContainer16,
       (Brightness.dark, false) => const Color(0xff0c0d0f),
     };
 

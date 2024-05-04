@@ -51,7 +51,7 @@ class AutofillMenu extends StatelessWidget {
           },
           style: FilledButton.styleFrom(
             shape: const StadiumBorder(),
-            backgroundColor: StartColors.bg,
+            backgroundColor: ThcColors.startBg,
             foregroundColor: colors.surface,
             padding: EdgeInsets.zero,
             visualDensity: const VisualDensity(vertical: 1),
@@ -140,7 +140,7 @@ class _AutofillBackground extends _SmoothColor {
 
   @override
   Color fromContext(BuildContext context) {
-    return context.lightDark(StartColors.lightContainer, Colors.black);
+    return context.lightDark(ThcColors.lightContainer, Colors.black);
   }
 
   @override

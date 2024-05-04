@@ -1,30 +1,35 @@
 import 'package:flutter/material.dart';
-import 'package:thc/start/src/start_theme.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/style_text.dart';
 
+/// This class copies [Colors] and has numbered names for different opacities:
+///
+/// - 12% – 1/8
+/// - 16% – 5/32
+/// - 38% – 3/8
+/// - 50% – 1/2
+/// - 75% – 3/4
+///
 /// {@template colorScheme}
 /// By pulling colors from the [ColorScheme], the color palette can adapt
 /// based on whether the app is in light or dark mode.
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   final colorScheme = Theme.of(context).colorScheme;
+///   final colors = ThcColors.of(context);
 ///   return ColoredBox(
-///     color: colorScheme.surface,
+///     color: colors.surface,
 ///     child: Text(
 ///       'Hello World',
-///       style: StyleText(color: colorScheme.onSurface),
+///       style: StyleText(color: colors.onSurface),
 ///     ),
 ///   );
 /// }
 /// ```
-///
-/// The THC app colors are based on the color palette from
-/// [theheartcenter.one](https://theheartcenter.one/).
 /// {@endtemplate}
 abstract final class ThcColors {
+  // from theheartcenter.one color palette
   static const green = Color(0xff99cc99);
   static const green67 = Color(0xaa99cc99);
   static const pink = Color(0xffeecce0);
@@ -32,12 +37,37 @@ abstract final class ThcColors {
   static const teal = Color(0xff00b0b0);
   static const tan = Color(0xfff8f0e0);
   static const gray = Color(0xff4b4f58);
-  static const dullBlue = Color(0xff364764);
-  static const darkBlue = Color(0xff151c28);
   static const darkGreen = Color(0xff003300);
   static const darkMagenta = Color(0xff663366);
   static const paleAzure = Color(0xffddeeff);
+  static const dullBlue = Color(0xff364764);
+  static const darkBlue = Color(0xff151c28);
 
+  // the rest was added for this app
+  static const darkerBlue = Color(0xff080d18);
+  static const darkestBlue = Color(0xff060a12);
+  static const paleAzure88 = Color(0xe0ddeeff);
+
+  static const startBg = Color(0xff202428);
+  static const startBg12 = Color(0x20202428);
+  static const startBg75 = Color(0xc0202428);
+
+  static const zaHando = Color(0xff80c080);
+
+  static const dullGreen = Color(0xff60a060);
+  static const dullGreen38 = Color(0x6060a060);
+  static const dullGreen50 = Color(0x8060a060);
+
+  static const dullerGreen = Color(0xff407040);
+
+  static const lightContainer = Color(0xffc8d8e6);
+  static const lightContainer16 = Color(0x28c8d8e6);
+  static const lightContainer38 = Color(0x60c8d8e6);
+  static const lightContainer75 = Color(0xc0c8d8e6);
+
+  static const darkContainer = Color(0xff101214);
+
+  /// {@macro colorScheme}
   static ColorScheme of(BuildContext context) => Theme.of(context).colorScheme;
 }
 
@@ -60,18 +90,20 @@ extension ThatOneVideo on Set<MaterialState> {
   bool get isPressed => contains(MaterialState.pressed);
 }
 
-const _iconTheme = IconThemeData(size: 32);
-const _labelTextStyle = StyleText(size: 12, weight: 600);
 final _lightBackground = Color.lerp(ThcColors.paleAzure, Colors.white, 0.33)!;
 
 ThemeData _generateTheme(Brightness brightness) {
   final isLight = brightness == Brightness.light;
 
-  final textColor = isLight ? Colors.black : ThcColors.paleAzure;
+  final textColor = isLight ? Colors.black : ThcColors.paleAzure88;
   final paleColor = isLight ? Colors.white : ThcColors.paleAzure;
-  final slightContrast = isLight ? ThcColors.dullBlue : ThcColors.paleAzure;
+  final barColor = isLight ? ThcColors.darkBlue : ThcColors.darkerBlue;
+  final slightContrast = isLight ? ThcColors.dullBlue : ThcColors.paleAzure88;
   final contrast13 = slightContrast.withOpacity(0.125);
   final contrast25 = slightContrast.withOpacity(0.25);
+
+  const iconTheme = IconThemeData(size: 32);
+  const labelTextStyle = StyleText(size: 12, weight: 600);
 
   MaterialStateProperty<T> selected<T>(T selected, T unselected) =>
       MaterialStateProperty.resolveWith((states) => states.isSelected ? selected : unselected);
@@ -86,9 +118,9 @@ ThemeData _generateTheme(Brightness brightness) {
   return ThemeData(
     colorScheme: ColorScheme(
       brightness: isLight ? Brightness.light : Brightness.dark,
-      primary: isLight ? ThcColors.green : StartColors.zaHando,
-      primaryContainer: isLight ? StartColors.dullGreen38 : StartColors.dullGreen50,
-      onPrimary: StartColors.dullerGreen,
+      primary: isLight ? ThcColors.green : ThcColors.zaHando,
+      primaryContainer: isLight ? ThcColors.dullGreen38 : ThcColors.dullGreen50,
+      onPrimary: ThcColors.dullerGreen,
       inversePrimary: ThcColors.darkGreen,
       secondary: ThcColors.teal,
       onSecondary: Colors.white,
@@ -98,7 +130,7 @@ ThemeData _generateTheme(Brightness brightness) {
       onError: Colors.white,
       errorContainer: Colors.red.withOpacity(0.33),
       onErrorContainer: Colors.red,
-      background: isLight ? _lightBackground : ThcColors.darkBlue,
+      background: isLight ? _lightBackground : ThcColors.darkestBlue,
       onBackground: textColor,
       surface: isLight ? ThcColors.tan : ThcColors.dullBlue,
       onSurface: textColor,
@@ -143,9 +175,9 @@ ThemeData _generateTheme(Brightness brightness) {
       ),
     ),
     appBarTheme: AppBarTheme(
-      backgroundColor: ThcColors.darkBlue,
-      foregroundColor: isLight ? Colors.white : ThcColors.paleAzure,
-      surfaceTintColor: isLight ? null : Colors.black,
+      backgroundColor: barColor,
+      foregroundColor: paleColor,
+      surfaceTintColor: Colors.transparent,
     ),
     listTileTheme: ListTileThemeData(iconColor: slightContrast),
     radioTheme: RadioThemeData(
@@ -155,12 +187,12 @@ ThemeData _generateTheme(Brightness brightness) {
       side: BorderSide(color: textColor.withOpacity(0.75), width: 2),
     ),
     navigationBarTheme: NavigationBarThemeData(
-      backgroundColor: ThcColors.darkBlue,
+      backgroundColor: barColor,
       overlayColor: const MaterialStatePropertyAll(Colors.transparent),
-      surfaceTintColor: isLight ? Colors.transparent : Colors.black,
+      surfaceTintColor: Colors.transparent,
       indicatorColor: Colors.transparent,
-      iconTheme: tealWhenSelected(_iconTheme.copyWith, isLight),
-      labelTextStyle: tealWhenSelected(_labelTextStyle.copyWith, isLight),
+      iconTheme: tealWhenSelected(iconTheme.copyWith, isLight),
+      labelTextStyle: tealWhenSelected(labelTextStyle.copyWith, isLight),
       labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
     ),
   );

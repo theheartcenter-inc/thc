@@ -263,6 +263,11 @@ class StreamOverlay extends StatelessWidget {
 /// all the way down the widget tree.
 class StreamOverlayFadeIn extends Cubit<bool> {
   StreamOverlayFadeIn(Animation<double> animation) : super(false) {
-    animation.addStatusListener((status) => emit(status == AnimationStatus.completed));
+    animation.addStatusListener(
+      (status) => Future.delayed(
+        Durations.medium1,
+        () => emit(status == AnimationStatus.completed),
+      ),
+    );
   }
 }

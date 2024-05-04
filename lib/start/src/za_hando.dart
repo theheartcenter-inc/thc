@@ -57,7 +57,7 @@ class ZaHando extends StatelessWidget {
     if (pressedStart) contents = _TopButtons(child: contents);
 
     return Scaffold(
-      backgroundColor: StartColors.bg,
+      backgroundColor: ThcColors.startBg,
       body: SafeArea(child: SizedBox.expand(child: contents)),
     );
   }
@@ -227,7 +227,7 @@ class ZaHando extends StatelessWidget {
 
     final heartText = Text(
       'THE HEART',
-      style: StyleText(color: Color.lerp(StartColors.dullGreen38, colors.onSurfaceVariant, t)),
+      style: StyleText(color: Color.lerp(ThcColors.dullGreen38, colors.onSurfaceVariant, t)),
     );
     final centerText = Text(
       'CENTER',

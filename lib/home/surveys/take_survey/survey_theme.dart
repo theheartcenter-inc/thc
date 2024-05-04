@@ -33,8 +33,7 @@ class SurveyTheme extends StatelessWidget {
   const SurveyTheme({required this.surveyContent, super.key});
 
   static ThemeData of(BuildContext context) {
-    final theme = Theme.of(context);
-    final brightness = theme.brightness;
+    final brightness = Theme.of(context).brightness;
     final isLight = brightness == Brightness.light;
     final blackAndWhite = isLight ? Colors.white : Colors.black;
     final textColor = isLight ? Colors.black : SurveyColors.orangeWhite;
@@ -57,7 +56,7 @@ class SurveyTheme extends StatelessWidget {
       onSurface: textColor,
     );
 
-    return theme.copyWith(
+    return ThemeData(
       colorScheme: colors,
       inputDecorationTheme: InputDecorationTheme(
         enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: textColor)),
