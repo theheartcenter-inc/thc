@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:thc/home/users/all_users.dart';
-import 'package:thc/home/users/permissions.dart';
+import 'package:thc/home/users/src/all_users.dart';
+import 'package:thc/home/users/src/permissions.dart';
 import 'package:thc/utils/navigator.dart';
 
 class ManageUsers extends StatelessWidget {
