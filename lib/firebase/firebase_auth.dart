@@ -88,7 +88,8 @@ Future<String?> register() async {
   if (LocalStorage.userId() case final id?) {
     if (useInternet) {
       user = await ThcUser.download(id);
-      user.upload(registering: true);
+      user = user.copyWith(registered: true);
+      user.upload();
     } else {
       loadUser();
     }

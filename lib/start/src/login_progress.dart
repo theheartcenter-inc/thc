@@ -263,6 +263,7 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
       return null;
     }
 
+    String? errorMessage;
     switch (labels) {
       case LoginLabels.withId:
         final (id!, name!) = fieldValues;
@@ -297,8 +298,7 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
           return "it looks like these passwords don't match.";
         }
         await LocalStorage.password.save(password);
-
-        if (await auth.register() case final errorMessage?) return errorMessage;
+        errorMessage = await auth.register();
 
       case LoginLabels.signIn:
         final (username!, password!) = fieldValues;
@@ -309,12 +309,14 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
             LocalStorage.userId.save(username),
           LocalStorage.password.save(password),
         ]);
-        if (await auth.signIn() case final errorMessage?) return errorMessage;
+        errorMessage = await auth.signIn();
 
       case LoginLabels.recovery:
         await LocalStorage.email.save(fieldValues.$1!);
-        if (await auth.resetPassword() case final errorMessage?) return errorMessage;
+        errorMessage = await auth.resetPassword();
     }
+
+    if (errorMessage != null) return errorMessage;
 
     for (final field in LoginField.values) {
       field.controller.text = '';

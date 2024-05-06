@@ -10,5 +10,3 @@ ThcUser get user => ThcUser.instance!;
 set user(ThcUser? updated) {
   ThcUser.instance = updated;
 }
-
-typedef Json = Map<String, dynamic>;

@@ -32,12 +32,10 @@ class ManageUsers extends StatelessWidget {
                       DataCell(Text(user.firestoreId)),
                       DataCell(Text(user.name)),
                       DataCell(Text(user.type.toString())),
-                      DataCell(
-                        IconButton.filled(
-                          icon: const Icon(Icons.edit),
-                          onPressed: () => navigator.push(Permissions(user)),
-                        ),
-                      ),
+                      DataCell(IconButton.filled(
+                        icon: const Icon(Icons.edit),
+                        onPressed: () => navigator.push(Permissions(user)),
+                      )),
                     ]),
                 ],
               ),

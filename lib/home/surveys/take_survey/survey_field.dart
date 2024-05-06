@@ -341,7 +341,9 @@ class _Scale extends SurveyBuilder<ScaleQuestion> {
   Widget buildAnswer(context, update, question, int value) {
     final divisions = question.values.length - 1;
     return LayoutBuilder(builder: (context, constraints) {
-      final colors = ThcColors.of(context);
+      final theme = Theme.of(context);
+      final colors = theme.colorScheme;
+      final textTheme = theme.textTheme;
       final sliderWidth = constraints.maxWidth - 100;
       final labelOffset = Offset(sliderWidth / 2 - 25, 0);
       final double spacing = question.endpoints == null ? 0 : 10;
@@ -355,7 +357,7 @@ class _Scale extends SurveyBuilder<ScaleQuestion> {
                 offset: labelOffset * shift,
                 child: Text(
                   shift < 0 ? ends.$1 : ends.$2,
-                  style: Theme.of(context).textTheme.labelMedium,
+                  style: textTheme.labelMedium,
                 ),
               ),
           Padding(
@@ -377,7 +379,7 @@ class _Scale extends SurveyBuilder<ScaleQuestion> {
           ),
           Padding(
             padding: EdgeInsets.only(top: 45 + spacing),
-            child: Text(question.values[value], style: Theme.of(context).textTheme.labelLarge),
+            child: Text(question.values[value], style: textTheme.labelLarge),
           ),
         ],
       );

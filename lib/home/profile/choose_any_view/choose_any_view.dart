@@ -15,7 +15,7 @@ class ChooseAnyView extends StatelessWidget {
   Widget build(BuildContext context) {
     const buttons = [null, ...UserType.values];
     const info = Text(
-      'All data in local device storage will be cleared,\n'
+      'All data in local device storage (except theme mode!) will be cleared,\n'
       'and the app will relaunch as if you were logged in as the specified user type.',
       textAlign: TextAlign.center,
     );

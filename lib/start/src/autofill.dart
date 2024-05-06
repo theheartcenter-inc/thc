@@ -14,7 +14,6 @@ import 'package:thc/start/src/start_theme.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
-import 'package:thc/utils/widgets/lerpy_hero.dart';
 
 /// {@macro autofill}
 class AutofillMenu extends StatelessWidget {
@@ -128,42 +127,39 @@ class AutofillButton extends StatelessWidget {
   }
 }
 
-abstract class _SmoothColor extends LerpyHero<Color> {
-  const _SmoothColor({required super.tag, super.child});
+class _AutofillBackground extends StatelessWidget {
+  const _AutofillBackground();
 
   @override
-  Color lerp(Color a, Color b, double t, HeroFlightDirection direction) => Color.lerp(a, b, t)!;
-}
-
-class _AutofillBackground extends _SmoothColor {
-  const _AutofillBackground() : super(tag: 'autofill background');
-
-  @override
-  Color fromContext(BuildContext context) {
-    return context.lightDark(ThcColors.lightContainer, Colors.black);
-  }
-
-  @override
-  Widget builder(BuildContext context, Color value, Widget? child) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: value,
-        borderRadius: const BorderRadius.all(Radius.circular(16)),
+  Widget build(BuildContext context) {
+    return Hero(
+      tag: 'autofill background',
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: context.lightDark(ThcColors.lightContainer, Colors.black),
+          borderRadius: const BorderRadius.all(Radius.circular(16)),
+        ),
       ),
     );
   }
 }
 
-class _AutofillIcon extends _SmoothColor {
-  const _AutofillIcon({super.child}) : super(tag: 'autofill icon');
+class _AutofillIcon extends StatelessWidget {
+  const _AutofillIcon({this.child});
+  final Widget? child;
 
   @override
-  Color fromContext(BuildContext context) => ThcColors.of(context).outline;
-
-  @override
-  Widget builder(BuildContext context, Color value, Widget? child) {
-    final icon = Icon(Icons.build, color: value, size: 20);
+  Widget build(BuildContext context) {
+    final color = ThcColors.of(context).outline;
+    final icon = Hero(
+      tag: 'autofill icon',
+      child: Icon(Icons.build, color: color, size: 20),
+    );
     if (child == null) return icon;
+    final label = Text(
+      'Autofill',
+      style: StyleText(size: 24, weight: 550, color: color),
+    );
     return DefaultTextStyle(
       style: Theme.of(context).textTheme.bodyMedium!,
       softWrap: false,
@@ -180,17 +176,7 @@ class _AutofillIcon extends _SmoothColor {
                   children: [
                     icon,
                     const Spacer(),
-                    Expanded(
-                      flex: 20,
-                      child: Text(
-                        'Autofill',
-                        style: StyleText(
-                          size: 24,
-                          weight: 550,
-                          color: ThcColors.of(context).outline,
-                        ),
-                      ),
-                    ),
+                    Expanded(flex: 20, child: label),
                   ],
                 ),
               ),

@@ -92,16 +92,13 @@ sealed class ThcUser {
   }
 
   /// Saves the current user data to Firebase.
-  Future<void> upload({bool registering = false}) {
-    return _collection.doc(firestoreId).set(json);
-  }
+  Future<void> upload() => _collection.doc(firestoreId).set(json);
 
   /// Removes this user from the database.
   ///
   /// Any function that calls this method should also call `navigator.logout()`
   /// to return to the login screen.
   Future<void> yeet() => Future.wait([
-        // need to delete both user ID & email authentication
         if (FirebaseAuth.instance.currentUser case final user?) user.delete(),
         if (useInternet && !UserType.testIds.contains(id))
           _collection.doc(firestoreId).delete()

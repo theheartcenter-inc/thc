@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/utils/app_config.dart';
 
 enum Firestore {
@@ -28,6 +27,7 @@ enum Firestore {
   }
 }
 
+typedef Json = Map<String, dynamic>;
 typedef Snapshot = QuerySnapshot<Json>;
 
 extension GetData<T> on DocumentReference<T> {
