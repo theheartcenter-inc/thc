@@ -12,7 +12,6 @@ import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 enum ProfileOption with StatelessEnum {
   account(
@@ -53,7 +52,7 @@ enum ProfileOption with StatelessEnum {
   static final count = values.length + (kDebugMode ? 1 : 0);
 
   VoidCallback get onTap => switch (this) {
-        donate => () => launchUrlString('https://secure.givelively.org/donate/heart-center-inc'),
+        donate => HeartCenterInfo.donate,
         account || settings || info || report || chooseAnyView => () => navigator.push(page!),
       };
 
