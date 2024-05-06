@@ -135,6 +135,7 @@ sealed class ThcUser {
         'type': '$type',
         if (id != null) 'id': id,
         if (email != null) 'email': email,
+        if (!registered) 'registered': false,
       };
 
   bool get canLivestream => switch (type) {

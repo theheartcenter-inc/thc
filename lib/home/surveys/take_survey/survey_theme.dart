@@ -7,9 +7,15 @@ import 'package:thc/utils/theme.dart';
 /// 1. adds a nice aesthetic
 /// 2. gives a visual indicator of how long the survey is, and how far along you are
 abstract final class SurveyColors {
+  static const veridian25 = Color(0x40c03000);
+  static const veridian50 = Color(0x80c03000);
   static const veridian = Color(0xffc03000);
+
   static const maroon = Color(0xff600030);
+
+  static const orangeWhite88 = Color(0xe0ffeee8);
   static const orangeWhite = Color(0xffffeee8);
+
   static const orangeSunrise = Color(0xffffb060);
   static const orangeSunset = Color(0xffc07020);
   static const yellowSunrise = Color(0xffffffa0);
@@ -64,20 +70,20 @@ class SurveyTheme extends StatelessWidget {
           borderSide: BorderSide(color: colors.primaryContainer, width: 1.5),
         ),
       ),
-      textSelectionTheme: TextSelectionThemeData(
+      textSelectionTheme: const TextSelectionThemeData(
         cursorColor: SurveyColors.veridian,
         selectionHandleColor: SurveyColors.veridian,
-        selectionColor: SurveyColors.veridian.withOpacity(0.5),
+        selectionColor: SurveyColors.veridian50,
       ),
       sliderTheme: SliderThemeData(
         trackHeight: 12,
         thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
-        activeTickMarkColor: isLight ? SurveyColors.veridian.withOpacity(0.25) : Colors.black12,
+        activeTickMarkColor: isLight ? SurveyColors.veridian25 : Colors.black12,
       ),
       segmentedButtonTheme: SegmentedButtonThemeData(
         style: SegmentedButton.styleFrom(
           side: BorderSide.none,
-          backgroundColor: paleColor.withOpacity(0.5),
+          backgroundColor: paleColor.withOpacity(7 / 8),
           foregroundColor: colors.secondary,
           selectedBackgroundColor: colors.secondary,
           selectedForegroundColor: paleColor.withOpacity(isLight ? 1 : 0.9),
@@ -86,11 +92,11 @@ class SurveyTheme extends StatelessWidget {
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
-          backgroundColor: isLight ? SurveyColors.darkGray : SurveyColors.orangeWhite,
+          backgroundColor: isLight ? SurveyColors.darkGray : SurveyColors.orangeWhite88,
           foregroundColor: isLight ? SurveyColors.yellowSunrise : SurveyColors.maroonSunset,
           shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(25)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
-          textStyle: const StyleText(size: 16, weight: 600),
+          textStyle: const StyleText(size: 16, weight: 450, letterSpacing: 1 / 3),
         ),
       ),
     );

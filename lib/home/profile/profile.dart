@@ -32,7 +32,10 @@ enum ProfileOption with StatelessEnum {
     page: HeartCenterInfo(),
   ),
 
-  donate(Icons.favorite),
+  donate(
+    Icons.favorite,
+    page: 'https://secure.givelively.org/donate/heart-center-inc',
+  ),
 
   report(
     Icons.report_problem,
@@ -46,17 +49,14 @@ enum ProfileOption with StatelessEnum {
     page: ChooseAnyView(),
   );
 
-  const ProfileOption(this.icon, {this.label, this.page});
+  const ProfileOption(this.icon, {this.label, required this.page});
   final IconData icon;
   final String? label;
-  final Widget? page;
+
+  /// Determines the behavior of `onTap()` in the [build] method below.
+  final dynamic page;
 
   static final count = values.length + (kDebugMode ? 1 : 0);
-
-  VoidCallback get onTap => switch (this) {
-        donate => () => launchUrlString('https://secure.givelively.org/donate/heart-center-inc'),
-        account || settings || info || report || chooseAnyView => () => navigator.push(page!),
-      };
 
   @override
   Widget build(BuildContext context) {
@@ -67,7 +67,11 @@ enum ProfileOption with StatelessEnum {
       leading: Icon(icon),
       title: Padding(padding: padding, child: Text(label ?? name)),
       trailing: const Icon(Icons.chevron_right),
-      onTap: onTap,
+      onTap: () => switch (page) {
+        Widget() => navigator.push(page),
+        String() => launchUrlString(page),
+        _ => throw TypeError(),
+      },
     );
   }
 }
@@ -79,9 +83,8 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     const image = Padding(
       padding: EdgeInsets.all(10),
-      child: SizedBox(
-        width: 100,
-        height: 100,
+      child: SizedBox.square(
+        dimension: 100,
         child: ClipOval(
           child: FittedBox(
             fit: BoxFit.cover,
