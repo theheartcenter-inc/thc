@@ -13,48 +13,47 @@ import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 enum ProfileOption with StatelessEnum {
   account(
     Icons.person_rounded,
-    page: AccountSettings(),
+    action: AccountSettings(),
   ),
 
   settings(
     Icons.settings,
-    page: SettingsScreen(),
+    action: SettingsScreen(),
   ),
 
   info(
     Icons.info_outline,
     label: 'about The Heart Center',
-    page: HeartCenterInfo(),
+    action: HeartCenterInfo(),
   ),
 
   donate(
     Icons.favorite,
-    page: 'https://secure.givelively.org/donate/heart-center-inc',
+    action: HeartCenterInfo.donate,
   ),
 
   report(
     Icons.report_problem,
     label: 'report an issue / send feedback',
-    page: IssueReport(),
+    action: IssueReport(),
   ),
 
   chooseAnyView(
     Icons.build,
     label: 'choose any view',
-    page: ChooseAnyView(),
+    action: ChooseAnyView(),
   );
 
-  const ProfileOption(this.icon, {this.label, required this.page});
+  const ProfileOption(this.icon, {this.label, required this.action});
   final IconData icon;
   final String? label;
 
   /// Determines the behavior of `onTap()` in the [build] method below.
-  final dynamic page;
+  final dynamic action;
 
   static final count = values.length + (kDebugMode ? 1 : 0);
 
@@ -67,9 +66,9 @@ enum ProfileOption with StatelessEnum {
       leading: Icon(icon),
       title: Padding(padding: padding, child: Text(label ?? name)),
       trailing: const Icon(Icons.chevron_right),
-      onTap: () => switch (page) {
-        Widget() => navigator.push(page),
-        String() => launchUrlString(page),
+      onTap: switch (action) {
+        VoidCallback() => action,
+        Widget() => () => navigator.push(action),
         _ => throw TypeError(),
       },
     );
