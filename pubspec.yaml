@@ -17,6 +17,7 @@ dependencies:
   provider: ^6.1.2
   shared_preferences: ^2.2.3
   url_launcher: ^6.2.6
+  http: ^1.2.1
 
   firebase_core: ^2.30.1
   firebase_auth: ^4.19.4
