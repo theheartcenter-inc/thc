@@ -7,6 +7,6 @@ class VideoLibrary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FunPlaceholder('video library', color: context.colorScheme.secondary);
+    return FunPlaceholder('video library', color: ThcColors.of(context).secondary);
   }
 }

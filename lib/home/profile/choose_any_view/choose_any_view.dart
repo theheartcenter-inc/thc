@@ -15,7 +15,7 @@ class ChooseAnyView extends StatelessWidget {
   Widget build(BuildContext context) {
     const buttons = [null, ...UserType.values];
     const info = Text(
-      'All data in local device storage will be cleared,\n'
+      'All data in local device storage (except theme mode!) will be cleared,\n'
       'and the app will relaunch as if you were logged in as the specified user type.',
       textAlign: TextAlign.center,
     );
@@ -42,7 +42,7 @@ class _ButtonFromLoginScreen extends ChooseAnyView {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colorScheme;
+    final colors = ThcColors.of(context);
     return IconButton.filled(
       style: IconButton.styleFrom(
         backgroundColor: colors.surface,
@@ -61,10 +61,7 @@ class UserButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FilledButton(
-      onPressed: () async {
-        await resetLocalStorage(userType);
-        App.relaunch();
-      },
+      onPressed: () => resetLocalStorage(userType).then(App.relaunch),
       style: FilledButton.styleFrom(
         backgroundColor: switch (userType) {
           null => context.lightDark(Colors.black26, Colors.white24),

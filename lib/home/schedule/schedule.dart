@@ -12,7 +12,7 @@ class Schedule extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colorScheme;
+    final colors = ThcColors.of(context);
 
     Widget? editButton;
     if (user.isAdmin) {

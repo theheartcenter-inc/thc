@@ -40,7 +40,7 @@ class ViewCustomSurvey extends StatelessWidget {
           children: [
             Text(
               '(survey not created yet)',
-              style: context.theme.textTheme.labelLarge,
+              style: Theme.of(context).textTheme.labelLarge,
             ),
             const SizedBox(height: 25),
             FilledButton(
@@ -301,7 +301,7 @@ class _SurveyEditDividerState extends State<SurveyEditDivider> {
           const Divider(),
           Card(
             clipBehavior: Clip.antiAlias,
-            color: expanded ? null : context.colorScheme.background,
+            color: expanded ? null : ThcColors.of(context).background,
             elevation: expanded ? null : 0,
             child: AnimatedSize(
               duration: Durations.medium1,

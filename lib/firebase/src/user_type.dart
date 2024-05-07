@@ -6,14 +6,7 @@ enum UserType {
   director,
   admin;
 
-  static UserType? fromJson(Json json) {
-    if (json['type'] case final type?) {
-      for (final userType in values) {
-        if (userType.toString() == type) return userType;
-      }
-    }
-    return null;
-  }
+  factory UserType.fromJson(Json json) => values.byName((json['type'] as String).toLowerCase());
 
   static List<String> get testIds => [for (final userType in values) userType.testId];
 

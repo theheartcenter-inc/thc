@@ -123,7 +123,7 @@ class Submitted extends StatelessWidget {
       ),
     );
 
-    final translucent = context.colorScheme.onBackground.withOpacity(0.5);
+    final translucent = ThcColors.of(context).onBackground.withOpacity(0.5);
 
     return Scaffold(
       appBar: AppBar(),

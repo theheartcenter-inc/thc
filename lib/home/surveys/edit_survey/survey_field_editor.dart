@@ -105,8 +105,8 @@ class ChoiceText extends StatelessWidget {
             focusNode: FocusNode(skipTraversal: true),
             style: TextButton.styleFrom(
               foregroundColor: switch (useDataIcon) {
-                true => context.colorScheme.error,
-                false => context.colorScheme.outlineVariant,
+                true => ThcColors.of(context).error,
+                false => ThcColors.of(context).outlineVariant,
                 null => Colors.transparent,
               },
             ),
@@ -341,7 +341,7 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colorScheme;
+    final colors = ThcColors.of(context);
     final translucent = colors.outlineVariant;
     final pluralChoices = choices.length > 1;
 
@@ -486,7 +486,7 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
           alignment: Alignment.bottomCenter,
           children: [
             Theme(
-              data: context.theme.copyWith(
+              data: Theme.of(context).copyWith(
                 listTileTheme: ListTileThemeData(textColor: colors.onBackground),
                 iconTheme: IconThemeData(color: colors.onBackground),
               ),
@@ -582,7 +582,7 @@ class QuestionTypeIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colorScheme;
+    final colors = ThcColors.of(context);
     final foregroundColor = colors.onSurface;
     final backgroundColor = colors.surface;
     final Widget graphic;
@@ -660,7 +660,7 @@ class QuestionTypeIcon extends StatelessWidget {
         );
     }
     return Theme(
-      data: context.theme.copyWith(
+      data: Theme.of(context).copyWith(
         iconTheme: IconThemeData(size: 12, color: foregroundColor),
       ),
       child: SizedBox(

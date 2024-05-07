@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:thc/start/start.dart';
+import 'package:thc/main.dart';
 import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/widgets/lerpy_hero.dart';
 
@@ -109,12 +109,5 @@ extension type Nav(NavigatorState navigator) {
   void showSnackBar(SnackBar snackBar) =>
       ScaffoldMessenger.of(navigator.context).showSnackBar(snackBar);
 
-  void logout() {
-    LocalStorage.loggedIn.save(false);
-    LocalStorage.userId.save(null);
-    LocalStorage.firstLastName.save('');
-
-    navigator.popUntil((_) => !navigator.canPop());
-    pushReplacement(const StartScreen());
-  }
+  Future<void> logout() => resetLocalStorage().then(App.relaunch);
 }
