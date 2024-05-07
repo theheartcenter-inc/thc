@@ -10,7 +10,7 @@ class FunPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = context.colorScheme;
+    final colorScheme = ThcColors.of(context);
     final style = StyleText.mono(
       size: 32,
       weight: FontWeight.bold,

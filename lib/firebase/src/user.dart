@@ -2,7 +2,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:meta/meta.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/utils/app_config.dart';
-import 'package:thc/utils/local_storage.dart';
 
 /// {@template ThcUser}
 /// We can't just call this class `User`, since that's one of the Firebase classes.
@@ -14,31 +13,31 @@ sealed class ThcUser {
   /// {@macro ThcUser}
   factory ThcUser({
     required String name,
-    UserType? type,
+    UserType type = UserType.participant,
     String? id,
     String? email,
+    bool registered = true,
   }) {
     assert((id ?? email) != null);
 
     return switch (type) {
-      null => AwaitingApproval(
-          name: name,
-          email: email,
-        ),
       UserType.participant => Participant(
           name: name,
           id: id,
           email: email,
+          registered: registered,
         ),
       UserType.director => Director(
           name: name,
           id: id,
           email: email,
+          registered: registered,
         ),
       UserType.admin => Admin(
           name: name,
           id: id,
           email: email,
+          registered: registered,
         ),
     };
   }
@@ -46,9 +45,10 @@ sealed class ThcUser {
   /// {@macro ThcUser}
   const ThcUser._({
     required this.name,
-    this.type,
+    required this.type,
     this.id,
     this.email,
+    this.registered = true,
   }) : assert((id ?? email) != null);
 
   /// {@macro ThcUser}
@@ -63,7 +63,7 @@ sealed class ThcUser {
   }
 
   final String name;
-  final UserType? type;
+  final UserType type;
 
   /// A unique string to identify the user, probably chosen by an admin.
   final String? id;
@@ -71,46 +71,39 @@ sealed class ThcUser {
   /// Used for password recovery.
   final String? email;
 
+  final bool registered;
+
   static ThcUser? instance;
 
+  static const _collection = Firestore.users;
+
   /// {@macro ThcUser}
-  static Future<ThcUser> download(String id, {Firestore? collection}) async {
+  static Future<ThcUser> download(String id) async {
     if (!useInternet) {
       return UserType.values.firstWhere((value) => id.contains(value.name)).testUser;
     }
 
     backendPrint('id: $id');
-    final doc = collection.doc(id);
+    final doc = _collection.doc(id);
     backendPrint('doc: $doc');
     final data = await doc.getData();
-    if (data == null) throw Exception("snapshot of $collection/$id doesn't exist");
+    if (data == null) throw Exception("snapshot of $_collection/$id doesn't exist");
     return ThcUser.fromJson(data);
   }
 
-  static Future<void> remove(String id, {Firestore? collection}) {
-    return switch (useInternet && !UserType.testIds.contains(id)) {
-      true => collection.doc(id).delete(),
-      false => Future.delayed(const Duration(seconds: 3)),
-    };
-  }
-
   /// Saves the current user data to Firebase.
-  Future<void> upload({Firestore? collection, bool saveLocally = true}) async {
-    await collection.doc(id).set(json);
-    if (!saveLocally) return;
-
-    LocalStorage.email.save(email);
-    LocalStorage.firstLastName.save(name);
-  }
+  Future<void> upload() => _collection.doc(firestoreId).set(json);
 
   /// Removes this user from the database.
   ///
   /// Any function that calls this method should also call `navigator.logout()`
   /// to return to the login screen.
   Future<void> yeet() => Future.wait([
-        // need to delete both user ID & email authentication
         if (FirebaseAuth.instance.currentUser case final user?) user.delete(),
-        if (id case final id?) remove(id),
+        if (useInternet && !UserType.testIds.contains(id))
+          _collection.doc(firestoreId).delete()
+        else
+          Future.delayed(const Duration(seconds: 3)),
       ]);
 
   /// {@macro ThcUser}
@@ -120,24 +113,30 @@ sealed class ThcUser {
     String? name,
     String? email,
     String? phone,
+    bool? registered,
   }) {
     return ThcUser(
       type: type ?? this.type,
       id: id ?? this.id,
       name: name ?? this.name,
       email: email ?? this.email,
+      registered: registered ?? this.registered,
     );
   }
+
+  String get firestoreId => id ?? email!;
+  bool matches(String key) => key == id || key == email;
 
   Json get json => {
         'name': name,
         'type': '$type',
         if (id != null) 'id': id,
         if (email != null) 'email': email,
+        if (!registered) 'registered': false,
       };
 
   bool get canLivestream => switch (type) {
-        UserType.participant || null => false,
+        UserType.participant => false,
         UserType.director || UserType.admin => true,
       };
 
@@ -149,18 +148,12 @@ sealed class ThcUser {
         other.runtimeType == runtimeType &&
         other.id == id &&
         other.name == name &&
-        other.email == email;
+        other.email == email &&
+        other.registered == registered;
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, name, email);
-}
-
-class AwaitingApproval extends ThcUser {
-  const AwaitingApproval({
-    required super.name,
-    super.email,
-  }) : super._(type: null);
+  int get hashCode => Object.hash(id, name, email, registered);
 }
 
 class Participant extends ThcUser {
@@ -168,6 +161,7 @@ class Participant extends ThcUser {
     required super.id,
     required super.name,
     super.email,
+    super.registered = true,
   }) : super._(type: UserType.participant);
 }
 
@@ -176,6 +170,7 @@ class Director extends ThcUser {
     required super.id,
     required super.name,
     super.email,
+    super.registered = true,
   }) : super._(type: UserType.director);
 }
 
@@ -184,5 +179,6 @@ class Admin extends ThcUser {
     required super.id,
     required super.name,
     super.email,
+    super.registered = true,
   }) : super._(type: UserType.admin);
 }

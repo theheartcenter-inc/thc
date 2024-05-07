@@ -12,7 +12,9 @@ Future<void> loadFromLocalStorage() async {
 }
 
 Future<dynamic> resetLocalStorage([UserType? userType]) async {
+  final ThemeMode keepTheThemeOfCourse = LocalStorage.themeMode();
   await _storage.clear();
+  await LocalStorage.themeMode.save(keepTheThemeOfCourse.index);
 
   if (userType == null) return user = null;
 

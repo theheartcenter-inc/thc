@@ -1,35 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:thc/utils/theme.dart';
 
-/// This class copies [Colors] and has numbered names for different opacities:
-///
-/// - 12% – 1/8
-/// - 16% – 5/32
-/// - 38% – 3/8
-/// - 50% – 1/2
-/// - 75% – 3/4
-abstract final class StartColors {
-  static const bg = Color(0xff202428);
-  static const bg12 = Color(0x20202428);
-  static const bg75 = Color(0xc0202428);
-
-  static const zaHando = Color(0xff80c080);
-
-  static const dullGreen = Color(0xff60a060);
-  static const dullGreen38 = Color(0x6060a060);
-  static const dullGreen50 = Color(0x8060a060);
-
-  static const dullerGreen = Color(0xff407040);
-
-  static const lightContainer = Color(0xffc8d8e6);
-  static const lightContainer16 = Color(0x28c8d8e6);
-  static const lightContainer38 = Color(0x60c8d8e6);
-  static const lightContainer75 = Color(0xc0c8d8e6);
-
-  static const darkContainer = Color(0xff101214);
-}
-
-/// This class is pretty epic: you can fetch the `static` values just like in [StartColors],
+/// This class is pretty epic: you can fetch the `static` values just like in [ThcColors],
 /// and you can also use the constructors to create the gradient for the sun's [Decoration].
 final class SunColors extends RadialGradient {
   SunColors.hsv(List<HSVColor> colors) : super(colors: [for (final hsv in colors) hsv.toColor()]);
@@ -51,24 +23,25 @@ final class SunColors extends RadialGradient {
 }
 
 class StartTheme extends StatelessWidget {
-  /// Wraps any widget with the "start theme" [data].
+  /// Wraps any widget with the "start theme".
   const StartTheme({required this.child, super.key});
 
   final Widget child;
 
   /// The theme data that we're using for the login/register screen.
-  static ThemeData data(ThemeData current) {
+  static ThemeData of(BuildContext context) {
+    final current = Theme.of(context);
     final isLight = current.brightness == Brightness.light;
 
-    final container = isLight ? StartColors.lightContainer : StartColors.darkContainer;
+    final container = isLight ? ThcColors.lightContainer : ThcColors.darkContainer;
     return current.copyWith(
       colorScheme: current.colorScheme.copyWith(
-        background: StartColors.bg,
+        background: ThcColors.startBg,
         surface: container,
-        onSurface: isLight ? Colors.black : StartColors.lightContainer,
+        onSurface: isLight ? Colors.black : ThcColors.lightContainer,
         surfaceTint: isLight ? Colors.white : Colors.black,
-        onSurfaceVariant: isLight ? StartColors.bg12 : StartColors.lightContainer38,
-        outline: isLight ? StartColors.bg75 : StartColors.lightContainer75,
+        onSurfaceVariant: isLight ? ThcColors.startBg12 : ThcColors.lightContainer38,
+        outline: isLight ? ThcColors.startBg75 : ThcColors.lightContainer75,
       ),
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
@@ -80,17 +53,17 @@ class StartTheme extends StatelessWidget {
       iconButtonTheme: IconButtonThemeData(
         style: IconButton.styleFrom(
           backgroundColor: container,
-          foregroundColor: isLight ? StartColors.bg75 : StartColors.lightContainer75,
+          foregroundColor: isLight ? ThcColors.startBg75 : ThcColors.lightContainer75,
         ),
       ),
       iconTheme: IconThemeData(
-        color: isLight ? StartColors.bg75 : StartColors.lightContainer,
+        color: isLight ? ThcColors.startBg75 : ThcColors.lightContainer,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedTheme(curve: Curves.easeOutSine, data: data(context.theme), child: child);
+    return AnimatedTheme(curve: Curves.easeOutSine, data: of(context), child: child);
   }
 }

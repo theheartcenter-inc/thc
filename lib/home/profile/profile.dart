@@ -8,68 +8,69 @@ import 'package:thc/home/profile/choose_any_view/choose_any_view.dart';
 import 'package:thc/home/profile/info/heart_center_info.dart';
 import 'package:thc/home/profile/report/issue_report.dart';
 import 'package:thc/home/profile/settings/settings.dart';
+import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 enum ProfileOption with StatelessEnum {
   account(
     Icons.person_rounded,
-    page: AccountSettings(),
+    action: AccountSettings(),
   ),
 
   settings(
     Icons.settings,
-    page: SettingsScreen(),
+    action: SettingsScreen(),
   ),
 
   info(
     Icons.info_outline,
     label: 'about The Heart Center',
-    page: HeartCenterInfo(),
+    action: HeartCenterInfo(),
   ),
 
-  donate(Icons.favorite),
+  donate(
+    Icons.favorite,
+    action: HeartCenterInfo.donate,
+  ),
 
   report(
     Icons.report_problem,
     label: 'report an issue / send feedback',
-    page: IssueReport(),
+    action: IssueReport(),
   ),
 
   chooseAnyView(
     Icons.build,
     label: 'choose any view',
-    page: ChooseAnyView(),
+    action: ChooseAnyView(),
   );
 
-  const ProfileOption(this.icon, {this.label, this.page});
+  const ProfileOption(this.icon, {this.label, required this.action});
   final IconData icon;
   final String? label;
-  final Widget? page;
+
+  /// Determines the behavior of `onTap()` in the [build] method below.
+  final dynamic action;
 
   static final count = values.length + (kDebugMode ? 1 : 0);
-
-  VoidCallback get onTap => switch (this) {
-        donate => () => launchUrlString('https://secure.givelively.org/donate/heart-center-inc'),
-        account || settings || info || report || chooseAnyView => () => navigator.push(page!),
-      };
 
   @override
   Widget build(BuildContext context) {
     const padding = EdgeInsets.only(left: 16);
-    final inkColor = context.colorScheme.outlineVariant;
 
     return ListTile(
-      splashColor: inkColor,
-      hoverColor: inkColor,
       contentPadding: padding,
       leading: Icon(icon),
       title: Padding(padding: padding, child: Text(label ?? name)),
       trailing: const Icon(Icons.chevron_right),
-      onTap: onTap,
+      onTap: switch (action) {
+        VoidCallback() => action,
+        Widget() => () => navigator.push(action),
+        _ => throw TypeError(),
+      },
     );
   }
 }
@@ -81,9 +82,8 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     const image = Padding(
       padding: EdgeInsets.all(10),
-      child: SizedBox(
-        width: 100,
-        height: 100,
+      child: SizedBox.square(
+        dimension: 100,
         child: ClipOval(
           child: FittedBox(
             fit: BoxFit.cover,
@@ -93,11 +93,12 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
 
-    final userWatch = context.watch<AccountFields>().state ??
-        ThcUser(name: 'Not Found', type: UserType.participant, id: '');
+    final userWatch = context.watch<AccountFields>().state ?? ThcUser(name: 'Not Found', id: '');
+    if (userWatch.name == 'Not Found') ErrorIfStrict("couldn't get AccountFields data");
+
     final linkColor = Color.lerp(ThcColors.dullBlue, ThcColors.teal, 0.25)!;
     final overview = DefaultTextStyle(
-      style: StyleText(height: 1.75, color: context.colorScheme.onBackground),
+      style: StyleText(height: 1.75, color: ThcColors.of(context).onBackground),
       child: Center(
         child: Column(
           children: [
