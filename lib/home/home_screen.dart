@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/library/video_library.dart';
 import 'package:thc/home/profile/profile.dart';
@@ -9,7 +10,6 @@ import 'package:thc/home/stream/create_livestream.dart';
 import 'package:thc/home/surveys/manage_surveys/manage_surveys.dart';
 import 'package:thc/home/users/manage_users.dart';
 import 'package:thc/home/watch_live/watch_live.dart';
-import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
 
@@ -140,7 +140,7 @@ class NavBar extends NavigationBar {
   /// {@macro NavBar}
   NavBar.of(BuildContext context, {super.key, this.belowPage = false})
       : super(
-          selectedIndex: context.watch<NavBarIndex>().state,
+          selectedIndex: context.watch<NavBarIndex>().value,
           onDestinationSelected: (i) => context.read<NavBarIndex>().selectIndex(i),
           destinations: NavBarButton.enabledValues,
         );
@@ -178,7 +178,7 @@ class NavBar extends NavigationBar {
 /// Updates the active [NavBar] index when you move to another page,
 /// and when you turn a page on/off in the Admin settings.
 /// {@endtemplate}
-class NavBarIndex extends Cubit<int> {
+class NavBarIndex extends ValueNotifier<int> {
   /// {@macro NavBarIndex}
   NavBarIndex() : super(_initial);
 
@@ -195,7 +195,7 @@ class NavBarIndex extends Cubit<int> {
   void selectIndex(int navIndex) {
     final newButton = NavBarButton.enabledValues[navIndex];
     LocalStorage.navBarState.save(newButton.index);
-    emit(navIndex);
+    value = navIndex;
   }
 
   /// Similar to [selectIndex], but you can pass in the desired button directly.

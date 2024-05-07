@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/stream/create_livestream.dart';
 import 'package:thc/utils/app_config.dart';
-import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/state_async.dart';
@@ -233,7 +233,7 @@ class StreamOverlay extends StatelessWidget {
     const duration = Durations.medium1;
 
     final child = AnimatedOpacity(
-      opacity: context.watch<StreamOverlayFadeIn>().state ? 1 : 0,
+      opacity: context.watch<StreamOverlayFadeIn>().value ? 1 : 0,
       duration: duration,
       child: this.child,
     );
@@ -261,12 +261,12 @@ class StreamOverlay extends StatelessWidget {
 /// This is implemented as a [Cubit] so that we can fetch the value
 /// from the [BuildContext] rather than passing the argument
 /// all the way down the widget tree.
-class StreamOverlayFadeIn extends Cubit<bool> {
+class StreamOverlayFadeIn extends ValueNotifier<bool> {
   StreamOverlayFadeIn(Animation<double> animation) : super(false) {
     animation.addStatusListener((status) async {
       final complete = status == AnimationStatus.completed;
       if (complete) await Future.delayed(Durations.medium1);
-      emit(complete);
+      value = complete;
     });
   }
 }
