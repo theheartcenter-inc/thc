@@ -12,7 +12,7 @@ import 'package:thc/utils/theme.dart';
 /// {@endtemplate}
 class SurveyScreen extends StatefulWidget {
   /// {@macro SurveyScreen}
-  const SurveyScreen({super.key, required this.questions});
+  const SurveyScreen(this.questions, {super.key});
 
   /// The list of questions to use.
   ///

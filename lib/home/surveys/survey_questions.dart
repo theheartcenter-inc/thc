@@ -39,7 +39,7 @@ sealed class SurveyQuestion {
         return TextPromptQuestion(question, optional: optional);
 
       case [final choicesType, 'multiple', 'choice']:
-        final List<String> choices = json['choices'];
+        final choices = <String>[...json['choices']];
         final bool canType = json['custom response allowed'] ?? false;
         return switch (choicesType) {
           'radio' => RadioQuestion(
@@ -57,10 +57,11 @@ sealed class SurveyQuestion {
         };
 
       case ['scale']:
+        final values = <String>[...json['values']];
         return ScaleQuestion(
           question,
           optional: optional,
-          values: json['values'],
+          values: values,
           showEndLabels: json['show endpoint labels'] ?? false,
         );
 
