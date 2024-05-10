@@ -16,6 +16,8 @@ enum Firestore {
 
   DocumentReference<Json> doc([String? path]) => _collection.doc(path);
 
+  Future<QuerySnapshot<Json>> get() => _collection.get();
+
   Stream<Snapshot> snapshots({
     ListenSource source = ListenSource.defaultSource,
     bool includeMetadataChanges = false,

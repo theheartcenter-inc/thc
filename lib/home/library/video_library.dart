@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:thc/firebase/firebase.dart';
@@ -13,12 +15,16 @@ class VideoCard extends StatelessWidget {
       required this.timestamp,
       this.thumbnail,
       required this.director,
+      this.category,
+      this.id,
       this.path});
   final String title;
   final Timestamp timestamp;
   final String? thumbnail;
   final String director;
   final String? path;
+  final category;
+  final id;
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +84,12 @@ class VideoCard extends StatelessWidget {
       ),
     );
   }
+
+  Future<String> getDownloadUrl(path) async {
+    final Reference storageReference = FirebaseStorage.instance.ref().child(path);
+    final String downloadURL = await storageReference.getDownloadURL();
+    return downloadURL;
+  }
 }
 
 class VideoLibrary extends StatefulWidget {
@@ -88,64 +100,137 @@ class VideoLibrary extends StatefulWidget {
 }
 
 class _VideoLibraryState extends State<VideoLibrary> {
+  final TextEditingController controller = TextEditingController();
+  String selectedCategory = 'All';
+  List<VideoCard> allVideos = [];
+  List<VideoCard> videos = [];
+  // final CollectionReference collectionRef = FirebaseFirestore.instance.collection('streams');
+  List<DocumentSnapshot> documents = [];
+  var document;
+  Set ids = {};
+
+  @override
+  void initState() {
+    super.initState();
+    fetchDocuments();
+  }
+
+  Future<void> fetchDocuments() async {
+    final QuerySnapshot snapshot = await Firestore.streams.get();
+    setState(() {
+      documents = snapshot.docs;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final videoCards = StreamBuilder<QuerySnapshot>(
-      stream: Firestore.streams.snapshots(),
-      builder: (context, snapshot) => Column(
-        children: [
-          if (snapshot.data?.docs.reversed case final streams?)
-            for (final stream in streams)
-              if ('${stream['storage_path']}' != '')
-                VideoCard(
-                  title: stream['title'],
-                  timestamp: stream['date'],
-                  director: stream['director'],
-                  path: stream['storage_path'],
-                )
-        ],
-      ),
-    );
+    if (documents.isEmpty) {
+      fetchDocuments();
+      return const CircularProgressIndicator();
+    } else {
+      if (allVideos.isEmpty) {
+        for (document in documents) {
+          allVideos.add(VideoCard(
+            id: document.id,
+            title: document['title'],
+            category: document['category'],
+            director: document['director'],
+            path: document['storage_path'],
+            timestamp: document['date'],
+          ));
+        }
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-          appBar: AppBar(
-            title: const Text(
-              'Video Library',
+        videos = allVideos;
+      }
+
+      return DefaultTabController(
+          length: 2,
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text('Video Library'),
             ),
-            bottom: const TabBar(
-              tabs: [
-                Tab(
-                  text: 'Recent',
+            body: Column(
+              children: <Widget>[
+                Container(
+                  margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  child: TextField(
+                    controller: controller,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.search),
+                      hintText: 'Search here',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    onChanged: searchVideo,
+                  ),
                 ),
-                Tab(
-                  text: 'Favorites',
-                )
+                DropdownButton<String>(
+                  value: selectedCategory,
+                  onChanged: (newValue) {
+                    setState(() {
+                      selectedCategory = newValue!;
+                      filterVideos();
+                    });
+                  },
+                  items: _buildCategoryDropdownItems(),
+                ),
+                Expanded(
+                  child: ListView.builder(
+                      itemCount: videos.length,
+                      itemBuilder: (context, index) {
+                        final video = videos[index];
+                        return video;
+                      }),
+                ),
               ],
             ),
-          ),
-          body: TabBarView(
-            children: <Widget>[
-              SingleChildScrollView(
-                child: videoCards,
-              ),
-              SingleChildScrollView(
-                // Replace with user's favorite videos
-                child: VideoCard(
-                  director: 'FirstName LastName',
-                  title: 'Test Favorite Video',
-                  timestamp: Timestamp.now(),
-                ),
-              ),
-            ],
-          )),
+          ));
+    }
+  }
+
+  List<DropdownMenuItem<String>> _buildCategoryDropdownItems() {
+    final categories = {
+      'All',
+      for (final video in allVideos) video.category,
+    };
+    final items = [
+      for (final category in categories.toList()..sort())
+        DropdownMenuItem<String>(value: category, child: Text(category)),
+    ];
+    return items;
+  }
+
+  void searchVideo(String query) {
+    filterVideos();
+    setState(
+      () {
+        if (query.isNotEmpty) {
+          videos = videos.where((video) {
+            if (!ids.contains(video.id)) {
+              final videoTitle = video.title.toLowerCase();
+              final input = query.toLowerCase();
+              ids.add(video.id);
+              return videoTitle.contains(input);
+            } else {
+              return false;
+            }
+          }).toList();
+        }
+        ids = {};
+      },
     );
   }
-}
 
-Future<String> getDownloadUrl(path) async {
-  final Reference storageReference = FirebaseStorage.instance.ref().child(path);
-  final String downloadURL = await storageReference.getDownloadURL();
-  return downloadURL;
+  void filterVideos() {
+    if (selectedCategory != 'All') {
+      setState(() {
+        videos = allVideos.where((video) => video.category == selectedCategory).toList();
+      });
+    } else {
+      setState(() {
+        videos = allVideos;
+      });
+    }
+  }
 }

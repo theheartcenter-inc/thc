@@ -1,5 +1,5 @@
-import 'package:appinio_video_player/appinio_video_player.dart';
 import 'package:flutter/material.dart';
+import 'package:appinio_video_player/appinio_video_player.dart';
 
 class PlayVideo extends StatefulWidget {
   const PlayVideo({super.key, required this.videoURL, required this.videoName});
@@ -17,7 +17,7 @@ class _PlayVideoState extends State<PlayVideo> {
   void initState() {
     super.initState();
     initializeVideoPlayer(
-      Uri.parse(widget.videoURL),
+      widget.videoURL,
     );
   }
 
@@ -44,11 +44,13 @@ class _PlayVideoState extends State<PlayVideo> {
         ));
   }
 
-  void initializeVideoPlayer(videoURL) {
-    VideoPlayerController videoPlayerController;
-    videoPlayerController = VideoPlayerController.networkUrl(videoURL)
-      ..initialize().then((value) => {setState(() {})});
+  void initializeVideoPlayer(videoUrl) {
+    CachedVideoPlayerController videoPlayerController;
+    videoPlayerController = CachedVideoPlayerController.network(videoUrl)
+      ..initialize().then((value) => setState(() {}));
     _customVideoPlayerController = CustomVideoPlayerController(
-        context: context, videoPlayerController: videoPlayerController);
+      context: context,
+      videoPlayerController: videoPlayerController,
+    );
   }
 }
