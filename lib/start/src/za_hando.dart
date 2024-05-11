@@ -65,11 +65,9 @@ class ZaHando extends StatelessWidget {
 
   static const _handWidth = 600.0, _handHeight = 800.0;
   static const handSize = Size(_handWidth, _handHeight);
+  static const handPadding = 25.0;
 
   Widget sunrise(BuildContext context, double t, Widget? child) {
-    final t2 = t.squared;
-    final t5 = t2.squared * t;
-    final t10 = t5.squared;
     final backgroundGradient = t < 2 / 3;
 
     final colors = ThcColors.of(context);
@@ -77,6 +75,7 @@ class ZaHando extends StatelessWidget {
       Brightness.light => (1 - t * 0.75, t * 0.8),
       Brightness.dark => (1 - t * 2 / 3, t * 0.75),
     };
+
     final handHSV = HSVColor.fromAHSV(1.0, 180 - t * 60, tSaturation, tValue);
     final handColor = t == 1 ? colors.primary : handHSV.toColor();
 
@@ -89,12 +88,16 @@ class ZaHando extends StatelessWidget {
 
     final tContainer = max(3 * (t - 1) + 1, 0.0);
     final tSunSpike = Curves.easeInOut.transform(max(8 / 3 * (t - 1) + 1, 0.0));
-    Color pink(HSVColor from, double saturation) {
-      final target = HSVColor.fromAHSV(1, 330, saturation, 1);
+    Color pink(
+      HSVColor from, {
+      required double hue,
+      required double saturation,
+      required double value,
+    }) {
+      final target = HSVColor.fromAHSV(1, hue, saturation, value);
       return Color.lerp(from.toColor(), target.toColor(), tSunSpike)!;
     }
 
-    final sunBorder = Sunflower.pinkBorder.withOpacity(t10);
     // final tGlow = 1.4 * (t2 - t10);
     // final sunGlow = Sunflower.glow.withOpacity(tGlow);
 
@@ -128,12 +131,12 @@ class ZaHando extends StatelessWidget {
                     Sunflower(
                       bulge: tSunSpike,
                       colors: (
-                        border: sunBorder,
-                        center: pink(sunCenter, 0.10),
-                        outer: pink(sunOuter, 0.50),
+                        center: pink(sunCenter, hue: 315, saturation: 0.25, value: 1),
+                        outer: pink(sunOuter, hue: 330.0, saturation: 2 / 3, value: 1),
                       ),
                     ),
-                    Center(
+                    Align(
+                      alignment: const Alignment(0, -1 / 32),
                       child: Transform.scale(
                         scaleY: 1.1,
                         child: _FadeIn(t, child: centerText),
@@ -163,7 +166,7 @@ class ZaHando extends StatelessWidget {
             ConstrainedBox(
               constraints: BoxConstraints(maxHeight: constraints.maxHeight - 275),
               child: Padding(
-                padding: const EdgeInsets.all(25).copyWith(top: 0),
+                padding: const EdgeInsets.all(handPadding).copyWith(top: 0),
                 child: FittedBox(
                   child: Stack(
                     children: [
@@ -172,13 +175,11 @@ class ZaHando extends StatelessWidget {
                         color: backgroundGradient ? null : handColor,
                       ),
                       Positioned.fill(
-                        child: ClipRect(
-                          child: Align(
-                            alignment: Alignment.topCenter,
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 420),
-                              child: innerHand,
-                            ),
+                        child: Align(
+                          alignment: Alignment.topCenter,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 420),
+                            child: innerHand,
                           ),
                         ),
                       ),
@@ -187,6 +188,10 @@ class ZaHando extends StatelessWidget {
                 ),
               ),
             ),
+            Horizon(
+              t: (3 * t - 1).clamp(0.0, 1.0).squared,
+              brightness: colors.brightness,
+            ).widget,
             _FadeIn(t, child: child!),
           ],
         ),
@@ -208,6 +213,7 @@ class ZaHando extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [handColor, handHorizon.toColor()],
+              stops: const [0, 3 / 4],
             ),
           );
 
@@ -238,8 +244,8 @@ class ZaHando extends StatelessWidget {
     final fontSize = 48 - 10 * tMotion;
     final sunHeight = Sunflower.size * (1 - tMotion);
 
-    final opacity = 1 - tHand.squared;
-    final sunOpacity = opacity.squared;
+    // final opacity = 1 - tHand.squared;
+    final sunOpacity = 1 - tHand;
 
     final colors = ThcColors.of(context);
     final handColor = colors.primary.withOpacity(1 - t2);
@@ -253,7 +259,9 @@ class ZaHando extends StatelessWidget {
     );
     final centerText = Text(
       'CENTER',
-      style: StyleText(color: Color.lerp(Sunflower.overlayText, colors.onSurfaceVariant, t)),
+      style: StyleText(
+        color: Color.lerp(Sunflower.overlayText, colors.onSurfaceVariant, t),
+      ),
     );
 
     final innerHand = DefaultTextStyle(
@@ -274,15 +282,15 @@ class ZaHando extends StatelessWidget {
                       width: Sunflower.size,
                       height: sunHeight,
                       child: Sunflower(colors: (
-                        center: const Color(0xffffe6f2).withOpacity(sunOpacity),
-                        outer: const Color(0xfff03c96).withOpacity(sunOpacity),
-                        border: const Color(0xffff80c0).withOpacity(sunOpacity),
+                        center: Sunflower.center.withOpacity(sunOpacity),
+                        outer: Sunflower.outer.withOpacity(sunOpacity),
                       )),
                     ),
                   ),
                 ConstrainedBox(
                   constraints: BoxConstraints(minWidth: Sunflower.size, minHeight: sunHeight),
-                  child: Center(
+                  child: Align(
+                    alignment: const Alignment(0, -1 / 32),
                     child: Transform.scale(scaleY: 1.1 - 0.1 * tMotion, child: centerText),
                   ),
                 ),
