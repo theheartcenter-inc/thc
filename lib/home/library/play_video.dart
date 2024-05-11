@@ -16,7 +16,9 @@ class _PlayVideoState extends State<PlayVideo> {
   @override
   void initState() {
     super.initState();
-    initializeVideoPlayer(widget.videoURL);
+    initializeVideoPlayer(
+      widget.videoURL,
+    );
   }
 
   @override
