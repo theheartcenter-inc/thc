@@ -30,10 +30,7 @@ class _PlayVideoState extends State<PlayVideo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text(widget.videoName),
-          leading: const BackButton(),
-        ),
+        appBar: AppBar(title: Text(widget.videoName)),
         body: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -44,7 +41,7 @@ class _PlayVideoState extends State<PlayVideo> {
         ));
   }
 
-  void initializeVideoPlayer(videoUrl) {
+  void initializeVideoPlayer(String videoUrl) {
     CachedVideoPlayerController videoPlayerController;
     videoPlayerController = CachedVideoPlayerController.network(videoUrl)
       ..initialize().then((value) => setState(() {}));
