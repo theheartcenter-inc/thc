@@ -93,7 +93,7 @@ class ProfileScreen extends StatelessWidget {
       ),
     );
 
-    final userWatch = context.watch<AccountFields>().state ?? ThcUser(name: 'Not Found', id: '');
+    final userWatch = context.watch<AccountFields>().value ?? ThcUser(name: 'Not Found', id: '');
     if (userWatch.name == 'Not Found') ErrorIfStrict("couldn't get AccountFields data");
 
     final linkColor = Color.lerp(ThcColors.dullBlue, ThcColors.teal, 0.25)!;
