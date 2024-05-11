@@ -1,8 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:thc/home/stream/active_stream.dart';
-import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/lerpy_hero.dart';
@@ -24,7 +24,7 @@ class CreateLivestream extends StatelessWidget {
       child: Column(
         children: [
           const Spacer(),
-          _StartSwitch(context.read<LivestreamEnabled>().emit),
+          _StartSwitch((newVal) => context.read<LivestreamEnabled>().value = newVal),
           const Spacer(flex: 20),
           Text(scheduledFor),
           const Spacer(flex: 2),
@@ -43,7 +43,7 @@ class _GoLive extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enabled = context.watch<LivestreamEnabled>().state;
+    final enabled = context.watch<LivestreamEnabled>().value;
     return AnimatedOpacity(
       duration: Durations.long1,
       opacity: enabled ? 1 : 1 / 3,
@@ -62,14 +62,14 @@ class _GoLive extends StatelessWidget {
                         PageRouteBuilder(
                           transitionDuration: duration,
                           reverseTransitionDuration: duration,
-                          pageBuilder: (_, animation, __) => BlocProvider(
+                          pageBuilder: (_, animation, __) => ChangeNotifierProvider(
                             create: (_) => StreamOverlayFadeIn(animation),
                             child: const ActiveStream(),
                           ),
                         ),
                       );
                       await Future.delayed(duration);
-                      context.read<LivestreamEnabled>().emit(false);
+                      context.read<LivestreamEnabled>().value = false;
                     }
                   : null,
               child: Center(
@@ -141,7 +141,7 @@ class _StartSwitch extends StatelessWidget {
   final ValueChanged<bool> onChanged;
   @override
   Widget build(BuildContext context) {
-    final aboutToStart = context.watch<LivestreamEnabled>().state;
+    final aboutToStart = context.watch<LivestreamEnabled>().value;
     return SizedBox(
       width: 300,
       child: ColoredBox(
@@ -159,7 +159,7 @@ class _StartSwitch extends StatelessWidget {
 }
 
 /// controls whether the "Go Live" button is enabled.
-class LivestreamEnabled extends Cubit<bool> {
+class LivestreamEnabled extends ValueNotifier<bool> {
   /// controls whether the "Go Live" button is enabled.
   LivestreamEnabled() : super(true);
 }

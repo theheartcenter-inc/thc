@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:provider/provider.dart';
 import 'package:thc/start/start.dart';
 import 'package:thc/utils/animation.dart';
-import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
@@ -31,7 +31,7 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
   Future<void> toggle([ThemeMode? mode]) async {
     final reversing = controller.aimedForward;
     if (reversing && mode != null) {
-      context.read<AppTheme>().emit(mode);
+      context.read<AppTheme>().value = mode;
       LocalStorage.themeMode.save(mode.index);
     }
     return reversing ? controller.reverse(from: 1) : controller.forward(from: 0);
@@ -46,7 +46,7 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
   }
 
   Widget builder(BuildContext context, _) {
-    final themeMode = context.watch<AppTheme>().state;
+    final themeMode = context.watch<AppTheme>().value;
 
     final t = controller.value;
     final aimedForward = controller.aimedForward;

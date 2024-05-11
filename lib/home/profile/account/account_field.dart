@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
-import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
@@ -128,16 +128,16 @@ class _AccountFieldState extends State<AccountField> {
   }
 }
 
-class AccountFields extends Cubit<ThcUser?> {
+class AccountFields extends ValueNotifier<ThcUser?> {
   AccountFields() : super(user);
 
-  void update(AccountField field) => emit(AccountField.updatedUser);
+  void update(AccountField field) => value = AccountField.updatedUser;
 
   bool get hasChanges => AccountField.values.any((value) => value.updated != null);
 
   Future<void> save(ThcUser updatedUser) async {
     await updatedUser.upload();
-    emit(user = updatedUser);
+    value = user = updatedUser;
   }
 
   Future<void> yeet(AccountField field) async {

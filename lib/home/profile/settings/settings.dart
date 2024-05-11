@@ -64,7 +64,7 @@ class _ThemePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeMode = context.watch<AppTheme>().state;
+    final themeMode = context.watch<AppTheme>().value;
     return SegmentedButton<ThemeMode>(
       showSelectedIcon: false,
       segments: [
