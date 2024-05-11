@@ -126,7 +126,9 @@ class _VideoLibraryState extends State<VideoLibrary> {
   Widget build(BuildContext context) {
     if (documents.isEmpty) {
       fetchDocuments();
-      return const CircularProgressIndicator();
+      return const Center(
+        child: CircularProgressIndicator(),
+      );
     } else {
       if (allVideos.isEmpty) {
         for (document in documents) {
