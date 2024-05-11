@@ -57,13 +57,10 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
     final fgOpacity = foregroundColor.opacity;
     final splashColor = foregroundColor.withOpacity(fgOpacity / 4);
 
-    final normalRadius = Radius.circular((1 - tCurve) * 24);
-    final cornerRadius = Radius.circular((1 - tCurve) * 16 + 8);
-
     final width = 72 * tCurve;
     final height = 80 * tCurve;
 
-    Widget? button(ThemeMode buttonMode) {
+    Widget? themeButton(ThemeMode buttonMode) {
       final active = buttonMode == themeMode;
       if (t == 0 && !active) return null;
 
@@ -74,14 +71,7 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
         top: tCurve * buttonMode.index * (height + 48) / 3,
         bottom: tCurve * (2 - buttonMode.index) * (height + 48) / 3,
         child: Material(
-          animationDuration: Duration.zero,
-          borderRadius: switch (buttonMode) {
-            ThemeMode.light => BorderRadius.all(normalRadius),
-            ThemeMode.dark => BorderRadius.vertical(top: normalRadius, bottom: cornerRadius),
-            ThemeMode.system => BorderRadius.vertical(top: cornerRadius, bottom: normalRadius),
-          },
-          color: widget.backgroundColor,
-          clipBehavior: Clip.hardEdge,
+          type: MaterialType.transparency,
           child: InkWell(
             key: ValueKey(buttonMode),
             onTap: t.remainder(1) == 0 ? () => toggle(buttonMode) : null,
@@ -121,11 +111,17 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
     return SizedBox(
       width: width + 48,
       height: height + 48,
-      child: Stack(
-        children: [
-          for (final mode in stacked)
-            if (button(mode) case final button?) button,
-        ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular((1 - tCurve) * 16 + 8),
+        child: ColoredBox(
+          color: widget.backgroundColor ?? Theme.of(context).canvasColor,
+          child: Stack(
+            children: [
+              for (final mode in stacked)
+                if (themeButton(mode) case final button?) button,
+            ],
+          ),
+        ),
       ),
     );
   }

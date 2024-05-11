@@ -13,7 +13,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:thc/home/profile/choose_any_view/choose_any_view.dart';
 import 'package:thc/start/src/login_fields.dart';
 import 'package:thc/start/src/login_progress.dart';
-import 'package:thc/start/src/start_theme.dart';
+import 'package:thc/start/src/sun_flower.dart';
+import 'package:thc/utils/num_powers.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/theme_mode_picker.dart';
@@ -23,7 +24,7 @@ void animate() async {
   LoginProgressTracker.update(animation: AnimationProgress.pressStart);
   await Future.delayed(ZaHando.transition);
   LoginProgressTracker.update(animation: AnimationProgress.collapseHand);
-  await Future.delayed(ZaHando.shrinkDuration);
+  await Future.delayed(ZaHando.collapseDuration);
   LoginField.top.node.requestFocus();
   await Future.delayed(Durations.extralong1);
   LoginProgressTracker.update(animation: AnimationProgress.showBottom);
@@ -35,11 +36,11 @@ class ZaHando extends StatelessWidget {
   const ZaHando({super.key});
 
   static const sunriseDuration = Duration(seconds: 5);
-  static const _shrinkMs = 1500;
-  static const _shrinkDuration = Duration(milliseconds: _shrinkMs);
+  static const _collapseMs = 1500;
+  static const _collapseDuration = Duration(milliseconds: _collapseMs);
 
-  static const transition = Duration(milliseconds: _shrinkMs ~/ (1 / handBounceTime));
-  static const shrinkDuration = Duration(milliseconds: _shrinkMs ~/ (1 / motionRatio));
+  static const transition = Duration(milliseconds: _collapseMs ~/ (1 / bounceHandRatio));
+  static const collapseDuration = Duration(milliseconds: _collapseMs ~/ (1 / motionRatio));
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +49,7 @@ class ZaHando extends StatelessWidget {
 
     Widget contents = TweenAnimationBuilder(
       key: ValueKey(pressedStart),
-      duration: pressedStart ? _shrinkDuration : sunriseDuration,
+      duration: pressedStart ? _collapseDuration : sunriseDuration,
       tween: Tween(begin: 0.0, end: 1.0),
       builder: pressedStart ? collapse : sunrise,
       child: const LoginFields(),
@@ -64,13 +65,11 @@ class ZaHando extends StatelessWidget {
 
   static const _handWidth = 600.0, _handHeight = 800.0;
   static const handSize = Size(_handWidth, _handHeight);
-  static const sunSize = 225.0;
-  static const sunPadding = 20.0;
 
   Widget sunrise(BuildContext context, double t, Widget? child) {
-    final t2 = t * t;
-    final t5 = t2 * t2 * t;
-    final t10 = t5 * t5;
+    final t2 = t.squared;
+    final t5 = t2.squared * t;
+    final t10 = t5.squared;
     final backgroundGradient = t < 2 / 3;
 
     final colors = ThcColors.of(context);
@@ -84,48 +83,63 @@ class ZaHando extends StatelessWidget {
     final tSun = Curves.easeOutSine.transform(t);
     final sunCenter = HSVColor.fromAHSV(1, tSun * 30 + 30, 1, (tSun + 1) / 2);
     final sunOuter = sunCenter.withHue(tSun * 30 + 20);
-    final sunMid = HSVColor.lerp(sunCenter, sunOuter, 1 / 3)!;
-    final sunBorder = Border.all(width: 4, color: SunColors.border.withOpacity(t10));
-    final tGlow = 1.4 * (t2 - t10);
-    final sunGlow = BoxShadow(color: SunColors.glow.withOpacity(tGlow), blurRadius: 20);
 
     final tSunrise = Curves.easeOutSine.transform(min(t * 1.25, 1));
-    final sunOffset = Offset(0, (sunSize + sunPadding * 2.5) * (1 - tSunrise));
+    final sunOffset = Offset(0, (Sunflower.size + Sunflower.padding * 2.5) * (1 - tSunrise));
 
     final tContainer = max(3 * (t - 1) + 1, 0.0);
+    final tSunSpike = Curves.easeInOut.transform(max(8 / 3 * (t - 1) + 1, 0.0));
+    Color pink(HSVColor from, double saturation) {
+      final target = HSVColor.fromAHSV(1, 330, saturation, 1);
+      return Color.lerp(from.toColor(), target.toColor(), tSunSpike)!;
+    }
+
+    final sunBorder = Sunflower.pinkBorder.withOpacity(t10);
+    // final tGlow = 1.4 * (t2 - t10);
+    // final sunGlow = Sunflower.glow.withOpacity(tGlow);
 
     final tScale = Curves.easeOutExpo.transform(tContainer);
     final scale = 20 * (1 - tScale) + 1.0;
 
-    final heartText = Text('THE HEART', style: StyleText(color: colors.primaryContainer));
-    const centerText = Text('CENTER', style: StyleText(color: SunColors.overlayText));
+    final heartText = Text(
+      'HEART',
+      style: StyleText(color: colors.primaryContainer, weight: 640),
+    );
+    const centerText = Text(
+      'CENTER',
+      style: StyleText(color: Sunflower.overlayText),
+    );
 
     final innerHand = DefaultTextStyle(
       style: const StyleText(size: 48, weight: 720),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Transform.scale(scale: 1.2, child: _FadeIn(t, child: heartText)),
+          Transform.scale(scale: 1.25, child: _FadeIn(t, child: heartText)),
           Transform.translate(
             offset: sunOffset,
             child: Padding(
-              padding: const EdgeInsets.all(sunPadding),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: SunColors.hsv([sunCenter, sunMid, sunOuter]),
-                  shape: BoxShape.circle,
-                  border: sunBorder,
-                  boxShadow: [sunGlow],
-                ),
-                child: SizedBox(
-                  width: sunSize,
-                  height: sunSize,
-                  child: Center(
-                    child: Transform.scale(
-                      scaleY: 1.1,
-                      child: _FadeIn(t, child: centerText),
+              padding: const EdgeInsets.all(Sunflower.padding),
+              child: SizedBox.square(
+                dimension: Sunflower.size,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Sunflower(
+                      bulge: tSunSpike,
+                      colors: (
+                        border: sunBorder,
+                        center: pink(sunCenter, 0.10),
+                        outer: pink(sunOuter, 0.50),
+                      ),
                     ),
-                  ),
+                    Center(
+                      child: Transform.scale(
+                        scaleY: 1.1,
+                        child: _FadeIn(t, child: centerText),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -162,7 +176,7 @@ class ZaHando extends StatelessWidget {
                           child: Align(
                             alignment: Alignment.topCenter,
                             child: Padding(
-                              padding: const EdgeInsets.only(top: 425),
+                              padding: const EdgeInsets.only(top: 420),
                               child: innerHand,
                             ),
                           ),
@@ -206,32 +220,40 @@ class ZaHando extends StatelessWidget {
     );
   }
 
-  static const handBounceTime = 0.25;
-  static const handTotalTime = 0.5;
+  static const bounceHandRatio = 0.25;
+  static const totalHandRatio = 0.5;
   static const minScale = 0.8;
-  static const motionRatio = 1 - handBounceTime;
+  static const motionRatio = 1 - bounceHandRatio;
 
   Widget collapse(BuildContext context, double t, Widget? child) {
-    final tHand = min(t / handTotalTime, 1.0);
-    final double scale = switch (tHand - handBounceTime) {
-      < 0 => 1 - tHand * (1 - minScale) / handBounceTime,
-      final tScale => 12 * tScale * tScale + minScale,
+    final tHand = min(t / totalHandRatio, 1.0);
+    final double scale = switch (tHand - bounceHandRatio) {
+      < 0 => 1 - tHand * (1 - minScale) / bounceHandRatio,
+      final tScale => 12 * tScale.squared + minScale,
     };
 
+    final t2 = t.squared;
     final tMotionLinear = max(1 + (t - 1) / motionRatio, 0.0);
     final tMotion = Curves.ease.transform(tMotionLinear);
     final fontSize = 48 - 10 * tMotion;
+    final sunHeight = Sunflower.size * (1 - tMotion);
+
+    final opacity = 1 - tHand.squared;
+    final sunOpacity = opacity.squared;
 
     final colors = ThcColors.of(context);
-    final handColor = colors.primary.withOpacity(1 - t * t);
+    final handColor = colors.primary.withOpacity(1 - t2);
 
     final heartText = Text(
-      'THE HEART',
-      style: StyleText(color: Color.lerp(ThcColors.dullGreen38, colors.onSurfaceVariant, t)),
+      'HEART',
+      style: StyleText(
+        color: Color.lerp(ThcColors.dullGreen38, colors.onSurfaceVariant, t),
+        weight: 640 + 80 * t2,
+      ),
     );
     final centerText = Text(
       'CENTER',
-      style: StyleText(color: Color.lerp(SunColors.overlayText, colors.onSurfaceVariant, t)),
+      style: StyleText(color: Color.lerp(Sunflower.overlayText, colors.onSurfaceVariant, t)),
     );
 
     final innerHand = DefaultTextStyle(
@@ -239,24 +261,32 @@ class ZaHando extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Transform.scale(scale: 1 + 0.2 * (1 - tMotion), child: heartText),
+          Transform.scale(scale: 1 + 0.25 * (1 - tMotion), child: heartText),
           Padding(
-            padding: EdgeInsets.all(sunPadding * (1 - tMotion)),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: SunColors.withOpacity(1 - tHand),
-                shape: BoxShape.circle,
-                border: Border.all(width: 4, color: SunColors.border.withOpacity(1 - tHand)),
-              ),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  minWidth: sunSize,
-                  minHeight: sunSize * (1 - tMotion),
+            padding: EdgeInsets.all(Sunflower.padding * (1 - tMotion)),
+            child: Stack(
+              alignment: Alignment.topCenter,
+              children: [
+                if (t < 1)
+                  Transform.scale(
+                    scale: scale,
+                    child: SizedBox(
+                      width: Sunflower.size,
+                      height: sunHeight,
+                      child: Sunflower(colors: (
+                        center: const Color(0xffffe6f2).withOpacity(sunOpacity),
+                        outer: const Color(0xfff03c96).withOpacity(sunOpacity),
+                        border: const Color(0xffff80c0).withOpacity(sunOpacity),
+                      )),
+                    ),
+                  ),
+                ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: Sunflower.size, minHeight: sunHeight),
+                  child: Center(
+                    child: Transform.scale(scaleY: 1.1 - 0.1 * tMotion, child: centerText),
+                  ),
                 ),
-                child: Center(
-                  child: Transform.scale(scaleY: 1.1 - 0.1 * tMotion, child: centerText),
-                ),
-              ),
+              ],
             ),
           ),
         ],
@@ -275,7 +305,7 @@ class ZaHando extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: EdgeInsets.only(top: 425 * (1 - tMotion), bottom: 20 * tMotion),
+          padding: EdgeInsets.only(top: 420 * (1 - tMotion), bottom: 20 * tMotion),
           child: innerHand,
         ),
       ],
