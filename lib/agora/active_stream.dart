@@ -3,15 +3,26 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:thc/agora/livestream_button.dart';
 import 'package:thc/home/home_screen.dart';
-import 'package:thc/home/stream/create_livestream.dart';
+import 'package:thc/home/surveys/survey_questions.dart';
+import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/state_async.dart';
 
 class ActiveStream extends StatefulWidget {
   const ActiveStream({super.key});
+
+  static const _duration = Durations.extralong1;
+  static PageRouteBuilder get route => PageRouteBuilder(
+        transitionDuration: _duration,
+        reverseTransitionDuration: _duration,
+        pageBuilder: (_, animation, __) => ChangeNotifierProvider(
+          create: (_) => StreamOverlayFadeIn(animation),
+          child: const ActiveStream(),
+        ),
+      );
 
   @override
   State<ActiveStream> createState() => _ActiveStreamState();
@@ -39,13 +50,6 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
   bool overlayVisible = true;
   bool buttonHovered = false;
 
-  /// Prevents the [_EndButton] from disappearing when you
-  /// move your mouse to click it, cause that would be weird.
-  void buttonHover(bool isHovered) {
-    buttonHovered = isHovered;
-    if (isHovered) timer?.cancel();
-  }
-
   /// Automatically hide the overlay when you move your mouse off the screen.
   void mouseOffScreen([_]) async {
     timer?.cancel();
@@ -67,6 +71,24 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
     }
   }
 
+  /// Prevents the [_EndButton] from disappearing when you
+  /// move your mouse to click it, cause that would be weird.
+  void buttonHover(bool isHovered) {
+    buttonHovered = isHovered;
+    if (isHovered) timer?.cancel();
+  }
+
+  void endStream() {
+    context.read<StreamOverlayFadeIn>().value = false;
+    if (NavBarSelection.of(context, listen: false) == NavBarButton.stream) {
+      return navigator.pop();
+    }
+
+    navigator.pushReplacement(
+      SurveyScreen(questions: SurveyPresets.streamFinished.questions),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,7 +107,7 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
       ),
       floatingActionButton: StreamOverlay(
         overlayVisible ? Offset.zero : const Offset(0, 2),
-        child: _EndButton(onPressed: navigator.pop, onHover: buttonHover),
+        child: _EndButton(onPressed: endStream, onHover: buttonHover),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
@@ -135,10 +157,7 @@ class _Backdrop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      data: context.editScheme(secondary: Colors.black),
-      child: const GoLive(),
-    );
+    return const LivestreamButton();
   }
 }
 
@@ -151,10 +170,14 @@ class _StreamingCamera extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    final enjoying = switch (NavBarSelection.of(context)) {
+      NavBarButton.stream => 'filming',
+      _ => 'watching',
+    };
+    return Center(
       child: Text(
-        "(pretend you're filming a very cool livestream)",
-        style: TextStyle(color: Colors.white70),
+        "(pretend you're $enjoying a very cool livestream)",
+        style: const TextStyle(color: Colors.white70),
       ),
     );
   }

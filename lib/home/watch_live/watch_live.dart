@@ -1,35 +1,48 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:thc/agora/active_stream.dart';
+import 'package:thc/agora/livestream_button.dart';
 import 'package:thc/home/watch_live/watching_livestream.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
+import 'package:thc/utils/widgets/placeholders.dart';
 
 class WatchLive extends StatelessWidget {
   const WatchLive({super.key});
-  static final lightBackground = Color.lerp(ThcColors.pink, Colors.white, 0.33)!;
-  static final darkBackground = Color.lerp(ThcColors.darkMagenta, Colors.black, 0.75)!;
 
+  final bool active = true;
   @override
   Widget build(BuildContext context) {
+    // final bool active = Random().nextBool();
     return Scaffold(
-      backgroundColor: context.lightDark(lightBackground, darkBackground),
       body: Center(
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // will eventually show current stream info
-            const Text('This is the Stream Title', style: StyleText(size: 24)),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => navigator.push(const LobbyScreen()),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: ThcColors.darkMagenta,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('Join'),
+            const Spacer(flex: 2),
+            const Text('Daily Breathing Meditation', style: StyleText(size: 24)),
+            const SizedBox(height: 10),
+            const Text('Bob Long', style: StyleText(size: 18)),
+            const Spacer(),
+            const PlaceholderImage(width: 200),
+            const Spacer(),
+            Text(
+              active ? 'active now!' : 'starting soon!',
+              style: const StyleText(weight: 550),
             ),
+            const SizedBox(height: 18),
+            if (active)
+              LivestreamButton(color: ThcColors.of(context).primary)
+            else
+              FilledButton(
+                onPressed: () => navigator.push(const LobbyScreen()),
+                child: const Padding(
+                  padding: EdgeInsets.all(18),
+                  child: Text('Enter Lobby', style: StyleText(size: 18)),
+                ),
+              ),
+            const Spacer(),
           ],
         ),
       ),
@@ -56,7 +69,10 @@ class _LobbyScreenState extends State<LobbyScreen> {
     super.initState();
     Timer(
       const Duration(seconds: 5),
-      () => mounted ? navigator.pushReplacement(const WatchingLivestream()) : null,
+      () async {
+        if (!mounted) return;
+        await navigator.currentState.pushReplacement(ActiveStream.route);
+      },
     );
   }
 
@@ -65,25 +81,34 @@ class _LobbyScreenState extends State<LobbyScreen> {
     return Scaffold(
         appBar: AppBar(title: const Text('Lobby')),
         body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+          child: Stack(
+            alignment: Alignment.center,
             children: [
-              const Padding(
-                padding: EdgeInsets.all(20),
-                child: Text(
-                  "We've informed the host that you're here.\n"
-                  'Please be patient and give them a few moments to let you join.',
-                  textAlign: TextAlign.center,
-                ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Spacer(flex: 3),
+                  const Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Text(
+                      "We've informed the host that you're here.\n"
+                      'Please be patient and give them a few moments to let you join.',
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const Spacer(flex: 2),
+                  ElevatedButton(
+                    onPressed: navigator.pop,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('Leave Lobby'),
+                  ),
+                  const Spacer(),
+                ],
               ),
-              ElevatedButton(
-                onPressed: navigator.pop,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Leave Lobby'),
-              )
+              const LivestreamButton(color: Colors.transparent),
             ],
           ),
         ));

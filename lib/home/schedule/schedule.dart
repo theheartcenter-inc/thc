@@ -44,7 +44,7 @@ class Schedule extends StatelessWidget {
                 clipBehavior: Clip.antiAlias,
                 child: ListTile(
                   onTap: () {
-                    context.read<NavBarIndex>().selectButton(NavBarButton.watchLive);
+                    context.read<NavBarSelection>().selectButton(NavBarButton.watchLive);
                   },
                   hoverColor: ThcColors.darkGreen.withOpacity(1 / 8),
                   leading: const FlutterLogo(size: 56.0),

@@ -36,6 +36,7 @@ class _SunflowerState extends State<Sunflower> with SingleTickerProviderStateMix
   late final controller = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 1666),
+    upperBound: PolarPath.theta,
   )..repeat();
 
   @override
@@ -53,7 +54,7 @@ class _SunflowerState extends State<Sunflower> with SingleTickerProviderStateMix
         painter: _SunflowerPaint(
           colors: widget.colors,
           bulge: widget.bulge,
-          controller: controller,
+          rotation: controller.value,
         ),
         willChange: true,
       ),
@@ -65,8 +66,8 @@ class _SunflowerPaint extends CustomPainter {
   _SunflowerPaint({
     required this.colors,
     required this.bulge,
-    required AnimationController controller,
-  }) : rotation = controller.value * PolarPath.theta;
+    required this.rotation,
+  });
 
   final SunScheme colors;
   final double bulge;
@@ -203,7 +204,7 @@ class Horizon extends CustomPainter {
   final double t;
   final Brightness brightness;
 
-  Widget get widget => CustomPaint(painter: this, willChange: t < 1);
+  Widget get widget => CustomPaint(painter: this, willChange: t > 0 && t < 1);
 
   @override
   void paint(Canvas canvas, Size size) {

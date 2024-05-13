@@ -30,3 +30,24 @@ class FunPlaceholder extends StatelessWidget {
     );
   }
 }
+
+class PlaceholderImage extends StatelessWidget {
+  const PlaceholderImage({required this.width, super.key});
+  final double width;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: SizedBox.square(
+        dimension: width,
+        child: const ClipOval(
+          child: FittedBox(
+            fit: BoxFit.cover,
+            child: Image(image: AssetImage('assets/profile_placeholder.jpg')),
+          ),
+        ),
+      ),
+    );
+  }
+}

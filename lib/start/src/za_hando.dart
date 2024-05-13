@@ -87,19 +87,7 @@ class ZaHando extends StatelessWidget {
     final sunOffset = Offset(0, (Sunflower.size + Sunflower.padding * 2.5) * (1 - tSunrise));
 
     final tContainer = max(3 * (t - 1) + 1, 0.0);
-    final tSunSpike = Curves.easeInOut.transform(max(8 / 3 * (t - 1) + 1, 0.0));
-    Color pink(
-      HSVColor from, {
-      required double hue,
-      required double saturation,
-      required double value,
-    }) {
-      final target = HSVColor.fromAHSV(1, hue, saturation, value);
-      return Color.lerp(from.toColor(), target.toColor(), tSunSpike)!;
-    }
-
-    // final tGlow = 1.4 * (t2 - t10);
-    // final sunGlow = Sunflower.glow.withOpacity(tGlow);
+    final tSunflower = Curves.easeInOut.transform(max(8 / 3 * (t - 1) + 1, 0.0));
 
     final tScale = Curves.easeOutExpo.transform(tContainer);
     final scale = 20 * (1 - tScale) + 1.0;
@@ -129,10 +117,10 @@ class ZaHando extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     Sunflower(
-                      bulge: tSunSpike,
+                      bulge: tSunflower,
                       colors: (
-                        center: pink(sunCenter, hue: 315, saturation: 0.25, value: 1),
-                        outer: pink(sunOuter, hue: 330.0, saturation: 2 / 3, value: 1),
+                        center: Color.lerp(sunCenter.toColor(), Sunflower.center, tSunflower)!,
+                        outer: Color.lerp(sunOuter.toColor(), Sunflower.outer, tSunflower)!,
                       ),
                     ),
                     Align(
@@ -335,7 +323,7 @@ class ZaHando extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: constraints.maxHeight - 400),
+                  constraints: BoxConstraints(maxHeight: constraints.maxHeight - 275),
                   child: Padding(
                     padding: EdgeInsets.all(25 * (1 - tMotion)).copyWith(top: 0),
                     child: FittedBox(child: zaHando),
