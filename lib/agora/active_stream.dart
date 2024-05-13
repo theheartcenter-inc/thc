@@ -80,7 +80,7 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
 
   void endStream() {
     context.read<StreamOverlayFadeIn>().value = false;
-    if (NavBarSelection.of(context, listen: false) == NavBarButton.stream) {
+    if (NavBarSelection.of(context, listen: false).streaming) {
       return navigator.pop();
     }
 
@@ -98,7 +98,7 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
         child: Stack(
           alignment: Alignment.bottomRight,
           children: [
-            const _Backdrop(),
+            const LivestreamButton(color: Colors.black),
             StreamOverlay(overlayVisible ? 1.0 : 0.25, child: const _ViewCount()),
             StreamOverlay(overlayVisible ? 1.0 : 0.0, child: const _StreamingCamera()),
             NavBar.of(context, belowPage: true),
@@ -147,20 +147,6 @@ class AdaptiveInput extends StatelessWidget {
   }
 }
 
-/// {@template Backdrop}
-/// The [Hero] widget gives the "Go Live" button a fun little animation
-/// as it expands into this black backdrop.
-/// {@endtemplate}
-class _Backdrop extends StatelessWidget {
-  /// {@macro Backdrop}
-  const _Backdrop();
-
-  @override
-  Widget build(BuildContext context) {
-    return const LivestreamButton();
-  }
-}
-
 /// {@template views.create_livestream.StreamingCamera}
 /// Currently just a placeholder.
 /// {@endtemplate}
@@ -170,10 +156,8 @@ class _StreamingCamera extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enjoying = switch (NavBarSelection.of(context)) {
-      NavBarButton.stream => 'filming',
-      _ => 'watching',
-    };
+    final enjoying = NavBarSelection.of(context).streaming ? 'filming' : 'watching';
+
     return Center(
       child: Text(
         "(pretend you're $enjoying a very cool livestream)",

@@ -24,21 +24,12 @@ class CreateLivestream extends StatelessWidget {
           const Spacer(flex: 20),
           Text(scheduledFor),
           const Spacer(flex: 2),
-          const _GoLive(),
+          const LivestreamButton(color: ThcColors.teal),
           const Spacer(flex: 2),
           Text('$numberInLobby $people waiting', style: semiBold),
           const Spacer(),
         ],
       ),
     );
-  }
-}
-
-class _GoLive extends StatelessWidget {
-  const _GoLive();
-
-  @override
-  Widget build(BuildContext context) {
-    return const LivestreamButton(color: ThcColors.teal);
   }
 }

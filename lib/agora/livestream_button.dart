@@ -9,7 +9,7 @@ import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/lerpy_hero.dart';
 
 class LivestreamButton extends StatelessWidget {
-  const LivestreamButton({this.color = Colors.black, this.enabled = true, super.key});
+  const LivestreamButton({required this.color, this.enabled = true, super.key});
   final Color color;
   final bool enabled;
 

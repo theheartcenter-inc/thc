@@ -98,6 +98,8 @@ enum NavBarButton with StatelessEnum {
     };
   }
 
+  bool get streaming => this == stream;
+
   /// The list of buttons to display at the bottom of the home screen.
   static List<NavBarButton> get enabledValues => List.of(values.where((value) => value.enabled));
 

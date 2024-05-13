@@ -201,7 +201,7 @@ class ZaHando extends StatelessWidget {
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
               colors: [handColor, handHorizon.toColor()],
-              stops: const [0, 3 / 4],
+              stops: const [0, 0.75],
             ),
           );
 
@@ -230,25 +230,24 @@ class ZaHando extends StatelessWidget {
     final tMotionLinear = max(1 + (t - 1) / motionRatio, 0.0);
     final tMotion = Curves.ease.transform(tMotionLinear);
     final fontSize = 48 - 10 * tMotion;
-    final sunHeight = Sunflower.size * (1 - tMotion);
-
-    // final opacity = 1 - tHand.squared;
-    final sunOpacity = 1 - tHand;
+    final flowerHeight = Sunflower.size * (1 - tMotion);
+    final flowerOpacity = 1 - tHand;
 
     final colors = ThcColors.of(context);
     final handColor = colors.primary.withOpacity(1 - t2);
 
+    final targetColor = colors.onSurfaceVariant;
     final heartText = Text(
       'HEART',
       style: StyleText(
-        color: Color.lerp(ThcColors.dullGreen38, colors.onSurfaceVariant, t),
+        color: Color.lerp(ThcColors.dullGreen38, targetColor, t),
         weight: 640 + 80 * t2,
       ),
     );
     final centerText = Text(
       'CENTER',
       style: StyleText(
-        color: Color.lerp(Sunflower.overlayText, colors.onSurfaceVariant, t),
+        color: Color.lerp(Sunflower.overlayText, targetColor, t),
       ),
     );
 
@@ -268,15 +267,15 @@ class ZaHando extends StatelessWidget {
                     scale: scale,
                     child: SizedBox(
                       width: Sunflower.size,
-                      height: sunHeight,
+                      height: flowerHeight,
                       child: Sunflower(colors: (
-                        center: Sunflower.center.withOpacity(sunOpacity),
-                        outer: Sunflower.outer.withOpacity(sunOpacity),
+                        center: Sunflower.center.withOpacity(flowerOpacity),
+                        outer: Sunflower.outer.withOpacity(flowerOpacity),
                       )),
                     ),
                   ),
                 ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: Sunflower.size, minHeight: sunHeight),
+                  constraints: BoxConstraints(minWidth: Sunflower.size, minHeight: flowerHeight),
                   child: Align(
                     alignment: const Alignment(0, -1 / 32),
                     child: Transform.scale(scaleY: 1.1 - 0.1 * tMotion, child: centerText),

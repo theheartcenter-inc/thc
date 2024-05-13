@@ -51,12 +51,12 @@ class _SunflowerState extends State<Sunflower> with SingleTickerProviderStateMix
       animation: controller,
       builder: (context, child) => CustomPaint(
         size: const Size.square(Sunflower.size),
+        willChange: true,
         painter: _SunflowerPaint(
           colors: widget.colors,
           bulge: widget.bulge,
           rotation: controller.value,
         ),
-        willChange: true,
       ),
     );
   }
