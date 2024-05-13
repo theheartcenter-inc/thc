@@ -4,6 +4,7 @@ import 'package:thc/utils/app_config.dart';
 enum Firestore {
   streams,
   surveys,
+  scheduled_streams,
   users;
 
   @override
