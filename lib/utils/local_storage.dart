@@ -45,7 +45,7 @@ enum LocalStorage {
   password,
   firstLastName,
   themeMode,
-  navBarState,
+  navBarSelection,
   adminWatchLive,
   adminStream;
 
@@ -55,7 +55,7 @@ enum LocalStorage {
         userId || userType || email => null,
         password || firstLastName => '',
         themeMode => ThemeMode.system.index,
-        navBarState => 0,
+        navBarSelection => 0,
         adminWatchLive || adminStream => false,
       };
 
@@ -74,7 +74,7 @@ enum LocalStorage {
       userType when value == null => null,
       userType => UserType.values[value],
       themeMode => ThemeMode.values[value],
-      navBarState => NavBarButton.values[value],
+      navBarSelection => NavBarButton.values[value],
       adminWatchLive || adminStream => value,
     };
   }

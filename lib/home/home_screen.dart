@@ -182,7 +182,7 @@ class NavBar extends NavigationBar {
 /// {@endtemplate}
 class NavBarSelection extends ValueNotifier<NavBarButton> {
   /// {@macro NavBarIndex}
-  NavBarSelection() : super(LocalStorage.navBarState());
+  NavBarSelection() : super(LocalStorage.navBarSelection());
 
   static NavBarButton of(BuildContext context, {bool listen = true}) =>
       Provider.of<NavBarSelection>(context, listen: listen).value;
@@ -194,7 +194,7 @@ class NavBarSelection extends ValueNotifier<NavBarButton> {
   /// `index` is used in [LocalStorage], and `navIndex` is used in the [NavBar].
   void selectIndex(int navIndex) {
     final newButton = NavBarButton.enabledValues[navIndex];
-    LocalStorage.navBarState.save(newButton.index);
+    LocalStorage.navBarSelection.save(newButton.index);
     value = newButton;
   }
 

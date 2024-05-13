@@ -24,7 +24,7 @@ class LivestreamButton extends StatelessWidget {
       case Colors.transparent:
         child = const SizedBox.shrink();
       default:
-        final label = switch (context.watch<NavBarSelection>().value) {
+        final label = switch (NavBarSelection.of(context)) {
           NavBarButton.stream => 'Go Live',
           NavBarButton.watchLive || _ => 'Join',
         };
