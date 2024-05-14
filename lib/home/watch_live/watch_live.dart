@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:thc/agora/active_stream.dart';
@@ -12,10 +13,9 @@ import 'package:thc/utils/widgets/placeholders.dart';
 class WatchLive extends StatelessWidget {
   const WatchLive({super.key});
 
-  final bool active = true;
   @override
   Widget build(BuildContext context) {
-    // final bool active = Random().nextBool();
+    final bool active = math.Random().nextBool();
     return Scaffold(
       body: Center(
         child: Column(
@@ -64,16 +64,20 @@ class LobbyScreen extends StatefulWidget {
 class _LobbyScreenState extends State<LobbyScreen> {
   /// Eventually, we'll connect with Firebase and Agora…
   /// for now, it's set up to show the [WatchingLivestream] after 5 seconds.
+  late final Timer timer;
   @override
   void initState() {
     super.initState();
-    Timer(
+    timer = Timer(
       const Duration(seconds: 5),
-      () async {
-        if (!mounted) return;
-        await navigator.currentState.pushReplacement(ActiveStream.route);
-      },
+      () => navigator.currentState.pushReplacement(ActiveStream.route),
     );
+  }
+
+  @override
+  void dispose() {
+    timer.cancel();
+    super.dispose();
   }
 
   @override
