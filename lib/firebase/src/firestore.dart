@@ -4,7 +4,7 @@ import 'package:thc/utils/app_config.dart';
 enum Firestore {
   streams,
   surveys,
-  scheduled_streams,
+  scheduled_streams, // ignore: constant_identifier_names
   users;
 
   @override
