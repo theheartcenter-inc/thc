@@ -65,6 +65,7 @@ class _LobbyScreenState extends State<LobbyScreen> {
   /// Eventually, we'll connect with Firebase and Agora…
   /// for now, it's set up to show the [WatchingLivestream] after 5 seconds.
   late final Timer timer;
+
   @override
   void initState() {
     super.initState();
