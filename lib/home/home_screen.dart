@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -104,7 +104,7 @@ enum NavBarButton with StatelessEnum {
   static List<NavBarButton> get enabledValues => List.of(values.where((value) => value.enabled));
 
   /// The button's position within [enabledValues].
-  int get navIndex => max(enabledValues.indexOf(this), 0);
+  int get navIndex => math.max(enabledValues.indexOf(this), 0);
 
   /// These enum values can be built into a widget thanks to the [StatelessEnum] mixin.
   @override

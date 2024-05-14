@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -175,7 +175,7 @@ class _ViewCount extends StatelessWidget {
   /// {@macro ViewCount}
   const _ViewCount();
 
-  int get peopleWatching => Random().nextBool() ? 69 : 420;
+  int get peopleWatching => math.Random().nextBool() ? 69 : 420;
 
   @override
   Widget build(BuildContext context) {

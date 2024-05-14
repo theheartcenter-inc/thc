@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:thc/agora/livestream_button.dart';
@@ -12,12 +12,11 @@ class CreateLivestream extends StatelessWidget {
   String get scheduledFor => 'Scheduled for: '
       '${nextStream.month}/${nextStream.day}/${nextStream.year} '
       '${nextStream.hour}:${nextStream.minute}';
-  int get numberInLobby => Random().nextBool() ? 69 : 420;
+  int get numberInLobby => math.Random().nextBool() ? 69 : 420;
   String get people => numberInLobby == 1 ? 'person' : 'people';
 
   @override
   Widget build(BuildContext context) {
-    const semiBold = StyleText(weight: 600);
     return Center(
       child: Column(
         children: [
@@ -26,7 +25,7 @@ class CreateLivestream extends StatelessWidget {
           const Spacer(flex: 2),
           const LivestreamButton(color: ThcColors.teal),
           const Spacer(flex: 2),
-          Text('$numberInLobby $people waiting', style: semiBold),
+          Text('$numberInLobby $people waiting', style: const StyleText(weight: 600)),
           const Spacer(),
         ],
       ),

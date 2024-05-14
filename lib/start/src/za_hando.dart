@@ -5,7 +5,7 @@
 /// {@endtemplate}
 library;
 
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -83,11 +83,11 @@ class ZaHando extends StatelessWidget {
     final sunCenter = HSVColor.fromAHSV(1, tSun * 30 + 30, 1, (tSun + 1) / 2);
     final sunOuter = sunCenter.withHue(tSun * 30 + 20);
 
-    final tSunrise = Curves.easeOutSine.transform(min(t * 1.25, 1));
+    final tSunrise = Curves.easeOutSine.transform(math.min(t * 1.25, 1));
     final sunOffset = Offset(0, (Sunflower.size + Sunflower.padding * 2.5) * (1 - tSunrise));
 
-    final tContainer = max(3 * (t - 1) + 1, 0.0);
-    final tSunflower = Curves.easeInOut.transform(max(8 / 3 * (t - 1) + 1, 0.0));
+    final tContainer = math.max(3 * (t - 1) + 1, 0.0);
+    final tSunflower = Curves.easeInOut.transform(math.max(8 / 3 * (t - 1) + 1, 0.0));
 
     final tScale = Curves.easeOutExpo.transform(tContainer);
     final scale = 20 * (1 - tScale) + 1.0;
@@ -118,10 +118,8 @@ class ZaHando extends StatelessWidget {
                   children: [
                     Sunflower(
                       bulge: tSunflower,
-                      colors: (
-                        center: Color.lerp(sunCenter.toColor(), Sunflower.center, tSunflower)!,
-                        outer: Color.lerp(sunOuter.toColor(), Sunflower.outer, tSunflower)!,
-                      ),
+                      centerColor: Color.lerp(sunCenter.toColor(), Sunflower.center, tSunflower)!,
+                      outerColor: Color.lerp(sunOuter.toColor(), Sunflower.outer, tSunflower)!,
                     ),
                     Align(
                       alignment: const Alignment(0, -1 / 32),
@@ -220,14 +218,14 @@ class ZaHando extends StatelessWidget {
   static const motionRatio = 1 - bounceHandRatio;
 
   Widget collapse(BuildContext context, double t, Widget? child) {
-    final tHand = min(t / totalHandRatio, 1.0);
+    final tHand = math.min(t / totalHandRatio, 1.0);
     final double scale = switch (tHand - bounceHandRatio) {
       < 0 => 1 - tHand * (1 - minScale) / bounceHandRatio,
       final tScale => 12 * tScale.squared + minScale,
     };
 
     final t2 = t.squared;
-    final tMotionLinear = max(1 + (t - 1) / motionRatio, 0.0);
+    final tMotionLinear = math.max(1 + (t - 1) / motionRatio, 0.0);
     final tMotion = Curves.ease.transform(tMotionLinear);
     final fontSize = 48 - 10 * tMotion;
     final flowerHeight = Sunflower.size * (1 - tMotion);
@@ -268,10 +266,10 @@ class ZaHando extends StatelessWidget {
                     child: SizedBox(
                       width: Sunflower.size,
                       height: flowerHeight,
-                      child: Sunflower(colors: (
-                        center: Sunflower.center.withOpacity(flowerOpacity),
-                        outer: Sunflower.outer.withOpacity(flowerOpacity),
-                      )),
+                      child: Sunflower(
+                        centerColor: Sunflower.center.withOpacity(flowerOpacity),
+                        outerColor: Sunflower.outer.withOpacity(flowerOpacity),
+                      ),
                     ),
                   ),
                 ConstrainedBox(

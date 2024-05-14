@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:thc/start/src/za_hando.dart';
 import 'package:thc/utils/num_powers.dart';
 
-typedef SunScheme = ({Color center, Color outer});
-
 class Sunflower extends StatefulWidget {
-  Sunflower({required this.colors, this.bulge = 1}) : super(key: _key);
+  Sunflower({required this.centerColor, required this.outerColor, this.bulge = 1})
+      : super(key: _key);
 
-  final SunScheme colors;
+  final Color centerColor;
+  final Color outerColor;
 
   /// `0.0` → just a circle
   ///
@@ -53,7 +53,8 @@ class _SunflowerState extends State<Sunflower> with SingleTickerProviderStateMix
         size: const Size.square(Sunflower.size),
         willChange: true,
         painter: _SunflowerPaint(
-          colors: widget.colors,
+          centerColor: widget.centerColor,
+          outerColor: widget.outerColor,
           bulge: widget.bulge,
           rotation: controller.value,
         ),
@@ -64,32 +65,34 @@ class _SunflowerState extends State<Sunflower> with SingleTickerProviderStateMix
 
 class _SunflowerPaint extends CustomPainter {
   _SunflowerPaint({
-    required this.colors,
+    required this.centerColor,
+    required this.outerColor,
     required this.bulge,
     required this.rotation,
   });
 
-  final SunScheme colors;
+  final Color centerColor;
+  final Color outerColor;
   final double bulge;
   final double rotation;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final (:center, :outer) = colors;
     final blooming = bulge > 0;
-    final borderOpacity = center.opacity;
+    final borderOpacity = centerColor.opacity;
 
     final radius = size.width / 2;
     final centerOffset = Offset(radius, radius);
     final polarPath = PolarPath(radius, bulge, rotation);
     final borderPath = polarPath.borderPath();
+    final bulge2 = bulge.squared;
 
     late final glowPaint = Paint()
       ..color = Sunflower.glow.withOpacity((1 + bulge) / 2)
       ..maskFilter = MaskFilter.blur(BlurStyle.solid, 25 * (1 - bulge).squared);
 
     final fillPaint = Paint()
-      ..color = outer
+      ..color = outerColor
       ..style = PaintingStyle.fill;
 
     if (blooming) {
@@ -108,22 +111,20 @@ class _SunflowerPaint extends CustomPainter {
 
     final rect = Rect.fromCircle(
       center: centerOffset,
-      radius: lerpDouble(polarPath.innerRadius, radius, bulge.squared)!,
+      radius: lerpDouble(polarPath.innerRadius, radius, bulge2)!,
     );
-    for (final (color, opacity) in [if (blooming) (outer, 7 / 8), (center, 2 / 3)]) {
-      final gradient = RadialGradient(
-        colors: [
-          color,
-          color.withOpacity(color.opacity * opacity),
-          color.withOpacity(0),
-        ],
-      ).createShader(rect);
+    for (final (color, opacity) in [if (blooming) (outerColor, 0.875), (centerColor, 2 / 3)]) {
+      final gradient = RadialGradient(colors: [
+        color,
+        color.withOpacity(color.opacity * opacity),
+        color.withOpacity(0),
+      ]).createShader(rect);
 
       canvas.drawPaint(Paint()..shader = gradient);
     }
 
     final borderPaint = Paint()
-      ..color = Sunflower.border.withOpacity(borderOpacity * bulge.squared)
+      ..color = Sunflower.border.withOpacity(borderOpacity * bulge2)
       ..strokeWidth = 6
       ..style = PaintingStyle.stroke;
 
