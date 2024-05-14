@@ -78,10 +78,8 @@ class Schedule extends StatefulWidget {
 }
 
 class _ScheduleState extends State<Schedule> {
-  Map<String, List<Widget>> scheduledStreams = {
-    'active': [],
-    'not_active': [],
-  };
+  final List<Widget> activeScheduledStreams = [];
+  final List<Widget> inactiveScheduledStreams = [];
 
   @override
   void initState() {
@@ -94,14 +92,14 @@ class _ScheduleState extends State<Schedule> {
     setState(() {
       for (final document in snapshot.docs) {
         if (document['active']) {
-          scheduledStreams['active']!.add(ScheduledStreamCard(
+          activeScheduledStreams.add(ScheduledStreamCard(
             title: document['title'],
             timestamp: document['date'],
             director: document['director'],
             active: document['active'],
           ));
         } else {
-          scheduledStreams['not_active']?.add(ScheduledStreamCard(
+          inactiveScheduledStreams.add(ScheduledStreamCard(
             title: document['title'],
             timestamp: document['date'],
             director: document['director'],
@@ -137,8 +135,8 @@ class _ScheduleState extends State<Schedule> {
             ),
           ),
         ),
-        if (scheduledStreams['active']!.isEmpty) const Center(child: CircularProgressIndicator()),
-        ...scheduledStreams['active']!,
+        if (activeScheduledStreams.isEmpty) const Center(child: CircularProgressIndicator()),
+        ...activeScheduledStreams,
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Text(
@@ -150,8 +148,8 @@ class _ScheduleState extends State<Schedule> {
             ),
           ),
         ),
-        if (scheduledStreams['not_active']!.isEmpty) const Center(child: CircularProgressIndicator()),
-        Expanded(child: ListView(children: scheduledStreams['not_active']!)),
+        if (inactiveScheduledStreams.isEmpty) const Center(child: CircularProgressIndicator()),
+        Expanded(child: ListView(children: inactiveScheduledStreams)),
       ],
     ),
     floatingActionButton: editButton,
