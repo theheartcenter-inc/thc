@@ -138,7 +138,7 @@ class _ScheduleState extends State<Schedule> {
           ),
         ),
         if (scheduledStreams['active']!.isEmpty) const Center(child: CircularProgressIndicator()),
-          for (final stream in scheduledStreams['active']!) stream,
+        ...scheduledStreams['active']!,
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Text(
