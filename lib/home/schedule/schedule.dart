@@ -151,10 +151,7 @@ class _ScheduleState extends State<Schedule> {
           ),
         ),
         if (scheduledStreams['not_active']!.isEmpty) const Center(child: CircularProgressIndicator()),
-        Expanded(
-            child: ListView(children: [
-          for (final stream in scheduledStreams['not_active']!) stream,
-        ])),
+        Expanded(child: ListView(children: scheduledStreams['not_active']!)),
       ],
     ),
     floatingActionButton: editButton,
