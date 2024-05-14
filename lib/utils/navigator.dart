@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:thc/main.dart';
 import 'package:thc/utils/local_storage.dart';
-import 'package:thc/utils/widgets/lerpy_hero.dart';
+import 'package:thc/utils/widgets/lerpy_hero/lerpy_hero.dart';
 
 /// {@template navigator}
 /// We can make navigation a little cleaner with a global key and an extension type:
