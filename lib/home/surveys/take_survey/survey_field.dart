@@ -36,7 +36,7 @@ class SurveyField extends StatelessWidget {
     final answer = builder.buildAnswer(context, update, record.question, record.cleanAnswer);
 
     return _ErrorBox(
-      valid: record.valid || !context.watch<ValidSurveyAnswers>().state,
+      valid: record.valid || !context.watch<ValidSurveyAnswers>().value,
       child: builder.layout(context, question, answer),
     );
   }

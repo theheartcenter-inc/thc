@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/utils/app_config.dart';
-import 'package:thc/utils/bloc.dart';
 
 /// Same as `List<ThcUser>`, but you have the option to use the user ID or email
 /// in place of the index.

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey_field.dart';
 import 'package:thc/home/surveys/take_survey/survey_theme.dart';
-import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
@@ -39,11 +39,11 @@ class _SurveyScreenState extends State<SurveyScreen> {
   void validate() {
     final validation = context.read<ValidSurveyAnswers>();
     if (data.valid) {
-      validation.emit(false);
+      validation.value = false;
       navigator.pushReplacement(Submitted(data.summary));
       return;
     }
-    validation.emit(true);
+    validation.value = true;
   }
 
   /// Creates a function for each [SurveyField] that can update the survey [data].
@@ -169,7 +169,7 @@ class _ValidateMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget? child;
-    if (context.watch<ValidSurveyAnswers>().state && invalidCount > 0) {
+    if (context.watch<ValidSurveyAnswers>().value && invalidCount > 0) {
       final theme = Theme.of(context);
       child = Padding(
         padding: const EdgeInsets.all(8.0),
@@ -185,7 +185,7 @@ class _ValidateMessage extends StatelessWidget {
 }
 
 /// {@macro ValidSurveyAnswers}
-class ValidSurveyAnswers extends Cubit<bool> {
+class ValidSurveyAnswers extends ValueNotifier<bool> {
   /// {@macro ValidSurveyAnswers}
   ValidSurveyAnswers() : super(false);
 }

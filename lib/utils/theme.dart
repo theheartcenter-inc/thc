@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:thc/utils/bloc.dart';
+import 'package:provider/provider.dart';
 import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/style_text.dart';
 
@@ -289,11 +289,11 @@ extension ThemeGetter on BuildContext {
   }
 }
 
-class AppTheme extends Cubit<ThemeMode> {
+class AppTheme extends ValueNotifier<ThemeMode> {
   AppTheme() : super(LocalStorage.themeMode());
 
   static ThemeData of(BuildContext context) {
-    final mode = switch (context.watch<AppTheme>().state) {
+    final mode = switch (context.watch<AppTheme>().value) {
       ThemeMode.light => Brightness.light,
       ThemeMode.dark => Brightness.dark,
       ThemeMode.system => MediaQuery.platformBrightnessOf(context),
@@ -303,6 +303,6 @@ class AppTheme extends Cubit<ThemeMode> {
 
   void newThemeMode(ThemeMode newTheme) {
     LocalStorage.themeMode.save(newTheme.index);
-    emit(newTheme);
+    value = newTheme;
   }
 }
