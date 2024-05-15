@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:thc/main.dart';
 import 'package:thc/utils/local_storage.dart';
-import 'package:thc/utils/widgets/lerpy_hero.dart';
+import 'package:thc/utils/widgets/lerpy_hero/lerpy_hero.dart';
 
 /// {@template navigator}
 /// We can make navigation a little cleaner with a global key and an extension type:
@@ -43,18 +43,18 @@ Nav get navigator => Nav(navKey.currentState!);
 /// navigator.pop(); // "/"
 /// ```
 /// {@endtemplate}
-extension type Nav(NavigatorState navigator) {
+extension type Nav(NavigatorState currentState) {
   /// Adds a new screen to the route.
   ///
   /// {@macro navigator_example}
   Future<T?> push<T>(Widget destination) =>
-      navigator.push<T>(MaterialPageRoute<T>(builder: (context) => destination));
+      currentState.push<T>(MaterialPageRoute<T>(builder: (context) => destination));
 
   /// Adds a new screen in place of the current screen.
   ///
   /// {@macro navigator_example}
   Future<T?> pushReplacement<T, TO>(Widget destination, {TO? result}) {
-    return navigator.pushReplacement<T, TO>(
+    return currentState.pushReplacement<T, TO>(
       MaterialPageRoute<T>(builder: (context) => destination),
       result: result,
     );
@@ -63,7 +63,7 @@ extension type Nav(NavigatorState navigator) {
   /// Removes the current screen from the route.
   ///
   /// {@macro navigator_example}
-  void pop<T>([T? value]) => navigator.maybePop<T>(value);
+  void pop<T>([T? value]) => currentState.maybePop<T>(value);
 
   void noTransition(Widget destination, {bool replacing = false}) {
     final route = PageRouteBuilder(
@@ -72,7 +72,7 @@ extension type Nav(NavigatorState navigator) {
       reverseTransitionDuration: Duration.zero,
     );
 
-    replacing ? navigator.pushReplacement(route) : navigator.push(route);
+    replacing ? currentState.pushReplacement(route) : currentState.push(route);
   }
 
   static const lerpy = Key("it's a LerpyHero!");
@@ -89,7 +89,7 @@ extension type Nav(NavigatorState navigator) {
     Widget builder(_) => dialog;
 
     return dialog.key == lerpy
-        ? navigator.push<T>(
+        ? currentState.push<T>(
             LerpyHeroRoute(
               barrierColor: barrierColor,
               transitionDuration: transitionDuration,
@@ -98,7 +98,7 @@ extension type Nav(NavigatorState navigator) {
             ),
           )
         : showAdaptiveDialog<T>(
-            context: navigator.context,
+            context: currentState.context,
             barrierColor: barrierColor,
             barrierDismissible: barrierDismissible,
             builder: builder,
@@ -107,7 +107,7 @@ extension type Nav(NavigatorState navigator) {
 
   /// Shows a fun little bar of text at the bottom of the screen.
   void showSnackBar(SnackBar snackBar) =>
-      ScaffoldMessenger.of(navigator.context).showSnackBar(snackBar);
+      ScaffoldMessenger.of(currentState.context).showSnackBar(snackBar);
 
   Future<void> logout() => resetLocalStorage().then(App.relaunch);
 }

@@ -5,7 +5,7 @@ import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/style_text.dart';
-import 'package:thc/utils/widgets/fun_placeholder.dart';
+import 'package:thc/utils/widgets/placeholders.dart';
 
 class WatchingLivestream extends StatefulWidget {
   const WatchingLivestream({super.key});

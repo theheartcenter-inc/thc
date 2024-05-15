@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:thc/home/surveys/take_survey/survey_theme.dart';
-import 'package:thc/utils/widgets/fun_placeholder.dart';
+import 'package:thc/utils/widgets/placeholders.dart';
 
 class SurveyResponseScreen extends StatelessWidget {
   const SurveyResponseScreen({super.key});

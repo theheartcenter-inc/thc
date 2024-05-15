@@ -1,6 +1,6 @@
 // ignore_for_file: sort_constructors_first
 
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/foundation.dart';
@@ -340,7 +340,7 @@ final class LoginProgressTracker extends ValueNotifier<LoginProgress> {
     final values = fieldValues ?? state.fieldValues;
 
     if ((labels ?? state.labels).choosingPassword) {
-      if (values case (final a!, final b!) when min(a.length, b.length) < 8) {
+      if (values case (final a!, final b!) when math.min(a.length, b.length) < 8) {
         return null; // password too short
       }
     }

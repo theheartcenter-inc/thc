@@ -36,7 +36,7 @@ class ScheduledStreamCard extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: ListTile(
           onTap: () {
-            context.read<NavBarIndex>().selectButton(NavBarButton.watchLive);
+            context.read<NavBarSelection>().selectButton(NavBarButton.watchLive);
           },
           hoverColor: ThcColors.darkGreen.withOpacity(1 / 8),
           leading: const FlutterLogo(size: 56.0),
@@ -123,36 +123,36 @@ class _ScheduleState extends State<Schedule> {
     }
     return Scaffold(
       body: Column(
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
-          child: Text(
-            'Active Livestream',
-            style: StyleText(
-              size: 24.0,
-              color: colors.inverseSurface,
-              weight: FontWeight.bold,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
+            child: Text(
+              'Active Livestream',
+              style: StyleText(
+                size: 24.0,
+                color: colors.inverseSurface,
+                weight: FontWeight.bold,
+              ),
             ),
           ),
-        ),
-        if (activeScheduledStreams.isEmpty) const Center(child: CircularProgressIndicator()),
-        ...activeScheduledStreams,
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Text(
-            'Upcoming Livestreams',
-            style: StyleText(
-              size: 24.0,
-              color: colors.inverseSurface,
-              weight: FontWeight.bold,
+          if (activeScheduledStreams.isEmpty) const Center(child: CircularProgressIndicator()),
+          ...activeScheduledStreams,
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Text(
+              'Upcoming Livestreams',
+              style: StyleText(
+                size: 24.0,
+                color: colors.inverseSurface,
+                weight: FontWeight.bold,
+              ),
             ),
           ),
-        ),
-        if (inactiveScheduledStreams.isEmpty) const Center(child: CircularProgressIndicator()),
-        Expanded(child: ListView(children: inactiveScheduledStreams)),
-      ],
-    ),
-    floatingActionButton: editButton,
+          if (inactiveScheduledStreams.isEmpty) const Center(child: CircularProgressIndicator()),
+          Expanded(child: ListView(children: inactiveScheduledStreams)),
+        ],
+      ),
+      floatingActionButton: editButton,
     );
   }
 }

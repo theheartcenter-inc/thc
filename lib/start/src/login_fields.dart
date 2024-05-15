@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:thc/start/src/autofill.dart';
 import 'package:thc/start/src/bottom_stuff.dart';
 import 'package:thc/start/src/login_progress.dart';
 import 'package:thc/start/src/za_hando.dart';
@@ -183,9 +182,7 @@ class LoginFields extends StatelessWidget {
           Positioned.fill(child: showBottom ? const SizedBox.shrink() : startButton),
           const _TextFieldButton(),
           if (labels.choosingPassword && fieldValues.$1!.isNotEmpty)
-            const _TextFieldButton.passwordVisibility()
-          else if (labels.signingIn && kDebugMode)
-            const _TextFieldButton.autofill(),
+            const _TextFieldButton.passwordVisibility(),
         ],
       ),
     );
@@ -219,20 +216,15 @@ class LoginFields extends StatelessWidget {
   }
 }
 
-enum _TextFieldButtonType { submit, showPassword, autofill }
-
 /// A button for the [LoginFields] with adaptive foreground/background colors.
 class _TextFieldButton extends StatelessWidget {
   /// Checkmark button—submit the text currently in the fields.
-  const _TextFieldButton() : type = _TextFieldButtonType.submit;
+  const _TextFieldButton() : passwordVisibility = false;
 
   /// Show/hide the password.
-  const _TextFieldButton.passwordVisibility() : type = _TextFieldButtonType.showPassword;
+  const _TextFieldButton.passwordVisibility() : passwordVisibility = true;
 
-  /// During development, we can tap this guy to autofill the username/password.
-  const _TextFieldButton.autofill() : type = _TextFieldButtonType.autofill;
-
-  final _TextFieldButtonType type;
+  final bool passwordVisibility;
 
   /// This node ensures that pressing 'Tab' takes you straight to the next field,
   /// not to the [_TextFieldButton].
@@ -269,45 +261,33 @@ class _TextFieldButton extends StatelessWidget {
 
     if (username == null) return const SizedBox.shrink();
 
-    final bool submitButton = type == _TextFieldButtonType.submit;
-    final bool autofill = type == _TextFieldButtonType.autofill;
-
     final (bool checkButton, bool focused) = switch (focusedField) {
       LoginField.top when labels.just1field => (true, true),
       LoginField.top when password == null => (false, true),
-      LoginField.top => (true, !submitButton),
-      LoginField.bottom => (true, submitButton),
+      LoginField.top => (true, passwordVisibility),
+      LoginField.bottom => (true, !passwordVisibility),
       null => (labels.just1field || password != null, false),
     };
 
-    final onPressed = switch (type) {
-      _TextFieldButtonType.submit =>
-        LoginProgressTracker.maybeSubmit(labels, fieldValues, errorMessage != null),
-      _TextFieldButtonType.showPassword => LoginProgressTracker.toggleShowPassword,
-      _TextFieldButtonType.autofill => () {}, // autofill doesn't use this variable
-    };
+    final onPressed = passwordVisibility
+        ? LoginProgressTracker.toggleShowPassword
+        : LoginProgressTracker.maybeSubmit(labels, fieldValues, errorMessage != null);
 
-    final IconData icon = switch (type) {
-      _TextFieldButtonType.submit => checkButton ? Icons.done : continueIcon,
-      _TextFieldButtonType.showPassword when showPassword => Icons.visibility,
-      _TextFieldButtonType.showPassword => Icons.visibility_off,
-      _TextFieldButtonType.autofill => Icons.build,
+    final IconData icon = switch (passwordVisibility) {
+      true => showPassword ? Icons.visibility : Icons.visibility_off,
+      false => checkButton ? Icons.done : continueIcon,
     };
 
     final brightness = Theme.of(context).brightness;
 
     final iconbg = _iconbg(
       focused,
-      submitButton ? checkButton : false,
+      passwordVisibility ? false : checkButton,
       brightness == Brightness.light,
-      switch (type) {
-        _TextFieldButtonType.submit => onPressed != null,
-        _TextFieldButtonType.showPassword => showPassword,
-        _TextFieldButtonType.autofill => true,
-      },
+      passwordVisibility ? showPassword : onPressed != null,
     );
 
-    final justUseTheDangColor = autofill || !submitButton && showPassword;
+    final justUseTheDangColor = passwordVisibility && showPassword;
     final iconfg = switch ((brightness, focused)) {
       (Brightness.light, true || false) when onPressed != null => Colors.white,
       (Brightness.light, true) => Colors.white,
@@ -317,10 +297,6 @@ class _TextFieldButton extends StatelessWidget {
       (Brightness.dark, true) => ThcColors.lightContainer16,
       (Brightness.dark, false) => const Color(0xff0c0d0f),
     };
-
-    if (type == _TextFieldButtonType.autofill) {
-      return AutofillButton(iconbg, iconfg, node);
-    }
 
     final button = Stack(
       alignment: Alignment.center,
@@ -341,7 +317,7 @@ class _TextFieldButton extends StatelessWidget {
       ],
     );
 
-    return submitButton ? button : Positioned(top: 0, right: 0, child: button);
+    return passwordVisibility ? Positioned(top: 0, right: 0, child: button) : button;
   }
 }
 
