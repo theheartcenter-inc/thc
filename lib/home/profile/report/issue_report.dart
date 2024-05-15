@@ -8,10 +8,10 @@ class IssueReport extends StatefulWidget {
   const IssueReport({super.key});
 
   @override
-  State<IssueReport> createState() => _IssueReportScreenState();
+  State<IssueReport> createState() => _IssueReportState();
 }
 
-class _IssueReportScreenState extends State<IssueReport> {
+class _IssueReportState extends State<IssueReport> {
   final _formKey = GlobalKey<FormState>();
 
   String _name = '';
