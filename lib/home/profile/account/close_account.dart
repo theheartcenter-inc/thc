@@ -15,6 +15,7 @@ class CloseAccount extends StatefulWidget {
 
 class _CloseAccountState extends State<CloseAccount> {
   bool canDelete = false;
+  bool _obscureText = true;
 
   Widget builder(BuildContext context, _) {
     final progress = context.watch<_Deleting>().value;
@@ -29,12 +30,26 @@ class _CloseAccountState extends State<CloseAccount> {
           style: StyleText(size: 16),
         ),
         TextField(
-          onChanged: (value) {
-            final correctValue = value == 'DELETE';
-            if (canDelete != correctValue) setState(() => canDelete = correctValue);
+          obscureText: _obscureText,
+          onChanged: (value) async {
+            final correctValue =
+                await context.read<_Deleting>().checkPassword(value);
+            if (canDelete != correctValue)
+              setState(() => canDelete = correctValue);
           },
           onSubmitted: canDelete ? (_) => delete() : null,
-          decoration: const InputDecoration(hintText: 'Type DELETE here'),
+          decoration: InputDecoration(
+            hintText: 'Enter your password',
+            suffixIcon: IconButton(
+              icon:
+                  Icon(_obscureText ? Icons.visibility : Icons.visibility_off),
+              onPressed: () {
+                setState(() {
+                  _obscureText = !_obscureText;
+                });
+              },
+            ),
+          ),
         ),
       ],
     );
@@ -47,7 +62,8 @@ class _CloseAccountState extends State<CloseAccount> {
         child: switch (progress) {
           _Progress.notStarted => textFieldContent,
           _Progress.loading => _Loading(textFieldContent),
-          _Progress.done => const Text('You have successfully closed your account.'),
+          _Progress.done =>
+            const Text('You have successfully closed your account.'),
         },
       ),
       actions: [
@@ -55,7 +71,8 @@ class _CloseAccountState extends State<CloseAccount> {
           _ConfirmButton('OK', navigator.logout, key: const Key('confirm'))
         else ...[
           _ConfirmButton('Cancel', navigator.pop),
-          _ConfirmButton('Confirm', canDelete ? delete : null, key: const Key('confirm')),
+          _ConfirmButton('Confirm', canDelete ? delete : null,
+              key: const Key('confirm')),
         ],
       ],
     );
@@ -87,7 +104,8 @@ class _ConfirmButton extends StatelessWidget {
 
     return ElevatedButton(
       onPressed: onPressed,
-      child: AnimatedSize(duration: Durations.medium1, curve: Curves.ease, child: Text(text)),
+      child: AnimatedSize(
+          duration: Durations.medium1, curve: Curves.ease, child: Text(text)),
     );
   }
 }
@@ -117,5 +135,17 @@ class _Deleting extends ValueNotifier<_Progress> {
     value = _Progress.loading;
     await user.yeet();
     value = _Progress.done;
+  }
+
+  Future<bool> checkPassword(String inputPassword) async {
+    // Replace this with the actual logic to verify the user's password
+    final storedPassword =
+        await getUserPassword(); // Fetch the actual user password
+    return inputPassword == storedPassword;
+  }
+
+  Future<String> getUserPassword() async {
+    // Fetch the user password from your authentication service
+    return 'user_actual_password';
   }
 }
