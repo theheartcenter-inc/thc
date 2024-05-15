@@ -1,4 +1,4 @@
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:thc/start/src/login_progress.dart';
@@ -64,15 +64,16 @@ class _BottomStuffState extends State<BottomStuff> with SingleTickerProviderStat
     final t = controller.value;
     final aimedForward = controller.aimedForward;
 
-    final tSeparator = aimedForward ? curve.transform(min(t * 2, 1)) : 1 - curve.transform(1 - t);
+    final tSeparator =
+        aimedForward ? curve.transform(math.min(t * 2, 1)) : 1 - curve.transform(1 - t);
     final tColumns = (t - 1) * (aimedForward ? 2 : 1) + 1;
 
     Widget button(LoginLabels? target) {
       if (tColumns <= 0 || target == null) return const Spacer();
 
       const timeOffsetRatio = 7 / 8;
-      final tTitle = min(tColumns / timeOffsetRatio, 1.0);
-      final tButton = max((tColumns - 1) / timeOffsetRatio + 1, 0.0);
+      final tTitle = math.min(tColumns / timeOffsetRatio, 1.0);
+      final tButton = math.max((tColumns - 1) / timeOffsetRatio + 1, 0.0);
 
       final (:label, :text) = target.buttonData!;
 

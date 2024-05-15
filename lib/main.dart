@@ -3,7 +3,6 @@ import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase_setup.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/profile/account/account_field.dart';
-import 'package:thc/home/stream/create_livestream.dart';
 import 'package:thc/home/surveys/edit_survey/survey_editor.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/home/users/src/all_users.dart';
@@ -44,8 +43,7 @@ class App extends StatelessWidget {
         key: context.watch<_AppKey>().value,
         providers: [
           ChangeNotifierProvider(create: (_) => AppTheme()),
-          ChangeNotifierProvider(create: (_) => NavBarIndex()),
-          ChangeNotifierProvider(create: (_) => LivestreamEnabled()),
+          ChangeNotifierProvider(create: (_) => NavBarSelection()),
           ChangeNotifierProvider(create: (_) => MobileEditing()),
           ChangeNotifierProvider(create: (_) => ValidSurveyQuestions()),
           ChangeNotifierProvider(create: (_) => ValidSurveyAnswers()),

@@ -120,7 +120,7 @@ ThemeData _generateTheme(Brightness brightness) {
       brightness: isLight ? Brightness.light : Brightness.dark,
       primary: isLight ? ThcColors.green : ThcColors.zaHando,
       primaryContainer: isLight ? ThcColors.dullGreen38 : ThcColors.dullGreen50,
-      onPrimary: ThcColors.dullerGreen,
+      onPrimary: isLight ? ThcColors.dullerGreen : Colors.black87,
       inversePrimary: ThcColors.darkGreen,
       secondary: ThcColors.teal,
       onSecondary: Colors.white,

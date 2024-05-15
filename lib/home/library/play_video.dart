@@ -30,15 +30,13 @@ class _PlayVideoState extends State<PlayVideo> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text(widget.videoName)),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CustomVideoPlayer(
-              customVideoPlayerController: _customVideoPlayerController,
-            ),
-          ],
-        ));
+      appBar: AppBar(title: Text(widget.videoName)),
+      body: Center(
+        child: CustomVideoPlayer(
+          customVideoPlayerController: _customVideoPlayerController,
+        ),
+      ),
+    );
   }
 
   void initializeVideoPlayer(String videoUrl) {
