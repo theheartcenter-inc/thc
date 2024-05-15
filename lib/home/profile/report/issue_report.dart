@@ -7,13 +7,15 @@ class IssueReport extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: IssueReportScreen(),
     );
   }
 }
 
 class IssueReportScreen extends StatefulWidget {
+  const IssueReportScreen({super.key});
+
   @override
   _IssueReportScreenState createState() => _IssueReportScreenState();
 }
@@ -50,13 +52,11 @@ class _IssueReportScreenState extends State<IssueReportScreen> {
                     labelText: 'name',
                     labelStyle: style,
                     floatingLabelStyle: style,
-                    border:
-                        MaterialStateOutlineInputBorder.resolveWith((states) {
+                    border: MaterialStateOutlineInputBorder.resolveWith((states) {
                       return OutlineInputBorder(
                         borderSide: states.isFocused
                             ? BorderSide(color: colors.primary, width: 2)
-                            : BorderSide(
-                                color: colors.onBackground.withOpacity(0.5)),
+                            : BorderSide(color: colors.onBackground.withOpacity(0.5)),
                       );
                     }),
                   ),
@@ -80,13 +80,11 @@ class _IssueReportScreenState extends State<IssueReportScreen> {
                     labelText: 'email',
                     labelStyle: style,
                     floatingLabelStyle: style,
-                    border:
-                        MaterialStateOutlineInputBorder.resolveWith((states) {
+                    border: MaterialStateOutlineInputBorder.resolveWith((states) {
                       return OutlineInputBorder(
                         borderSide: states.isFocused
                             ? BorderSide(color: colors.primary, width: 2)
-                            : BorderSide(
-                                color: colors.onBackground.withOpacity(0.5)),
+                            : BorderSide(color: colors.onBackground.withOpacity(0.5)),
                       );
                     }),
                   ),
@@ -111,8 +109,7 @@ class _IssueReportScreenState extends State<IssueReportScreen> {
                     return OutlineInputBorder(
                       borderSide: states.isFocused
                           ? BorderSide(color: colors.primary, width: 2)
-                          : BorderSide(
-                              color: colors.onBackground.withOpacity(0.5)),
+                          : BorderSide(color: colors.onBackground.withOpacity(0.5)),
                     );
                   }),
                 ),
@@ -125,7 +122,6 @@ class _IssueReportScreenState extends State<IssueReportScreen> {
                 },
                 onSaved: (value) {
                   _message = value ?? '';
-                  ;
                 },
               ),
               const SizedBox(height: 16.0),

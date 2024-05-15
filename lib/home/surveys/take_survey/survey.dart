@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey_field.dart';
 import 'package:thc/home/surveys/take_survey/survey_theme.dart';
@@ -127,29 +128,35 @@ class Submitted extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(),
-      body: SizedBox.expand(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              thanks,
-              for (final (question, answer) in summary) ...[
-                Text(
-                  question,
-                  style: const StyleText(size: 16, weight: 600),
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 5, 0, 50),
-                  child: Text(
-                    answer ?? '(no answer)',
-                    style: answer == null ? StyleText(color: translucent) : null,
-                  ),
-                ),
-              ],
-            ],
+      body: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          SizedBox.expand(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  thanks,
+                  for (final (question, answer) in summary) ...[
+                    Text(
+                      question,
+                      style: const StyleText(size: 16, weight: 600),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 5, 0, 50),
+                      child: Text(
+                        answer ?? '(no answer)',
+                        style: answer == null ? StyleText(color: translucent) : null,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ),
-        ),
+          NavBar.of(context, belowPage: true),
+        ],
       ),
     );
   }

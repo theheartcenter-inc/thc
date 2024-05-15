@@ -53,7 +53,7 @@ class _NavBarSwitchState extends State<NavBarSwitch> {
       onChanged: (newValue) {
         setState(() => value = newValue);
         widget.storageKey.save(newValue);
-        context.read<NavBarIndex>().refresh();
+        context.read<NavBarSelection>().refresh();
       },
     );
   }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:thc/utils/theme.dart';
-import 'package:thc/utils/widgets/fun_placeholder.dart';
+import 'package:thc/utils/widgets/placeholders.dart';
 
 class ScheduleEditor extends StatelessWidget {
   const ScheduleEditor({super.key});
