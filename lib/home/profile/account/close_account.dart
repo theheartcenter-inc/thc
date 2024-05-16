@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
+import 'package:thc/firebase/firebase_auth.dart' as auth;
+import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/style_text.dart';
+import 'package:thc/utils/widgets/state_async.dart';
 
 enum _Progress { notStarted, loading, done }
 
@@ -13,13 +16,26 @@ class CloseAccount extends StatefulWidget {
   State<CloseAccount> createState() => _CloseAccountState();
 }
 
-class _CloseAccountState extends State<CloseAccount> {
-  bool canDelete = false;
-  bool _obscureText = true;
+class _CloseAccountState extends StateAsync<CloseAccount> {
+  String password = '';
+  String? errorText;
+  bool obscureText = true;
 
   Widget builder(BuildContext context, _) {
     final progress = context.watch<_Deleting>().value;
-    Future<void> delete() => context.read<_Deleting>().delete();
+    final delete = errorText != null || password.isEmpty
+        ? null
+        : ([_]) async {
+            await LocalStorage.password.save(password);
+            if (await auth.signIn() case final error?) {
+              return safeState(() {
+                errorText =
+                    error.isEmpty ? 'please double-check your password and try again.' : error;
+              });
+            }
+
+            if (mounted) await context.read<_Deleting>().delete();
+          };
 
     final textFieldContent = Column(
       mainAxisSize: MainAxisSize.min,
@@ -30,21 +46,20 @@ class _CloseAccountState extends State<CloseAccount> {
           style: StyleText(size: 16),
         ),
         TextField(
-          obscureText: _obscureText,
-          onChanged: (value) async {
-            final correctValue = await context.read<_Deleting>().checkPassword(value);
-            if (canDelete != correctValue) setState(() => canDelete = correctValue);
+          obscureText: obscureText,
+          onChanged: (value) {
+            setState(() {
+              errorText = null;
+              password = value;
+            });
           },
-          onSubmitted: canDelete ? (_) => delete() : null,
+          onSubmitted: delete,
           decoration: InputDecoration(
             hintText: 'Enter your password',
+            errorText: errorText,
             suffixIcon: IconButton(
-              icon: Icon(_obscureText ? Icons.visibility : Icons.visibility_off),
-              onPressed: () {
-                setState(() {
-                  _obscureText = !_obscureText;
-                });
-              },
+              icon: Icon(obscureText ? Icons.visibility : Icons.visibility_off),
+              onPressed: () => setState(() => obscureText = !obscureText),
             ),
           ),
         ),
@@ -67,7 +82,7 @@ class _CloseAccountState extends State<CloseAccount> {
           _ConfirmButton('OK', navigator.logout, key: const Key('confirm'))
         else ...[
           _ConfirmButton('Cancel', navigator.pop),
-          _ConfirmButton('Confirm', canDelete ? delete : null, key: const Key('confirm')),
+          _ConfirmButton('Confirm', delete, key: const Key('confirm')),
         ],
       ],
     );
@@ -129,16 +144,5 @@ class _Deleting extends ValueNotifier<_Progress> {
     value = _Progress.loading;
     await user.yeet();
     value = _Progress.done;
-  }
-
-  Future<bool> checkPassword(String inputPassword) async {
-    // Replace this with the actual logic to verify the user's password
-    final storedPassword = await getUserPassword(); // Fetch the actual user password
-    return inputPassword == storedPassword;
-  }
-
-  Future<String> getUserPassword() async {
-    // Fetch the user password from your authentication service
-    return 'user_actual_password';
   }
 }
