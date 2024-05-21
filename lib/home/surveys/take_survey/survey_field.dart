@@ -145,7 +145,7 @@ class _QuestionText extends StatelessWidget {
       size: 16,
       weight: 500,
       shadows: [
-        if (colors.brightness == Brightness.dark) Shadow(color: colors.background, blurRadius: 1),
+        if (colors.brightness == Brightness.dark) Shadow(color: colors.surface, blurRadius: 1),
       ],
     );
     return Padding(
@@ -180,7 +180,7 @@ class _MultipleChoiceTyping extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = ThcColors.of(context);
-    final enabled = BorderSide(color: colors.onBackground);
+    final enabled = BorderSide(color: colors.onSurface);
     final focused = BorderSide(color: colors.primaryContainer, width: 1.5);
     return Row(
       children: [
@@ -367,7 +367,7 @@ class _Scale extends SurveyBuilder<ScaleQuestion> {
               child: Slider.adaptive(
                 activeColor: Color.lerp(
                   colors.primary,
-                  context.lightDark(colors.background, colors.secondary),
+                  context.lightDark(colors.surface, colors.secondary),
                   value / divisions,
                 ),
                 divisions: divisions,

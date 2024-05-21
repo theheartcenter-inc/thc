@@ -47,6 +47,7 @@ abstract final class ThcColors {
   static const darkerBlue = Color(0xff080d18);
   static const darkestBlue = Color(0xff060a12);
   static const paleAzure88 = Color(0xe0ddeeff);
+  static const veryPaleAzure = Color(0xffe8f4ff);
 
   static const startBg = Color(0xff202428);
   static const startBg12 = Color(0x20202428);
@@ -71,7 +72,7 @@ abstract final class ThcColors {
   static ColorScheme of(BuildContext context) => Theme.of(context).colorScheme;
 }
 
-/// [MaterialStateProperty] is pretty neat: you can have different styles
+/// [WidgetStateProperty] is pretty neat: you can have different styles
 /// based on whatever's going on with the widget.
 ///
 /// For example, if a Director clicks on the "stream" button
@@ -84,17 +85,16 @@ abstract final class ThcColors {
 ///
 /// I made this extension because of [that one video](https://youtu.be/CylXr3AF3uU?t=449)
 /// that told me to.
-extension ThatOneVideo on Set<MaterialState> {
-  bool get isFocused => contains(MaterialState.focused);
-  bool get isSelected => contains(MaterialState.selected);
-  bool get isPressed => contains(MaterialState.pressed);
+extension ThatOneVideo on Set<WidgetState> {
+  bool get isFocused => contains(WidgetState.focused);
+  bool get isSelected => contains(WidgetState.selected);
+  bool get isPressed => contains(WidgetState.pressed);
 }
-
-final _lightBackground = Color.lerp(ThcColors.paleAzure, Colors.white, 0.33)!;
 
 ThemeData _generateTheme(Brightness brightness) {
   final isLight = brightness == Brightness.light;
 
+  final green = isLight ? ThcColors.green : ThcColors.zaHando;
   final textColor = isLight ? Colors.black : ThcColors.paleAzure88;
   final paleColor = isLight ? Colors.white : ThcColors.paleAzure;
   final barColor = isLight ? ThcColors.darkBlue : ThcColors.darkerBlue;
@@ -105,10 +105,10 @@ ThemeData _generateTheme(Brightness brightness) {
   const iconTheme = IconThemeData(size: 32);
   const labelTextStyle = StyleText(size: 12, weight: 600);
 
-  MaterialStateProperty<T> selected<T>(T selected, T unselected) =>
-      MaterialStateProperty.resolveWith((states) => states.isSelected ? selected : unselected);
+  WidgetStateProperty<T> selected<T>(T selected, T unselected) =>
+      WidgetStateProperty.resolveWith((states) => states.isSelected ? selected : unselected);
 
-  MaterialStateProperty<T> tealWhenSelected<T>(T Function({Color color}) copyWith, bool isLight) {
+  WidgetStateProperty<T> tealWhenSelected<T>(T Function({Color color}) copyWith, bool isLight) {
     return selected(
       copyWith(color: ThcColors.teal),
       copyWith(color: paleColor.withOpacity(0.33)),
@@ -116,28 +116,21 @@ ThemeData _generateTheme(Brightness brightness) {
   }
 
   return ThemeData(
-    colorScheme: ColorScheme(
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: green,
       brightness: isLight ? Brightness.light : Brightness.dark,
-      primary: isLight ? ThcColors.green : ThcColors.zaHando,
+      primary: green,
       primaryContainer: isLight ? ThcColors.dullGreen38 : ThcColors.dullGreen50,
       onPrimary: isLight ? ThcColors.dullerGreen : Colors.black87,
       inversePrimary: ThcColors.darkGreen,
-      secondary: ThcColors.teal,
-      onSecondary: Colors.white,
-      tertiary: isLight ? ThcColors.darkMagenta : ThcColors.tan,
+      secondary: ThcColors.dullBlue,
+      onSecondary: paleColor,
+      tertiary: ThcColors.teal,
       onTertiary: isLight ? ThcColors.tan : ThcColors.darkMagenta,
-      error: Colors.red.withOpacity(0.75),
-      onError: Colors.white,
-      errorContainer: Colors.red.withOpacity(0.33),
-      onErrorContainer: Colors.red,
-      background: isLight ? _lightBackground : ThcColors.darkestBlue,
-      onBackground: textColor,
-      surface: isLight ? ThcColors.tan : ThcColors.dullBlue,
+      surface: isLight ? ThcColors.veryPaleAzure : ThcColors.darkestBlue,
       onSurface: textColor,
       inverseSurface: isLight ? ThcColors.darkBlue : ThcColors.paleAzure,
-      onInverseSurface: isLight ? Colors.white : ThcColors.darkBlue,
-      surfaceVariant: ThcColors.dullBlue,
-      onSurfaceVariant: paleColor,
+      onInverseSurface: isLight ? Colors.white : ThcColors.darkestBlue,
       outline: slightContrast,
       outlineVariant: contrast25,
     ),
@@ -181,14 +174,14 @@ ThemeData _generateTheme(Brightness brightness) {
     ),
     listTileTheme: ListTileThemeData(iconColor: slightContrast),
     radioTheme: RadioThemeData(
-      fillColor: MaterialStatePropertyAll(textColor.withOpacity(0.75)),
+      fillColor: WidgetStatePropertyAll(textColor.withOpacity(0.75)),
     ),
     checkboxTheme: CheckboxThemeData(
       side: BorderSide(color: textColor.withOpacity(0.75), width: 2),
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: barColor,
-      overlayColor: const MaterialStatePropertyAll(Colors.transparent),
+      overlayColor: const WidgetStatePropertyAll(Colors.transparent),
       surfaceTintColor: Colors.transparent,
       indicatorColor: Colors.transparent,
       iconTheme: tealWhenSelected(iconTheme.copyWith, isLight),
@@ -270,11 +263,9 @@ extension ThemeGetter on BuildContext {
         onError: onError,
         errorContainer: errorContainer,
         onErrorContainer: onErrorContainer,
-        background: background,
-        onBackground: onBackground,
         surface: surface,
         onSurface: onSurface,
-        surfaceVariant: surfaceVariant,
+        surfaceContainerHighest: surfaceVariant,
         onSurfaceVariant: onSurfaceVariant,
         outline: outline,
         outlineVariant: outlineVariant,

@@ -124,7 +124,7 @@ class Submitted extends StatelessWidget {
       ),
     );
 
-    final translucent = ThcColors.of(context).onBackground.withOpacity(0.5);
+    final translucent = ThcColors.of(context).onSurface.withOpacity(0.5);
 
     return Scaffold(
       appBar: AppBar(),

@@ -84,9 +84,7 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
       return navigator.pop();
     }
 
-    navigator.pushReplacement(
-      SurveyScreen(questions: SurveyPresets.streamFinished.questions),
-    );
+    navigator.pushReplacement(SurveyScreen(SurveyPresets.streamFinished.questions));
   }
 
   @override
@@ -197,11 +195,11 @@ class _EndButton extends FilledButton {
       : super(style: _style, child: const Text('End', style: TextStyle(fontSize: 18)));
 
   static const _style = ButtonStyle(
-    backgroundColor: MaterialStatePropertyAll(Colors.red),
-    foregroundColor: MaterialStatePropertyAll(Colors.white),
-    overlayColor: MaterialStatePropertyAll(Colors.white10),
-    padding: MaterialStatePropertyAll(EdgeInsets.symmetric(horizontal: 25, vertical: 20)),
-    shape: MaterialStatePropertyAll(StadiumBorder()),
+    backgroundColor: WidgetStatePropertyAll(Colors.red),
+    foregroundColor: WidgetStatePropertyAll(Colors.white),
+    overlayColor: WidgetStatePropertyAll(Colors.white10),
+    padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 25, vertical: 20)),
+    shape: WidgetStatePropertyAll(StadiumBorder()),
   );
 }
 

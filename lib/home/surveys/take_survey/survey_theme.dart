@@ -45,7 +45,8 @@ class SurveyTheme extends StatelessWidget {
     final textColor = isLight ? Colors.black : SurveyColors.orangeWhite;
     final error = isLight ? SurveyColors.vibrantRed : Colors.redAccent;
     final paleColor = isLight ? SurveyColors.yellowSunrise : SurveyColors.orangeWhite;
-    final colors = ColorScheme(
+    final colors = ColorScheme.fromSeed(
+      seedColor: SurveyColors.veridian,
       brightness: brightness,
       primary: SurveyColors.veridian,
       primaryContainer: isLight ? SurveyColors.veridian : SurveyColors.orangeWhite,
@@ -56,9 +57,8 @@ class SurveyTheme extends StatelessWidget {
       onError: blackAndWhite,
       errorContainer: isLight ? SurveyColors.sunriseError : SurveyColors.sunsetError,
       onErrorContainer: error,
-      background: isLight ? SurveyColors.yellowSunrise : SurveyColors.maroonSunset,
-      onBackground: textColor,
-      surface: isLight ? SurveyColors.orangeSunrise : SurveyColors.orangeSunset,
+      surfaceContainerLowest: isLight ? SurveyColors.yellowSunrise : SurveyColors.maroonSunset,
+      surfaceContainerHighest: isLight ? SurveyColors.orangeSunrise : SurveyColors.orangeSunset,
       onSurface: textColor,
     );
 
@@ -129,7 +129,7 @@ class _SurveySunrise extends StatelessWidget {
             gradient: LinearGradient(
               begin: const Alignment(-0.25, -1.0),
               end: const Alignment(0.25, 1.0),
-              colors: [colors.surface, colors.background],
+              colors: [colors.surface, colors.surface],
             ),
           ),
           constraints: BoxConstraints(minWidth: size.width, minHeight: size.height),
@@ -155,14 +155,14 @@ class DarkModeSwitch extends StatelessWidget {
     return Align(
       alignment: Alignment.topRight,
       child: Switch(
-        thumbIcon: MaterialStatePropertyAll(
+        thumbIcon: WidgetStatePropertyAll(
           isLight
               ? const Icon(Icons.light_mode, color: SurveyColors.yellowSunrise)
               : const Icon(Icons.dark_mode, color: SurveyColors.maroon),
         ),
         activeTrackColor: SurveyColors.maroon,
         inactiveTrackColor: SurveyColors.yellowSunrise,
-        thumbColor: const MaterialStatePropertyAll(Colors.black),
+        thumbColor: const WidgetStatePropertyAll(Colors.black),
         value: !isLight,
         onChanged: (isLight) {
           context.read<AppTheme>().newThemeMode(isLight ? ThemeMode.dark : ThemeMode.light);

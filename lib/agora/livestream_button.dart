@@ -33,7 +33,7 @@ class LivestreamButton extends StatelessWidget {
         child: Material(
           type: MaterialType.transparency,
           child: InkWell(
-            overlayColor: const MaterialStatePropertyAll(Colors.black12),
+            overlayColor: const WidgetStatePropertyAll(Colors.black12),
             onTap: enabled ? start : null,
             child: Center(
               child: Text(
