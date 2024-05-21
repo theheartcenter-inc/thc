@@ -1,26 +1,17 @@
+import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
+import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/style_text.dart';
 
-class IssueReport extends StatelessWidget {
+class IssueReport extends StatefulWidget {
   const IssueReport({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: IssueReportScreen(),
-    );
-  }
+  State<IssueReport> createState() => _IssueReportState();
 }
 
-class IssueReportScreen extends StatefulWidget {
-  const IssueReportScreen({super.key});
-
-  @override
-  _IssueReportScreenState createState() => _IssueReportScreenState();
-}
-
-class _IssueReportScreenState extends State<IssueReportScreen> {
+class _IssueReportState extends State<IssueReport> {
   final _formKey = GlobalKey<FormState>();
 
   String _name = '';
@@ -34,6 +25,13 @@ class _IssueReportScreenState extends State<IssueReportScreen> {
     final style = MaterialStateTextStyle.resolveWith((states) => StyleText(
           color: colors.onBackground.withOpacity(states.isFocused ? 1.0 : 0.5),
         ));
+    final border = MaterialStateOutlineInputBorder.resolveWith(
+      (states) => OutlineInputBorder(
+        borderSide: states.isFocused
+            ? BorderSide(color: colors.primary, width: 2)
+            : BorderSide(color: colors.onBackground.withOpacity(0.5)),
+      ),
+    );
 
     return Scaffold(
       appBar: AppBar(title: const Text('Report an Issue')),
@@ -52,13 +50,7 @@ class _IssueReportScreenState extends State<IssueReportScreen> {
                     labelText: 'name',
                     labelStyle: style,
                     floatingLabelStyle: style,
-                    border: MaterialStateOutlineInputBorder.resolveWith((states) {
-                      return OutlineInputBorder(
-                        borderSide: states.isFocused
-                            ? BorderSide(color: colors.primary, width: 2)
-                            : BorderSide(color: colors.onBackground.withOpacity(0.5)),
-                      );
-                    }),
+                    border: border,
                   ),
                   validator: (value) {
                     if (value?.isEmpty ?? true) {
@@ -66,37 +58,24 @@ class _IssueReportScreenState extends State<IssueReportScreen> {
                     }
                     return null;
                   },
-                  onSaved: (value) {
-                    _name = value ?? '';
-                  },
+                  onSaved: (value) => _name = value ?? '',
                 ),
               ),
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
-                // Add bottom padding here
                 child: TextFormField(
                   decoration: InputDecoration(
                     isDense: true,
                     labelText: 'email',
                     labelStyle: style,
                     floatingLabelStyle: style,
-                    border: MaterialStateOutlineInputBorder.resolveWith((states) {
-                      return OutlineInputBorder(
-                        borderSide: states.isFocused
-                            ? BorderSide(color: colors.primary, width: 2)
-                            : BorderSide(color: colors.onBackground.withOpacity(0.5)),
-                      );
-                    }),
+                    border: border,
                   ),
-                  validator: (value) {
-                    if (value?.isEmpty ?? true) {
-                      return 'Please enter a valid email address';
-                    }
-                    return null;
+                  validator: (value) => switch (value) {
+                    final email? when EmailValidator.validate(email) => null,
+                    _ => 'Please enter a valid email address',
                   },
-                  onSaved: (value) {
-                    _email = value ?? '';
-                  },
+                  onSaved: (value) => _email = value ?? '',
                 ),
               ),
               TextFormField(
@@ -105,13 +84,7 @@ class _IssueReportScreenState extends State<IssueReportScreen> {
                   labelText: 'message',
                   labelStyle: style,
                   floatingLabelStyle: style,
-                  border: MaterialStateOutlineInputBorder.resolveWith((states) {
-                    return OutlineInputBorder(
-                      borderSide: states.isFocused
-                          ? BorderSide(color: colors.primary, width: 2)
-                          : BorderSide(color: colors.onBackground.withOpacity(0.5)),
-                    );
-                  }),
+                  border: border,
                 ),
                 maxLines: 3,
                 validator: (value) {
@@ -120,15 +93,14 @@ class _IssueReportScreenState extends State<IssueReportScreen> {
                   }
                   return null;
                 },
-                onSaved: (value) {
-                  _message = value ?? '';
-                },
+                onSaved: (value) => _message = value ?? '',
               ),
               const SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
                     _formKey.currentState!.save();
+                    backendPrint('$_name $_email $_message');
                   }
                 },
                 child: const Text('Submit', style: StyleText(weight: 520)),
