@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:provider/provider.dart';
 import 'package:thc/start/start.dart';
 import 'package:thc/utils/animation.dart';
-import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
@@ -31,7 +31,7 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
   Future<void> toggle([ThemeMode? mode]) async {
     final reversing = controller.aimedForward;
     if (reversing && mode != null) {
-      context.read<AppTheme>().emit(mode);
+      context.read<AppTheme>().value = mode;
       LocalStorage.themeMode.save(mode.index);
     }
     return reversing ? controller.reverse(from: 1) : controller.forward(from: 0);
@@ -46,7 +46,7 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
   }
 
   Widget builder(BuildContext context, _) {
-    final themeMode = context.watch<AppTheme>().state;
+    final themeMode = context.watch<AppTheme>().value;
 
     final t = controller.value;
     final aimedForward = controller.aimedForward;
@@ -57,13 +57,10 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
     final fgOpacity = foregroundColor.opacity;
     final splashColor = foregroundColor.withOpacity(fgOpacity / 4);
 
-    final normalRadius = Radius.circular((1 - tCurve) * 24);
-    final cornerRadius = Radius.circular((1 - tCurve) * 16 + 8);
-
     final width = 72 * tCurve;
     final height = 80 * tCurve;
 
-    Widget? button(ThemeMode buttonMode) {
+    Widget? themeButton(ThemeMode buttonMode) {
       final active = buttonMode == themeMode;
       if (t == 0 && !active) return null;
 
@@ -74,14 +71,7 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
         top: tCurve * buttonMode.index * (height + 48) / 3,
         bottom: tCurve * (2 - buttonMode.index) * (height + 48) / 3,
         child: Material(
-          animationDuration: Duration.zero,
-          borderRadius: switch (buttonMode) {
-            ThemeMode.light => BorderRadius.all(normalRadius),
-            ThemeMode.dark => BorderRadius.vertical(top: normalRadius, bottom: cornerRadius),
-            ThemeMode.system => BorderRadius.vertical(top: cornerRadius, bottom: normalRadius),
-          },
-          color: widget.backgroundColor,
-          clipBehavior: Clip.hardEdge,
+          type: MaterialType.transparency,
           child: InkWell(
             key: ValueKey(buttonMode),
             onTap: t.remainder(1) == 0 ? () => toggle(buttonMode) : null,
@@ -121,11 +111,17 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
     return SizedBox(
       width: width + 48,
       height: height + 48,
-      child: Stack(
-        children: [
-          for (final mode in stacked)
-            if (button(mode) case final button?) button,
-        ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular((1 - tCurve) * 16 + 8),
+        child: ColoredBox(
+          color: widget.backgroundColor ?? Theme.of(context).canvasColor,
+          child: Stack(
+            children: [
+              for (final mode in stacked)
+                if (themeButton(mode) case final button?) button,
+            ],
+          ),
+        ),
       ),
     );
   }

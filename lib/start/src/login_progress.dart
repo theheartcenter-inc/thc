@@ -1,15 +1,15 @@
 // ignore_for_file: sort_constructors_first
 
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/firebase/firebase_auth.dart' as auth;
 import 'package:thc/start/src/bottom_stuff.dart';
 import 'package:thc/start/src/login_fields.dart';
-import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
 
 /// {@template LoginLabels}
@@ -178,14 +178,14 @@ class LoginProgress {
 
 /// This is a "singleton class", so it's marked as `final`
 /// and has a private constructor to discourage multiple instances.
-final class LoginProgressTracker extends Cubit<LoginProgress> {
+final class LoginProgressTracker extends ValueNotifier<LoginProgress> {
   LoginProgressTracker._() : super(const LoginProgress._initial());
 
   static LoginProgressTracker? _tracker;
 
   /// Accessing the state without a [BuildContext] is super convenient,
   /// but it doesn't trigger a rebuild when something changes.
-  static LoginProgress get readState => _tracker!.state;
+  static LoginProgress get readState => _tracker!.value;
 
   factory LoginProgressTracker.create(_) {
     for (final field in LoginField.values) {
@@ -198,7 +198,7 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
   }
 
   /// This makes retrieving the state from the current [BuildContext] slightly more concise.
-  static LoginProgress of(BuildContext context) => context.watch<LoginProgressTracker>().state;
+  static LoginProgress of(BuildContext context) => context.watch<LoginProgressTracker>().value;
 
   /// Causes the tracker to [emit] a new progress state.
   ///
@@ -220,14 +220,14 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
 
     final progress = fieldValues == null ? readState : readState.resolveError();
 
-    _tracker!.emit(progress.copyWith(
+    _tracker!.value = progress.copyWith(
       animation: animation,
       labels: labels,
       focusedField: focusedField,
       fieldValues: fieldValues,
       errorMessage: errorMessage,
       showPassword: showPassword,
-    ));
+    );
   }
 
   static void mismatch([String? message]) => update(errorMessage: message ?? '');
@@ -235,7 +235,7 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
   static void toggleShowPassword() => update(showPassword: !readState.showPassword);
 
   static void unfocus(LoginField field) {
-    if (readState.focusedField == field) _tracker!.emit(readState.unfocus());
+    if (readState.focusedField == field) _tracker!.value = readState.unfocus();
   }
 
   /// The current "page" is determined by the [LoginLabels] rather than a [NavigatorState],
@@ -340,7 +340,7 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
     final values = fieldValues ?? state.fieldValues;
 
     if ((labels ?? state.labels).choosingPassword) {
-      if (values case (final a!, final b!) when min(a.length, b.length) < 8) {
+      if (values case (final a!, final b!) when math.min(a.length, b.length) < 8) {
         return null; // password too short
       }
     }

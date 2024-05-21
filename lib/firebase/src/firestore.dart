@@ -22,6 +22,7 @@ mixin CollectionName on Enum {
 enum Firestore with CollectionName {
   streams,
   surveys,
+  scheduled_streams, // ignore: constant_identifier_names
   users;
 
   CollectionReference<Json> get _collection {
@@ -30,6 +31,8 @@ enum Firestore with CollectionName {
   }
 
   DocumentReference<Json> doc([String? path]) => _collection.doc(path);
+
+  Future<QuerySnapshot<Json>> get() => _collection.get();
 
   Stream<Snapshot> snapshots({
     ListenSource source = ListenSource.defaultSource,

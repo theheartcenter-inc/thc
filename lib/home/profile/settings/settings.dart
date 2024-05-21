@@ -53,7 +53,7 @@ class _NavBarSwitchState extends State<NavBarSwitch> {
       onChanged: (newValue) {
         setState(() => value = newValue);
         widget.storageKey.save(newValue);
-        context.read<NavBarIndex>().refresh();
+        context.read<NavBarSelection>().refresh();
       },
     );
   }
@@ -64,7 +64,7 @@ class _ThemePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeMode = context.watch<AppTheme>().state;
+    final themeMode = context.watch<AppTheme>().value;
     return SegmentedButton<ThemeMode>(
       showSelectedIcon: false,
       segments: [

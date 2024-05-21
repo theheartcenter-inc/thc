@@ -13,6 +13,7 @@ import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
+import 'package:thc/utils/widgets/placeholders.dart';
 
 enum ProfileOption with StatelessEnum {
   account(
@@ -80,20 +81,7 @@ class ProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const image = Padding(
-      padding: EdgeInsets.all(10),
-      child: SizedBox.square(
-        dimension: 100,
-        child: ClipOval(
-          child: FittedBox(
-            fit: BoxFit.cover,
-            child: Image(image: AssetImage('assets/profile_placeholder.jpg')),
-          ),
-        ),
-      ),
-    );
-
-    final userWatch = context.watch<AccountFields>().state ?? ThcUser(name: 'Not Found', id: '');
+    final userWatch = context.watch<AccountFields>().value ?? ThcUser(name: 'Not Found', id: '');
     if (userWatch.name == 'Not Found') ErrorIfStrict("couldn't get AccountFields data");
 
     final linkColor = Color.lerp(ThcColors.dullBlue, ThcColors.teal, 0.25)!;
@@ -102,7 +90,7 @@ class ProfileScreen extends StatelessWidget {
       child: Center(
         child: Column(
           children: [
-            image,
+            const PlaceholderImage(width: 100),
             Text(userWatch.name, style: const StyleText(size: 28)),
             if (user.id case final id?) Text('user ID: $id', style: const StyleText(weight: 600)),
             if (userWatch.email case final email?)

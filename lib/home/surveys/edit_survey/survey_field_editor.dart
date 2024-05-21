@@ -348,8 +348,8 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
     final choiceNames = [for (final choice in choices) choice.text];
     const choicePadding = EdgeInsets.fromLTRB(48, 0, 36, 16);
 
-    final validating = context.watch<ValidSurveyQuestions>().state;
-    final mobileEditing = context.watch<MobileEditing>().state;
+    final validating = context.watch<ValidSurveyQuestions>().value;
+    final mobileEditing = context.watch<MobileEditing>().value;
     if (mobileEditing) stopEditing();
 
     Widget? content;

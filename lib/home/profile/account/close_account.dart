@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
-import 'package:thc/utils/bloc.dart';
+import 'package:thc/firebase/firebase_auth.dart' as auth;
+import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/style_text.dart';
+import 'package:thc/utils/widgets/state_async.dart';
 
 enum _Progress { notStarted, loading, done }
 
@@ -13,12 +16,26 @@ class CloseAccount extends StatefulWidget {
   State<CloseAccount> createState() => _CloseAccountState();
 }
 
-class _CloseAccountState extends State<CloseAccount> {
-  bool canDelete = false;
+class _CloseAccountState extends StateAsync<CloseAccount> {
+  String password = '';
+  String? errorText;
+  bool obscureText = true;
 
   Widget builder(BuildContext context, _) {
-    final progress = context.watch<_Deleting>().state;
-    Future<void> delete() => context.read<_Deleting>().delete();
+    final progress = context.watch<_Deleting>().value;
+    final delete = errorText != null || password.isEmpty
+        ? null
+        : ([_]) async {
+            await LocalStorage.password.save(password);
+            if (await auth.signIn() case final error?) {
+              return safeState(() {
+                errorText =
+                    error.isEmpty ? 'please double-check your password and try again.' : error;
+              });
+            }
+
+            if (mounted) await context.read<_Deleting>().delete();
+          };
 
     final textFieldContent = Column(
       mainAxisSize: MainAxisSize.min,
@@ -29,12 +46,22 @@ class _CloseAccountState extends State<CloseAccount> {
           style: StyleText(size: 16),
         ),
         TextField(
+          obscureText: obscureText,
           onChanged: (value) {
-            final correctValue = value == 'DELETE';
-            if (canDelete != correctValue) setState(() => canDelete = correctValue);
+            setState(() {
+              errorText = null;
+              password = value;
+            });
           },
-          onSubmitted: canDelete ? (_) => delete() : null,
-          decoration: const InputDecoration(hintText: 'Type DELETE here'),
+          onSubmitted: delete,
+          decoration: InputDecoration(
+            hintText: 'Enter your password',
+            errorText: errorText,
+            suffixIcon: IconButton(
+              icon: Icon(obscureText ? Icons.visibility : Icons.visibility_off),
+              onPressed: () => setState(() => obscureText = !obscureText),
+            ),
+          ),
         ),
       ],
     );
@@ -55,7 +82,7 @@ class _CloseAccountState extends State<CloseAccount> {
           _ConfirmButton('OK', navigator.logout, key: const Key('confirm'))
         else ...[
           _ConfirmButton('Cancel', navigator.pop),
-          _ConfirmButton('Confirm', canDelete ? delete : null, key: const Key('confirm')),
+          _ConfirmButton('Confirm', delete, key: const Key('confirm')),
         ],
       ],
     );
@@ -68,7 +95,7 @@ class _CloseAccountState extends State<CloseAccount> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(create: (_) => _Deleting(), builder: builder);
+    return ChangeNotifierProvider(create: (_) => _Deleting(), builder: builder);
   }
 }
 
@@ -80,7 +107,7 @@ class _ConfirmButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final onPressed = switch (context.watch<_Deleting>().state) {
+    final onPressed = switch (context.watch<_Deleting>().value) {
       _Progress.notStarted || _Progress.done => this.onPressed,
       _Progress.loading => null,
     };
@@ -110,12 +137,12 @@ class _Loading extends StatelessWidget {
   }
 }
 
-class _Deleting extends Cubit<_Progress> {
+class _Deleting extends ValueNotifier<_Progress> {
   _Deleting() : super(_Progress.notStarted);
 
   Future<void> delete() async {
-    emit(_Progress.loading);
+    value = _Progress.loading;
     await user.yeet();
-    emit(_Progress.done);
+    value = _Progress.done;
   }
 }

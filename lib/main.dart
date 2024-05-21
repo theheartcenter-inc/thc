@@ -3,12 +3,10 @@ import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase_setup.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/profile/account/account_field.dart';
-import 'package:thc/home/stream/create_livestream.dart';
 import 'package:thc/home/surveys/edit_survey/survey_editor.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/home/users/src/all_users.dart';
 import 'package:thc/start/start.dart';
-import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/keyboard_shortcuts.dart';
 import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/navigator.dart';
@@ -34,23 +32,22 @@ class App extends StatelessWidget {
   static final _key = _AppKey();
   static void relaunch([_]) {
     navKey = GlobalKey<NavigatorState>();
-    _key.emit(UniqueKey());
+    _key.value = UniqueKey();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
+    return ChangeNotifierProvider(
       create: (_) => _key,
       builder: (context, _) => MultiProvider(
-        key: context.watch<_AppKey>().state,
+        key: context.watch<_AppKey>().value,
         providers: [
-          BlocProvider(create: (_) => AppTheme()),
-          BlocProvider(create: (_) => NavBarIndex()),
-          BlocProvider(create: (_) => LivestreamEnabled()),
-          BlocProvider(create: (_) => MobileEditing()),
-          BlocProvider(create: (_) => ValidSurveyQuestions()),
-          BlocProvider(create: (_) => ValidSurveyAnswers()),
-          BlocProvider(create: (_) => AccountFields()),
+          ChangeNotifierProvider(create: (_) => AppTheme()),
+          ChangeNotifierProvider(create: (_) => NavBarSelection()),
+          ChangeNotifierProvider(create: (_) => MobileEditing()),
+          ChangeNotifierProvider(create: (_) => ValidSurveyQuestions()),
+          ChangeNotifierProvider(create: (_) => ValidSurveyAnswers()),
+          ChangeNotifierProvider(create: (_) => AccountFields()),
           ChangeNotifierProvider(create: (_) => AllUsers()),
         ],
         builder: (context, _) => MaterialApp(
@@ -67,6 +64,6 @@ class App extends StatelessWidget {
 
 /// If you change a widget's key (using [State.setState] or a [Provider]),
 /// Flutter will rebuild the whole widget!
-class _AppKey extends Cubit<Key> {
-  _AppKey() : super(UniqueKey());
+class _AppKey extends ValueNotifier<Key> {
+  _AppKey() : super(const ValueKey(null));
 }

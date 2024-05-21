@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:thc/firebase/firebase.dart';
+import 'package:provider/provider.dart';
 import 'package:thc/home/surveys/edit_survey/survey_field_editor.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/utils/app_config.dart';
-import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/theme.dart';
 
@@ -113,7 +113,10 @@ class _SurveyEditorState extends State<SurveyEditor> {
     ];
     final validation = context.read<ValidSurveyQuestions>();
 
-    if (checks.contains(false)) return validation.emit(true);
+    if (checks.contains(false)) {
+      validation.value = true;
+      return;
+    }
 
     try {
       final type = widget.type;
@@ -122,7 +125,7 @@ class _SurveyEditorState extends State<SurveyEditor> {
         for (final (i, q) in keyedQuestions.indexed) type.doc(i).set(q.question.json),
       ]);
       navigator.showSnackBar(const SnackBar(content: Text('saved!')));
-      validation.emit(false);
+      validation.value = false;
       navigator.pop();
     } catch (e) {
       navigator.showSnackBar(SnackBar(content: Text('[error] $e')));
@@ -143,7 +146,7 @@ class _SurveyEditorState extends State<SurveyEditor> {
           duplicate: () => setState(() => keyedQuestions.insert(i + 1, record.copy())),
           yeet: () {
             setState(() => keyedQuestions.removeAt(i));
-            if (keyedQuestions.isEmpty) context.read<MobileEditing>().emit(false);
+            if (keyedQuestions.isEmpty) context.read<MobileEditing>().value = false;
           },
           validate: () => questionNames.validChoice(i),
           divider: divider(i),
@@ -162,7 +165,7 @@ class _SurveyEditorState extends State<SurveyEditor> {
         title: const Text('Survey Editor'),
         actions: [
           IconButton(
-            onPressed: context.watch<MobileEditing>().state ? null : validate,
+            onPressed: context.watch<MobileEditing>().value ? null : validate,
             icon: const Icon(Icons.save),
           ),
         ],
@@ -235,7 +238,7 @@ class _SurveyEditDividerState extends State<SurveyEditDivider> {
 
   @override
   Widget build(BuildContext context) {
-    if (context.watch<MobileEditing>().state) {
+    if (context.watch<MobileEditing>().value) {
       return const SizedBox(height: SurveyEditDivider.height / 2);
     }
     final Widget button;
@@ -283,7 +286,7 @@ class _SurveyEditDividerState extends State<SurveyEditDivider> {
           const Divider(),
           Card(
             clipBehavior: Clip.antiAlias,
-            color: expanded ? null : ThcColors.of(context).background,
+            color: expanded ? null : ThcColors.of(context).surface,
             elevation: expanded ? null : 0,
             child: AnimatedSize(
               duration: Durations.medium1,
@@ -310,12 +313,12 @@ class _SurveyEditDividerState extends State<SurveyEditDivider> {
 ///
 /// Mobile devices don't have mouse cursors,
 /// so instead there's a button that uses this BLoC to show/hide the extra options.
-class MobileEditing extends Cubit<bool> {
+class MobileEditing extends ValueNotifier<bool> {
   MobileEditing() : super(false);
 
-  IconData get icon => state ? Icons.done : Icons.calendar_view_day;
+  IconData get icon => value ? Icons.done : Icons.calendar_view_day;
 
-  void toggle() => emit(!state);
+  void toggle() => value = !value;
 }
 
 /// {@template ValidSurveyQuestions}
@@ -326,7 +329,7 @@ class MobileEditing extends Cubit<bool> {
 /// - it's non-empty
 /// - there are no duplicate items
 /// {@endtemplate}
-class ValidSurveyQuestions extends Cubit<bool> {
+class ValidSurveyQuestions extends ValueNotifier<bool> {
   /// {@macro ValidSurveyQuestions}
   ValidSurveyQuestions() : super(false);
 }

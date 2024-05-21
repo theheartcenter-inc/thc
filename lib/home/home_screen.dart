@@ -1,6 +1,7 @@
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/library/video_library.dart';
 import 'package:thc/home/profile/profile.dart';
@@ -9,7 +10,6 @@ import 'package:thc/home/stream/create_livestream.dart';
 import 'package:thc/home/surveys/manage_surveys/manage_surveys.dart';
 import 'package:thc/home/users/manage_users.dart';
 import 'package:thc/home/watch_live/watch_live.dart';
-import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
 
@@ -98,11 +98,13 @@ enum NavBarButton with StatelessEnum {
     };
   }
 
+  bool get streaming => this == stream;
+
   /// The list of buttons to display at the bottom of the home screen.
   static List<NavBarButton> get enabledValues => List.of(values.where((value) => value.enabled));
 
   /// The button's position within [enabledValues].
-  int get navIndex => max(enabledValues.indexOf(this), 0);
+  int get navIndex => math.max(enabledValues.indexOf(this), 0);
 
   /// These enum values can be built into a widget thanks to the [StatelessEnum] mixin.
   @override
@@ -140,9 +142,9 @@ class NavBar extends NavigationBar {
   /// {@macro NavBar}
   NavBar.of(BuildContext context, {super.key, this.belowPage = false})
       : super(
-          selectedIndex: context.watch<NavBarIndex>().state,
-          onDestinationSelected: (i) => context.read<NavBarIndex>().selectIndex(i),
           destinations: NavBarButton.enabledValues,
+          selectedIndex: NavBarSelection.of(context).navIndex,
+          onDestinationSelected: context.read<NavBarSelection>().selectIndex,
         );
 
   /// If [belowPage] is true, then instead of passing this widget
@@ -178,14 +180,12 @@ class NavBar extends NavigationBar {
 /// Updates the active [NavBar] index when you move to another page,
 /// and when you turn a page on/off in the Admin settings.
 /// {@endtemplate}
-class NavBarIndex extends Cubit<int> {
+class NavBarSelection extends ValueNotifier<NavBarButton> {
   /// {@macro NavBarIndex}
-  NavBarIndex() : super(_initial);
+  NavBarSelection() : super(LocalStorage.navBarSelection());
 
-  static int get _initial {
-    final NavBarButton fromStorage = LocalStorage.navBarState();
-    return fromStorage.navIndex;
-  }
+  static NavBarButton of(BuildContext context, {bool listen = true}) =>
+      Provider.of<NavBarSelection>(context, listen: listen).value;
 
   /// This function is kinda tricky, since NavBar buttons have 2 indexes:
   /// 1. `index`: its index in [NavBarButton.values]
@@ -194,8 +194,8 @@ class NavBarIndex extends Cubit<int> {
   /// `index` is used in [LocalStorage], and `navIndex` is used in the [NavBar].
   void selectIndex(int navIndex) {
     final newButton = NavBarButton.enabledValues[navIndex];
-    LocalStorage.navBarState.save(newButton.index);
-    emit(navIndex);
+    LocalStorage.navBarSelection.save(newButton.index);
+    value = newButton;
   }
 
   /// Similar to [selectIndex], but you can pass in the desired button directly.

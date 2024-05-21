@@ -53,9 +53,12 @@ Future<String?> signIn() async {
       'invalid-password' =>
         'Invalid Password. Please enter password if blank.',
       'invalid-email' => 'Invalid Email. Please enter email if blank.',
+      'unknown-error' => '',
       _ => 'Error: ${e.code}',
     };
   }
+  if (LocalStorage.loggedIn()) return null;
+
   if (LocalStorage.userId() case final id?) {
     if (useInternet) {
       user = await ThcUser.download(id);
