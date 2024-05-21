@@ -4,8 +4,8 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/agora/livestream_button.dart';
+import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
-import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/navigator.dart';
@@ -41,8 +41,15 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
     );
   }
 
+  /// Used to determine whether [finishedQuestions] or [endEarlyQuestions]
+  /// are shown. Will probably change once Agora is up and running.
+  late final Timer endStreamTimer;
+
   @override
-  void animate() => sleep(0.5, then: setTimer);
+  void animate() async {
+    endStreamTimer = Timer(const Duration(seconds: 10), endStream);
+    Future.delayed(Durations.long2, setTimer);
+  }
 
   /// Determines whether [_EndButton] is shown.
   ///
@@ -78,13 +85,17 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
     if (isHovered) timer?.cancel();
   }
 
-  void endStream() {
+  final finishedQuestions = ThcSurvey.streamFinished.getQuestions();
+  final endEarlyQuestions = ThcSurvey.streamEndEarly.getQuestions();
+
+  void endStream({bool endedEarly = false}) async {
     context.read<StreamOverlayFadeIn>().value = false;
     if (NavBarSelection.of(context, listen: false).streaming) {
       return navigator.pop();
     }
 
-    navigator.pushReplacement(SurveyScreen(SurveyPresets.streamFinished.questions));
+    final questions = endedEarly ? endEarlyQuestions : finishedQuestions;
+    navigator.pushReplacement(SurveyScreen(await questions));
   }
 
   @override
@@ -105,7 +116,10 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
       ),
       floatingActionButton: StreamOverlay(
         overlayVisible ? Offset.zero : const Offset(0, 2),
-        child: _EndButton(onPressed: endStream, onHover: buttonHover),
+        child: _EndButton(
+          onPressed: () => endStream(endedEarly: true),
+          onHover: buttonHover,
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );

@@ -20,7 +20,7 @@ class _WatchingLivestreamState extends State<WatchingLivestream> {
 
   void endStream() async {
     final questions = endedEarly
-        ? ThcSurvey.streamEndedEarly.getQuestions()
+        ? ThcSurvey.streamEndEarly.getQuestions()
         : ThcSurvey.streamFinished.getQuestions();
     navigator.pushReplacement(SurveyScreen(await questions));
   }

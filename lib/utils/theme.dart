@@ -59,7 +59,7 @@ abstract final class ThcColors {
   static const dullGreen38 = Color(0x6060a060);
   static const dullGreen50 = Color(0x8060a060);
 
-  static const dullerGreen = Color(0xff407040);
+  static const dullerGreen = Color(0xff387038);
 
   static const lightContainer = Color(0xffc8d8e6);
   static const lightContainer16 = Color(0x28c8d8e6);
@@ -95,6 +95,7 @@ ThemeData _generateTheme(Brightness brightness) {
   final isLight = brightness == Brightness.light;
 
   final green = isLight ? ThcColors.green : ThcColors.zaHando;
+  final backgroundColor = isLight ? ThcColors.veryPaleAzure : ThcColors.darkestBlue;
   final textColor = isLight ? Colors.black : ThcColors.paleAzure88;
   final paleColor = isLight ? Colors.white : ThcColors.paleAzure;
   final barColor = isLight ? ThcColors.darkBlue : ThcColors.darkerBlue;
@@ -104,6 +105,9 @@ ThemeData _generateTheme(Brightness brightness) {
 
   const iconTheme = IconThemeData(size: 32);
   const labelTextStyle = StyleText(size: 12, weight: 600);
+  final inputLabelStyle = WidgetStateTextStyle.resolveWith(
+    (states) => TextStyle(color: states.isFocused ? green : textColor),
+  );
 
   WidgetStateProperty<T> selected<T>(T selected, T unselected) =>
       WidgetStateProperty.resolveWith((states) => states.isSelected ? selected : unselected);
@@ -111,23 +115,23 @@ ThemeData _generateTheme(Brightness brightness) {
   WidgetStateProperty<T> tealWhenSelected<T>(T Function({Color color}) copyWith, bool isLight) {
     return selected(
       copyWith(color: ThcColors.teal),
-      copyWith(color: paleColor.withOpacity(0.33)),
+      copyWith(color: paleColor.withOpacity(1 / 3)),
     );
   }
 
   return ThemeData(
     colorScheme: ColorScheme.fromSeed(
-      seedColor: green,
+      seedColor: ThcColors.darkBlue,
       brightness: isLight ? Brightness.light : Brightness.dark,
       primary: green,
-      primaryContainer: isLight ? ThcColors.dullGreen38 : ThcColors.dullGreen50,
       onPrimary: isLight ? ThcColors.dullerGreen : Colors.black87,
       inversePrimary: ThcColors.darkGreen,
+      primaryContainer: isLight ? ThcColors.dullGreen38 : ThcColors.dullGreen50,
       secondary: ThcColors.dullBlue,
       onSecondary: paleColor,
       tertiary: ThcColors.teal,
       onTertiary: isLight ? ThcColors.tan : ThcColors.darkMagenta,
-      surface: isLight ? ThcColors.veryPaleAzure : ThcColors.darkestBlue,
+      surface: backgroundColor,
       onSurface: textColor,
       inverseSurface: isLight ? ThcColors.darkBlue : ThcColors.paleAzure,
       onInverseSurface: isLight ? Colors.white : ThcColors.darkestBlue,
@@ -136,9 +140,27 @@ ThemeData _generateTheme(Brightness brightness) {
     ),
     fontFamily: 'pretendard',
     materialTapTargetSize: MaterialTapTargetSize.padded,
+    canvasColor: backgroundColor,
+    scaffoldBackgroundColor: backgroundColor,
     highlightColor: contrast13,
     hoverColor: contrast13,
     splashColor: contrast13,
+    inputDecorationTheme: InputDecorationTheme(
+      border: MaterialStateOutlineInputBorder.resolveWith(
+        (states) => OutlineInputBorder(
+          borderSide: states.isFocused
+              ? BorderSide(color: green, width: 2)
+              : BorderSide(color: textColor.withOpacity(0.5)),
+          borderRadius: const BorderRadius.all(Radius.circular(100)),
+        ),
+      ),
+      labelStyle: inputLabelStyle,
+      floatingLabelStyle: inputLabelStyle,
+    ),
+    iconTheme: IconThemeData(color: textColor),
+    iconButtonTheme: IconButtonThemeData(
+      style: IconButton.styleFrom(foregroundColor: Colors.black87),
+    ),
     switchTheme: SwitchThemeData(
       thumbColor: selected(Colors.white, slightContrast),
       trackOutlineColor: selected(ThcColors.green, slightContrast),

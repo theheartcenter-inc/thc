@@ -42,7 +42,6 @@ class SurveyTheme extends StatelessWidget {
     final brightness = Theme.of(context).brightness;
     final isLight = brightness == Brightness.light;
     final blackAndWhite = isLight ? Colors.white : Colors.black;
-    final textColor = isLight ? Colors.black : SurveyColors.orangeWhite;
     final error = isLight ? SurveyColors.vibrantRed : Colors.redAccent;
     final paleColor = isLight ? SurveyColors.yellowSunrise : SurveyColors.orangeWhite;
     final colors = ColorScheme.fromSeed(
@@ -59,13 +58,13 @@ class SurveyTheme extends StatelessWidget {
       onErrorContainer: error,
       surfaceContainerLowest: isLight ? SurveyColors.yellowSunrise : SurveyColors.maroonSunset,
       surfaceContainerHighest: isLight ? SurveyColors.orangeSunrise : SurveyColors.orangeSunset,
-      onSurface: textColor,
+      onSurface: isLight ? Colors.black : SurveyColors.orangeWhite,
     );
 
     return ThemeData(
       colorScheme: colors,
       inputDecorationTheme: InputDecorationTheme(
-        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: textColor)),
+        enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: colors.onSurface)),
         focusedBorder: OutlineInputBorder(
           borderSide: BorderSide(color: colors.primaryContainer, width: 1.5),
         ),
@@ -129,7 +128,10 @@ class _SurveySunrise extends StatelessWidget {
             gradient: LinearGradient(
               begin: const Alignment(-0.25, -1.0),
               end: const Alignment(0.25, 1.0),
-              colors: [colors.surface, colors.surface],
+              colors: [
+                colors.surfaceContainerHighest,
+                colors.surfaceContainerLowest,
+              ],
             ),
           ),
           constraints: BoxConstraints(minWidth: size.width, minHeight: size.height),

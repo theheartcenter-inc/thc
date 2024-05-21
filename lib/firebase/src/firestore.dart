@@ -63,7 +63,7 @@ extension GetData<T> on DocumentReference<T> {
 enum ThcSurvey with CollectionName {
   introSurvey,
   streamFinished,
-  streamEndedEarly;
+  streamEndEarly;
 
   /// A reference to the survey in Firebase.
   DocumentReference<Json> get _doc => Firestore.surveys.doc('$this');
