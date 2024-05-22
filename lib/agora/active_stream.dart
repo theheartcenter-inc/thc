@@ -11,7 +11,13 @@ import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/widgets/state_async.dart';
 
+/// {@template ActiveStream}
+/// A black screen with cool button animations.
+///
+/// Shown when the user is creating or watching a livestream.
+/// {@endtemplate}
 class ActiveStream extends StatefulWidget {
+  /// {@macro ActiveStream}
   const ActiveStream({super.key});
 
   static const _duration = Durations.extralong1;

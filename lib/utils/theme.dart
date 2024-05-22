@@ -151,7 +151,6 @@ ThemeData _generateTheme(Brightness brightness) {
           borderSide: states.isFocused
               ? BorderSide(color: green, width: 2)
               : BorderSide(color: textColor.withOpacity(0.5)),
-          borderRadius: const BorderRadius.all(Radius.circular(100)),
         ),
       ),
       labelStyle: inputLabelStyle,
