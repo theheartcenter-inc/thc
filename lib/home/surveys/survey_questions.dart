@@ -120,8 +120,11 @@ class TextPromptQuestion extends SurveyQuestion {
 /// We're using an `(AnswerType, String?)` tuple: a [String] is passed in when
 /// the user types a custom value.
 sealed class MultipleChoice extends SurveyQuestion {
-  /// You can't make a [MultipleChoice] object using this constructor;
-  /// it's here because [RadioQuestion] and [CheckboxQuestion] use it.
+  /// {@template MultipleChoice_answer}
+  /// [MultipleChoice] questions have answers stored as tuples:
+  /// the first value is information about which answer(s) are selected,
+  /// and the second value can contain a custom text response that the user typed in.
+  /// {@endtemplate}
   const MultipleChoice(
     super.description, {
     super.optional = false,

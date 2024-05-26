@@ -100,8 +100,11 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
       return navigator.pop();
     }
 
-    final questions = endedEarly ? endEarlyQuestions : finishedQuestions;
-    navigator.pushReplacement(SurveyScreen(await questions));
+    final (questions, type) = endedEarly
+        ? (endEarlyQuestions, ThcSurvey.streamEndEarly)
+        : (finishedQuestions, ThcSurvey.streamFinished);
+
+    navigator.pushReplacement(SurveyScreen(await questions, surveyType: type));
   }
 
   @override
@@ -123,7 +126,10 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
       floatingActionButton: StreamOverlay(
         overlayVisible ? Offset.zero : const Offset(0, 2),
         child: _EndButton(
-          onPressed: () => endStream(endedEarly: true),
+          onPressed: () {
+            endStreamTimer.cancel();
+            endStream(endedEarly: true);
+          },
           onHover: buttonHover,
         ),
       ),

@@ -71,6 +71,9 @@ enum ThcSurvey with CollectionName {
   /// A reference to a question from this survey in Firebase.
   DocumentReference<Json> doc(int i) => _doc.collection('questions').doc('$i');
 
+  Future<DocumentReference<Json>> submitResponse(Json answerJson) =>
+      _doc.collection('responses').add(answerJson);
+
   /// The number of questions in the survey.
   Future<int?> getLength() async {
     final json = await _doc.getData();

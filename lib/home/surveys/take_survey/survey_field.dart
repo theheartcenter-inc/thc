@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/utils/style_text.dart';
@@ -64,12 +65,36 @@ extension type SurveyRecord.fromRecord((SurveyQuestion, dynamic) record) {
   SurveyQuestion get question => record.$1;
   dynamic get answer => record.$2;
 
-  /// [MultipleChoice] questions have answers stored as tuples:
-  /// the first value is information about which answer(s) are selected,
-  /// and the second value can contain a custom text response that the user typed in.
+  /// {@macro MultipleChoice_answer}
   ///
   /// This getter ignores the second value and returns the data showing what's been selected.
   dynamic get cleanAnswer => switch (answer) { (final a, _) || final a => a };
+
+  /// {@macro MultipleChoice_answer}
+  ///
+  /// If the [question] is a [RadioQuestion], returns the index of the answer,
+  /// or if the user picked "other", a string containing the user's response.
+  ///
+  /// If it's a [CheckboxQuestion], returns a list of the selected indices
+  /// (a string of the user's custom response is appended if applicable).
+  dynamic get descriptiveAnswer {
+    if (question is! MultipleChoice) return answer;
+
+    switch (question as MultipleChoice) {
+      case final RadioQuestion q:
+        final (int index, String? customResponse) = answer;
+        return (index < q.choices.length) ? index : customResponse;
+
+      case final CheckboxQuestion q:
+        final (List<bool> checks, String? customResponse) = answer;
+        final defaultLength = q.choices.length;
+        return [
+          for (int i = 0; i < defaultLength; i++)
+            if (checks[i]) i,
+          if (q.canType && checks[defaultLength] && customResponse != null) customResponse,
+        ].join('\n');
+    }
+  }
 
   /// In order for the user to finish the survey, all non-optional questions must be answered.
   bool get valid => question.optional || question.answerDescription(answer) != null;
@@ -99,11 +124,14 @@ extension type SurveyData(List<SurveyRecord> data) implements List<SurveyRecord>
   bool get valid => data.every((record) => record.valid);
   int get invalidCount => data.fold(0, (previous, record) => previous + (record.valid ? 0 : 1));
 
-  /// The "fun quiz" only uses [ScaleQuestion]s, so its answer output can be an [int] list.
-  List<int> get funQuizResults => [for (final record in data.sublist(1)) record.answer];
-
   /// Contains text that describes each question & answer.
   List<QuestionSummary> get summary => [for (final record in data) record.summary];
+
+  Json get json => {
+        'user id': user.firestoreId,
+        "user's name": user.name,
+        'answers': [for (final record in data) record.descriptiveAnswer],
+      };
 }
 
 /// {@macro ValidSurveyAnswers}

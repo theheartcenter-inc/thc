@@ -73,7 +73,7 @@ class _CustomSurveyButtonsState extends State<CustomSurveyButtons> {
                 ElevatedButton(
                   onPressed: () async {
                     final questions = await surveyType.getQuestions();
-                    return navigator.push(SurveyScreen(questions));
+                    return navigator.push(SurveyScreen(questions, surveyType: surveyType));
                   },
                   child: const Text('view'),
                 ),

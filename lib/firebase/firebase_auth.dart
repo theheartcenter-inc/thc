@@ -106,7 +106,7 @@ Future<String?> register() async {
   final introQuestions = await ThcSurvey.introSurvey.getQuestions();
   navigator.pushReplacement(const HomeScreen());
   await Future.delayed(Durations.short2);
-  navigator.push(SurveyScreen(introQuestions));
+  navigator.push(SurveyScreen(introQuestions, surveyType: ThcSurvey.introSurvey));
   return null;
 }
 
