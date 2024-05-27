@@ -8,6 +8,32 @@ import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:intl/intl.dart';
+import 'package:dio/dio.dart';
+import 'package:universal_html/html.dart' as html;
+
+class FavoriteIconButton extends StatefulWidget {
+  const FavoriteIconButton({
+    super.key,
+    required this.isPinned,
+    required this.onFavoriteToggle,
+  });
+  final bool isPinned;
+  final VoidCallback onFavoriteToggle;
+
+  @override
+  _FavoriteIconButtonState createState() => _FavoriteIconButtonState();
+}
+
+class _FavoriteIconButtonState extends State<FavoriteIconButton> {
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: Icon(widget.isPinned ? Icons.star : Icons.star_border),
+      color: widget.isPinned ? Colors.orange : Colors.grey,
+      onPressed: widget.onFavoriteToggle,
+    );
+  }
+}
 
 class VideoCard extends StatelessWidget {
   const VideoCard({
@@ -19,6 +45,8 @@ class VideoCard extends StatelessWidget {
     required this.id,
     required this.path,
     this.thumbnail,
+    this.isPinned = false,
+    required this.onFavoriteToggle,
   });
 
   final String title;
@@ -28,6 +56,8 @@ class VideoCard extends StatelessWidget {
   final String id;
   final String path;
   final String? thumbnail;
+  final bool isPinned;
+  final VoidCallback onFavoriteToggle;
 
   Future<String?> playVideo() async {
     if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
@@ -43,6 +73,53 @@ class VideoCard extends StatelessWidget {
     }
     navigator.push(PlayVideo(videoURL: url, videoName: title));
     return null;
+  }
+
+  // Add a method to toggle the pinned status
+  Future<void> togglePinnedStatus() async {
+    final userDoc = FirebaseFirestore.instance.collection('users').doc('test_participant');
+    final streamDoc = userDoc.collection('streams').doc(id);
+
+    // Get the current pinned status
+    final docSnapshot = await streamDoc.get();
+    if (docSnapshot.exists) {
+      final currentPinnedStatus = docSnapshot.data()?['pinned'] ?? false;
+      // Update the pinned status to the opposite value
+      await streamDoc.update({'pinned': !currentPinnedStatus});
+    }
+  }
+
+  // Add a method to download the video
+  Future<void> downloadVideo(BuildContext context) async {
+    try {
+      // Retrieve the download URL from Firebase Storage
+      final storageReference = FirebaseStorage.instance.ref().child(path);
+      final url = await storageReference.getDownloadURL();
+
+      if (kIsWeb) {
+        // Handle download for web environment
+        final html.AnchorElement anchorElement = html.AnchorElement(href: url)
+          ..setAttribute('downloadVideo', title)
+          ..click();
+      } else {
+        // Handle download for non-web environment
+        final dio = Dio();
+        final savePath = './download_video/$title.mp4';
+
+        await dio.download(url, savePath, onReceiveProgress: (received, total) {});
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Download completed: $savePath')),
+        );
+      }
+    } on DioException catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to download video: ${e.message}')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('An error occurred: $e')),
+      );
+    }
   }
 
   @override
@@ -82,6 +159,29 @@ class VideoCard extends StatelessWidget {
         },
         hoverColor: ThcColors.dullBlue.withOpacity(1 / 8),
         leading: image,
+        // Add a trailing favorite icon button
+        // Add a download button
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Existing favorite icon button
+            FavoriteIconButton(
+              isPinned: isPinned,
+              onFavoriteToggle: onFavoriteToggle,
+            ),
+            // New download icon button
+            IconButton(
+              icon: const Icon(Icons.download),
+              onPressed: () async {
+                await downloadVideo(context);
+                // Show a confirmation message
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Download started!')),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -109,6 +209,12 @@ class _VideoLibraryState extends State<VideoLibrary> {
 
   Future<void> fetchDocuments() async {
     final QuerySnapshot snapshot = await Firestore.streams.get();
+    final userSnapshot =
+        await Firestore.users.doc('test_participant').collection('streams').get();
+    final pinnedIds = userSnapshot.docs
+        .where((doc) => doc.data()['pinned'] as bool)
+        .map((doc) => doc.id)
+        .toSet();
     setState(() {
       videos = allVideos = [
         for (final document in snapshot.docs)
@@ -119,14 +225,26 @@ class _VideoLibraryState extends State<VideoLibrary> {
             director: document['director'],
             path: document['storage_path'],
             timestamp: document['date'],
+            isPinned: pinnedIds.contains(document.id),
+            onFavoriteToggle: () => toggleFavorite(document.id),
           ),
       ];
     });
   }
 
+  void toggleFavorite(String videoId) async {
+    final docRef = Firestore.users.doc('test_participant').collection('streams').doc(videoId);
+    final docSnapshot = await docRef.get();
+    final isCurrentlyPinned = docSnapshot.data()?['pinned'] as bool? ?? false;
+
+    await docRef.update({'pinned': !isCurrentlyPinned});
+    fetchDocuments(); // Refresh the list after updating
+  }
+
   List<String> get categories {
     final categories = {
       'All',
+      'Pinned',
       for (final video in allVideos) video.category,
     };
     return categories.toList()..sort();
@@ -150,7 +268,11 @@ class _VideoLibraryState extends State<VideoLibrary> {
   }
 
   void filterVideos() {
-    if (selectedCategory != 'All') {
+    if (selectedCategory == 'Pinned') {
+      setState(() {
+        videos = allVideos.where((video) => video.isPinned).toList();
+      });
+    } else if (selectedCategory != 'All') {
       setState(() {
         videos = allVideos.where((video) => video.category == selectedCategory).toList();
       });
