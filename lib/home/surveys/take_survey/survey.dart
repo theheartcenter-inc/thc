@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey_field.dart';
 import 'package:thc/home/surveys/take_survey/survey_theme.dart';
+import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
@@ -124,7 +124,7 @@ class Submitted extends StatelessWidget {
       ),
     );
 
-    final translucent = ThcColors.of(context).onBackground.withOpacity(0.5);
+    final translucent = ThcColors.of(context).onSurface.withOpacity(0.5);
 
     return Scaffold(
       appBar: AppBar(),
@@ -192,7 +192,7 @@ class _ValidateMessage extends StatelessWidget {
 }
 
 /// {@macro ValidSurveyAnswers}
-class ValidSurveyAnswers extends ValueNotifier<bool> {
+class ValidSurveyAnswers extends Cubit<bool> {
   /// {@macro ValidSurveyAnswers}
   ValidSurveyAnswers() : super(false);
 }

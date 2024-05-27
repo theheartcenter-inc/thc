@@ -5,11 +5,11 @@ import 'dart:math' as math;
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/firebase/firebase_auth.dart' as auth;
 import 'package:thc/start/src/bottom_stuff.dart';
 import 'package:thc/start/src/login_fields.dart';
+import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
 
 /// {@template LoginLabels}
@@ -178,7 +178,7 @@ class LoginProgress {
 
 /// This is a "singleton class", so it's marked as `final`
 /// and has a private constructor to discourage multiple instances.
-final class LoginProgressTracker extends ValueNotifier<LoginProgress> {
+final class LoginProgressTracker extends Cubit<LoginProgress> {
   LoginProgressTracker._() : super(const LoginProgress._initial());
 
   static LoginProgressTracker? _tracker;

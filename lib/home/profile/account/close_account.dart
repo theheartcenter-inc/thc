@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/firebase/firebase_auth.dart' as auth;
+import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/style_text.dart';
@@ -95,7 +95,7 @@ class _CloseAccountState extends StateAsync<CloseAccount> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(create: (_) => _Deleting(), builder: builder);
+    return BlocProvider(create: (_) => _Deleting(), builder: builder);
   }
 }
 
@@ -137,7 +137,7 @@ class _Loading extends StatelessWidget {
   }
 }
 
-class _Deleting extends ValueNotifier<_Progress> {
+class _Deleting extends Cubit<_Progress> {
   _Deleting() : super(_Progress.notStarted);
 
   Future<void> delete() async {

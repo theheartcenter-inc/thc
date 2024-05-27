@@ -7,6 +7,7 @@ import 'package:thc/home/surveys/edit_survey/survey_editor.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/home/users/src/all_users.dart';
 import 'package:thc/start/start.dart';
+import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/keyboard_shortcuts.dart';
 import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/navigator.dart';
@@ -37,18 +38,18 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
+    return BlocProvider(
       create: (_) => _key,
       builder: (context, _) => MultiProvider(
         key: context.watch<_AppKey>().value,
         providers: [
-          ChangeNotifierProvider(create: (_) => AppTheme()),
-          ChangeNotifierProvider(create: (_) => NavBarSelection()),
-          ChangeNotifierProvider(create: (_) => MobileEditing()),
-          ChangeNotifierProvider(create: (_) => ValidSurveyQuestions()),
-          ChangeNotifierProvider(create: (_) => ValidSurveyAnswers()),
-          ChangeNotifierProvider(create: (_) => AccountFields()),
-          ChangeNotifierProvider(create: (_) => AllUsers()),
+          BlocProvider(create: (_) => AppTheme()),
+          BlocProvider(create: (_) => NavBarSelection()),
+          BlocProvider(create: (_) => MobileEditing()),
+          BlocProvider(create: (_) => ValidSurveyQuestions()),
+          BlocProvider(create: (_) => ValidSurveyAnswers()),
+          BlocProvider(create: (_) => AccountFields()),
+          BlocProvider(create: (_) => AllUsers()),
         ],
         builder: (context, _) => MaterialApp(
           themeAnimationCurve: Curves.easeOutSine,
@@ -64,6 +65,6 @@ class App extends StatelessWidget {
 
 /// If you change a widget's key (using [State.setState] or a [Provider]),
 /// Flutter will rebuild the whole widget!
-class _AppKey extends ValueNotifier<Key> {
+class _AppKey extends Cubit<Key> {
   _AppKey() : super(const ValueKey(null));
 }

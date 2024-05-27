@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
+import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
@@ -128,7 +128,7 @@ class _AccountFieldState extends State<AccountField> {
   }
 }
 
-class AccountFields extends ValueNotifier<ThcUser?> {
+class AccountFields extends Cubit<ThcUser?> {
   AccountFields() : super(user);
 
   void update(AccountField field) => value = AccountField.updatedUser;

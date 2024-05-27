@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/style_text.dart';
 
@@ -289,7 +289,7 @@ extension ThemeGetter on BuildContext {
   }
 }
 
-class AppTheme extends ValueNotifier<ThemeMode> {
+class AppTheme extends Cubit<ThemeMode> {
   AppTheme() : super(LocalStorage.themeMode());
 
   static ThemeData of(BuildContext context) {
