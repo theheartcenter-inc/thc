@@ -79,6 +79,9 @@ class _CustomSurveyButtonsState extends State<CustomSurveyButtons> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
+                    final proceed = await navigator.showDialog(const _SurveyEditWarning());
+                    if (proceed == null) return;
+
                     final questions = await surveyType.getQuestions();
                     navigator.push(SurveyEditor(surveyType, questions));
                   },
@@ -89,6 +92,22 @@ class _CustomSurveyButtonsState extends State<CustomSurveyButtons> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _SurveyEditWarning extends StatelessWidget {
+  const _SurveyEditWarning();
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Heads-up!'),
+      content: const Text('If you edit this survey, previous responses will be discarded.'),
+      actions: [
+        TextButton(onPressed: navigator.pop, child: const Text('back')),
+        TextButton(onPressed: () => navigator.pop(true), child: const Text('continue')),
+      ],
     );
   }
 }

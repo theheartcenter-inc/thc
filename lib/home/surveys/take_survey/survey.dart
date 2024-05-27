@@ -48,7 +48,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
       final survey = widget.surveyType;
       await survey.submitResponse(switch (survey) {
         ThcSurvey.introSurvey => data.json,
-        ThcSurvey.streamFinished || ThcSurvey.streamEndEarly => {
+        ThcSurvey.streamFinished || ThcSurvey.streamEndedEarly => {
             ...data.json,
             'director ID': directorId,
           },

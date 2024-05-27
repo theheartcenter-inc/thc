@@ -128,8 +128,7 @@ extension type SurveyData(List<SurveyRecord> data) implements List<SurveyRecord>
   List<QuestionSummary> get summary => [for (final record in data) record.summary];
 
   Json get json => {
-        'user id': user.firestoreId,
-        "user's name": user.name,
+        'user ID': user.firestoreId,
         'answers': [for (final record in data) record.descriptiveAnswer],
       };
 }

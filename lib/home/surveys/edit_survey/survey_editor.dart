@@ -23,9 +23,9 @@ extension ValidChoices on List<String> {
 }
 
 class SurveyEditor extends StatefulWidget {
-  const SurveyEditor(this.type, this.questions, {super.key});
+  const SurveyEditor(this.surveyType, this.questions, {super.key});
 
-  final ThcSurvey type;
+  final ThcSurvey surveyType;
   final List<SurveyQuestion> questions;
 
   @override
@@ -118,11 +118,12 @@ class _SurveyEditorState extends State<SurveyEditor> {
       return;
     }
 
+    final survey = widget.surveyType;
     try {
-      final type = widget.type;
-      await type.newLength(keyedQuestions.length);
       await Future.wait([
-        for (final (i, q) in keyedQuestions.indexed) type.doc(i).set(q.question.json),
+        survey.yeetResponses(),
+        survey.newLength(keyedQuestions.length),
+        for (final (i, q) in keyedQuestions.indexed) survey.doc(i).set(q.question.json),
       ]);
       navigator.showSnackBar(const SnackBar(content: Text('saved!')));
       validation.value = false;

@@ -6,7 +6,6 @@ import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/navigator.dart';
 
 typedef Json = Map<String, dynamic>;
-typedef Snapshot = QuerySnapshot<Json>;
 
 mixin CollectionName on Enum {
   @override
@@ -34,7 +33,7 @@ enum Firestore with CollectionName {
 
   Future<QuerySnapshot<Json>> get() => _collection.get();
 
-  Stream<Snapshot> snapshots({
+  Stream<QuerySnapshot<Json>> snapshots({
     ListenSource source = ListenSource.defaultSource,
     bool includeMetadataChanges = false,
   }) {
@@ -45,17 +44,18 @@ enum Firestore with CollectionName {
   }
 }
 
-extension GetData<T> on DocumentReference<T> {
-  Future<T?> getData() async {
-    T? data;
+extension GetData on DocumentReference<Json> {
+  Future<Json?> getData() async {
+    DocumentSnapshot<Json>? result;
     try {
-      final result = await get();
-      backendPrint('result: $result');
-      data = result.data();
+      result = await get();
     } catch (e) {
-      backendPrint('got an error (type ${e.runtimeType})');
-      if (superStrict) rethrow;
+      assert(false, 'got an error (type ${e.runtimeType})');
     }
+    if (result == null) return null;
+    assert(result.exists, "$path doesn't exist");
+    final data = result.data();
+    backendPrint('data: $data');
     return data;
   }
 }
@@ -63,7 +63,7 @@ extension GetData<T> on DocumentReference<T> {
 enum ThcSurvey with CollectionName {
   introSurvey,
   streamFinished,
-  streamEndEarly;
+  streamEndedEarly;
 
   /// A reference to the survey in Firebase.
   DocumentReference<Json> get _doc => Firestore.surveys.doc('$this');
@@ -74,16 +74,23 @@ enum ThcSurvey with CollectionName {
   Future<DocumentReference<Json>> submitResponse(Json answerJson) =>
       _doc.collection('responses').add(answerJson);
 
+  Future<void> yeetResponses() async {
+    final responseDocs = await _doc.collection('responses').get();
+    await Future.wait([
+      for (final item in responseDocs.docs) item.reference.delete(),
+    ]);
+  }
+
   /// The number of questions in the survey.
-  Future<int?> getLength() async {
-    final json = await _doc.getData();
-    return json?['question count'];
+  Future<int> getLength() async {
+    final json = (await _doc.getData())!;
+    return json['question count'];
   }
 
   Future<void> newLength(int length) async {
     if (kDebugMode && !(await _doc.get()).exists) {
       const message = 'tried to set the length for a non-existent survey';
-      ErrorIfStrict(message);
+      assert(false, message);
       await navigator.showSnackBar(const SnackBar(content: Text(message)));
       return _doc.set({'question count': length});
     }
@@ -91,14 +98,7 @@ enum ThcSurvey with CollectionName {
   }
 
   Future<List<SurveyQuestion>> getQuestions() async {
-    final defaults = SurveyPresets.values[index].questions;
-    if (!useInternet) return Future.value(defaults);
-
     final length = await getLength();
-    if (length == null) {
-      ErrorIfStrict("the length of '$this' hasn't been set.");
-      return defaults;
-    }
 
     Future<SurveyQuestion> getQuestion(int i) async {
       final json = await doc(i).getData();

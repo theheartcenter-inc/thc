@@ -92,7 +92,7 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
   }
 
   final finishedQuestions = ThcSurvey.streamFinished.getQuestions();
-  final endEarlyQuestions = ThcSurvey.streamEndEarly.getQuestions();
+  final endEarlyQuestions = ThcSurvey.streamEndedEarly.getQuestions();
 
   void endStream({bool endedEarly = false}) async {
     context.read<StreamOverlayFadeIn>().value = false;
@@ -101,7 +101,7 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
     }
 
     final (questions, type) = endedEarly
-        ? (endEarlyQuestions, ThcSurvey.streamEndEarly)
+        ? (endEarlyQuestions, ThcSurvey.streamEndedEarly)
         : (finishedQuestions, ThcSurvey.streamFinished);
 
     navigator.pushReplacement(SurveyScreen(await questions, surveyType: type));

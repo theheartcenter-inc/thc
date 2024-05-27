@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
-import 'package:thc/utils/app_config.dart';
 
 late final SharedPreferences _storage;
 
@@ -18,16 +17,11 @@ Future<dynamic> resetLocalStorage([UserType? userType]) async {
 
   if (userType == null) return user = null;
 
-  final List<Future<dynamic>> futures = [
+  await Future.wait([
     for (final MapEntry(key: storageKey, :value) in userType.testUserSaveData.entries)
       storageKey.save(value),
-  ];
-  if (useInternet) {
-    futures.add(ThcUser.download(userType.testId).then((value) => user = value));
-  } else {
-    user = userType.testUser;
-  }
-  await Future.wait(futures);
+    ThcUser.download(userType.testId).then((value) => user = value),
+  ]);
 }
 
 /// {@template StorageKeys}
