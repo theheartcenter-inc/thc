@@ -75,7 +75,7 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
           child: InkWell(
             key: ValueKey(buttonMode),
             onTap: t.remainder(1) == 0 ? () => toggle(buttonMode) : null,
-            overlayColor: MaterialStateProperty.resolveWith(
+            overlayColor: WidgetStateProperty.resolveWith(
               (states) => states.isPressed && t < 1 ? Colors.transparent : splashColor,
             ),
             child: Row(

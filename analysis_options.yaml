@@ -8,6 +8,7 @@ linter:
     use_build_context_synchronously: false
     # directives_ordering: true
     # cascade_invocations: true
+    # avoid_void_async: true
 
     annotate_redeclares: true
     avoid_escaping_inner_quotes: true

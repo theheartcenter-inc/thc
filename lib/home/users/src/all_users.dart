@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart' show QuerySnapshot;
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
@@ -61,7 +62,7 @@ class AllUsers with ChangeNotifier {
 
   final users = ThcUsers();
   final stream = Firestore.users.snapshots();
-  late final StreamSubscription<Snapshot> subscription;
+  late final StreamSubscription<QuerySnapshot<Json>> subscription;
 
   @override
   void dispose() {

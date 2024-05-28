@@ -487,8 +487,8 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
           children: [
             Theme(
               data: Theme.of(context).copyWith(
-                listTileTheme: ListTileThemeData(textColor: colors.onBackground),
-                iconTheme: IconThemeData(color: colors.onBackground),
+                listTileTheme: ListTileThemeData(textColor: colors.onSurface),
+                iconTheme: IconThemeData(color: colors.onSurface),
               ),
               child: SurveyField(SurveyRecord.init(updatedQuestion), (_) {}),
             ),

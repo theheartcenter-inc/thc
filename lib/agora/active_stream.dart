@@ -4,14 +4,20 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/agora/livestream_button.dart';
+import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
-import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/widgets/state_async.dart';
 
+/// {@template ActiveStream}
+/// A black screen with cool button animations.
+///
+/// Shown when the user is creating or watching a livestream.
+/// {@endtemplate}
 class ActiveStream extends StatefulWidget {
+  /// {@macro ActiveStream}
   const ActiveStream({super.key});
 
   static const _duration = Durations.extralong1;
@@ -41,8 +47,15 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
     );
   }
 
+  /// Used to determine whether [finishedQuestions] or [endEarlyQuestions]
+  /// are shown. Will probably change once Agora is up and running.
+  late final Timer endStreamTimer;
+
   @override
-  void animate() => sleep(0.5, then: setTimer);
+  void animate() async {
+    endStreamTimer = Timer(const Duration(seconds: 10), endStream);
+    Future.delayed(Durations.long2, setTimer);
+  }
 
   /// Determines whether [_EndButton] is shown.
   ///
@@ -78,15 +91,20 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
     if (isHovered) timer?.cancel();
   }
 
-  void endStream() {
+  final finishedQuestions = ThcSurvey.streamFinished.getQuestions();
+  final endEarlyQuestions = ThcSurvey.streamEndedEarly.getQuestions();
+
+  void endStream({bool endedEarly = false}) async {
     context.read<StreamOverlayFadeIn>().value = false;
     if (NavBarSelection.of(context, listen: false).streaming) {
       return navigator.pop();
     }
 
-    navigator.pushReplacement(
-      SurveyScreen(questions: SurveyPresets.streamFinished.questions),
-    );
+    final (questions, type) = endedEarly
+        ? (endEarlyQuestions, ThcSurvey.streamEndedEarly)
+        : (finishedQuestions, ThcSurvey.streamFinished);
+
+    navigator.pushReplacement(SurveyScreen(await questions, surveyType: type));
   }
 
   @override
@@ -107,7 +125,13 @@ class _ActiveStreamState extends StateAsync<ActiveStream> {
       ),
       floatingActionButton: StreamOverlay(
         overlayVisible ? Offset.zero : const Offset(0, 2),
-        child: _EndButton(onPressed: endStream, onHover: buttonHover),
+        child: _EndButton(
+          onPressed: () {
+            endStreamTimer.cancel();
+            endStream(endedEarly: true);
+          },
+          onHover: buttonHover,
+        ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
@@ -197,11 +221,11 @@ class _EndButton extends FilledButton {
       : super(style: _style, child: const Text('End', style: TextStyle(fontSize: 18)));
 
   static const _style = ButtonStyle(
-    backgroundColor: MaterialStatePropertyAll(Colors.red),
-    foregroundColor: MaterialStatePropertyAll(Colors.white),
-    overlayColor: MaterialStatePropertyAll(Colors.white10),
-    padding: MaterialStatePropertyAll(EdgeInsets.symmetric(horizontal: 25, vertical: 20)),
-    shape: MaterialStatePropertyAll(StadiumBorder()),
+    backgroundColor: WidgetStatePropertyAll(Colors.red),
+    foregroundColor: WidgetStatePropertyAll(Colors.white),
+    overlayColor: WidgetStatePropertyAll(Colors.white10),
+    padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 25, vertical: 20)),
+    shape: WidgetStatePropertyAll(StadiumBorder()),
   );
 }
 

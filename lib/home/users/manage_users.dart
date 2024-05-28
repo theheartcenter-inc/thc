@@ -31,21 +31,11 @@ class _ManageUsersState extends State<ManageUsers> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              onChanged: (value) {
-                setState(() {
-                  searchValue = value;
-                });
-              },
+              onChanged: (value) => setState(() => searchValue = value),
               decoration: const InputDecoration(
                 labelText: 'Search',
                 hintText: 'Search by ID, Email, Name',
-                labelStyle: TextStyle(
-                  color: Colors.black,
-                ),
-                prefixIcon: Icon(Icons.search, size: 18.0, color: Colors.black),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(25.0)),
-                ),
+                prefixIcon: Icon(Icons.search, size: 20),
               ),
             ),
           ),

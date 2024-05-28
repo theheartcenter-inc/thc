@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/surveys/edit_survey/survey_editor.dart';
 import 'package:thc/home/surveys/manage_surveys/survey_responses.dart';
+import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/home/surveys/take_survey/survey_theme.dart';
 import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 class ManageSurveys extends StatelessWidget {
@@ -11,34 +12,39 @@ class ManageSurveys extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responseSummary = Theme(
+      data: SurveyTheme.of(context),
+      child: Builder(
+        builder: (context) => FilledButton(
+          style: FilledButton.styleFrom(
+            backgroundColor: ThcColors.of(context).surfaceContainerHighest,
+            foregroundColor: Colors.black,
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 33),
+          ),
+          onPressed: () => navigator.push(const SurveyResponseScreen()),
+          child: const Text('survey response summary'),
+        ),
+      ),
+    );
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Theme(
-            data: SurveyTheme.of(context),
-            child: Builder(
-              builder: (context) => FilledButton(
-                style: FilledButton.styleFrom(
-                  backgroundColor: ThcColors.of(context).surface,
-                  foregroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 33),
-                ),
-                onPressed: () => navigator.push(const SurveyResponseScreen()),
-                child: const Text('survey response summary'),
-              ),
-            ),
-          ),
-          const CustomSurveyButtons(),
-        ],
+        children: [responseSummary, const CustomSurveyButtons()],
       ),
     );
   }
 }
 
-class CustomSurveyButtons extends StatelessWidget {
+class CustomSurveyButtons extends StatefulWidget {
   const CustomSurveyButtons({super.key});
 
+  @override
+  State<CustomSurveyButtons> createState() => _CustomSurveyButtonsState();
+}
+
+class _CustomSurveyButtonsState extends State<CustomSurveyButtons> {
+  ThcSurvey surveyType = ThcSurvey.introSurvey;
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
@@ -51,20 +57,34 @@ class CustomSurveyButtons extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'custom survey',
-              style: StyleText(size: 18, weight: 600),
+            DropdownButton(
+              focusColor: Colors.transparent,
+              value: surveyType,
+              items: [
+                for (final type in ThcSurvey.values)
+                  DropdownMenuItem(value: type, child: Text('  $type'))
+              ],
+              onChanged: (newType) => setState(() => surveyType = newType!),
             ),
             const SizedBox(width: 25),
             Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 ElevatedButton(
-                  onPressed: () => navigator.push(const ViewCustomSurvey()),
+                  onPressed: () async {
+                    final questions = await surveyType.getQuestions();
+                    return navigator.push(SurveyScreen(questions, surveyType: surveyType));
+                  },
                   child: const Text('view'),
                 ),
                 ElevatedButton(
-                  onPressed: () => navigator.push(const SurveyEditor()),
+                  onPressed: () async {
+                    final proceed = await navigator.showDialog(const _SurveyEditWarning());
+                    if (proceed == null) return;
+
+                    final questions = await surveyType.getQuestions();
+                    navigator.push(SurveyEditor(surveyType, questions));
+                  },
                   child: const Text('edit'),
                 ),
               ],
@@ -72,6 +92,22 @@ class CustomSurveyButtons extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _SurveyEditWarning extends StatelessWidget {
+  const _SurveyEditWarning();
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Heads-up!'),
+      content: const Text('If you edit this survey, previous responses will be discarded.'),
+      actions: [
+        TextButton(onPressed: navigator.pop, child: const Text('back')),
+        TextButton(onPressed: () => navigator.pop(true), child: const Text('continue')),
+      ],
     );
   }
 }
