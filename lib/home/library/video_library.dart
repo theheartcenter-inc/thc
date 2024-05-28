@@ -11,7 +11,7 @@ import 'package:intl/intl.dart';
 import 'package:dio/dio.dart';
 import 'package:universal_html/html.dart' as html;
 
-class FavoriteIconButton extends StatefulWidget {
+class FavoriteIconButton extends StatelessWidget {
   const FavoriteIconButton({
     super.key,
     required this.isPinned,
@@ -21,16 +21,11 @@ class FavoriteIconButton extends StatefulWidget {
   final VoidCallback onFavoriteToggle;
 
   @override
-  _FavoriteIconButtonState createState() => _FavoriteIconButtonState();
-}
-
-class _FavoriteIconButtonState extends State<FavoriteIconButton> {
-  @override
   Widget build(BuildContext context) {
     return IconButton(
-      icon: Icon(widget.isPinned ? Icons.star : Icons.star_border),
-      color: widget.isPinned ? Colors.orange : Colors.grey,
-      onPressed: widget.onFavoriteToggle,
+      icon: Icon(isPinned ? Icons.star : Icons.star_border),
+      color: isPinned ? Colors.orange : Colors.grey,
+      onPressed: onFavoriteToggle,
     );
   }
 }
@@ -90,7 +85,7 @@ class VideoCard extends StatelessWidget {
   }
 
   // Add a method to download the video
-  Future<void> downloadVideo(BuildContext context) async {
+  Future<void> downloadVideo() async {
     try {
       // Retrieve the download URL from Firebase Storage
       final storageReference = FirebaseStorage.instance.ref().child(path);
@@ -98,7 +93,7 @@ class VideoCard extends StatelessWidget {
 
       if (kIsWeb) {
         // Handle download for web environment
-        final html.AnchorElement anchorElement = html.AnchorElement(href: url)
+        html.AnchorElement(href: url)
           ..setAttribute('downloadVideo', title)
           ..click();
       } else {
@@ -107,16 +102,16 @@ class VideoCard extends StatelessWidget {
         final savePath = './download_video/$title.mp4';
 
         await dio.download(url, savePath, onReceiveProgress: (received, total) {});
-        ScaffoldMessenger.of(context).showSnackBar(
+        navigator.showSnackBar(
           SnackBar(content: Text('Download completed: $savePath')),
         );
       }
     } on DioException catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      navigator.showSnackBar(
         SnackBar(content: Text('Failed to download video: ${e.message}')),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      navigator.showSnackBar(
         SnackBar(content: Text('An error occurred: $e')),
       );
     }
@@ -172,13 +167,7 @@ class VideoCard extends StatelessWidget {
             // New download icon button
             IconButton(
               icon: const Icon(Icons.download),
-              onPressed: () async {
-                await downloadVideo(context);
-                // Show a confirmation message
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Download started!')),
-                );
-              },
+              onPressed: downloadVideo,
             ),
           ],
         ),
@@ -209,12 +198,11 @@ class _VideoLibraryState extends State<VideoLibrary> {
 
   Future<void> fetchDocuments() async {
     final QuerySnapshot snapshot = await Firestore.streams.get();
-    final userSnapshot =
-        await Firestore.users.doc('test_participant').collection('streams').get();
-    final pinnedIds = userSnapshot.docs
-        .where((doc) => doc.data()['pinned'] as bool)
-        .map((doc) => doc.id)
-        .toSet();
+    final userStreamData = await user.streamData.get();
+    final pinnedIds = {
+      for (final doc in userStreamData.docs)
+        if (doc.data()['pinned']) doc.id,
+    };
     setState(() {
       videos = allVideos = [
         for (final document in snapshot.docs)
@@ -233,9 +221,9 @@ class _VideoLibraryState extends State<VideoLibrary> {
   }
 
   void toggleFavorite(String videoId) async {
-    final docRef = Firestore.users.doc('test_participant').collection('streams').doc(videoId);
-    final docSnapshot = await docRef.get();
-    final isCurrentlyPinned = docSnapshot.data()?['pinned'] as bool? ?? false;
+    final docRef = user.streamData.doc(videoId);
+    final data = await docRef.getData();
+    final bool isCurrentlyPinned = data?['pinned'] ?? false;
 
     await docRef.update({'pinned': !isCurrentlyPinned});
     fetchDocuments(); // Refresh the list after updating
@@ -268,19 +256,13 @@ class _VideoLibraryState extends State<VideoLibrary> {
   }
 
   void filterVideos() {
-    if (selectedCategory == 'Pinned') {
-      setState(() {
-        videos = allVideos.where((video) => video.isPinned).toList();
-      });
-    } else if (selectedCategory != 'All') {
-      setState(() {
-        videos = allVideos.where((video) => video.category == selectedCategory).toList();
-      });
-    } else {
-      setState(() {
-        videos = allVideos;
-      });
-    }
+    setState(() {
+      videos = switch (selectedCategory) {
+        'All' => allVideos,
+        'Pinned' => videos = allVideos.where((video) => video.isPinned).toList(),
+        _ => allVideos.where((video) => video.category == selectedCategory).toList(),
+      };
+    });
   }
 
   @override
