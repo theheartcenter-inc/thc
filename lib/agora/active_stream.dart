@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:thc/agora/livestream_button.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/utils/app_config.dart';
+import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/widgets/state_async.dart';
 
@@ -24,7 +24,7 @@ class ActiveStream extends StatefulWidget {
   static PageRouteBuilder get route => PageRouteBuilder(
         transitionDuration: _duration,
         reverseTransitionDuration: _duration,
-        pageBuilder: (_, animation, __) => ChangeNotifierProvider(
+        pageBuilder: (_, animation, __) => BlocProvider(
           create: (_) => StreamOverlayFadeIn(animation),
           child: const ActiveStream(),
         ),
@@ -292,7 +292,7 @@ class StreamOverlay extends StatelessWidget {
 /// This is implemented as a [Cubit] so that we can fetch the value
 /// from the [BuildContext] rather than passing the argument
 /// all the way down the widget tree.
-class StreamOverlayFadeIn extends ValueNotifier<bool> {
+class StreamOverlayFadeIn extends Cubit<bool> {
   StreamOverlayFadeIn(Animation<double> animation) : super(false) {
     animation.addStatusListener((status) async {
       final complete = status == AnimationStatus.completed;

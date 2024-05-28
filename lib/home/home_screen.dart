@@ -10,6 +10,7 @@ import 'package:thc/home/stream/create_livestream.dart';
 import 'package:thc/home/surveys/manage_surveys/manage_surveys.dart';
 import 'package:thc/home/users/manage_users.dart';
 import 'package:thc/home/watch_live/watch_live.dart';
+import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
 
@@ -180,7 +181,7 @@ class NavBar extends NavigationBar {
 /// Updates the active [NavBar] index when you move to another page,
 /// and when you turn a page on/off in the Admin settings.
 /// {@endtemplate}
-class NavBarSelection extends ValueNotifier<NavBarButton> {
+class NavBarSelection extends Cubit<NavBarButton> {
   /// {@macro NavBarIndex}
   NavBarSelection() : super(LocalStorage.navBarSelection());
 

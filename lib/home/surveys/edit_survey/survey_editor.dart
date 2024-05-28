@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:thc/firebase/firebase.dart';
-import 'package:provider/provider.dart';
 import 'package:thc/home/surveys/edit_survey/survey_field_editor.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/utils/app_config.dart';
+import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/theme.dart';
 
@@ -314,7 +314,7 @@ class _SurveyEditDividerState extends State<SurveyEditDivider> {
 ///
 /// Mobile devices don't have mouse cursors,
 /// so instead there's a button that uses this BLoC to show/hide the extra options.
-class MobileEditing extends ValueNotifier<bool> {
+class MobileEditing extends Cubit<bool> {
   MobileEditing() : super(false);
 
   IconData get icon => value ? Icons.done : Icons.calendar_view_day;
@@ -330,7 +330,7 @@ class MobileEditing extends ValueNotifier<bool> {
 /// - it's non-empty
 /// - there are no duplicate items
 /// {@endtemplate}
-class ValidSurveyQuestions extends ValueNotifier<bool> {
+class ValidSurveyQuestions extends Cubit<bool> {
   /// {@macro ValidSurveyQuestions}
   ValidSurveyQuestions() : super(false);
 }
