@@ -106,8 +106,8 @@ extension type Nav(NavigatorState currentState) {
   }
 
   /// Shows a fun little bar of text at the bottom of the screen.
-  void showSnackBar(SnackBar snackBar) =>
-      ScaffoldMessenger.of(currentState.context).showSnackBar(snackBar);
+  Future<void> showSnackBar(SnackBar snackBar) =>
+      ScaffoldMessenger.of(currentState.context).showSnackBar(snackBar).closed;
 
   Future<void> logout() => resetLocalStorage().then(App.relaunch);
 }

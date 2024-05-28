@@ -15,7 +15,7 @@ class FunPlaceholder extends StatelessWidget {
       size: 32,
       weight: FontWeight.bold,
       color: color,
-      shadows: [Shadow(color: colorScheme.background.withOpacity(0.5), blurRadius: 2)],
+      shadows: [Shadow(color: colorScheme.surface.withOpacity(0.5), blurRadius: 2)],
     );
 
     return Container(

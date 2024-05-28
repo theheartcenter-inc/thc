@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey_field.dart';
@@ -13,12 +14,14 @@ import 'package:thc/utils/theme.dart';
 /// {@endtemplate}
 class SurveyScreen extends StatefulWidget {
   /// {@macro SurveyScreen}
-  const SurveyScreen({super.key, required this.questions});
+  const SurveyScreen(this.questions, {required this.surveyType, super.key});
 
   /// The list of questions to use.
   ///
   /// Sample lists can be pulled from [SurveyPresets].
   final List<SurveyQuestion> questions;
+
+  final ThcSurvey surveyType;
 
   @override
   State<SurveyScreen> createState() => _SurveyScreenState();
@@ -37,14 +40,24 @@ class _SurveyScreenState extends State<SurveyScreen> {
   ///
   /// If every non-optional question is answered, this will navigate
   /// to a screen that shows results.
-  void validate() {
+  Future<void> validate() async {
     final validation = context.read<ValidSurveyAnswers>();
     if (data.valid) {
       validation.value = false;
+
+      final survey = widget.surveyType;
+      await survey.submitResponse(switch (survey) {
+        ThcSurvey.introSurvey => data.json,
+        ThcSurvey.streamFinished || ThcSurvey.streamEndedEarly => {
+            ...data.json,
+            'director ID': directorId,
+          },
+      });
+
       navigator.pushReplacement(Submitted(data.summary));
-      return;
+    } else {
+      validation.value = true;
     }
-    validation.value = true;
   }
 
   /// Creates a function for each [SurveyField] that can update the survey [data].
@@ -63,7 +76,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
     return (newAnswer) {
       final answer = switch (record.question) {
         MultipleChoice() => fromMultipleChoice(newAnswer),
-        _ => newAnswer
+        _ => newAnswer,
       };
       setState(() => data[i] = SurveyRecord(data[i].question, answer));
     };
@@ -115,16 +128,12 @@ class Submitted extends StatelessWidget {
               text: 'your response has been recorded.\n',
               style: StyleText(size: 16, weight: FontWeight.w600),
             ),
-            TextSpan(
-              text: "(just kidding, it hasn't)\n\n\n",
-              style: StyleText(size: 13, letterSpacing: 0.33),
-            ),
           ],
         ),
       ),
     );
 
-    final translucent = ThcColors.of(context).onBackground.withOpacity(0.5);
+    final translucent = ThcColors.of(context).onSurface.withOpacity(0.5);
 
     return Scaffold(
       appBar: AppBar(),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:thc/agora/active_stream.dart';
+import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/num_powers.dart';
@@ -20,10 +21,14 @@ class LivestreamButton extends StatelessWidget {
   final Color color;
   final bool enabled;
 
-  static Future<void> start() => navigator.currentState.push(ActiveStream.route);
+  static Future<void> start() {
+    directorId = 'test_director';
+    return navigator.currentState.push(ActiveStream.route);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final streaming = NavBarSelection.of(context).streaming;
     late final button = AnimatedOpacity(
       duration: Durations.long1,
       opacity: enabled ? 1 : 1 / 3,
@@ -33,11 +38,11 @@ class LivestreamButton extends StatelessWidget {
         child: Material(
           type: MaterialType.transparency,
           child: InkWell(
-            overlayColor: const MaterialStatePropertyAll(Colors.black12),
+            overlayColor: const WidgetStatePropertyAll(Colors.black12),
             onTap: enabled ? start : null,
             child: Center(
               child: Text(
-                NavBarSelection.of(context).streaming ? 'Go Live' : 'Join',
+                streaming ? 'Go Live' : 'Join',
                 style: StyleText(
                   weight: 600,
                   size: 32,

@@ -1,7 +1,6 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:thc/utils/app_config.dart';
-import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/style_text.dart';
 
 class IssueReport extends StatefulWidget {
@@ -20,19 +19,6 @@ class _IssueReportState extends State<IssueReport> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = ThcColors.of(context);
-
-    final style = MaterialStateTextStyle.resolveWith((states) => StyleText(
-          color: colors.onBackground.withOpacity(states.isFocused ? 1.0 : 0.5),
-        ));
-    final border = MaterialStateOutlineInputBorder.resolveWith(
-      (states) => OutlineInputBorder(
-        borderSide: states.isFocused
-            ? BorderSide(color: colors.primary, width: 2)
-            : BorderSide(color: colors.onBackground.withOpacity(0.5)),
-      ),
-    );
-
     return Scaffold(
       appBar: AppBar(title: const Text('Report an Issue')),
       body: Padding(
@@ -45,13 +31,7 @@ class _IssueReportState extends State<IssueReport> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
                 child: TextFormField(
-                  decoration: InputDecoration(
-                    isDense: true,
-                    labelText: 'name',
-                    labelStyle: style,
-                    floatingLabelStyle: style,
-                    border: border,
-                  ),
+                  decoration: const InputDecoration(isDense: true, labelText: 'name'),
                   validator: (value) {
                     if (value?.isEmpty ?? true) {
                       return 'Please enter your name';
@@ -64,13 +44,7 @@ class _IssueReportState extends State<IssueReport> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
                 child: TextFormField(
-                  decoration: InputDecoration(
-                    isDense: true,
-                    labelText: 'email',
-                    labelStyle: style,
-                    floatingLabelStyle: style,
-                    border: border,
-                  ),
+                  decoration: const InputDecoration(isDense: true, labelText: 'email'),
                   validator: (value) => switch (value) {
                     final email? when EmailValidator.validate(email) => null,
                     _ => 'Please enter a valid email address',
@@ -79,13 +53,7 @@ class _IssueReportState extends State<IssueReport> {
                 ),
               ),
               TextFormField(
-                decoration: InputDecoration(
-                  isDense: true,
-                  labelText: 'message',
-                  labelStyle: style,
-                  floatingLabelStyle: style,
-                  border: border,
-                ),
+                decoration: const InputDecoration(isDense: true, labelText: 'message'),
                 maxLines: 3,
                 validator: (value) {
                   if (value?.isEmpty ?? true) {

@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/surveys/edit_survey/survey_field_editor.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
-import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/theme.dart';
-
-/// This is meant for demonstration; the survey isn't saved to Firebase or local storage.
-List<SurveyQuestion> customSurvey = [];
 
 /// {@macro ValidSurveyQuestions}
 extension ValidChoices on List<String> {
@@ -25,37 +22,11 @@ extension ValidChoices on List<String> {
   bool get valid => indexed.every((item) => validChoice(item.$1, item.$2));
 }
 
-class ViewCustomSurvey extends StatelessWidget {
-  const ViewCustomSurvey({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    if (customSurvey.isNotEmpty) return SurveyScreen(questions: customSurvey);
-
-    return Scaffold(
-      appBar: AppBar(),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              '(survey not created yet)',
-              style: Theme.of(context).textTheme.labelLarge,
-            ),
-            const SizedBox(height: 25),
-            FilledButton(
-              onPressed: () => navigator.pushReplacement(const SurveyEditor()),
-              child: const Text('create survey'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class SurveyEditor extends StatefulWidget {
-  const SurveyEditor({super.key});
+  const SurveyEditor(this.surveyType, this.questions, {super.key});
+
+  final ThcSurvey surveyType;
+  final List<SurveyQuestion> questions;
 
   @override
   State<SurveyEditor> createState() => _SurveyEditorState();
@@ -100,9 +71,11 @@ class SurveyEditor extends StatefulWidget {
 /// {@endtemplate}
 ///
 /// This extension type attaches a [UniqueKey] to each question so they can be reordered.
-extension type KeyedQuestion.from((SurveyQuestion, Key) record) {
+extension type KeyedQuestion.fromRecord((SurveyQuestion, Key) record) {
   /// {@macro Key}
-  KeyedQuestion(SurveyQuestion question) : this.from((question, newKey));
+  KeyedQuestion(SurveyQuestion question) : this.from(question, newKey);
+
+  KeyedQuestion.from(SurveyQuestion question, Key key) : this.fromRecord((question, key));
 
   SurveyQuestion get question => record.$1;
 
@@ -113,14 +86,14 @@ extension type KeyedQuestion.from((SurveyQuestion, Key) record) {
   static Key get newKey => UniqueKey();
 
   /// Creates a new [KeyedQuestion] object: same question, different key.
-  KeyedQuestion copy() => KeyedQuestion.from((question, newKey));
+  KeyedQuestion copy() => KeyedQuestion(question);
 
   /// Returns an updated [question] with the same [key].
-  KeyedQuestion update(SurveyQuestion newQuestion) => KeyedQuestion.from((newQuestion, key));
+  KeyedQuestion update(SurveyQuestion newQuestion) => KeyedQuestion.from(newQuestion, key);
 }
 
 class _SurveyEditorState extends State<SurveyEditor> {
-  final keyedQuestions = [for (final question in customSurvey) KeyedQuestion(question)];
+  late final keyedQuestions = [for (final question in widget.questions) KeyedQuestion(question)];
   List<String> get questionNames => [for (final q in keyedQuestions) q.question.description];
 
   /// {@macro edit_survey.divider}
@@ -128,7 +101,7 @@ class _SurveyEditorState extends State<SurveyEditor> {
         (question) => setState(() => keyedQuestions.insert(index, KeyedQuestion(question))),
       );
 
-  void validate() {
+  void validate() async {
     final checks = [
       questionNames.valid,
       for (final record in keyedQuestions)
@@ -145,9 +118,19 @@ class _SurveyEditorState extends State<SurveyEditor> {
       return;
     }
 
-    customSurvey = [for (final q in keyedQuestions) q.question];
-    validation.value = false;
-    navigator.pop();
+    final survey = widget.surveyType;
+    try {
+      await Future.wait([
+        survey.yeetResponses(),
+        survey.newLength(keyedQuestions.length),
+        for (final (i, q) in keyedQuestions.indexed) survey.doc(i).set(q.question.json),
+      ]);
+      navigator.showSnackBar(const SnackBar(content: Text('saved!')));
+      validation.value = false;
+      navigator.pop();
+    } catch (e) {
+      navigator.showSnackBar(SnackBar(content: Text('[error] $e')));
+    }
   }
 
   @override
@@ -304,7 +287,7 @@ class _SurveyEditDividerState extends State<SurveyEditDivider> {
           const Divider(),
           Card(
             clipBehavior: Clip.antiAlias,
-            color: expanded ? null : ThcColors.of(context).background,
+            color: expanded ? null : ThcColors.of(context).surface,
             elevation: expanded ? null : 0,
             child: AnimatedSize(
               duration: Durations.medium1,

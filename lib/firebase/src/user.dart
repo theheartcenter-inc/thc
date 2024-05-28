@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:meta/meta.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/utils/app_config.dart';
+import 'package:thc/utils/local_storage.dart';
 
 /// {@template ThcUser}
 /// We can't just call this class `User`, since that's one of the Firebase classes.
@@ -53,7 +54,7 @@ sealed class ThcUser {
 
   /// {@macro ThcUser}
   factory ThcUser.fromJson(Json json) {
-    backendPrint(json);
+    backendPrint('creating user from: $json');
     return ThcUser(
       name: json['name'],
       type: UserType.fromJson(json),
@@ -64,25 +65,16 @@ sealed class ThcUser {
 
   final String name;
   final UserType type;
-
-  /// A unique string to identify the user, probably chosen by an admin.
   final String? id;
-
-  /// Used for password recovery.
   final String? email;
-
   final bool registered;
 
+  static const _collection = Firestore.users;
   static ThcUser? instance;
 
-  static const _collection = Firestore.users;
-
   /// {@macro ThcUser}
-  static Future<ThcUser> download(String id) async {
-    if (!useInternet) {
-      return UserType.values.firstWhere((value) => id.contains(value.name)).testUser;
-    }
-
+  static Future<ThcUser> download([String? id]) async {
+    id ??= LocalStorage.userId() ?? LocalStorage.email()!;
     backendPrint('id: $id');
     final doc = _collection.doc(id);
     backendPrint('doc: $doc');
@@ -100,10 +92,10 @@ sealed class ThcUser {
   /// to return to the login screen.
   Future<void> yeet() => Future.wait([
         if (FirebaseAuth.instance.currentUser case final user?) user.delete(),
-        if (useInternet && !UserType.testIds.contains(id))
-          _collection.doc(firestoreId).delete()
+        if (UserType.testIds.contains(id))
+          Future.delayed(const Duration(seconds: 3))
         else
-          Future.delayed(const Duration(seconds: 3)),
+          _collection.doc(firestoreId).delete(),
       ]);
 
   /// {@macro ThcUser}

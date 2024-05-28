@@ -1,9 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:thc/firebase/firebase.dart';
-import 'package:thc/firebase/firebase_setup.dart';
 import 'package:thc/home/home_screen.dart';
-import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/local_storage.dart';
@@ -60,15 +58,8 @@ Future<String?> signIn() async {
   }
   if (LocalStorage.loggedIn()) return null;
 
-  if (LocalStorage.userId() case final id?) {
-    if (useInternet) {
-      user = await ThcUser.download(id);
-    } else {
-      loadUser();
-    }
-  } else if (useInternet) {
-    user = await ThcUser.download(LocalStorage.email());
-  }
+  user = await ThcUser.download();
+
   LocalStorage.loggedIn.save(true);
   LocalStorage.firstLastName.save(ThcUser.instance?.name);
   LocalStorage.userType.save(ThcUser.instance?.type.index);
@@ -89,13 +80,9 @@ Future<String?> register() async {
     };
   }
   if (LocalStorage.userId() case final id?) {
-    if (useInternet) {
-      user = await ThcUser.download(id);
-      user = user.copyWith(registered: true);
-      user.upload();
-    } else {
-      loadUser();
-    }
+    user = await ThcUser.download(id);
+    user = user.copyWith(registered: true);
+    user.upload();
   } else {
     final String name = LocalStorage.firstLastName();
     final String email = LocalStorage.email();
@@ -104,9 +91,10 @@ Future<String?> register() async {
   }
   LocalStorage.loggedIn.save(true);
   LocalStorage.userType.save(ThcUser.instance?.type.index);
+  final introQuestions = await ThcSurvey.introSurvey.getQuestions();
   navigator.pushReplacement(const HomeScreen());
   await Future.delayed(Durations.short2);
-  navigator.push(SurveyScreen(questions: SurveyPresets.intro.questions));
+  navigator.push(SurveyScreen(introQuestions, surveyType: ThcSurvey.introSurvey));
   return null;
 }
 

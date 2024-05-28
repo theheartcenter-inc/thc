@@ -8,6 +8,7 @@ import 'package:thc/home/schedule/edit_schedule/schedule_editor.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
+import 'package:thc/utils/widgets/state_async.dart';
 
 class ScheduledStreamCard extends StatelessWidget {
   const ScheduledStreamCard({
@@ -77,7 +78,7 @@ class Schedule extends StatefulWidget {
   State<Schedule> createState() => _ScheduleState();
 }
 
-class _ScheduleState extends State<Schedule> {
+class _ScheduleState extends StateAsync<Schedule> {
   final List<Widget> activeScheduledStreams = [];
   final List<Widget> inactiveScheduledStreams = [];
 
@@ -89,7 +90,7 @@ class _ScheduleState extends State<Schedule> {
 
   Future<void> fetchDocuments() async {
     final QuerySnapshot snapshot = await Firestore.scheduled_streams.get();
-    setState(() {
+    safeState(() {
       for (final document in snapshot.docs) {
         if (document['active']) {
           activeScheduledStreams.add(ScheduledStreamCard(
