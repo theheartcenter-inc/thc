@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase_setup.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/profile/account/account_field.dart';
@@ -63,7 +62,7 @@ class App extends StatelessWidget {
   }
 }
 
-/// If you change a widget's key (using [State.setState] or a [Provider]),
+/// If you change a widget's key (using [State.setState] or a [Bloc]),
 /// Flutter will rebuild the whole widget!
 class _AppKey extends Cubit<Key> {
   _AppKey() : super(const ValueKey(null));
