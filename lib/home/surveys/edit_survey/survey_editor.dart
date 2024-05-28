@@ -304,7 +304,7 @@ class _SurveyEditDividerState extends State<SurveyEditDivider> {
           const Divider(),
           Card(
             clipBehavior: Clip.antiAlias,
-            color: expanded ? null : ThcColors.of(context).surface,
+            color: expanded ? null : ThcColors.of(context).background,
             elevation: expanded ? null : 0,
             child: AnimatedSize(
               duration: Durations.medium1,
