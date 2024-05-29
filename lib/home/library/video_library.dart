@@ -167,25 +167,22 @@ class _VideoLibraryState extends State<VideoLibrary> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final Widget blankCard = Card(
+    const Widget blankCard = Card(
       clipBehavior: Clip.antiAlias,
-      margin: const EdgeInsets.all(10),
+      margin: EdgeInsets.all(10),
       color: Colors.white,
       child: ListTile(
-        title: Container(
-          width: 100,
-          height: 20,
-          color: Colors.grey[300],
+        title: ColoredBox(
+          color: Color(0xffbbbbbb),
+          child: SizedBox(width: 100, height: 20),
         ),
-        subtitle: Container(
-          width: 150,
-          height: 20,
-          color: Colors.grey[200],
+        subtitle: ColoredBox(
+          color: Color(0xffeeeeee),
+          child: SizedBox(width: 150, height: 20),
         ),
-        leading: Container(
-          width: 100,
-          height: 100,
-          color: Colors.grey[400],
+        leading: ColoredBox(
+          color: Color(0xffbbbbbb),
+          child: SizedBox(width: 100, height: 100),
         ),
       ),
     );
