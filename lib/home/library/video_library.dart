@@ -167,6 +167,26 @@ class _VideoLibraryState extends State<VideoLibrary> {
       return const Center(child: CircularProgressIndicator());
     }
 
+    const Widget blankCard = Card(
+      clipBehavior: Clip.antiAlias,
+      margin: EdgeInsets.all(10),
+      color: Colors.white,
+      child: ListTile(
+        title: ColoredBox(
+          color: Color(0xffbbbbbb),
+          child: SizedBox(width: 100, height: 20),
+        ),
+        subtitle: ColoredBox(
+          color: Color(0xffeeeeee),
+          child: SizedBox(width: 150, height: 20),
+        ),
+        leading: ColoredBox(
+          color: Color(0xffbbbbbb),
+          child: SizedBox(width: 100, height: 100),
+        ),
+      ),
+    );
+
     return Column(
       children: <Widget>[
         Padding(
@@ -196,7 +216,13 @@ class _VideoLibraryState extends State<VideoLibrary> {
               DropdownMenuItem<String>(value: category, child: Text(category)),
           ],
         ),
-        Expanded(child: ListView(children: videos)),
+        Expanded(
+          child: ListView.builder(
+            itemCount: videos.length,
+            itemBuilder: (context, index) => videos[index],
+            prototypeItem: blankCard,
+          ),
+        ),
       ],
     );
   }
