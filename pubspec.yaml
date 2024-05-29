@@ -29,6 +29,9 @@ dependencies:
   cloud_firestore: ^4.17.3
   email_validator: ^2.1.17
 
+  dio: ^5.4.0
+  universal_html: ^2.2.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

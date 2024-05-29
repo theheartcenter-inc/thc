@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart' show CollectionReference;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:meta/meta.dart';
 import 'package:thc/firebase/firebase.dart';
@@ -133,6 +134,8 @@ sealed class ThcUser {
       };
 
   bool get isAdmin => type == UserType.admin;
+
+  CollectionReference<Json> get streamData => _collection.doc(firestoreId).collection('streams');
 
   @override
   bool operator ==(Object other) {
