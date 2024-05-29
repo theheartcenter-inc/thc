@@ -39,7 +39,7 @@ sealed class SurveyQuestion {
         return TextPromptQuestion(question, optional: optional);
 
       case [final choicesType, 'multiple', 'choice']:
-        final List<String> choices = json['choices'];
+        final choices = <String>[...json['choices']];
         final bool canType = json['custom response allowed'] ?? false;
         return switch (choicesType) {
           'radio' => RadioQuestion(
@@ -57,10 +57,11 @@ sealed class SurveyQuestion {
         };
 
       case ['scale']:
+        final values = <String>[...json['values']];
         return ScaleQuestion(
           question,
           optional: optional,
-          values: json['values'],
+          values: values,
           showEndLabels: json['show endpoint labels'] ?? false,
         );
 
@@ -119,8 +120,11 @@ class TextPromptQuestion extends SurveyQuestion {
 /// We're using an `(AnswerType, String?)` tuple: a [String] is passed in when
 /// the user types a custom value.
 sealed class MultipleChoice extends SurveyQuestion {
-  /// You can't make a [MultipleChoice] object using this constructor;
-  /// it's here because [RadioQuestion] and [CheckboxQuestion] use it.
+  /// {@template MultipleChoice_answer}
+  /// [MultipleChoice] questions have answers stored as tuples:
+  /// the first value is information about which answer(s) are selected,
+  /// and the second value can contain a custom text response that the user typed in.
+  /// {@endtemplate}
   const MultipleChoice(
     super.description, {
     super.optional = false,
@@ -283,87 +287,3 @@ class ScaleQuestion extends SurveyQuestion {
 /// ```
 /// {@endtemplate}
 typedef QuestionSummary = (String question, String? answer);
-
-/// The goal of this [Enum] is to showcase different things you can do
-/// with the current survey class implementations.
-enum SurveyPresets {
-  intro(
-    label: 'intro survey',
-    questions: [
-      YesNoQuestion('Are you in need of guided meditation?'),
-      CheckboxQuestion(
-        'Please check all that apply:',
-        choices: [
-          'Currently incarcerated',
-          'Have been incarcerated in the past',
-          'Impacted by incarceration through a loved one',
-          'CDCR officer',
-        ],
-        optional: true,
-        canType: true,
-      ),
-      YesNoQuestion('Have you practiced meditation before?'),
-      TextPromptQuestion(
-        'If yes, feel free to provide details:',
-        optional: true,
-      ),
-      CheckboxQuestion(
-        'Which meditation types are you interested in practicing?',
-        choices: [
-          'Mindfulness',
-          'Metta (Loving-Kindness)',
-          'Tai Chi (moving meditation)',
-          'Zen (focus)',
-        ],
-        optional: true,
-        canType: true,
-      ),
-      TextPromptQuestion(
-        "Is there anything else you'd like to share with us?",
-        optional: true,
-      ),
-    ],
-  ),
-  streamFinished(
-    label: 'after finishing stream',
-    questions: [
-      ScaleQuestion(
-        'How are you feeling right now?',
-        values: ['awful', 'not good', 'neutral', 'good', 'fantastic'],
-        showEndLabels: true,
-      ),
-      YesNoQuestion('Did you find this practice helpful?'),
-      TextPromptQuestion(
-        'Do you have any feedback for the streamer?',
-        optional: true,
-      ),
-    ],
-  ),
-  streamEndedEarly(
-    label: 'stream ended early',
-    questions: [
-      CheckboxQuestion(
-        'What caused you to end the stream early?',
-        choices: [
-          'Discomfort/difficulty focusing',
-          "The streamer's behavior",
-          'Need to do something else',
-          'False positive (I watched the entire stream)',
-        ],
-        canType: true,
-      ),
-      TextPromptQuestion(
-        'Do you have any feedback for the streamer?',
-        optional: true,
-      ),
-    ],
-  );
-
-  /// By defining a constructor inside an enum, we can give it members
-  /// in a way similar to a regular class definition.
-  const SurveyPresets({required this.label, required this.questions});
-
-  /// Stores the text shown on the button that links to the survey.
-  final String label;
-  final List<SurveyQuestion> questions;
-}

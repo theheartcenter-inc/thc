@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
+import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
@@ -72,8 +72,8 @@ class _AccountFieldState extends State<AccountField> {
   Widget build(BuildContext context) {
     final colors = ThcColors.of(context);
 
-    final style = MaterialStateTextStyle.resolveWith((states) => StyleText(
-          color: colors.onBackground.withOpacity(states.isFocused ? 1.0 : 0.5),
+    final style = WidgetStateTextStyle.resolveWith((states) => StyleText(
+          color: colors.onSurface.withOpacity(states.isFocused ? 1.0 : 0.5),
         ));
     final decoration = InputDecoration(
       isDense: true,
@@ -84,7 +84,7 @@ class _AccountFieldState extends State<AccountField> {
         return OutlineInputBorder(
           borderSide: states.isFocused
               ? BorderSide(color: colors.primary, width: 2)
-              : BorderSide(color: colors.onBackground.withOpacity(0.5)),
+              : BorderSide(color: colors.onSurface.withOpacity(0.5)),
         );
       }),
     );
@@ -128,7 +128,7 @@ class _AccountFieldState extends State<AccountField> {
   }
 }
 
-class AccountFields extends ValueNotifier<ThcUser?> {
+class AccountFields extends Cubit<ThcUser?> {
   AccountFields() : super(user);
 
   void update(AccountField field) => value = AccountField.updatedUser;

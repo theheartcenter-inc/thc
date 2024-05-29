@@ -15,7 +15,6 @@ class StartTheme extends StatelessWidget {
     final container = isLight ? ThcColors.lightContainer : ThcColors.darkContainer;
     return current.copyWith(
       colorScheme: current.colorScheme.copyWith(
-        background: ThcColors.startBg,
         surface: container,
         onSurface: isLight ? Colors.black : ThcColors.lightContainer,
         surfaceTint: isLight ? Colors.white : Colors.black,

@@ -1,9 +1,10 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart' show QuerySnapshot;
 import 'package:flutter/widgets.dart';
-import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/utils/app_config.dart';
+import 'package:thc/utils/bloc.dart';
 
 /// Same as `List<ThcUser>`, but you have the option to use the user ID or email
 /// in place of the index.
@@ -44,7 +45,7 @@ extension type ThcUsers.fromList(List<ThcUser> users) implements Iterable<ThcUse
   }
 }
 
-class AllUsers with ChangeNotifier {
+class AllUsers with Bloc {
   AllUsers() {
     subscription = stream.listen((event) {
       for (final newStuff in event.docChanges) {
@@ -61,7 +62,7 @@ class AllUsers with ChangeNotifier {
 
   final users = ThcUsers();
   final stream = Firestore.users.snapshots();
-  late final StreamSubscription<Snapshot> subscription;
+  late final StreamSubscription<QuerySnapshot<Json>> subscription;
 
   @override
   void dispose() {
