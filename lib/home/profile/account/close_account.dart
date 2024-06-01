@@ -29,8 +29,9 @@ class _CloseAccountState extends StateAsync<CloseAccount> {
             await LocalStorage.password.save(password);
             if (await auth.signIn() case final error?) {
               return safeState(() {
-                errorText =
-                    error.isEmpty ? 'please double-check your password and try again.' : error;
+                errorText = error.isEmpty
+                    ? 'please double-check your password and try again.'
+                    : error;
               });
             }
 
@@ -42,7 +43,7 @@ class _CloseAccountState extends StateAsync<CloseAccount> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'To confirm deletion, please type "DELETE" in the field below and tap "Confirm".',
+          'To confirm deletion, please type your password in the field below and tap "Confirm".',
           style: StyleText(size: 16),
         ),
         TextField(
@@ -74,7 +75,8 @@ class _CloseAccountState extends StateAsync<CloseAccount> {
         child: switch (progress) {
           _Progress.notStarted => textFieldContent,
           _Progress.loading => _Loading(textFieldContent),
-          _Progress.done => const Text('You have successfully closed your account.'),
+          _Progress.done =>
+            const Text('You have successfully closed your account.'),
         },
       ),
       actions: [
@@ -114,7 +116,8 @@ class _ConfirmButton extends StatelessWidget {
 
     return ElevatedButton(
       onPressed: onPressed,
-      child: AnimatedSize(duration: Durations.medium1, curve: Curves.ease, child: Text(text)),
+      child: AnimatedSize(
+          duration: Durations.medium1, curve: Curves.ease, child: Text(text)),
     );
   }
 }
