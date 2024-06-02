@@ -42,7 +42,7 @@ class _CloseAccountState extends StateAsync<CloseAccount> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'To confirm deletion, please type "DELETE" in the field below and tap "Confirm".',
+          'To confirm deletion, please type your password in the field below and tap "Confirm".',
           style: StyleText(size: 16),
         ),
         TextField(

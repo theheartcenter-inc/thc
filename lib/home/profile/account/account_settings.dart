@@ -48,25 +48,7 @@ class _AccountSettingsState extends State<AccountSettings> {
             1 => ListTile(
                 leading: const Icon(Icons.lock_outline),
                 title: const Text('change password'),
-                onTap: () => navigator.showDialog(
-                  AlertDialog.adaptive(
-                    title: const Text('Change Password'),
-                    content: const Text(
-                      'Are you sure you want to change the password?\n'
-                      "You'll need to enter your current password & new password to change.",
-                    ),
-                    actions: [
-                      ElevatedButton(onPressed: navigator.pop, child: const Text('No')),
-                      ElevatedButton(
-                        onPressed: () => navigator
-                          ..pop()
-                          ..push(const ChangePasswordScreen()),
-                        child: const Text('Yes'),
-                      ),
-                    ],
-                    actionsAlignment: MainAxisAlignment.spaceEvenly,
-                  ),
-                ),
+                onTap: () => navigator.push(const ChangePasswordScreen()),
               ),
             2 => ListTile(
                 leading: const Icon(Icons.logout),
