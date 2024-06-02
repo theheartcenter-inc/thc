@@ -48,8 +48,7 @@ class _AccountSettingsState extends State<AccountSettings> {
             1 => ListTile(
                 leading: const Icon(Icons.lock_outline),
                 title: const Text('change password'),
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                    builder: (_) => const ChangePasswordScreen())),
+                onTap: () => navigator.push(const ChangePasswordScreen()),
               ),
             2 => ListTile(
                 leading: const Icon(Icons.logout),

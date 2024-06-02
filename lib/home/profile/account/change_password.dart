@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/navigator.dart';
+import 'package:thc/utils/style_text.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
-  _ChangePasswordScreenState createState() => _ChangePasswordScreenState();
+  State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
 }
 
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
@@ -19,7 +20,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   bool _isCurrentPasswordCorrect = false;
   bool _isCurrentPasswordVerified = false;
   String _verificationMessage = '';
-  Color _messageColor = Colors.black;
+  Color? _messageColor;
   String _passwordError = '';
   bool _isPasswordValid = false;
 
@@ -86,8 +87,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               if (_isCurrentPasswordVerified)
                 Text(
                   _verificationMessage,
-                  style: TextStyle(
-                      color: _messageColor, fontWeight: FontWeight.bold),
+                  style: StyleText(color: _messageColor, weight: 700),
                 ),
               const SizedBox(height: 30),
               TextField(
