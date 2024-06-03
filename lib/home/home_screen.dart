@@ -77,6 +77,9 @@ enum NavBarButton with EnumStatelessWidgetMixin {
     required this.screen,
   });
 
+  factory NavBarButton.fromStorageIndex(int index) =>
+      NavBarButton.enabledValues[values[index].navIndex];
+
   /// Shown when the button is unselected (and also when selected, if [filled] is null).
   final Icon outlined;
 
