@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
-import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 /// {@template SurveyField}
@@ -32,7 +31,7 @@ class SurveyField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final builder = SurveyBuilder.fromRecord(record);
+    final SurveyBuilder builder = SurveyBuilder.fromRecord(record);
     final question = _QuestionText(record.question);
     final answer = builder.buildAnswer(context, update, record.question, record.cleanAnswer);
 
@@ -167,7 +166,7 @@ class _QuestionText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = ThcColors.of(context);
+    final ColorScheme colors = ThcColors.of(context);
     final style = StyleText(
       size: 16,
       weight: 500,
@@ -202,11 +201,11 @@ class _MultipleChoiceTyping extends StatelessWidget {
   /// {@macro MultipleChoiceTheme}
   const _MultipleChoiceTyping({required this.onChanged, required this.onSubmitted});
 
-  final dynamic onChanged, onSubmitted;
+  final ValueChanged<String> onChanged, onSubmitted;
 
   @override
   Widget build(BuildContext context) {
-    final colors = ThcColors.of(context);
+    final ColorScheme colors = ThcColors.of(context);
     final enabled = BorderSide(color: colors.onSurface);
     final focused = BorderSide(color: colors.primaryContainer, width: 1.5);
     return Row(
@@ -333,7 +332,7 @@ class _Checkbox extends SurveyBuilder<CheckboxQuestion> {
   @override
   Widget buildAnswer(context, update, question, List<bool> checks) {
     void updateSelected(int i, [String? input]) {
-      final selected = checks.toList();
+      final List<bool> selected = checks.toList();
       selected[i] = !selected[i];
       update((selected, input));
     }
@@ -366,11 +365,11 @@ class _Checkbox extends SurveyBuilder<CheckboxQuestion> {
 class _Scale extends SurveyBuilder<ScaleQuestion> {
   @override
   Widget buildAnswer(context, update, question, int value) {
-    final divisions = question.values.length - 1;
+    final int divisions = question.values.length - 1;
     return LayoutBuilder(builder: (context, constraints) {
-      final theme = Theme.of(context);
-      final colors = theme.colorScheme;
-      final textTheme = theme.textTheme;
+      final themeData = Theme.of(context);
+      final colors = themeData.colorScheme;
+      final textTheme = themeData.textTheme;
       final sliderWidth = constraints.maxWidth - 100;
       final labelOffset = Offset(sliderWidth / 2 - 25, 0);
       final double spacing = question.endpoints == null ? 0 : 10;
@@ -379,7 +378,7 @@ class _Scale extends SurveyBuilder<ScaleQuestion> {
         alignment: Alignment.topCenter,
         children: [
           if (question.endpoints case final ends?)
-            for (final shift in const [-1.0, 1.0])
+            for (final double shift in const [-1.0, 1.0])
               Transform.translate(
                 offset: labelOffset * shift,
                 child: Text(
@@ -394,7 +393,7 @@ class _Scale extends SurveyBuilder<ScaleQuestion> {
               child: Slider.adaptive(
                 activeColor: Color.lerp(
                   colors.primary,
-                  context.lightDark(colors.surface, colors.secondary),
+                  context.lightDark(colors.surfaceContainerLowest, colors.secondary),
                   value / divisions,
                 ),
                 divisions: divisions,

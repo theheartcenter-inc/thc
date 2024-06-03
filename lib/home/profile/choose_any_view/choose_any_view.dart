@@ -3,7 +3,6 @@ import 'package:thc/firebase/firebase.dart';
 import 'package:thc/main.dart';
 import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 class ChooseAnyView extends StatelessWidget {
@@ -42,7 +41,7 @@ class _ButtonFromLoginScreen extends ChooseAnyView {
 
   @override
   Widget build(BuildContext context) {
-    final colors = ThcColors.of(context);
+    final ColorScheme colors = ThcColors.of(context);
     return IconButton.filled(
       style: IconButton.styleFrom(
         backgroundColor: colors.surface,

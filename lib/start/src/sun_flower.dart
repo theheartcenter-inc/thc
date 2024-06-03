@@ -3,21 +3,23 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:thc/start/src/za_hando.dart';
-import 'package:thc/utils/num_powers.dart';
+import 'package:thc/utils/bloc.dart';
 
-class Sunflower extends StatefulWidget {
-  Sunflower({required this.centerColor, required this.outerColor, this.bulge = 1})
-      : super(key: _key);
+class Sunflower extends HookWidget {
+  const Sunflower({
+    required this.centerColor,
+    required this.outerColor,
+    this.bloom = 1,
+  }) : super(key: const GlobalObjectKey('Sunflower'));
 
   final Color centerColor;
   final Color outerColor;
 
   /// `0.0` → just a circle
   ///
-  /// `1.0` → a bunch of semicircle bumps
-  final double bulge;
+  /// `1.0` → petals!
+  final double bloom;
 
-  static final _key = GlobalKey<_SunflowerState>();
   static const size = 260.0;
   static const padding = 20.0;
   static const petalCount = 9;
@@ -29,35 +31,22 @@ class Sunflower extends StatefulWidget {
   static const overlayText = Color(0x50ff0080);
 
   @override
-  State<Sunflower> createState() => _SunflowerState();
-}
-
-class _SunflowerState extends State<Sunflower> with SingleTickerProviderStateMixin {
-  late final controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 1666),
-    upperBound: PolarPath.theta,
-  )..repeat();
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: controller,
-      builder: (context, child) => CustomPaint(
-        size: const Size.square(Sunflower.size),
-        willChange: true,
-        painter: _SunflowerPaint(
-          centerColor: widget.centerColor,
-          outerColor: widget.outerColor,
-          bulge: widget.bulge,
-          rotation: controller.value,
-        ),
+    final controller = useAnimationController(
+      duration: const Duration(milliseconds: 1666),
+      upperBound: PolarPath.theta,
+    );
+    useOnce(controller.repeat);
+    final rotation = useAnimation(controller);
+
+    return CustomPaint(
+      size: const Size.square(Sunflower.size),
+      willChange: true,
+      painter: _SunflowerPaint(
+        centerColor: centerColor,
+        outerColor: outerColor,
+        bloom: bloom,
+        rotation: rotation,
       ),
     );
   }
@@ -67,29 +56,29 @@ class _SunflowerPaint extends CustomPainter {
   _SunflowerPaint({
     required this.centerColor,
     required this.outerColor,
-    required this.bulge,
+    required this.bloom,
     required this.rotation,
   });
 
   final Color centerColor;
   final Color outerColor;
-  final double bulge;
+  final double bloom;
   final double rotation;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final blooming = bulge > 0;
+    final blooming = bloom > 0;
     final borderOpacity = centerColor.opacity;
 
     final radius = size.width / 2;
     final centerOffset = Offset(radius, radius);
-    final polarPath = PolarPath(radius, bulge, rotation);
+    final polarPath = PolarPath(radius, bloom, rotation);
     final borderPath = polarPath.borderPath();
-    final bulge2 = bulge.squared;
+    final bloom2 = bloom.squared;
 
     late final glowPaint = Paint()
-      ..color = Sunflower.glow.withOpacity((1 + bulge) / 2)
-      ..maskFilter = MaskFilter.blur(BlurStyle.solid, 25 * (1 - bulge).squared);
+      ..color = Sunflower.glow.withOpacity((1 + bloom) / 2)
+      ..maskFilter = MaskFilter.blur(BlurStyle.solid, 25 * (1 - bloom).squared);
 
     final fillPaint = Paint()
       ..color = outerColor
@@ -97,11 +86,11 @@ class _SunflowerPaint extends CustomPainter {
 
     if (blooming) {
       final petalLinePaint = Paint()
-        ..color = Sunflower.border.withOpacity(borderOpacity.cubed * bulge / 2)
+        ..color = Sunflower.border.withOpacity(borderOpacity.cubed * bloom / 2)
         ..strokeWidth = 4
         ..style = PaintingStyle.stroke;
 
-      if (bulge < 1) canvas.drawPath(borderPath, glowPaint);
+      if (bloom < 1) canvas.drawPath(borderPath, glowPaint);
       canvas.drawPath(borderPath, fillPaint);
       canvas.drawPath(polarPath.innerLines(), petalLinePaint);
     } else {
@@ -111,7 +100,7 @@ class _SunflowerPaint extends CustomPainter {
 
     final rect = Rect.fromCircle(
       center: centerOffset,
-      radius: lerpDouble(polarPath.innerRadius, radius, bulge2)!,
+      radius: lerpDouble(polarPath.innerRadius, radius, bloom2)!,
     );
     for (final (color, opacity) in [if (blooming) (outerColor, 0.875), (centerColor, 2 / 3)]) {
       final gradient = RadialGradient(colors: [
@@ -124,7 +113,7 @@ class _SunflowerPaint extends CustomPainter {
     }
 
     final borderPaint = Paint()
-      ..color = Sunflower.border.withOpacity(borderOpacity * bulge2)
+      ..color = Sunflower.border.withOpacity(borderOpacity * bloom2)
       ..strokeWidth = 6
       ..style = PaintingStyle.stroke;
 
@@ -141,15 +130,15 @@ class _SunflowerPaint extends CustomPainter {
 /// {@endtemplate}
 class PolarPath {
   /// {@macro polar_coordinates}
-  PolarPath(this.radius, double bulge, this.rotation)
-      : bulge = Curves.easeOutCirc.transform(bulge);
+  PolarPath(this.radius, double bloom, this.rotation)
+      : bloom = Curves.easeOutCirc.transform(bloom);
 
   Path borderPath() {
     path = Path();
     moveTo(theta: rotation);
     for (int i = 0; i < Sunflower.petalCount; i++) {
       arcTo(theta: i * PolarPath.theta + rotation);
-      arcTo(r: 1 + bulge.cubed * 1 / 3, theta: (i + 0.5) * PolarPath.theta + rotation);
+      arcTo(r: 1 + bloom.cubed * 1 / 3, theta: (i + 0.5) * PolarPath.theta + rotation);
     }
     arcTo(theta: rotation);
 
@@ -167,13 +156,13 @@ class PolarPath {
 
   late Path path;
   final double radius;
-  final double bulge;
+  final double bloom;
   final double rotation;
 
-  late final innerRadius = radius * (1 - bulge / 5.5);
-  late final bulgeRadius = Radius.circular(innerRadius / (1 + bulge / 2));
+  late final innerRadius = radius * (1 - bloom / 5.5);
+  late final bloomRadius = Radius.circular(innerRadius / (1 + bloom / 2));
 
-  /// The angle, in radians, of each flower petal
+  /// The angle, in radians, that each flower petal spans.
   static const theta = math.pi * 2 / Sunflower.petalCount;
 
   /// Converts polar coordinates to cartesian.
@@ -194,36 +183,45 @@ class PolarPath {
 
   void arcTo({double r = 1.0, required double theta}) {
     final (x, y) = coordsFrom(r, theta);
-    path.arcToPoint(Offset(x, y), radius: bulgeRadius);
+    path.arcToPoint(Offset(x, y), radius: bloomRadius);
   }
 }
 
-/// The dark part of the screen below the sun.
-class Horizon extends CustomPainter {
-  /// The dark part of the screen below the sun.
-  const Horizon({required this.t, required this.brightness});
+class Horizon extends StatelessWidget {
+  const Horizon({super.key, required this.t, required this.brightness});
+
   final double t;
   final Brightness brightness;
 
-  Widget get widget => CustomPaint(painter: this, willChange: t > 0 && t < 1);
-
   @override
-  void paint(Canvas canvas, Size size) {
-    if (t == 1) return;
-
+  Widget build(BuildContext context) {
     final (hSaturation, hValue) = switch (brightness) {
       Brightness.light => (0.5, 8 / 15),
       Brightness.dark => (5 / 9, 0.5),
     };
-    final color = HSVColor.fromAHSV(1.0, 120 + 20 * t, hSaturation, t * hValue);
+    final color = HSVColor.fromAHSV(1.0, 120 + 20 * t, hSaturation, t * hValue).toColor();
 
+    return CustomPaint(painter: _HorizonPainter(color), willChange: t != 0);
+  }
+}
+
+/// The dark part of the screen below the sun.
+class _HorizonPainter extends CustomPainter {
+  /// The dark part of the screen below the sun.
+  const _HorizonPainter(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
     const big = 1.0E+9;
+
     canvas.drawRect(
       const Rect.fromLTRB(-big, -ZaHando.handPadding, big, big),
-      Paint()..color = color.toColor(),
+      Paint()..color = color,
     );
   }
 
   @override
-  bool shouldRepaint(Horizon oldDelegate) => t != oldDelegate.t;
+  bool shouldRepaint(_HorizonPainter oldDelegate) => color != oldDelegate.color;
 }

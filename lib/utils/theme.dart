@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
-import 'package:thc/utils/style_text.dart';
 
 /// This class copies [Colors] and has numbered names for different opacities:
 ///
@@ -17,7 +16,7 @@ import 'package:thc/utils/style_text.dart';
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
-///   final colors = ThcColors.of(context);
+///   final ColorScheme colors = ThcColors.of(context);
 ///   return ColoredBox(
 ///     color: colors.surface,
 ///     child: Text(
@@ -72,6 +71,81 @@ abstract final class ThcColors {
   static ColorScheme of(BuildContext context) => Theme.of(context).colorScheme;
 }
 
+/// We're storing fonts in the `assets/` folder
+/// to keep the app appearance consistent across devices.
+///
+/// Both "pretendard" and "roboto mono" are open-source fonts with variable weight.
+class StyleText extends TextStyle {
+  /// "Pretendard" is almost exactly like the default Apple fonts,
+  /// but it's open-source and free to use!
+  const StyleText({
+    double? size,
+    this.weight,
+    super.inherit,
+    super.color,
+    super.backgroundColor,
+    super.letterSpacing,
+    super.wordSpacing,
+    super.textBaseline,
+    super.height,
+    super.leadingDistribution,
+    super.locale,
+    super.foreground,
+    super.background,
+    super.shadows,
+    super.decoration,
+    super.decorationColor,
+    super.decorationStyle,
+    super.decorationThickness,
+    super.overflow,
+  })  : assert(weight == null || weight is FontWeight || weight is num),
+        super(fontSize: size, fontFamily: 'pretendard');
+
+  /// "Roboto mono" is a monospace font,
+  /// i.e. a font you'd see with typewriters and code editors.
+  const StyleText.mono({
+    double? size,
+    this.weight,
+    super.fontStyle,
+    super.inherit,
+    super.color,
+    super.backgroundColor,
+    super.letterSpacing,
+    super.wordSpacing,
+    super.textBaseline,
+    super.height,
+    super.leadingDistribution,
+    super.locale,
+    super.foreground,
+    super.background,
+    super.shadows,
+    super.decoration,
+    super.decorationColor,
+    super.decorationStyle,
+    super.decorationThickness,
+    super.overflow,
+  })  : assert(weight == null || weight is FontWeight || weight is num),
+        super(fontSize: size, fontFamily: 'roboto mono');
+
+  /// The type should either be [FontWeight] or [double].
+  ///
+  /// In [StyleText.mono], the value can range from 100 to 700;
+  /// otherwise, it can go from 50 to 1000.
+  final dynamic weight;
+
+  @override
+  List<FontVariation>? get fontVariations {
+    if (this.weight == null) return null;
+
+    final num weight = switch (this.weight) {
+      final FontWeight w => w.value,
+      final n => n as num,
+    };
+
+    return [FontVariation.weight(weight.toDouble())];
+  }
+}
+
 /// [WidgetStateProperty] is pretty neat: you can have different styles
 /// based on whatever's going on with the widget.
 ///
@@ -89,25 +163,44 @@ extension ThatOneVideo on Set<WidgetState> {
   bool get isFocused => contains(WidgetState.focused);
   bool get isSelected => contains(WidgetState.selected);
   bool get isPressed => contains(WidgetState.pressed);
+  bool get isError => contains(WidgetState.error);
 }
 
 ThemeData _generateTheme(Brightness brightness) {
   final isLight = brightness == Brightness.light;
 
-  final green = isLight ? ThcColors.green : ThcColors.zaHando;
-  final backgroundColor = isLight ? ThcColors.veryPaleAzure : ThcColors.darkestBlue;
-  final textColor = isLight ? Colors.black : ThcColors.paleAzure88;
-  final paleColor = isLight ? Colors.white : ThcColors.paleAzure;
   final barColor = isLight ? ThcColors.darkBlue : ThcColors.darkerBlue;
   final slightContrast = isLight ? ThcColors.dullBlue : ThcColors.paleAzure88;
-  final contrast13 = slightContrast.withOpacity(0.125);
-  final contrast25 = slightContrast.withOpacity(0.25);
+
+  final colors = ColorScheme.fromSeed(
+    seedColor: ThcColors.darkBlue,
+    brightness: isLight ? Brightness.light : Brightness.dark,
+    primary: isLight ? ThcColors.green : ThcColors.zaHando,
+    onPrimary: isLight ? ThcColors.dullerGreen : Colors.black87,
+    inversePrimary: ThcColors.darkGreen,
+    primaryContainer: isLight ? ThcColors.dullGreen38 : ThcColors.dullGreen50,
+    secondary: ThcColors.dullBlue,
+    onSecondary: isLight ? Colors.white : ThcColors.paleAzure,
+    tertiary: ThcColors.teal,
+    onTertiary: isLight ? ThcColors.tan : ThcColors.darkMagenta,
+    surface: isLight ? ThcColors.veryPaleAzure : ThcColors.darkestBlue,
+    onSurface: isLight ? Colors.black : ThcColors.paleAzure88,
+    inverseSurface: isLight ? ThcColors.darkBlue : ThcColors.paleAzure,
+    onInverseSurface: isLight ? Colors.white : ThcColors.darkestBlue,
+    outline: slightContrast,
+    outlineVariant: slightContrast.withOpacity(0.25),
+  );
+
+  final inkColor = slightContrast.withOpacity(0.125);
+  final onSurface75 = colors.onSurface.withOpacity(0.75);
+  final onSurface50 = colors.onSurface.withOpacity(0.5);
 
   const iconTheme = IconThemeData(size: 32);
   const labelTextStyle = StyleText(size: 12, weight: 600);
-  final inputLabelStyle = WidgetStateTextStyle.resolveWith(
-    (states) => TextStyle(color: states.isFocused ? green : textColor),
-  );
+  final inputLabelStyle = WidgetStateTextStyle.resolveWith((states) {
+    if (states.isError) return TextStyle(color: colors.error);
+    return TextStyle(color: states.isFocused ? colors.primary : colors.onSurface);
+  });
 
   WidgetStateProperty<T> selected<T>(T selected, T unselected) =>
       WidgetStateProperty.resolveWith((states) => states.isSelected ? selected : unselected);
@@ -115,54 +208,38 @@ ThemeData _generateTheme(Brightness brightness) {
   WidgetStateProperty<T> tealWhenSelected<T>(T Function({Color color}) copyWith, bool isLight) {
     return selected(
       copyWith(color: ThcColors.teal),
-      copyWith(color: paleColor.withOpacity(1 / 3)),
+      copyWith(color: colors.onSecondary.withOpacity(1 / 3)),
     );
   }
 
   return ThemeData(
-    colorScheme: ColorScheme.fromSeed(
-      seedColor: ThcColors.darkBlue,
-      brightness: isLight ? Brightness.light : Brightness.dark,
-      primary: green,
-      onPrimary: isLight ? ThcColors.dullerGreen : Colors.black87,
-      inversePrimary: ThcColors.darkGreen,
-      primaryContainer: isLight ? ThcColors.dullGreen38 : ThcColors.dullGreen50,
-      secondary: ThcColors.dullBlue,
-      onSecondary: paleColor,
-      tertiary: ThcColors.teal,
-      onTertiary: isLight ? ThcColors.tan : ThcColors.darkMagenta,
-      surface: backgroundColor,
-      onSurface: textColor,
-      inverseSurface: isLight ? ThcColors.darkBlue : ThcColors.paleAzure,
-      onInverseSurface: isLight ? Colors.white : ThcColors.darkestBlue,
-      outline: slightContrast,
-      outlineVariant: contrast25,
-    ),
+    colorScheme: colors,
     fontFamily: 'pretendard',
     materialTapTargetSize: MaterialTapTargetSize.padded,
-    canvasColor: backgroundColor,
-    scaffoldBackgroundColor: backgroundColor,
-    highlightColor: contrast13,
-    hoverColor: contrast13,
-    splashColor: contrast13,
+    canvasColor: colors.surface,
+    scaffoldBackgroundColor: colors.surface,
+    highlightColor: inkColor,
+    hoverColor: inkColor,
+    splashColor: inkColor,
     inputDecorationTheme: InputDecorationTheme(
-      border: MaterialStateOutlineInputBorder.resolveWith(
-        (states) => OutlineInputBorder(
+      border: MaterialStateOutlineInputBorder.resolveWith((states) {
+        final Color? error = states.isError ? colors.error : null;
+        return OutlineInputBorder(
           borderSide: states.isFocused
-              ? BorderSide(color: green, width: 2)
-              : BorderSide(color: textColor.withOpacity(0.5)),
-        ),
-      ),
+              ? BorderSide(color: error ?? colors.primary, width: 2)
+              : BorderSide(color: error ?? onSurface50),
+        );
+      }),
       labelStyle: inputLabelStyle,
       floatingLabelStyle: inputLabelStyle,
     ),
-    iconTheme: IconThemeData(color: textColor),
+    iconTheme: IconThemeData(color: colors.onSurface),
     iconButtonTheme: IconButtonThemeData(
       style: IconButton.styleFrom(foregroundColor: Colors.black87),
     ),
     switchTheme: SwitchThemeData(
-      thumbColor: selected(Colors.white, slightContrast),
-      trackOutlineColor: selected(ThcColors.green, slightContrast),
+      thumbColor: selected(Colors.white, colors.outline),
+      trackOutlineColor: selected(ThcColors.green, colors.outline),
       trackColor: selected(
         ThcColors.green,
         ThcColors.dullBlue.withOpacity(isLight ? 0.33 : 1),
@@ -190,15 +267,15 @@ ThemeData _generateTheme(Brightness brightness) {
     ),
     appBarTheme: AppBarTheme(
       backgroundColor: barColor,
-      foregroundColor: paleColor,
+      foregroundColor: colors.onSecondary,
       surfaceTintColor: Colors.transparent,
     ),
-    listTileTheme: ListTileThemeData(iconColor: slightContrast),
+    listTileTheme: ListTileThemeData(iconColor: colors.outline),
     radioTheme: RadioThemeData(
-      fillColor: WidgetStatePropertyAll(textColor.withOpacity(0.75)),
+      fillColor: WidgetStatePropertyAll(onSurface75),
     ),
     checkboxTheme: CheckboxThemeData(
-      side: BorderSide(color: textColor.withOpacity(0.75), width: 2),
+      side: BorderSide(color: onSurface75, width: 2),
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: barColor,
@@ -214,91 +291,13 @@ ThemeData _generateTheme(Brightness brightness) {
 
 /// `extension` lets you add methods to a class, as if you were
 /// doing it inside the class definition.
-///
-/// {@template ThemeGetter}
-/// This extension makes fetching the color scheme a bit cleaner.
-///
-/// ```dart
-/// ColoredBox(color: Theme.of(context).colorScheme.surface) // before
-/// ColoredBox(color: context.colorScheme.surface) // after
-/// ```
-/// {@endtemplate}
-extension ThemeGetter on BuildContext {
+extension LightDark on BuildContext {
   /// The displayed color will be [light] or [dark] based on
   /// whether we're currently in dark mode.
   Color lightDark(Color light, Color dark) => switch (Theme.of(this).brightness) {
         Brightness.light => light,
         Brightness.dark => dark,
       };
-
-  ThemeData editScheme({
-    Brightness? brightness,
-    Color? primary,
-    Color? onPrimary,
-    Color? primaryContainer,
-    Color? onPrimaryContainer,
-    Color? secondary,
-    Color? onSecondary,
-    Color? secondaryContainer,
-    Color? onSecondaryContainer,
-    Color? tertiary,
-    Color? onTertiary,
-    Color? tertiaryContainer,
-    Color? onTertiaryContainer,
-    Color? error,
-    Color? onError,
-    Color? errorContainer,
-    Color? onErrorContainer,
-    Color? background,
-    Color? onBackground,
-    Color? surface,
-    Color? onSurface,
-    Color? surfaceVariant,
-    Color? onSurfaceVariant,
-    Color? outline,
-    Color? outlineVariant,
-    Color? shadow,
-    Color? scrim,
-    Color? inverseSurface,
-    Color? onInverseSurface,
-    Color? inversePrimary,
-    Color? surfaceTint,
-  }) {
-    final theme = Theme.of(this);
-    return theme.copyWith(
-      colorScheme: theme.colorScheme.copyWith(
-        brightness: brightness,
-        primary: primary,
-        onPrimary: onPrimary,
-        primaryContainer: primaryContainer,
-        onPrimaryContainer: onPrimaryContainer,
-        secondary: secondary,
-        onSecondary: onSecondary,
-        secondaryContainer: secondaryContainer,
-        onSecondaryContainer: onSecondaryContainer,
-        tertiary: tertiary,
-        onTertiary: onTertiary,
-        tertiaryContainer: tertiaryContainer,
-        onTertiaryContainer: onTertiaryContainer,
-        error: error,
-        onError: onError,
-        errorContainer: errorContainer,
-        onErrorContainer: onErrorContainer,
-        surface: surface,
-        onSurface: onSurface,
-        surfaceContainerHighest: surfaceVariant,
-        onSurfaceVariant: onSurfaceVariant,
-        outline: outline,
-        outlineVariant: outlineVariant,
-        shadow: shadow,
-        scrim: scrim,
-        inverseSurface: inverseSurface,
-        onInverseSurface: onInverseSurface,
-        inversePrimary: inversePrimary,
-        surfaceTint: surfaceTint,
-      ),
-    );
-  }
 }
 
 class AppTheme extends Cubit<ThemeMode> {

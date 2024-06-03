@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:thc/agora/active_stream.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
+import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/num_powers.dart';
-import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/lerpy_hero/lerpy_hero.dart';
 
@@ -18,6 +17,11 @@ import 'package:thc/utils/widgets/lerpy_hero/lerpy_hero.dart';
 class LivestreamButton extends StatelessWidget {
   /// {@macro LivestreamButton}
   const LivestreamButton({required this.color, this.enabled = true, super.key});
+
+  const LivestreamButton.backdrop({super.key})
+      : color = Colors.black,
+        enabled = true;
+
   final Color color;
   final bool enabled;
 
@@ -28,7 +32,7 @@ class LivestreamButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final streaming = NavBarSelection.of(context).streaming;
+    final bool streaming = NavBarSelection.streaming(context);
     late final button = AnimatedOpacity(
       duration: Durations.long1,
       opacity: enabled ? 1 : 1 / 3,

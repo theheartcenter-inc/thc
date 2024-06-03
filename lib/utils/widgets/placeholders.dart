@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 class FunPlaceholder extends StatelessWidget {
@@ -10,12 +9,12 @@ class FunPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = ThcColors.of(context);
+    final ColorScheme colors = ThcColors.of(context);
     final style = StyleText.mono(
       size: 32,
       weight: FontWeight.bold,
       color: color,
-      shadows: [Shadow(color: colorScheme.surface.withOpacity(0.5), blurRadius: 2)],
+      shadows: [Shadow(color: colors.surface.withOpacity(0.5), blurRadius: 2)],
     );
 
     return Container(

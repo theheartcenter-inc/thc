@@ -4,31 +4,34 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
-import 'package:thc/home/schedule/edit_schedule/schedule_editor.dart';
+import 'package:thc/home/schedule/src/all_scheduled_streams.dart';
+import 'package:thc/home/schedule/src/schedule_editor.dart';
 import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
-import 'package:thc/utils/widgets/state_async.dart';
 
 class ScheduledStreamCard extends StatelessWidget {
   const ScheduledStreamCard({
-    super.key,
+    required Key super.key,
     required this.title,
     required this.timestamp,
-    required this.director,
     required this.active,
+    required this.director,
   });
+
+  ScheduledStreamCard.fromJson(Json json, {required Key super.key})
+      : title = json['title'],
+        timestamp = json['date'],
+        active = json['active'],
+        director = json['director'];
 
   final String title;
   final Timestamp timestamp;
-  final String director;
   final bool active;
+  final String director;
 
   @override
   Widget build(BuildContext context) {
-    final format = DateFormat('yyyy-MM-dd hh:mm a');
-    final DateTime date = DateTime.parse(timestamp.toDate().toString());
-    final formatedDate = format.format(date);
+    final String date = DateFormat('yyyy-MM-dd hh:mm a').format(timestamp.toDate());
 
     if (active) {
       return Card(
@@ -46,7 +49,7 @@ class ScheduledStreamCard extends StatelessWidget {
             style: const StyleText(color: Colors.black),
           ),
           subtitle: Text(
-            formatedDate,
+            date,
             style: const StyleText(color: Colors.black),
           ),
         ),
@@ -62,7 +65,7 @@ class ScheduledStreamCard extends StatelessWidget {
             style: const StyleText(color: Colors.black),
           ),
           subtitle: Text(
-            formatedDate,
+            date,
             style: const StyleText(color: Colors.black),
           ),
         ),
@@ -71,49 +74,13 @@ class ScheduledStreamCard extends StatelessWidget {
   }
 }
 
-class Schedule extends StatefulWidget {
+class Schedule extends StatelessWidget {
   const Schedule({super.key});
 
   @override
-  State<Schedule> createState() => _ScheduleState();
-}
-
-class _ScheduleState extends StateAsync<Schedule> {
-  final List<Widget> activeScheduledStreams = [];
-  final List<Widget> inactiveScheduledStreams = [];
-
-  @override
-  void initState() {
-    super.initState();
-    fetchDocuments();
-  }
-
-  Future<void> fetchDocuments() async {
-    final QuerySnapshot snapshot = await Firestore.scheduled_streams.get();
-    safeState(() {
-      for (final document in snapshot.docs) {
-        if (document['active']) {
-          activeScheduledStreams.add(ScheduledStreamCard(
-            title: document['title'],
-            timestamp: document['date'],
-            director: document['director'],
-            active: document['active'],
-          ));
-        } else {
-          inactiveScheduledStreams.add(ScheduledStreamCard(
-            title: document['title'],
-            timestamp: document['date'],
-            director: document['director'],
-            active: document['active'],
-          ));
-        }
-      }
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final colors = ThcColors.of(context);
+    final (:active, :scheduled) = ScheduledStreams.of(context);
+    final ColorScheme colors = ThcColors.of(context);
 
     Widget? editButton;
     if (user.isAdmin) {
@@ -136,8 +103,8 @@ class _ScheduleState extends StateAsync<Schedule> {
               ),
             ),
           ),
-          if (activeScheduledStreams.isEmpty) const Center(child: CircularProgressIndicator()),
-          ...activeScheduledStreams,
+          if (active.isEmpty) const Center(child: CircularProgressIndicator()),
+          ...active,
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
@@ -149,8 +116,11 @@ class _ScheduleState extends StateAsync<Schedule> {
               ),
             ),
           ),
-          if (inactiveScheduledStreams.isEmpty) const Center(child: CircularProgressIndicator()),
-          Expanded(child: ListView(children: inactiveScheduledStreams)),
+          Expanded(
+            child: scheduled.isEmpty
+                ? const Center(child: CircularProgressIndicator())
+                : ListView(children: scheduled),
+          ),
         ],
       ),
       floatingActionButton: editButton,

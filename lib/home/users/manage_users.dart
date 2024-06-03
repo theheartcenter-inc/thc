@@ -1,29 +1,18 @@
 import 'package:flutter/material.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/users/src/all_users.dart';
 import 'package:thc/home/users/src/permissions.dart';
+import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/navigator.dart';
 
-class ManageUsers extends StatefulWidget {
+class ManageUsers extends HookWidget {
   const ManageUsers({super.key});
 
   @override
-  State<ManageUsers> createState() => _ManageUsersState();
-}
-
-class _ManageUsersState extends State<ManageUsers> {
-  String searchValue = '';
-
-  bool closeMatch(ThcUser user) {
-    final fields = [user.id, user.email, user.name];
-    final searchTerm = searchValue.toLowerCase();
-
-    return fields.any((value) => value?.toLowerCase().contains(searchTerm) ?? false);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final users = ThcUsers.of(context).where(closeMatch).toList();
+    final search = useState('');
+    final users = ThcUsers.of(context, filter: search.value);
+
+    if (users.isEmpty) return const Center(child: CircularProgressIndicator());
 
     return Scaffold(
       body: Column(
@@ -31,7 +20,7 @@ class _ManageUsersState extends State<ManageUsers> {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              onChanged: (value) => setState(() => searchValue = value),
+              onChanged: search.update,
               decoration: const InputDecoration(
                 labelText: 'Search',
                 hintText: 'Search by ID, Email, Name',

@@ -12,11 +12,11 @@ extension EmailSyntax on String {
     const zero = 48, nine = 57, a = 97, z = 122;
     const period = 46, underscore = 95;
 
-    final s = toLowerCase();
+    final String lowered = toLowerCase();
     String newAndImproved = '';
 
     for (final (index, char) in characters.indexed) {
-      newAndImproved += switch (s.codeUnitAt(index)) {
+      newAndImproved += switch (lowered.codeUnitAt(index)) {
         >= zero && <= nine || >= a && <= z => char,
         period || underscore => char,
         _ when newAndImproved.endsWith('-') => '',
@@ -33,7 +33,7 @@ Future<UserCredential> authenticate({bool registering = false}) {
       ? FirebaseAuth.instance.createUserWithEmailAndPassword
       : FirebaseAuth.instance.signInWithEmailAndPassword;
 
-  final email = switch (LocalStorage.userId()) {
+  final String email = switch (LocalStorage.userId()) {
     final id? => 'userid_$id@theheartcenter.one',
     null => LocalStorage.email()!,
   };
@@ -45,7 +45,7 @@ Future<UserCredential> authenticate({bool registering = false}) {
 Future<String?> signIn() async {
   try {
     await authenticate();
-  } on FirebaseAuthException catch (e) {
+  } on FirebaseException catch (e) {
     return switch (e.code) {
       'invalid-credential' => 'Wrong credentials.',
       'wrong-password' ||
@@ -53,7 +53,7 @@ Future<String?> signIn() async {
         'Invalid Password. Please enter password if blank.',
       'invalid-email' => 'Invalid Email. Please enter email if blank.',
       'unknown-error' => '',
-      _ => 'Error: ${e.code}',
+      _ => '$e',
     };
   }
   if (LocalStorage.loggedIn()) return null;
@@ -101,9 +101,7 @@ Future<String?> register() async {
 Future<String?> resetPassword() async {
   try {
     await FirebaseAuth.instance.sendPasswordResetEmail(email: LocalStorage.email()!);
-    navigator.showSnackBar(
-      const SnackBar(content: Text('check your email for a password reset link!')),
-    );
+    navigator.snackbarMessage('check your email for a password reset link!');
     return null;
   } on FirebaseAuthException catch (e) {
     return switch (e.code) {

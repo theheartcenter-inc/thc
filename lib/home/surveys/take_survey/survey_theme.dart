@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 /// The sunrise/sunset gradient does a couple things:
@@ -40,10 +39,10 @@ class SurveyTheme extends StatelessWidget {
 
   static ThemeData of(BuildContext context) {
     final brightness = Theme.of(context).brightness;
-    final isLight = brightness == Brightness.light;
-    final blackAndWhite = isLight ? Colors.white : Colors.black;
-    final error = isLight ? SurveyColors.vibrantRed : Colors.redAccent;
-    final paleColor = isLight ? SurveyColors.yellowSunrise : SurveyColors.orangeWhite;
+    final bool isLight = brightness == Brightness.light;
+    final Color blackAndWhite = isLight ? Colors.white : Colors.black;
+    final Color error = isLight ? SurveyColors.vibrantRed : Colors.redAccent;
+    final Color pale = isLight ? SurveyColors.yellowSunrise : SurveyColors.orangeWhite;
     final colors = ColorScheme.fromSeed(
       seedColor: SurveyColors.veridian,
       brightness: brightness,
@@ -82,10 +81,10 @@ class SurveyTheme extends StatelessWidget {
       segmentedButtonTheme: SegmentedButtonThemeData(
         style: SegmentedButton.styleFrom(
           side: BorderSide.none,
-          backgroundColor: paleColor.withOpacity(7 / 8),
+          backgroundColor: pale.withOpacity(7 / 8),
           foregroundColor: colors.secondary,
           selectedBackgroundColor: colors.secondary,
-          selectedForegroundColor: paleColor.withOpacity(isLight ? 1 : 0.9),
+          selectedForegroundColor: pale.withOpacity(isLight ? 1 : 0.9),
           padding: const EdgeInsets.only(bottom: 10),
         ),
       ),
@@ -119,7 +118,7 @@ class _SurveySunrise extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = ThcColors.of(context);
+    final ColorScheme colors = ThcColors.of(context);
     final size = MediaQuery.sizeOf(context);
     return Scaffold(
       body: SingleChildScrollView(
@@ -152,7 +151,7 @@ class DarkModeSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = ThcColors.of(context);
+    final ColorScheme colors = ThcColors.of(context);
     final bool isLight = colors.brightness == Brightness.light;
     return Align(
       alignment: Alignment.topRight,
