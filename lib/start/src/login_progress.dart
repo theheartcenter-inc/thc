@@ -200,7 +200,16 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
   /// This makes retrieving the state from the current [BuildContext] slightly more concise.
   static LoginProgress of(BuildContext context) => context.watch<LoginProgressTracker>().value;
 
-  /// Causes the tracker to [emit] a new progress state.
+  static LoginLabels labelsOf(BuildContext context) {
+    LoginLabels labels(LoginProgressTracker tracker) => tracker.value.labels;
+    return context.select<LoginProgressTracker, LoginLabels>(labels);
+  }
+
+  static bool pressedStart(BuildContext context) => context.select<LoginProgressTracker, bool>(
+        (tracker) => tracker.value.animation >= AnimationProgress.pressStart,
+      );
+
+  /// Updates the tracker to a new progress [value].
   ///
   /// And it's accessible without needing a [BuildContext]!
   static void update({

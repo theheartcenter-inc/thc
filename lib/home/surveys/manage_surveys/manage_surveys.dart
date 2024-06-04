@@ -4,6 +4,7 @@ import 'package:thc/home/surveys/edit_survey/survey_editor.dart';
 import 'package:thc/home/surveys/manage_surveys/survey_responses.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/home/surveys/take_survey/survey_theme.dart';
+import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/navigator.dart';
 import 'package:thc/utils/theme.dart';
 
@@ -36,17 +37,14 @@ class ManageSurveys extends StatelessWidget {
   }
 }
 
-class CustomSurveyButtons extends StatefulWidget {
+class CustomSurveyButtons extends HookWidget {
   const CustomSurveyButtons({super.key});
 
   @override
-  State<CustomSurveyButtons> createState() => _CustomSurveyButtonsState();
-}
-
-class _CustomSurveyButtonsState extends State<CustomSurveyButtons> {
-  ThcSurvey surveyType = ThcSurvey.introSurvey;
-  @override
   Widget build(BuildContext context) {
+    final survey = useState(ThcSurvey.introSurvey);
+    final ThcSurvey surveyType = survey.value;
+
     return DecoratedBox(
       decoration: BoxDecoration(
         color: ThcColors.dullBlue.withAlpha(0x40),
@@ -64,7 +62,7 @@ class _CustomSurveyButtonsState extends State<CustomSurveyButtons> {
                 for (final type in ThcSurvey.values)
                   DropdownMenuItem(value: type, child: Text('  $type'))
               ],
-              onChanged: (newType) => setState(() => surveyType = newType!),
+              onChanged: survey.update,
             ),
             const SizedBox(width: 25),
             Column(

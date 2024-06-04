@@ -6,7 +6,7 @@ import 'package:thc/home/profile/account/change_password.dart';
 import 'package:thc/home/profile/account/close_account.dart';
 import 'package:thc/home/profile/profile.dart';
 import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/style_text.dart';
+import 'package:thc/utils/theme.dart';
 
 class AccountSettings extends StatefulWidget {
   const AccountSettings({super.key});

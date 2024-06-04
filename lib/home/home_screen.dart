@@ -1,20 +1,23 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
+import 'package:thc/home/library/src/all_videos.dart';
 import 'package:thc/home/library/video_library.dart';
+import 'package:thc/home/profile/account/account_field.dart';
 import 'package:thc/home/profile/profile.dart';
 import 'package:thc/home/schedule/schedule.dart';
+import 'package:thc/home/schedule/src/all_scheduled_streams.dart';
 import 'package:thc/home/stream/create_livestream.dart';
 import 'package:thc/home/surveys/manage_surveys/manage_surveys.dart';
 import 'package:thc/home/users/manage_users.dart';
+import 'package:thc/home/users/src/all_users.dart';
 import 'package:thc/home/watch_live/watch_live.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/widgets/enum_widget.dart';
 
-enum NavBarButton with StatelessEnum {
+enum NavBarButton with EnumStatelessWidgetMixin {
   /// A place for admins to manage other users.
   users(
     outlined: Icon(Icons.group_outlined),
@@ -74,6 +77,9 @@ enum NavBarButton with StatelessEnum {
     required this.screen,
   });
 
+  factory NavBarButton.fromStorageIndex(int index) =>
+      NavBarButton.enabledValues[values[index].navIndex];
+
   /// Shown when the button is unselected (and also when selected, if [filled] is null).
   final Icon outlined;
 
@@ -89,7 +95,7 @@ enum NavBarButton with StatelessEnum {
   /// Not every button should be enabled for every user,
   /// e.g. participants and directors don't have access to the admin portal.
   bool get enabled {
-    final isAdmin = user.isAdmin;
+    final bool isAdmin = user.isAdmin;
     return switch (this) {
       watchLive when isAdmin => LocalStorage.adminWatchLive(),
       stream when isAdmin => LocalStorage.adminStream(),
@@ -107,7 +113,7 @@ enum NavBarButton with StatelessEnum {
   /// The button's position within [enabledValues].
   int get navIndex => math.max(enabledValues.indexOf(this), 0);
 
-  /// These enum values can be built into a widget thanks to the [StatelessEnum] mixin.
+  /// These enum values can be built into a widget thanks to the [EnumStatelessWidgetMixin] mixin.
   @override
   Widget build(BuildContext context) {
     return NavigationDestination(
@@ -124,29 +130,31 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final navBar = NavBar.of(context);
-
-    return Scaffold(
-      body: SafeArea(bottom: false, child: navBar.screen),
-      bottomNavigationBar: navBar,
+    return MultiProvider(
+      providers: [
+        BlocProvider(create: (_) => ThcUsers(), lazy: !user.isAdmin),
+        BlocProvider(create: (_) => ScheduledStreams(), lazy: false),
+        BlocProvider(create: (_) => ThcVideos(), lazy: user.canLivestream),
+        BlocProvider(create: (_) => UserPins(), lazy: user.canLivestream),
+        BlocProvider(create: (_) => AccountFields()),
+      ],
+      child: Scaffold(
+        body: SafeArea(bottom: false, child: NavBarSelection.of(context).screen),
+        bottomNavigationBar: const NavBar(),
+      ),
     );
   }
 }
 
 /// {@template NavBar}
-/// Why are we extending [NavigationBar] and making a BLoC class for state management?
+/// Why are we extending [NavigationBar] and making a [Bloc] class for state management?
 ///
 /// Literally just so that the navigation bar slides down when you click "Go Live"
 /// and then smoothly slides back up when the stream is over.
 /// {@endtemplate}
-class NavBar extends NavigationBar {
+class NavBar extends StatelessWidget {
   /// {@macro NavBar}
-  NavBar.of(BuildContext context, {super.key, this.belowPage = false})
-      : super(
-          destinations: NavBarButton.enabledValues,
-          selectedIndex: NavBarSelection.of(context).navIndex,
-          onDestinationSelected: context.read<NavBarSelection>().selectIndex,
-        );
+  const NavBar({super.key, this.belowPage = false});
 
   /// If [belowPage] is true, then instead of passing this widget
   /// into the [Scaffold.bottomNavigationBar] slot, [Scaffold.body] should be
@@ -159,21 +167,20 @@ class NavBar extends NavigationBar {
   /// and set its alignment to the bottom of the screen.
   final bool belowPage;
 
-  Widget get screen => NavBarButton.enabledValues[selectedIndex].screen;
-
   @override
   Widget build(BuildContext context) {
     final navBar = Hero(
       tag: 'Admin home screen bottom bar',
-      child: super.build(context),
+      child: NavigationBar(
+        destinations: NavBarButton.enabledValues,
+        selectedIndex: NavBarSelection.of(context).navIndex,
+        onDestinationSelected: context.read<NavBarSelection>().selectIndex,
+      ),
     );
 
     if (!belowPage) return navBar;
 
-    return Transform(
-      transform: Matrix4.translationValues(0, 80, 0.0),
-      child: navBar,
-    );
+    return FractionalTranslation(translation: const Offset(0, 1), child: navBar);
   }
 }
 
@@ -185,6 +192,8 @@ class NavBarSelection extends Cubit<NavBarButton> {
   /// {@macro NavBarIndex}
   NavBarSelection() : super(LocalStorage.navBarSelection());
 
+  static bool streaming(BuildContext context) => of(context, listen: false).streaming;
+
   static NavBarButton of(BuildContext context, {bool listen = true}) =>
       Provider.of<NavBarSelection>(context, listen: listen).value;
 
@@ -193,21 +202,19 @@ class NavBarSelection extends Cubit<NavBarButton> {
   /// 2. `navIndex`: its index in [NavigationBar.destinations]
   ///
   /// `index` is used in [LocalStorage], and `navIndex` is used in the [NavBar].
-  void selectIndex(int navIndex) {
-    final newButton = NavBarButton.enabledValues[navIndex];
-    LocalStorage.navBarSelection.save(newButton.index);
-    value = newButton;
-  }
+  void selectIndex(int navIndex) => selectButton(NavBarButton.enabledValues[navIndex]);
 
   /// Similar to [selectIndex], but you can pass in the desired button directly.
   void selectButton(NavBarButton button) {
-    return switch (NavBarButton.enabledValues.indexOf(button)) {
-      < 0 =>
-        throw UnsupportedError('"${user.type}" does not currently have access to "$button".'),
-      final int navIndex => selectIndex(navIndex),
-    };
+    if (!button.enabled) {
+      assert(false, '"${user.type}" does not currently have access to "$button".');
+      return;
+    }
+
+    LocalStorage.navBarSelection.save(button.index);
+    value = button;
   }
 
   /// Ensures that the index remains valid when an admin adds or removes a [NavBarButton].
-  void refresh() => selectButton(NavBarButton.profile);
+  void refresh() => notifyListeners();
 }

@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:thc/agora/livestream_button.dart';
-import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 class CreateLivestream extends StatelessWidget {

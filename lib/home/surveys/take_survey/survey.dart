@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:thc/agora/livestream_button.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
@@ -6,7 +7,6 @@ import 'package:thc/home/surveys/take_survey/survey_field.dart';
 import 'package:thc/home/surveys/take_survey/survey_theme.dart';
 import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 /// {@template SurveyScreen}
@@ -45,7 +45,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
     if (data.valid) {
       validation.value = false;
 
-      final survey = widget.surveyType;
+      final ThcSurvey survey = widget.surveyType;
       await survey.submitResponse(switch (survey) {
         ThcSurvey.introSurvey => data.json,
         ThcSurvey.streamFinished || ThcSurvey.streamEndedEarly => {
@@ -65,7 +65,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
     (dynamic, String?) fromMultipleChoice((dynamic, String?) newAnswer) {
       final (oldData, String? oldInput) = record.answer ?? (null, null);
       final (newData, String? newInput) = newAnswer;
-      final answer = switch (newInput) {
+      final String? answer = switch (newInput) {
         String() when newInput.valid => newInput,
         String() => null, // blank answer
         null => oldInput,
@@ -74,7 +74,7 @@ class _SurveyScreenState extends State<SurveyScreen> {
     }
 
     return (newAnswer) {
-      final answer = switch (record.question) {
+      final dynamic answer = switch (record.question) {
         MultipleChoice() => fromMultipleChoice(newAnswer),
         _ => newAnswer,
       };
@@ -84,15 +84,18 @@ class _SurveyScreenState extends State<SurveyScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return SurveyTheme(
-      surveyContent: Column(
-        children: [
-          const DarkModeSwitch(),
-          const SizedBox(height: 20),
-          for (final (i, record) in data.indexed) SurveyField(record, update(i, record)),
-          FilledButton(onPressed: validate, child: const Text('Submit')),
-          _ValidateMessage(data.invalidCount),
-        ],
+    return PopScope(
+      canPop: false,
+      child: SurveyTheme(
+        surveyContent: Column(
+          children: [
+            const DarkModeSwitch(),
+            const SizedBox(height: 20),
+            for (final (i, record) in data.indexed) SurveyField(record, update(i, record)),
+            FilledButton(onPressed: validate, child: const Text('Submit')),
+            _ValidateMessage(data.invalidCount),
+          ],
+        ),
       ),
     );
   }
@@ -147,6 +150,7 @@ class Submitted extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   thanks,
+                  const LivestreamButton(color: Colors.transparent),
                   for (final (question, answer) in summary) ...[
                     Text(
                       question,
@@ -164,7 +168,7 @@ class Submitted extends StatelessWidget {
               ),
             ),
           ),
-          NavBar.of(context, belowPage: true),
+          const NavBar(belowPage: true),
         ],
       ),
     );
@@ -186,13 +190,14 @@ class _ValidateMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget? child;
     if (context.watch<ValidSurveyAnswers>().value && invalidCount > 0) {
-      final theme = Theme.of(context);
+      final themeData = Theme.of(context);
       child = Padding(
         padding: const EdgeInsets.all(8.0),
         child: Text(
           invalidCount == 1 ? '1 question left!' : 'answer $invalidCount more questions',
           textAlign: TextAlign.center,
-          style: theme.textTheme.labelSmall!.copyWith(color: theme.colorScheme.onErrorContainer),
+          style: themeData.textTheme.labelSmall!
+              .copyWith(color: themeData.colorScheme.onErrorContainer),
         ),
       );
     }

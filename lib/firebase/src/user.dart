@@ -1,4 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart' show CollectionReference;
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:meta/meta.dart';
 import 'package:thc/firebase/firebase.dart';
@@ -77,9 +77,9 @@ sealed class ThcUser {
   static Future<ThcUser> download([String? id]) async {
     id ??= LocalStorage.userId() ?? LocalStorage.email()!;
     backendPrint('id: $id');
-    final doc = _collection.doc(id);
+    final DocumentReference<Json> doc = _collection.doc(id);
     backendPrint('doc: $doc');
-    final data = await doc.getData();
+    final Json? data = await doc.getData();
     if (data == null) throw Exception("snapshot of $_collection/$id doesn't exist");
     return ThcUser.fromJson(data);
   }

@@ -1,30 +1,24 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
-import 'package:thc/utils/app_config.dart';
-import 'package:thc/utils/style_text.dart';
+import 'package:thc/utils/bloc.dart';
+import 'package:thc/utils/theme.dart';
 
-class IssueReport extends StatefulWidget {
+class IssueReport extends HookWidget {
   const IssueReport({super.key});
 
   @override
-  State<IssueReport> createState() => _IssueReportState();
-}
-
-class _IssueReportState extends State<IssueReport> {
-  final _formKey = GlobalKey<FormState>();
-
-  String _name = '';
-  String _email = '';
-  String _message = '';
-
-  @override
   Widget build(BuildContext context) {
+    final formKey = useFormKey();
+    final name = useRef('');
+    final email = useRef('');
+    final message = useRef('');
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Report an Issue')),
+      appBar: AppBar(title: const Text('Report an issue')),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
-          key: _formKey,
+          key: formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -38,7 +32,7 @@ class _IssueReportState extends State<IssueReport> {
                     }
                     return null;
                   },
-                  onSaved: (value) => _name = value ?? '',
+                  onSaved: name.update,
                 ),
               ),
               Padding(
@@ -49,7 +43,7 @@ class _IssueReportState extends State<IssueReport> {
                     final email? when EmailValidator.validate(email) => null,
                     _ => 'Please enter a valid email address',
                   },
-                  onSaved: (value) => _email = value ?? '',
+                  onSaved: email.update,
                 ),
               ),
               TextFormField(
@@ -61,15 +55,12 @@ class _IssueReportState extends State<IssueReport> {
                   }
                   return null;
                 },
-                onSaved: (value) => _message = value ?? '',
+                onSaved: message.update,
               ),
               const SizedBox(height: 16.0),
               ElevatedButton(
                 onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _formKey.currentState!.save();
-                    backendPrint('$_name $_email $_message');
-                  }
+                  if (formKey.validate()) formKey.save();
                 },
                 child: const Text('Submit', style: StyleText(weight: 520)),
               ),

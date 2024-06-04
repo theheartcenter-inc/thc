@@ -4,7 +4,7 @@ extension ValidAnswer on String? {
   /// If the user just presses the spacebar a couple of times,
   /// it probably shouldn't count as a valid answer.
   String? get validated {
-    final trimmed = this?.trim();
+    final String? trimmed = this?.trim();
     if (trimmed == null || trimmed.isEmpty) return null;
     return trimmed;
   }
@@ -148,7 +148,7 @@ sealed class MultipleChoice extends SurveyQuestion {
 
   @override
   Json get json {
-    final type = switch (this) {
+    final String type = switch (this) {
       RadioQuestion() => 'radio',
       CheckboxQuestion() => 'checkbox',
     };
@@ -209,7 +209,7 @@ class CheckboxQuestion extends MultipleChoice {
     final (checks, userInput) = answer!;
     if (!checks.contains(true)) return null;
 
-    final selectedChoices = [
+    final selectedChoices = <String>[
       for (final (i, choice) in choices.indexed)
         if (checks[i]) choice,
       if (canType && checks[choices.length])

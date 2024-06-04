@@ -1,41 +1,30 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/style_text.dart';
+import 'package:thc/utils/theme.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
-class HeartCenterInfo extends StatefulWidget {
+class HeartCenterInfo extends HookWidget {
   const HeartCenterInfo({super.key});
 
   static void donate() =>
       launchUrlString('https://secure.givelively.org/donate/heart-center-inc');
 
-  @override
-  State<HeartCenterInfo> createState() => _HeartCenterInfoState();
-}
-
-class _HeartCenterInfoState extends State<HeartCenterInfo> {
-  final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
-  final _messageController = TextEditingController();
-  int _selectedIndex = 0;
-
-  /// Function to submit form data to server API
-  Future<void> _submitForm(String email, String message) async {
+  static Future<void> _submitForm(String email, String message) async {
     const String apiUrl = 'server API URL';
 
-    final response = await http.post(
+    final http.Response response = await http.post(
       Uri.parse(apiUrl),
       headers: {'Content-Type': 'application/json'},
       body: '{"email": "$email", "message": "$message"}',
     );
-    final popupMessage = switch (response.statusCode) {
+
+    navigator.snackbarMessage(switch (response.statusCode) {
       200 => 'Form submitted successfully!',
       _ => 'Submission failed. Please try again.',
-    };
-
-    navigator.showSnackBar(SnackBar(content: Text(popupMessage)));
+    });
   }
 
   static const aboutUs = '''\
@@ -71,7 +60,12 @@ Support our next 6 month wellness program: the art of nurturing your nervous sys
 
   @override
   Widget build(BuildContext context) {
-    final contents = switch (_selectedIndex) {
+    final formKey = useFormKey();
+    final emailController = useTextEditingController();
+    final messageController = useTextEditingController();
+    final index = useState(0);
+
+    final List<Widget> contents = switch (index.value) {
       0 => const [
           Text('The Heart Center', style: StyleText(size: 24, weight: 650)),
           SizedBox(height: 16),
@@ -99,11 +93,11 @@ Support our next 6 month wellness program: the art of nurturing your nervous sys
           ),
           const SizedBox(height: 16),
           Form(
-            key: _formKey,
+            key: formKey,
             child: Column(
               children: [
                 TextFormField(
-                  controller: _emailController,
+                  controller: emailController,
                   decoration: const InputDecoration(labelText: 'Your Email'),
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
@@ -118,7 +112,7 @@ Support our next 6 month wellness program: the art of nurturing your nervous sys
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
-                  controller: _messageController,
+                  controller: messageController,
                   decoration: const InputDecoration(labelText: 'Your Message'),
                   maxLines: 4,
                   validator: (value) {
@@ -131,11 +125,11 @@ Support our next 6 month wellness program: the art of nurturing your nervous sys
                 const SizedBox(height: 16.0),
                 ElevatedButton(
                   onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      _submitForm(_emailController.text, _messageController.text);
+                    if (formKey.validate()) {
+                      _submitForm(emailController.text, messageController.text);
 
-                      _emailController.clear();
-                      _messageController.clear();
+                      emailController.clear();
+                      messageController.clear();
                     }
                   },
                   child: const Text('Submit'),
@@ -191,8 +185,8 @@ Support our next 6 month wellness program: the art of nurturing your nervous sys
           NavigationDestination(icon: Icon(Icons.info), label: 'About Us'),
           NavigationDestination(icon: Icon(Icons.contact_mail), label: 'Contact'),
         ],
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) => setState(() => _selectedIndex = index),
+        selectedIndex: index.value,
+        onDestinationSelected: index.update,
       ),
     );
   }

@@ -1,70 +1,49 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:provider/provider.dart';
 import 'package:thc/start/start.dart';
-import 'package:thc/utils/animation.dart';
+import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
-import 'package:thc/utils/style_text.dart';
 import 'package:thc/utils/theme.dart';
 
 /// {@template ThemeModePicker}
 /// An animated button shown in the [StartScreen] used to set the [ThemeMode].
 /// {@endtemplate}
-class ThemeModePicker extends StatefulWidget {
+class ThemeModePicker extends HookWidget {
   /// {@macro ThemeModePicker}
   const ThemeModePicker({this.backgroundColor, this.foregroundColor, super.key});
   final Color? backgroundColor, foregroundColor;
 
   @override
-  State<ThemeModePicker> createState() => _ThemeModePickerState();
-}
-
-class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProviderStateMixin {
-  late final controller = AnimationController(vsync: this, duration: Durations.short3);
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-
-  Future<void> toggle([ThemeMode? mode]) async {
-    final reversing = controller.aimedForward;
-    if (reversing && mode != null) {
-      context.read<AppTheme>().value = mode;
-      LocalStorage.themeMode.save(mode.index);
-    }
-    return reversing ? controller.reverse(from: 1) : controller.forward(from: 0);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return TapRegion(
-      onTapOutside: (_) => controller.aimedForward ? toggle() : null,
-      child: AnimatedBuilder(animation: controller, builder: builder),
-    );
-  }
+    final controller = useAnimationController(duration: Durations.short3);
+    final t = useAnimation(controller);
 
-  Widget builder(BuildContext context, _) {
+    Future<void> toggle([ThemeMode? mode]) async {
+      if (controller.isForwardOrCompleted && mode != null) {
+        context.read<AppTheme>().value = mode;
+        LocalStorage.themeMode.save(mode.index);
+      }
+      controller.toggle();
+    }
+
     final themeMode = context.watch<AppTheme>().value;
 
-    final t = controller.value;
-    final aimedForward = controller.aimedForward;
     const curve = Curves.ease;
-    final tCurve = aimedForward ? curve.transform(t) : 1 - curve.transform(1 - t);
+    final bool forwardOrComplete = controller.isForwardOrCompleted;
+    final tCurve = forwardOrComplete ? curve.transform(t) : 1 - curve.transform(1 - t);
 
-    final foregroundColor = widget.foregroundColor ?? IconTheme.of(context).color ?? Colors.white;
-    final fgOpacity = foregroundColor.opacity;
-    final splashColor = foregroundColor.withOpacity(fgOpacity / 4);
+    final Color foreground = foregroundColor ?? IconTheme.of(context).color ?? Colors.white;
+    final double fgOpacity = foreground.opacity;
+    final Color splashColor = foreground.withOpacity(fgOpacity / 4);
 
-    final width = 72 * tCurve;
-    final height = 80 * tCurve;
+    final double width = 72 * tCurve;
+    final double height = 80 * tCurve;
 
     Widget? themeButton(ThemeMode buttonMode) {
       final active = buttonMode == themeMode;
       if (t == 0 && !active) return null;
 
-      final iconfg = foregroundColor.withOpacity(fgOpacity * (active ? 1 : tCurve));
+      final iconfg = foreground.withOpacity(fgOpacity * (active ? 1 : tCurve));
 
       return Positioned.fill(
         key: ValueKey(buttonMode),
@@ -95,7 +74,7 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
                       softWrap: false,
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.fade,
-                      style: StyleText(weight: 600, color: foregroundColor),
+                      style: StyleText(weight: 600, color: foreground),
                     ),
                   ),
                 ),
@@ -108,18 +87,21 @@ class _ThemeModePickerState extends State<ThemeModePicker> with SingleTickerProv
 
     final stacked = [...ThemeMode.values.where((value) => value != themeMode), themeMode];
 
-    return SizedBox(
-      width: width + 48,
-      height: height + 48,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular((1 - tCurve) * 16 + 8),
-        child: ColoredBox(
-          color: widget.backgroundColor ?? Theme.of(context).canvasColor,
-          child: Stack(
-            children: [
-              for (final mode in stacked)
-                if (themeButton(mode) case final button?) button,
-            ],
+    return TapRegion(
+      onTapOutside: (_) => controller.isForwardOrCompleted ? toggle() : null,
+      child: SizedBox(
+        width: width + 48,
+        height: height + 48,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular((1 - tCurve) * 16 + 8),
+          child: ColoredBox(
+            color: backgroundColor ?? Theme.of(context).canvasColor,
+            child: Stack(
+              children: [
+                for (final mode in stacked)
+                  if (themeButton(mode) case final button?) button,
+              ],
+            ),
           ),
         ),
       ),
