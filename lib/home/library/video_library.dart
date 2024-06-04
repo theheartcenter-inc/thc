@@ -1,333 +1,68 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:thc/firebase/firebase.dart';
-import 'package:thc/home/library/play_video.dart';
-import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/style_text.dart';
-import 'package:thc/utils/theme.dart';
-import 'package:intl/intl.dart';
-import 'package:dio/dio.dart';
-import 'package:universal_html/html.dart' as html;
+import 'package:thc/home/library/src/all_videos.dart';
+import 'package:thc/home/library/src/video_card.dart';
+import 'package:thc/utils/bloc.dart';
 
-class FavoriteIconButton extends StatelessWidget {
-  const FavoriteIconButton({
-    super.key,
-    required this.isPinned,
-    required this.onFavoriteToggle,
-  });
-  final bool isPinned;
-  final VoidCallback onFavoriteToggle;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      icon: Icon(isPinned ? Icons.star : Icons.star_border),
-      color: isPinned ? Colors.orange : Colors.grey,
-      onPressed: onFavoriteToggle,
-    );
-  }
-}
-
-class VideoCard extends StatelessWidget {
-  const VideoCard({
-    super.key,
-    required this.title,
-    required this.timestamp,
-    required this.director,
-    required this.category,
-    required this.id,
-    required this.path,
-    this.thumbnail,
-    this.isPinned = false,
-    required this.onFavoriteToggle,
-  });
-
-  final String title;
-  final Timestamp timestamp;
-  final String director;
-  final String category;
-  final String id;
-  final String path;
-  final String? thumbnail;
-  final bool isPinned;
-  final VoidCallback onFavoriteToggle;
-
-  Future<String?> playVideo() async {
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
-      return 'not supported on Windows';
-    }
-
-    String? url;
-    try {
-      final storageReference = FirebaseStorage.instance.ref().child(path);
-      url = await storageReference.getDownloadURL();
-    } catch (e) {
-      return '${e.runtimeType} has occurred: $e';
-    }
-    navigator.push(PlayVideo(videoURL: url, videoName: title));
-    return null;
-  }
-
-  // Add a method to toggle the pinned status
-  Future<void> togglePinnedStatus() async {
-    final userDoc = FirebaseFirestore.instance.collection('users').doc('test_participant');
-    final streamDoc = userDoc.collection('streams').doc(id);
-
-    // Get the current pinned status
-    final docSnapshot = await streamDoc.get();
-    if (docSnapshot.exists) {
-      final currentPinnedStatus = docSnapshot.data()?['pinned'] ?? false;
-      // Update the pinned status to the opposite value
-      await streamDoc.update({'pinned': !currentPinnedStatus});
-    }
-  }
-
-  // Add a method to download the video
-  Future<void> downloadVideo() async {
-    try {
-      // Retrieve the download URL from Firebase Storage
-      final storageReference = FirebaseStorage.instance.ref().child(path);
-      final url = await storageReference.getDownloadURL();
-
-      if (kIsWeb) {
-        // Handle download for web environment
-        html.AnchorElement(href: url)
-          ..setAttribute('downloadVideo', title)
-          ..click();
-      } else {
-        // Handle download for non-web environment
-        final dio = Dio();
-        final savePath = './download_video/$title.mp4';
-
-        await dio.download(url, savePath, onReceiveProgress: (received, total) {});
-        navigator.showSnackBar(
-          SnackBar(content: Text('Download completed: $savePath')),
-        );
-      }
-    } on DioException catch (e) {
-      navigator.showSnackBar(
-        SnackBar(content: Text('Failed to download video: ${e.message}')),
-      );
-    } catch (e) {
-      navigator.showSnackBar(
-        SnackBar(content: Text('An error occurred: $e')),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final Image image;
-    if (thumbnail == null) {
-      image = Image.asset(
-        'assets/thc_thumbnail.jpg',
-        width: 100,
-        height: 100,
-      );
-    } else {
-      // Will likely change how we get thumbnails in the future
-      image = Image.network(thumbnail!);
-    }
-    final format = DateFormat('yyyy-MM-dd hh:mm a');
-    final DateTime date = DateTime.parse(timestamp.toDate().toString());
-    final formatedDate = format.format(date);
-
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      margin: const EdgeInsets.all(10),
-      color: Colors.white,
-      child: ListTile(
-        title: Text(
-          title,
-          style: const StyleText(weight: 650, color: Colors.black),
-        ),
-        subtitle: Text(
-          '$director • $formatedDate',
-          style: const StyleText(color: Colors.black),
-        ),
-        onTap: () async {
-          if (await playVideo() case final errorMessage?) {
-            navigator.showSnackBar(SnackBar(content: Text('$errorMessage :(')));
-          }
-        },
-        hoverColor: ThcColors.dullBlue.withOpacity(1 / 8),
-        leading: image,
-        // Add a trailing favorite icon button
-        // Add a download button
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Existing favorite icon button
-            FavoriteIconButton(
-              isPinned: isPinned,
-              onFavoriteToggle: onFavoriteToggle,
-            ),
-            // New download icon button
-            IconButton(
-              icon: const Icon(Icons.download),
-              onPressed: downloadVideo,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class VideoLibrary extends StatefulWidget {
+class VideoLibrary extends HookWidget {
   const VideoLibrary({super.key});
 
   @override
-  State<VideoLibrary> createState() => _VideoLibraryState();
-}
-
-class _VideoLibraryState extends State<VideoLibrary> {
-  final TextEditingController controller = TextEditingController();
-  String selectedCategory = 'All';
-  List<VideoCard> allVideos = [];
-  List<VideoCard> videos = [];
-  Set<String> ids = {};
-
-  @override
-  void initState() {
-    super.initState();
-    fetchDocuments();
-  }
-
-  Future<void> fetchDocuments() async {
-    final QuerySnapshot snapshot = await Firestore.streams.get();
-    final userStreamData = await user.streamData.get();
-    final pinnedIds = {
-      for (final doc in userStreamData.docs)
-        if (doc.data()['pinned']) doc.id,
-    };
-    setState(() {
-      videos = allVideos = [
-        for (final document in snapshot.docs)
-          VideoCard(
-            id: document.id,
-            title: document['title'],
-            category: document['category'],
-            director: document['director'],
-            path: document['storage_path'],
-            timestamp: document['date'],
-            isPinned: pinnedIds.contains(document.id),
-            onFavoriteToggle: () => toggleFavorite(document.id),
-          ),
-      ];
-    });
-  }
-
-  void toggleFavorite(String videoId) async {
-    final docRef = user.streamData.doc(videoId);
-    final data = await docRef.getData();
-    final bool isCurrentlyPinned = data?['pinned'] ?? false;
-
-    await docRef.update({'pinned': !isCurrentlyPinned});
-    fetchDocuments(); // Refresh the list after updating
-  }
-
-  List<String> get categories {
-    final categories = {
-      'All',
-      'Pinned',
-      for (final video in allVideos) video.category,
-    };
-    return categories.toList()..sort();
-  }
-
-  void searchVideo(String query) {
-    filterVideos();
-    setState(() {
-      if (query.isNotEmpty) {
-        videos = videos.where((video) {
-          if (ids.contains(video.id)) return false;
-
-          final videoTitle = video.title.toLowerCase();
-          final input = query.toLowerCase();
-          ids.add(video.id);
-          return videoTitle.contains(input);
-        }).toList();
-      }
-      ids = {};
-    });
-  }
-
-  void filterVideos() {
-    setState(() {
-      videos = switch (selectedCategory) {
-        'All' => allVideos,
-        'Pinned' => videos = allVideos.where((video) => video.isPinned).toList(),
-        _ => allVideos.where((video) => video.category == selectedCategory).toList(),
-      };
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (allVideos.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    final category = useState('All');
+    final search = useState('');
 
-    const Widget blankCard = Card(
-      clipBehavior: Clip.antiAlias,
-      margin: EdgeInsets.all(10),
-      color: Colors.white,
-      child: ListTile(
-        title: ColoredBox(
-          color: Color(0xffbbbbbb),
-          child: SizedBox(width: 100, height: 20),
-        ),
-        subtitle: ColoredBox(
-          color: Color(0xffeeeeee),
-          child: SizedBox(width: 150, height: 20),
-        ),
-        leading: ColoredBox(
-          color: Color(0xffbbbbbb),
-          child: SizedBox(width: 100, height: 100),
-        ),
-      ),
-    );
+    final (:videos, :categories) = ThcVideos.of(context, category.value, search.value);
 
-    return Column(
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-          child: TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.search),
-              hintText: 'Search here',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-            onChanged: searchVideo,
-          ),
-        ),
-        DropdownButton<String>(
-          value: selectedCategory,
-          onChanged: (newValue) {
-            setState(() {
-              selectedCategory = newValue!;
-              filterVideos();
-            });
-          },
-          items: [
-            for (final category in categories)
-              DropdownMenuItem<String>(value: category, child: Text(category)),
-          ],
-        ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: videos.length,
-            itemBuilder: (context, index) => videos[index],
-            prototypeItem: blankCard,
-          ),
-        ),
+    if (videos == null) return const Center(child: CircularProgressIndicator());
+
+    const decoration = InputDecoration(prefixIcon: Icon(Icons.search), hintText: 'Search');
+    final dropdownButton = DropdownButton<String>(
+      focusColor: Colors.transparent,
+      value: category.value,
+      onChanged: category.update,
+      underline: const SizedBox.shrink(),
+      padding: const EdgeInsets.only(left: 8, right: 4),
+      items: [
+        for (final String category in categories)
+          DropdownMenuItem(value: category, child: Text(category)),
       ],
+    );
+    final searchBox = LayoutBuilder(builder: (context, constraints) {
+      if (constraints.maxWidth > 600) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: TextField(
+            decoration: decoration.copyWith(suffixIcon: dropdownButton),
+            onChanged: (text) => search.value = text.toLowerCase(),
+          ),
+        );
+      }
+
+      return Column(
+        children: [
+          TextField(
+            decoration: decoration,
+            onChanged: (text) => search.value = text.toLowerCase(),
+          ),
+          dropdownButton,
+        ],
+      );
+    });
+
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: <Widget>[
+          searchBox,
+          Expanded(
+            child: ListView.builder(
+              itemCount: videos.length,
+              itemBuilder: (context, index) => videos[index],
+              prototypeItem: VideoCard.blank,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

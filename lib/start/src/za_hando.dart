@@ -14,8 +14,7 @@ import 'package:thc/home/profile/choose_any_view/choose_any_view.dart';
 import 'package:thc/start/src/login_fields.dart';
 import 'package:thc/start/src/login_progress.dart';
 import 'package:thc/start/src/sun_flower.dart';
-import 'package:thc/utils/num_powers.dart';
-import 'package:thc/utils/style_text.dart';
+import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/theme.dart';
 import 'package:thc/utils/widgets/theme_mode_picker.dart';
 
@@ -44,8 +43,7 @@ class ZaHando extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final LoginProgress(:animation) = LoginProgressTracker.of(context);
-    final pressedStart = animation >= AnimationProgress.pressStart;
+    final pressedStart = LoginProgressTracker.pressedStart(context);
 
     Widget contents = TweenAnimationBuilder(
       key: ValueKey(pressedStart),
@@ -70,7 +68,7 @@ class ZaHando extends StatelessWidget {
   Widget sunrise(BuildContext context, double t, Widget? child) {
     final backgroundGradient = t < 2 / 3;
 
-    final colors = ThcColors.of(context);
+    final ColorScheme colors = ThcColors.of(context);
     final (tSaturation, tValue) = switch (colors.brightness) {
       Brightness.light => (1 - t * 0.75, t * 0.8),
       Brightness.dark => (1 - t * 2 / 3, t * 0.75),
@@ -88,6 +86,7 @@ class ZaHando extends StatelessWidget {
 
     final tContainer = math.max(3 * (t - 1) + 1, 0.0);
     final tSunflower = Curves.easeInOut.transform(math.max(8 / 3 * (t - 1) + 1, 0.0));
+    final tHorizon = (3 * t - 1).clamp(0.0, 1.0).squared;
 
     final tScale = Curves.easeOutExpo.transform(tContainer);
     final scale = 20 * (1 - tScale) + 1.0;
@@ -117,7 +116,7 @@ class ZaHando extends StatelessWidget {
                   fit: StackFit.expand,
                   children: [
                     Sunflower(
-                      bulge: tSunflower,
+                      bloom: tSunflower,
                       centerColor: Color.lerp(sunCenter.toColor(), Sunflower.center, tSunflower)!,
                       outerColor: Color.lerp(sunOuter.toColor(), Sunflower.outer, tSunflower)!,
                     ),
@@ -150,6 +149,7 @@ class ZaHando extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ConstrainedBox(
+              key: const Key('za hando'),
               constraints: BoxConstraints(maxHeight: constraints.maxHeight - 275),
               child: Padding(
                 padding: const EdgeInsets.all(handPadding).copyWith(top: 0),
@@ -174,22 +174,19 @@ class ZaHando extends StatelessWidget {
                 ),
               ),
             ),
-            Horizon(
-              t: (3 * t - 1).clamp(0.0, 1.0).squared,
-              brightness: colors.brightness,
-            ).widget,
-            _FadeIn(t, child: child!),
+            if (tHorizon < 1) Horizon(t: tHorizon, brightness: colors.brightness),
+            _FadeIn(key: const Key('bottom stuff'), t, child: child!),
           ],
         ),
       ),
     );
     if (!backgroundGradient) return _TopButtons(t: t, child: zaHando);
 
-    final tHorizon = (t * 2 - 1 / 3).clamp(0.0, 1.0);
-    late final handHorizon = HSVColor.lerp(
-      HSVColor.fromAHSV(1.0, 0, 1 - tHorizon * 0.75, tHorizon * 0.8),
+    final tBottomColor = (t * 2 - 1 / 3).clamp(0.0, 1.0);
+    late final HSVColor bottomColor = HSVColor.lerp(
+      HSVColor.fromAHSV(1.0, 0, 1 - tBottomColor * 0.75, tBottomColor * 0.8),
       handHSV,
-      tHorizon,
+      tBottomColor,
     )!;
 
     final BoxDecoration decoration = kIsWeb
@@ -198,7 +195,7 @@ class ZaHando extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [handColor, handHorizon.toColor()],
+              colors: [handColor, bottomColor.toColor()],
               stops: const [0, 0.75],
             ),
           );
@@ -231,7 +228,7 @@ class ZaHando extends StatelessWidget {
     final flowerHeight = Sunflower.size * (1 - tMotion);
     final flowerOpacity = 1 - tHand;
 
-    final colors = ThcColors.of(context);
+    final ColorScheme colors = ThcColors.of(context);
     final handColor = colors.primary.withOpacity(1 - t2);
 
     final targetColor = colors.onSurfaceVariant;
@@ -337,7 +334,7 @@ class ZaHando extends StatelessWidget {
 }
 
 class _FadeIn extends StatelessWidget {
-  const _FadeIn(this.t, {required this.child});
+  const _FadeIn(this.t, {super.key, required this.child});
 
   final double t;
   final Widget child;
@@ -367,7 +364,7 @@ class _TopButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = ThcColors.of(context);
+    final ColorScheme colors = ThcColors.of(context);
 
     final row = Row(
       mainAxisSize: MainAxisSize.min,

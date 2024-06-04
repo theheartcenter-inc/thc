@@ -54,7 +54,7 @@ extension GetData on DocumentReference<Json> {
     }
     if (result == null) return null;
     assert(result.exists, "$path doesn't exist");
-    final data = result.data();
+    final Json? data = result.data();
     backendPrint('data: $data');
     return data;
   }
@@ -75,7 +75,7 @@ enum ThcSurvey with CollectionName {
       _doc.collection('responses').add(answerJson);
 
   Future<void> yeetResponses() async {
-    final responseDocs = await _doc.collection('responses').get();
+    final QuerySnapshot<Json> responseDocs = await _doc.collection('responses').get();
     await Future.wait([
       for (final item in responseDocs.docs) item.reference.delete(),
     ]);
@@ -83,7 +83,7 @@ enum ThcSurvey with CollectionName {
 
   /// The number of questions in the survey.
   Future<int> getLength() async {
-    final json = (await _doc.getData())!;
+    final Json json = (await _doc.getData())!;
     return json['question count'];
   }
 
@@ -91,18 +91,18 @@ enum ThcSurvey with CollectionName {
     if (kDebugMode && !(await _doc.get()).exists) {
       const message = 'tried to set the length for a non-existent survey';
       assert(false, message);
-      await navigator.showSnackBar(const SnackBar(content: Text(message)));
+      await navigator.snackbarMessage(message);
       return _doc.set({'question count': length});
     }
     return _doc.update({'question count': length});
   }
 
   Future<List<SurveyQuestion>> getQuestions() async {
-    final length = await getLength();
+    final int length = await getLength();
 
     Future<SurveyQuestion> getQuestion(int i) async {
-      final json = await doc(i).getData();
-      return SurveyQuestion.fromJson(json!);
+      final Json json = (await doc(i).getData())!;
+      return SurveyQuestion.fromJson(json);
     }
 
     return Future.wait<SurveyQuestion>([for (int i = 0; i < length; i++) getQuestion(i)]);

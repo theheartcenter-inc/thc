@@ -8,7 +8,7 @@ import 'package:thc/utils/local_storage.dart';
 /// [Private Credentials wiki page](https://github.com/theheartcenter-one/thc/wiki/Private-Credentials)
 /// for a solution.
 Future<void> initFirebase() async {
-  final options = switch (defaultTargetPlatform) {
+  final FirebaseOptions options = switch (defaultTargetPlatform) {
     TargetPlatform() when kIsWeb => FirebaseCredentials.web,
     TargetPlatform.android => FirebaseCredentials.android,
     TargetPlatform.iOS => FirebaseCredentials.ios,
@@ -44,10 +44,8 @@ void loadUser() {
 
   ThcUser.instance = ThcUser(name: name, type: type, id: id, email: email);
 
-  if (id == null) return;
-
   try {
-    ThcUser.download(id).then((user) => ThcUser.instance = user);
+    ThcUser.download().then((user) => ThcUser.instance = user);
   } catch (e) {
     assert(false, e.toString());
   }
