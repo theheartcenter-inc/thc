@@ -3,14 +3,10 @@
 import 'dart:math' as math;
 
 import 'package:email_validator/email_validator.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/firebase/firebase_auth.dart' as auth;
 import 'package:thc/start/src/bottom_stuff.dart';
 import 'package:thc/start/src/login_fields.dart';
-import 'package:thc/utils/bloc.dart';
-import 'package:thc/utils/local_storage.dart';
+import 'package:thc/the_good_stuff.dart';
 
 /// {@template LoginLabels}
 /// Stores [LoginField] hint text & [BottomStuff] labels,

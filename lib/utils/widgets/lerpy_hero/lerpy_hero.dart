@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:thc/the_good_stuff.dart';
 import 'package:thc/utils/widgets/lerpy_hero/data_widget.dart';
 
 /// The [T] type can be as simple as a [Color] (using [Color.lerp]),

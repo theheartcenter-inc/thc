@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:thc/main.dart';
 import 'package:thc/start/src/login_progress.dart';
+import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/widgets/lerpy_hero/lerpy_hero.dart';
 
@@ -46,6 +47,11 @@ Nav get navigator => Nav(navKey.currentState!);
 /// ```
 /// {@endtemplate}
 extension type Nav(NavigatorState currentState) {
+  /// This is the context of the app's [Navigator] widget.
+  ///
+  /// We can use it to access the app-wide [Bloc]s!
+  BuildContext get context => currentState.context;
+
   /// Adds a new screen to the route.
   ///
   /// {@macro navigator_example}

@@ -1,11 +1,8 @@
 // ignore_for_file: avoid_renaming_method_parameters, type_annotate_public_apis
 
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 
 /// {@template SurveyField}
 /// A widget that displays a survey question.
@@ -167,7 +164,7 @@ class _QuestionText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colors = ThcColors.of(context);
-    final style = StyleText(
+    final style = TextStyle(
       size: 16,
       weight: 500,
       shadows: [
@@ -183,7 +180,7 @@ class _QuestionText extends StatelessWidget {
             if (!question.optional)
               Transform.translate(
                 offset: const Offset(-11, -3),
-                child: Text('*', style: StyleText(size: 20, color: colors.error)),
+                child: Text('*', style: TextStyle(size: 20, color: colors.error)),
               ),
             Text(question.description, style: style),
           ],

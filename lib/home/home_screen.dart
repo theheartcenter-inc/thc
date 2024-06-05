@@ -1,21 +1,13 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
-import 'package:thc/firebase/firebase.dart';
-import 'package:thc/home/library/src/all_videos.dart';
 import 'package:thc/home/library/video_library.dart';
-import 'package:thc/home/profile/account/account_field.dart';
 import 'package:thc/home/profile/profile.dart';
 import 'package:thc/home/schedule/schedule.dart';
-import 'package:thc/home/schedule/src/all_scheduled_streams.dart';
 import 'package:thc/home/stream/create_livestream.dart';
 import 'package:thc/home/surveys/manage_surveys/manage_surveys.dart';
 import 'package:thc/home/users/manage_users.dart';
-import 'package:thc/home/users/src/all_users.dart';
 import 'package:thc/home/watch_live/watch_live.dart';
-import 'package:thc/utils/bloc.dart';
-import 'package:thc/utils/local_storage.dart';
-import 'package:thc/utils/widgets/enum_widget.dart';
+import 'package:thc/the_good_stuff.dart';
 
 enum NavBarButton with EnumStatelessWidgetMixin {
   /// A place for admins to manage other users.
@@ -130,18 +122,9 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        BlocProvider(create: (_) => ThcUsers(), lazy: !user.isAdmin),
-        BlocProvider(create: (_) => ScheduledStreams(), lazy: false),
-        BlocProvider(create: (_) => ThcVideos(), lazy: user.canLivestream),
-        BlocProvider(create: (_) => UserPins(), lazy: user.canLivestream),
-        BlocProvider(create: (_) => AccountFields()),
-      ],
-      child: Scaffold(
-        body: SafeArea(bottom: false, child: NavBarSelection.of(context).screen),
-        bottomNavigationBar: const NavBar(),
-      ),
+    return Scaffold(
+      body: SafeArea(bottom: false, child: NavBarSelection.of(context).screen),
+      bottomNavigationBar: const NavBar(),
     );
   }
 }

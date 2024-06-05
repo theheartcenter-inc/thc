@@ -1,13 +1,10 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
 import 'package:thc/agora/livestream_button.dart';
 import 'package:thc/agora/livestream_overlay.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
-import 'package:thc/utils/bloc.dart';
-import 'package:thc/utils/navigator.dart';
+import 'package:thc/the_good_stuff.dart';
 
 /// {@template ActiveStream}
 /// A black screen with cool button animations.
@@ -143,7 +140,7 @@ class _EndButton extends StatelessWidget {
       onPressed: onPressed,
       onHover: context.read<OverlayBloc>().hover,
       style: style,
-      child: const Text('End', style: TextStyle(fontSize: 18)),
+      child: const Text('End', style: TextStyle(size: 18)),
     );
   }
 }

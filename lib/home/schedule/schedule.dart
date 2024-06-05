@@ -1,28 +1,27 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/schedule/src/all_scheduled_streams.dart';
 import 'package:thc/home/schedule/src/schedule_editor.dart';
-import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 
 class ScheduledStreamCard extends StatelessWidget {
   const ScheduledStreamCard({
-    required Key super.key,
+    required FirestoreID id,
     required this.title,
     required this.timestamp,
     required this.active,
     required this.director,
-  });
+  }) : super(key: id);
 
-  ScheduledStreamCard.fromJson(Json json, {required Key super.key})
-      : title = json['title'],
-        timestamp = json['date'],
-        active = json['active'],
-        director = json['director'];
+  ScheduledStreamCard.fromJson(Json json, FirestoreID id)
+      : this(
+          id: id,
+          title: json['title'] ?? '[title not found]',
+          timestamp: json['timestamp'] ?? Timestamp.now(),
+          active: json['active'] ?? false,
+          director: json['director'] ?? '[director not found]',
+        );
 
   final String title;
   final Timestamp timestamp;
@@ -46,11 +45,11 @@ class ScheduledStreamCard extends StatelessWidget {
           leading: const FlutterLogo(size: 56.0),
           title: Text(
             title,
-            style: const StyleText(color: Colors.black),
+            style: const TextStyle(color: Colors.black),
           ),
           subtitle: Text(
             date,
-            style: const StyleText(color: Colors.black),
+            style: const TextStyle(color: Colors.black),
           ),
         ),
       );
@@ -62,11 +61,11 @@ class ScheduledStreamCard extends StatelessWidget {
           leading: const FlutterLogo(size: 56.0),
           title: Text(
             title,
-            style: const StyleText(color: Colors.black),
+            style: const TextStyle(color: Colors.black),
           ),
           subtitle: Text(
             date,
-            style: const StyleText(color: Colors.black),
+            style: const TextStyle(color: Colors.black),
           ),
         ),
       );
@@ -96,10 +95,10 @@ class Schedule extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
             child: Text(
               'Active Livestream',
-              style: StyleText(
+              style: TextStyle(
                 size: 24.0,
                 color: colors.inverseSurface,
-                weight: FontWeight.bold,
+                weight: 700,
               ),
             ),
           ),
@@ -109,10 +108,10 @@ class Schedule extends StatelessWidget {
             padding: const EdgeInsets.all(16.0),
             child: Text(
               'Upcoming Livestreams',
-              style: StyleText(
+              style: TextStyle(
                 size: 24.0,
                 color: colors.inverseSurface,
-                weight: FontWeight.bold,
+                weight: 700,
               ),
             ),
           ),

@@ -1,14 +1,7 @@
-import 'dart:async';
 import 'dart:isolate';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
-import 'package:thc/firebase/firebase.dart';
-import 'package:thc/utils/app_config.dart';
-import 'package:thc/utils/bloc.dart';
-
-export 'dart:isolate';
+import 'package:thc/the_good_stuff.dart';
 
 typedef SnapshotDoc = DocumentSnapshot<Json>;
 typedef SnapshotDocs = List<SnapshotDoc>;
@@ -52,12 +45,12 @@ abstract class FirebaseBloc<T> extends Bloc {
 }
 
 extension KeyValue on Widget {
-  String get keyVal => switch (key) {
-        final ValueKey<String> stringKey => stringKey.value,
-        _ => throw Exception('Key is "${key.runtimeType}" should be of type "ValueKey<String>"'),
+  String get firestoreId => switch (key) {
+        final FirestoreID id => id.value,
+        _ => throw Exception('The key (${key.runtimeType}) should be a $FirestoreID'),
       };
 }
 
 extension DocMatcher on DocumentSnapshot<Json> {
-  bool match(Widget widget) => widget.keyVal == id;
+  bool match(Widget widget) => widget.firestoreId == id;
 }

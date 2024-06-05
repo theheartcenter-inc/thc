@@ -2,10 +2,10 @@ import 'dart:async' show Timer;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:provider/provider.dart' show ChangeNotifierProvider;
+import 'package:provider/provider.dart';
+import 'package:thc/main.dart';
 
 export 'package:provider/provider.dart' hide Dispose, ChangeNotifierProvider;
-export 'package:flutter_hooks/flutter_hooks.dart';
 
 typedef Bloc = ChangeNotifier;
 typedef Cubit<T> = ValueNotifier<T>;
@@ -25,6 +25,24 @@ extension UpdateCubit<T> on Cubit<T> {
 
 extension UpdateRef<T> on ObjectRef<T> {
   void update(T? newValue) => value = newValue as T;
+}
+
+/// {@template Editing}
+/// By passing this into the [MultiProvider] in [App.build],
+/// any widget can see whether we're in "editing mode" by calling [Editing.of].
+/// {@endtemplate}
+class Editing extends Cubit<bool> {
+  /// {@macro Editing}
+  Editing([super.initialValue = false]);
+
+  /// {@macro Editing}
+  static bool of(BuildContext context) => context.watch<Editing>().value;
+}
+
+class Loading extends Cubit<bool> {
+  Loading() : super(false);
+
+  static bool of(BuildContext context) => context.watch<Loading>().value;
 }
 
 extension ToggleController on Animation {

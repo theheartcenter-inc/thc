@@ -1,9 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/main.dart';
-import 'package:thc/utils/local_storage.dart';
-import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 
 class ChooseAnyView extends StatelessWidget {
   const ChooseAnyView({super.key});
@@ -83,7 +79,7 @@ class UserButton extends StatelessWidget {
             const SizedBox(width: 25, height: 50),
             Text(
               userType?.toString() ?? 'logged out',
-              style: const StyleText(size: 18),
+              style: const TextStyle(size: 18),
             ),
           ],
         ),

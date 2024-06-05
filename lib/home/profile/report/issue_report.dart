@@ -1,7 +1,5 @@
 import 'package:email_validator/email_validator.dart';
-import 'package:flutter/material.dart';
-import 'package:thc/utils/bloc.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 
 class IssueReport extends HookWidget {
   const IssueReport({super.key});
@@ -62,7 +60,7 @@ class IssueReport extends HookWidget {
                 onPressed: () {
                   if (formKey.validate()) formKey.save();
                 },
-                child: const Text('Submit', style: StyleText(weight: 520)),
+                child: const Text('Submit', style: TextStyle(weight: 520)),
               ),
             ],
           ),

@@ -1,13 +1,9 @@
-import 'package:flutter/material.dart';
 import 'package:thc/agora/livestream_button.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey_field.dart';
 import 'package:thc/home/surveys/take_survey/survey_theme.dart';
-import 'package:thc/utils/bloc.dart';
-import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 
 /// {@template SurveyScreen}
 /// Displays survey questions for the user to answer.
@@ -125,11 +121,11 @@ class Submitted extends StatelessWidget {
           children: [
             TextSpan(
               text: 'Thank you!\n',
-              style: StyleText(size: 56, letterSpacing: 0.5),
+              style: TextStyle(size: 56, letterSpacing: 0.5),
             ),
             TextSpan(
               text: 'your response has been recorded.\n',
-              style: StyleText(size: 16, weight: FontWeight.w600),
+              style: TextStyle(size: 16, weight: 600),
             ),
           ],
         ),
@@ -154,13 +150,13 @@ class Submitted extends StatelessWidget {
                   for (final (question, answer) in summary) ...[
                     Text(
                       question,
-                      style: const StyleText(size: 16, weight: 600),
+                      style: const TextStyle(size: 16, weight: 600),
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 5, 0, 50),
                       child: Text(
                         answer ?? '(no answer)',
-                        style: answer == null ? StyleText(color: translucent) : null,
+                        style: answer == null ? TextStyle(color: translucent) : null,
                       ),
                     ),
                   ],

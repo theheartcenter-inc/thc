@@ -1,8 +1,6 @@
-import 'package:flutter/widgets.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/firebase/firebase_bloc.dart';
 import 'package:thc/home/schedule/schedule.dart';
-import 'package:thc/utils/bloc.dart';
+import 'package:thc/the_good_stuff.dart';
 
 typedef StreamSchedule = List<ScheduledStreamCard>;
 
@@ -11,7 +9,7 @@ class ScheduledStreams extends FirebaseBloc<StreamSchedule> {
 
   static _onData(StreamSchedule current, SnapshotDoc doc) {
     if (doc.data() case final json?) {
-      final newScheduled = ScheduledStreamCard.fromJson(json, key: Key(doc.id));
+      final newScheduled = ScheduledStreamCard.fromJson(json, FirestoreID(doc.id));
       final int index = current.indexWhere(doc.match);
       if (index == -1) {
         current.add(newScheduled);

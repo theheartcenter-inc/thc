@@ -1,9 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
-import 'package:thc/utils/app_config.dart';
-import 'package:thc/utils/navigator.dart';
+import 'package:thc/the_good_stuff.dart';
 
 typedef Json = Map<String, dynamic>;
 
@@ -107,4 +104,12 @@ enum ThcSurvey with CollectionName {
 
     return Future.wait<SurveyQuestion>([for (int i = 0; i < length; i++) getQuestion(i)]);
   }
+}
+
+class FirestoreID extends ValueKey<String> {
+  const FirestoreID(super.id);
+
+  FirestoreID.doc(DocumentReference doc) : this(doc.id);
+
+  FirestoreID.create(Firestore collection) : this.doc(collection.doc());
 }

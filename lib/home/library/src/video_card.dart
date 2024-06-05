@@ -1,15 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:thc/firebase/firebase.dart';
+import 'package:intl/intl.dart';
 import 'package:thc/firebase/firebase_bloc.dart';
 import 'package:thc/home/library/src/all_videos.dart';
 import 'package:thc/home/library/src/play_video.dart';
-import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/theme.dart';
-import 'package:intl/intl.dart';
-import 'package:dio/dio.dart';
+import 'package:thc/the_good_stuff.dart';
 import 'package:universal_html/html.dart' as html;
 
 /// {@template VideoCard}
@@ -20,22 +16,25 @@ import 'package:universal_html/html.dart' as html;
 class VideoCard extends StatelessWidget {
   /// {@macro VideoCard}
   const VideoCard({
-    required Key super.key,
+    required FirestoreID id,
     required this.title,
     required this.timestamp,
     required this.director,
     required this.category,
     required this.path,
     this.thumbnail,
-  });
+  }) : super(key: id);
 
-  VideoCard.fromJson(Json json, {required Key super.key})
-      : title = json['title'],
-        category = json['category'],
-        director = json['director'],
-        path = json['storage_path'],
-        timestamp = json['date'],
-        thumbnail = null; // = json['thumbnail'];
+  VideoCard.fromJson(Json json, FirestoreID id)
+      : this(
+          id: id,
+          title: json['title'] ?? '[title not found]',
+          category: json['category'] ?? '[category not found]',
+          director: json['director'] ?? '[director not found]',
+          path: json['storage_path'] ?? '[path not found]',
+          timestamp: json['date'] ?? Timestamp.now(),
+          // thumbnail: json['thumbnail'],
+        );
 
   final String title;
   final Timestamp timestamp;
@@ -44,11 +43,20 @@ class VideoCard extends StatelessWidget {
   final String path;
   final String? thumbnail;
 
-  static const margin = EdgeInsets.symmetric(vertical: 8.0);
+  Json get json => {
+        'title': title,
+        'date': timestamp,
+        'director': director,
+        'category': category,
+        'storage_path': path,
+        'thumbnail': thumbnail,
+      };
+
+  static const _margin = EdgeInsets.symmetric(vertical: 8.0);
 
   static const blank = Card(
     clipBehavior: Clip.antiAlias,
-    margin: margin,
+    margin: _margin,
     color: Colors.white,
     child: ListTile(
       title: ColoredBox(
@@ -68,22 +76,28 @@ class VideoCard extends StatelessWidget {
 
   Future<String> getDownloadURL() => FirebaseStorage.instance.ref().child(path).getDownloadURL();
 
-  Future<String?> playVideo() async {
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
-      return 'not supported on Windows';
+  Future<void> play() async {
+    Future<String?> openVideoPlayer() async {
+      if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
+        return 'not supported on Windows';
+      }
+
+      String? url;
+      try {
+        url = await getDownloadURL();
+      } catch (e) {
+        return '${e.runtimeType} has occurred: $e';
+      }
+      navigator.push(PlayVideo(videoURL: url, videoName: title));
+      return null;
     }
 
-    String? url;
-    try {
-      url = await getDownloadURL();
-    } catch (e) {
-      return '${e.runtimeType} has occurred: $e';
+    if (await openVideoPlayer() case final errorMessage?) {
+      navigator.snackbarMessage('$errorMessage :(');
     }
-    navigator.push(PlayVideo(videoURL: url, videoName: title));
-    return null;
   }
 
-  Future<void> downloadVideo() async {
+  Future<void> download() async {
     try {
       final String url = await getDownloadURL();
 
@@ -105,8 +119,19 @@ class VideoCard extends StatelessWidget {
     }
   }
 
+  Future<void> delete() async {
+    final loading = navKey.currentContext!.read<Loading>();
+    if (loading.value) return;
+
+    loading.value = true;
+    await Future.delayed(const Duration(seconds: 2));
+    loading.value = false;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colors = ThcColors.of(context);
+    final bool loading = Loading.of(context);
     final Image image;
     if (thumbnail == null) {
       image = Image.asset(
@@ -121,29 +146,34 @@ class VideoCard extends StatelessWidget {
 
     return Card(
       clipBehavior: Clip.antiAlias,
-      margin: margin,
-      color: Colors.white,
+      margin: _margin,
+      color: colors.surfaceContainerLowest.withOpacity(loading ? 2 / 3 : 1),
+      shadowColor: loading ? Colors.transparent : null,
       child: ListTile(
         title: Text(
           title,
-          style: const StyleText(weight: 650, color: Colors.black),
+          style: const TextStyle(weight: 650, color: Colors.black),
         ),
         subtitle: Text(
           '$director • $date',
-          style: const StyleText(color: Colors.black),
+          style: const TextStyle(color: Colors.black),
         ),
-        onTap: () async {
-          if (await playVideo() case final errorMessage?) {
-            navigator.snackbarMessage('$errorMessage :(');
-          }
-        },
-        hoverColor: ThcColors.dullBlue.withOpacity(1 / 8),
+        onTap: loading ? null : play,
+        hoverColor: ThcColors.dullBlue.withOpacity(1 / 16),
         leading: image,
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            FavoriteIconButton(streamId: keyVal),
-            IconButton(icon: const Icon(Icons.download), onPressed: downloadVideo),
+            if (Editing.of(context))
+              IconButton(
+                style: IconButton.styleFrom(foregroundColor: colors.error),
+                icon: const Icon(Icons.delete),
+                onPressed: loading ? null : delete,
+              )
+            else ...[
+              FavoriteIconButton(streamId: firestoreId),
+              IconButton(icon: const Icon(Icons.download), onPressed: download),
+            ]
           ],
         ),
       ),

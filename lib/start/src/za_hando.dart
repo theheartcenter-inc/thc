@@ -7,15 +7,12 @@ library;
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:thc/home/profile/choose_any_view/choose_any_view.dart';
 import 'package:thc/start/src/login_fields.dart';
 import 'package:thc/start/src/login_progress.dart';
 import 'package:thc/start/src/sun_flower.dart';
-import 'package:thc/utils/bloc.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 import 'package:thc/utils/widgets/theme_mode_picker.dart';
 
 /// runs when the user presses "start".
@@ -93,15 +90,15 @@ class ZaHando extends StatelessWidget {
 
     final heartText = Text(
       'HEART',
-      style: StyleText(color: colors.primaryContainer, weight: 640),
+      style: TextStyle(color: colors.primaryContainer, weight: 640),
     );
     const centerText = Text(
       'CENTER',
-      style: StyleText(color: Sunflower.overlayText),
+      style: TextStyle(color: Sunflower.overlayText, weight: 720),
     );
 
     final innerHand = DefaultTextStyle(
-      style: const StyleText(size: 48, weight: 720),
+      style: const TextStyle(size: 48, weight: 720),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -234,20 +231,21 @@ class ZaHando extends StatelessWidget {
     final targetColor = colors.onSurfaceVariant;
     final heartText = Text(
       'HEART',
-      style: StyleText(
+      style: TextStyle(
         color: Color.lerp(ThcColors.dullGreen38, targetColor, t),
         weight: 640 + 80 * t2,
       ),
     );
     final centerText = Text(
       'CENTER',
-      style: StyleText(
+      style: TextStyle(
         color: Color.lerp(Sunflower.overlayText, targetColor, t),
+        weight: 720,
       ),
     );
 
     final innerHand = DefaultTextStyle(
-      style: StyleText(size: fontSize, weight: 720),
+      style: TextStyle(size: fontSize, weight: 720),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

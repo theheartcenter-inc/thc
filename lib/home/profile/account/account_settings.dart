@@ -1,12 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/profile/account/account_field.dart';
 import 'package:thc/home/profile/account/change_password.dart';
 import 'package:thc/home/profile/account/close_account.dart';
 import 'package:thc/home/profile/profile.dart';
-import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 
 class AccountSettings extends StatefulWidget {
   const AccountSettings({super.key});
@@ -33,7 +29,7 @@ class _AccountSettingsState extends State<AccountSettings> {
                 setState(AccountField.reset);
               }
             : null,
-        child: const Text('save changes', style: StyleText(weight: 520)),
+        child: const Text('save changes', style: TextStyle(weight: 520)),
       ),
     );
 
@@ -53,20 +49,19 @@ class _AccountSettingsState extends State<AccountSettings> {
             2 => ListTile(
                 leading: const Icon(Icons.logout),
                 title: const Text('sign out'),
-                onTap: () => navigator.showDialog(
-                  AlertDialog.adaptive(
-                    title: const Text('sign out'),
-                    content: const Text(
-                      'Are you sure you want to sign out?\n'
-                      "You'll need to enter your email & password to sign back in.",
+                onTap: () async {
+                  final signOut = await navigator.showDialog(
+                    const Dialog.confirm(
+                      titleText: 'sign out',
+                      bodyText: 'Are you sure you want to sign out?\n'
+                          "You'll need to enter your email & password to sign back in.",
+                      actionText: ('back', 'sign out'),
+                      actionsAlignment: MainAxisAlignment.spaceEvenly,
                     ),
-                    actions: [
-                      ElevatedButton(onPressed: navigator.pop, child: const Text('back')),
-                      ElevatedButton(onPressed: navigator.logout, child: const Text('sign out')),
-                    ],
-                    actionsAlignment: MainAxisAlignment.spaceEvenly,
-                  ),
-                ),
+                  );
+
+                  if (signOut) navigator.logout();
+                },
               ),
             _ => ListTile(
                 leading: const Icon(Icons.person_off_outlined),

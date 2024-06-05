@@ -1,5 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 
 class FunPlaceholder extends StatelessWidget {
   const FunPlaceholder(this.label, {this.color = ThcColors.green, super.key});
@@ -10,9 +9,9 @@ class FunPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colors = ThcColors.of(context);
-    final style = StyleText.mono(
+    final style = TextStyle.mono(
       size: 32,
-      weight: FontWeight.bold,
+      weight: 700,
       color: color,
       shadows: [Shadow(color: colors.surface.withOpacity(0.5), blurRadius: 2)],
     );

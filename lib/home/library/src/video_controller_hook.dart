@@ -1,6 +1,5 @@
 import 'package:appinio_video_player/appinio_video_player.dart';
-import 'package:flutter/widgets.dart';
-import 'package:thc/utils/bloc.dart';
+import 'package:thc/the_good_stuff.dart';
 
 export 'package:appinio_video_player/appinio_video_player.dart' show CustomVideoPlayer;
 
