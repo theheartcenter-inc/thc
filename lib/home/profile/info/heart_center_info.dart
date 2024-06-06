@@ -1,9 +1,6 @@
 import 'package:email_validator/email_validator.dart';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:thc/utils/bloc.dart';
-import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class HeartCenterInfo extends HookWidget {
@@ -67,7 +64,7 @@ Support our next 6 month wellness program: the art of nurturing your nervous sys
 
     final List<Widget> contents = switch (index.value) {
       0 => const [
-          Text('The Heart Center', style: StyleText(size: 24, weight: 650)),
+          Text('The Heart Center', style: TextStyle(size: 24, weight: 650)),
           SizedBox(height: 16),
           Text(
             'Our intention is to provide individuals impacted by mass incarceration with '
@@ -82,14 +79,14 @@ Support our next 6 month wellness program: the art of nurturing your nervous sys
           ),
         ],
       1 => [
-          const Text('Our Intention', style: StyleText(size: 24, weight: 650)),
+          const Text('Our Intention', style: TextStyle(size: 24, weight: 650)),
           const SizedBox(height: 16),
           Text(aboutUs.replaceAll(' \n', ' '), textAlign: TextAlign.center),
         ],
       2 || _ => [
           const Text(
             'The Heart Center Inc',
-            style: StyleText(size: 24, weight: 650),
+            style: TextStyle(size: 24, weight: 650),
           ),
           const SizedBox(height: 16),
           Form(
@@ -148,7 +145,7 @@ Support our next 6 month wellness program: the art of nurturing your nervous sys
             onPressed: () => launchUrlString('https://theheartcenter.one/'),
             child: const Text(
               'Visit Our Website',
-              style: StyleText(
+              style: TextStyle(
                 size: 16,
                 weight: 500,
                 decoration: TextDecoration.underline,

@@ -8,9 +8,7 @@
 /// {@endtemplate}
 library;
 
-import 'package:flutter/foundation.dart' show DiagnosticableTreeNode;
-import 'package:flutter/material.dart';
-import 'package:thc/utils/bloc.dart';
+import 'package:thc/the_good_stuff.dart';
 
 // ignore_for_file: type_annotate_public_apis, no_logic_in_create_state
 

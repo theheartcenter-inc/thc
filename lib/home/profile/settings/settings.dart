@@ -1,9 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
-import 'package:thc/utils/bloc.dart';
-import 'package:thc/utils/local_storage.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -16,7 +12,7 @@ class SettingsScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Dark theme?', style: StyleText(size: 20)),
+            const Text('Dark theme?', style: TextStyle(size: 20)),
             const SizedBox(height: 20),
             const _ThemePicker(),
             if (user.isAdmin) ...const [

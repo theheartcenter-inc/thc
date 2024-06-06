@@ -1,9 +1,7 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
 import 'package:thc/start/src/login_progress.dart';
-import 'package:thc/utils/bloc.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 import 'package:thc/utils/widgets/clip_height.dart';
 
 class BottomStuff extends HookWidget {
@@ -43,7 +41,7 @@ class BottomStuff extends HookWidget {
     if (shouldShow && labels != loginLabels.value) loginLabels.value = labels;
 
     return DefaultTextStyle(
-      style: StyleText(weight: 600, color: colors.outline.withOpacity(0.875)),
+      style: TextStyle(weight: 600, color: colors.outline.withOpacity(0.875)),
       textAlign: TextAlign.center,
       child: AnimatedBuilder(
         animation: controller,
@@ -65,7 +63,7 @@ class BottomStuff extends HookWidget {
 
             final (:label, :text) = target.buttonData!;
 
-            const spaced = StyleText(letterSpacing: 1 / 3);
+            const spaced = TextStyle(letterSpacing: 1 / 3);
             final button = FilledButton(
               onPressed: LoginLabels.goto(target),
               child: SizedBox(

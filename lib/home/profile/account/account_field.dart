@@ -1,8 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:thc/firebase/firebase.dart';
-import 'package:thc/utils/bloc.dart';
-import 'package:thc/utils/theme.dart';
-import 'package:thc/utils/widgets/enum_widget.dart';
+import 'package:thc/the_good_stuff.dart';
 
 /// A [TextField] with a name that matches a [ThcUser.json] key.
 enum AccountField with EnumStatefulWidgetMixin {
@@ -71,7 +67,7 @@ class _AccountFieldState extends State<AccountField> {
   Widget build(BuildContext context) {
     final ColorScheme colors = ThcColors.of(context);
 
-    final style = WidgetStateTextStyle.resolveWith((states) => StyleText(
+    final style = WidgetStateTextStyle.resolveWith((states) => TextStyle(
           color: colors.onSurface.withOpacity(states.isFocused ? 1.0 : 0.5),
         ));
     final decoration = InputDecoration(

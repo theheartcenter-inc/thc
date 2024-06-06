@@ -1,9 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:thc/firebase/firebase.dart';
-import 'package:thc/utils/bloc.dart';
-import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/theme.dart';
-import 'package:thc/utils/widgets/dialogs.dart';
+import 'package:thc/the_good_stuff.dart';
 
 class Permissions extends HookWidget {
   const Permissions(this.user, {super.key});
@@ -21,7 +16,7 @@ class Permissions extends HookWidget {
             padding: EdgeInsets.all(16.0),
             child: Text(
               'User Permissions',
-              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+              style: TextStyle(size: 16.0, weight: 700),
             ),
           ),
           for (final userType in UserType.values)

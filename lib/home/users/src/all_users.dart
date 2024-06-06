@@ -1,7 +1,5 @@
-import 'package:flutter/widgets.dart';
-import 'package:provider/provider.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/firebase/firebase_bloc.dart';
+import 'package:thc/the_good_stuff.dart';
 
 class ThcUsers extends FirebaseBloc<List<ThcUser>> {
   ThcUsers() : super(Firestore.users.snapshots, data: [], onData: _onData);

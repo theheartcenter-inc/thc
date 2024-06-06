@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 
 /// The sunrise/sunset gradient does a couple things:
 /// 1. adds a nice aesthetic
@@ -94,7 +92,7 @@ class SurveyTheme extends StatelessWidget {
           foregroundColor: isLight ? SurveyColors.yellowSunrise : SurveyColors.maroonSunset,
           shape: ContinuousRectangleBorder(borderRadius: BorderRadius.circular(25)),
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 15),
-          textStyle: const StyleText(size: 16, weight: 450, letterSpacing: 1 / 3),
+          textStyle: const TextStyle(size: 16, weight: 450, letterSpacing: 1 / 3),
         ),
       ),
     );

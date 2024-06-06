@@ -1,10 +1,5 @@
-import 'package:flutter/material.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/firebase/firebase_auth.dart' as auth;
-import 'package:thc/utils/local_storage.dart';
-import 'package:thc/utils/bloc.dart';
-import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 
 enum _Progress { notStarted, loading, done }
 
@@ -41,7 +36,7 @@ class CloseAccount extends StatelessWidget {
       children: [
         const Text(
           'To confirm deletion, please type your password in the field below and tap "Confirm".',
-          style: StyleText(size: 16),
+          style: TextStyle(size: 16),
         ),
         TextField(
           obscureText: obscureText.value,
@@ -62,6 +57,7 @@ class CloseAccount extends StatelessWidget {
       ],
     );
 
+    // ignore: deprecated_member_use_from_same_package
     final dialog = AlertDialog(
       title: const Text('Close Account'),
       content: AnimatedSize(

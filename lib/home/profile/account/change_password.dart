@@ -1,9 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:thc/utils/local_storage.dart';
-import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/theme.dart';
-import 'package:thc/utils/widgets/dialogs.dart';
+import 'package:thc/the_good_stuff.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -56,7 +52,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       if (_passwordCorrect case final correct?)
         Text(
           correct ? 'Verification success!' : 'Check your password and try again.',
-          style: StyleText(color: correct ? colors.primary : colors.error, weight: 700),
+          style: TextStyle(color: correct ? colors.primary : colors.error, weight: 700),
         ),
       const SizedBox(height: 30),
       TextField(
@@ -114,7 +110,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       navigator.snackbarMessage('${e.runtimeType} occurred: $e');
     }
     LocalStorage.password.save(_newPassword);
-    navigator.showDialog(const InfoDialog(
+    navigator.showDialog(const Dialog(
       titleText: 'Password Changed',
       bodyText: 'Your password has been successfully changed.',
     ));

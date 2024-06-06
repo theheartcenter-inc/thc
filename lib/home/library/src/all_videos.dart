@@ -1,8 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/firebase/firebase_bloc.dart';
 import 'package:thc/home/library/src/video_card.dart';
-import 'package:thc/utils/bloc.dart';
+import 'package:thc/the_good_stuff.dart';
 
 typedef Videos = List<VideoCard>;
 typedef VideoData = ({List<String> categories, Videos? videos});
@@ -12,7 +10,7 @@ class ThcVideos extends FirebaseBloc<Videos> {
 
   static void _onData(Videos current, SnapshotDoc doc) {
     if (doc.data() case final json?) {
-      final newVideo = VideoCard.fromJson(json, key: Key(doc.id));
+      final newVideo = VideoCard.fromJson(json, FirestoreID(doc.id));
       final int index = current.indexWhere(doc.match);
       if (index == -1) {
         current.add(newVideo);
@@ -47,7 +45,7 @@ class ThcVideos extends FirebaseBloc<Videos> {
 
     videos = switch (category) {
       'All' => videos,
-      'Pinned' => videos.where((video) => UserPins.contains(context, video.keyVal)),
+      'Pinned' => videos.where((video) => UserPins.contains(context, video.firestoreId)),
       _ => videos.where((video) => video.category == category),
     };
     if (search.isNotEmpty) {

@@ -1,6 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:thc/utils/bloc.dart';
-import 'package:thc/utils/local_storage.dart';
+import 'package:thc/the_good_stuff.dart';
 
 /// This class copies [Colors] and has numbered names for different opacities:
 ///
@@ -71,81 +69,6 @@ abstract final class ThcColors {
   static ColorScheme of(BuildContext context) => Theme.of(context).colorScheme;
 }
 
-/// We're storing fonts in the `assets/` folder
-/// to keep the app appearance consistent across devices.
-///
-/// Both "pretendard" and "roboto mono" are open-source fonts with variable weight.
-class StyleText extends TextStyle {
-  /// "Pretendard" is almost exactly like the default Apple fonts,
-  /// but it's open-source and free to use!
-  const StyleText({
-    double? size,
-    this.weight,
-    super.inherit,
-    super.color,
-    super.backgroundColor,
-    super.letterSpacing,
-    super.wordSpacing,
-    super.textBaseline,
-    super.height,
-    super.leadingDistribution,
-    super.locale,
-    super.foreground,
-    super.background,
-    super.shadows,
-    super.decoration,
-    super.decorationColor,
-    super.decorationStyle,
-    super.decorationThickness,
-    super.overflow,
-  })  : assert(weight == null || weight is FontWeight || weight is num),
-        super(fontSize: size, fontFamily: 'pretendard');
-
-  /// "Roboto mono" is a monospace font,
-  /// i.e. a font you'd see with typewriters and code editors.
-  const StyleText.mono({
-    double? size,
-    this.weight,
-    super.fontStyle,
-    super.inherit,
-    super.color,
-    super.backgroundColor,
-    super.letterSpacing,
-    super.wordSpacing,
-    super.textBaseline,
-    super.height,
-    super.leadingDistribution,
-    super.locale,
-    super.foreground,
-    super.background,
-    super.shadows,
-    super.decoration,
-    super.decorationColor,
-    super.decorationStyle,
-    super.decorationThickness,
-    super.overflow,
-  })  : assert(weight == null || weight is FontWeight || weight is num),
-        super(fontSize: size, fontFamily: 'roboto mono');
-
-  /// The type should either be [FontWeight] or [double].
-  ///
-  /// In [StyleText.mono], the value can range from 100 to 700;
-  /// otherwise, it can go from 50 to 1000.
-  final dynamic weight;
-
-  @override
-  List<FontVariation>? get fontVariations {
-    if (this.weight == null) return null;
-
-    final num weight = switch (this.weight) {
-      final FontWeight w => w.value,
-      final n => n as num,
-    };
-
-    return [FontVariation.weight(weight.toDouble())];
-  }
-}
-
 /// [WidgetStateProperty] is pretty neat: you can have different styles
 /// based on whatever's going on with the widget.
 ///
@@ -176,7 +99,7 @@ ThemeData _generateTheme(Brightness brightness) {
     seedColor: ThcColors.darkBlue,
     brightness: isLight ? Brightness.light : Brightness.dark,
     primary: isLight ? ThcColors.green : ThcColors.zaHando,
-    onPrimary: isLight ? ThcColors.dullerGreen : Colors.black87,
+    onPrimary: Colors.black87,
     inversePrimary: ThcColors.darkGreen,
     primaryContainer: isLight ? ThcColors.dullGreen38 : ThcColors.dullGreen50,
     secondary: ThcColors.dullBlue,
@@ -185,6 +108,7 @@ ThemeData _generateTheme(Brightness brightness) {
     onTertiary: isLight ? ThcColors.tan : ThcColors.darkMagenta,
     surface: isLight ? ThcColors.veryPaleAzure : ThcColors.darkestBlue,
     onSurface: isLight ? Colors.black : ThcColors.paleAzure88,
+    surfaceContainerLowest: isLight ? Colors.white : Colors.black,
     inverseSurface: isLight ? ThcColors.darkBlue : ThcColors.paleAzure,
     onInverseSurface: isLight ? Colors.white : ThcColors.darkestBlue,
     outline: slightContrast,
@@ -196,7 +120,7 @@ ThemeData _generateTheme(Brightness brightness) {
   final onSurface50 = colors.onSurface.withOpacity(0.5);
 
   const iconTheme = IconThemeData(size: 32);
-  const labelTextStyle = StyleText(size: 12, weight: 600);
+  const labelTextStyle = TextStyle(size: 12, weight: 600);
   final inputLabelStyle = WidgetStateTextStyle.resolveWith((states) {
     if (states.isError) return TextStyle(color: colors.error);
     return TextStyle(color: states.isFocused ? colors.primary : colors.onSurface);
@@ -248,7 +172,7 @@ ThemeData _generateTheme(Brightness brightness) {
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         shape: const BeveledRectangleBorder(),
-        textStyle: const StyleText(weight: 600),
+        textStyle: const TextStyle(weight: 600),
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(

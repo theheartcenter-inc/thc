@@ -1,12 +1,8 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:thc/start/src/bottom_stuff.dart';
 import 'package:thc/start/src/login_progress.dart';
 import 'package:thc/start/src/za_hando.dart';
-import 'package:thc/utils/app_config.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 import 'package:thc/utils/widgets/clip_height.dart';
-import 'package:thc/utils/widgets/enum_widget.dart';
 
 /// We could have done something like
 ///
@@ -94,7 +90,7 @@ enum LoginField with EnumStatelessWidgetMixin {
             : Colors.transparent,
         filled: true,
         hintText: hintText,
-        hintStyle: StyleText(color: blackHint ? Colors.black : colors.outline),
+        hintStyle: TextStyle(color: blackHint ? Colors.black : colors.outline),
       ),
       obscureText: !(this == top && showPassword) && (hintText?.contains('password') ?? false),
       onChanged: newVal,
@@ -146,7 +142,7 @@ class LoginFields extends StatelessWidget {
             padding: EdgeInsets.only(bottom: 3),
             child: Text(
               'start',
-              style: StyleText(size: 22, weight: 600, color: ThcColors.green),
+              style: TextStyle(size: 22, weight: 600, color: ThcColors.green),
             ),
           ),
         ),
@@ -193,13 +189,13 @@ class LoginFields extends StatelessWidget {
             ? errorMessage
             : 'check the above field${labels.just1field ? "" : "s"} and try again.',
         textAlign: TextAlign.center,
-        style: const StyleText(size: 12, weight: 600, color: Color(0xffc00000)),
+        style: const TextStyle(size: 12, weight: 600, color: Color(0xffc00000)),
       );
     } else if (labels == LoginLabels.recovery) {
       helpText = Text(
         "If you don't have a connected email,\ncontact the person who provided your user ID.",
         textAlign: TextAlign.center,
-        style: StyleText(size: 12, weight: 550, color: colors.onSurface),
+        style: TextStyle(size: 12, weight: 550, color: colors.onSurface),
       );
     } else {
       helpText = const SizedBox(width: double.infinity);

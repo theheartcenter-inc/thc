@@ -1,11 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'package:thc/home/surveys/edit_survey/survey_editor.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey_field.dart';
-import 'package:thc/utils/app_config.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 
 /// Shows a preview of a [SurveyField] that you can tap to edit.
 class SurveyFieldEditor extends StatefulWidget {
@@ -347,8 +344,8 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
     const choicePadding = EdgeInsets.fromLTRB(48, 0, 36, 16);
 
     final bool validating = context.watch<ValidSurveyQuestions>().value;
-    final bool mobileEditing = context.watch<MobileEditing>().value;
-    if (mobileEditing) stopEditing();
+    final bool editing = Editing.of(context);
+    if (editing) stopEditing();
 
     Widget? content;
     switch (mode) {
@@ -431,7 +428,7 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
                     TextField(
                       decoration: InputDecoration(
                         hintText: 'add…',
-                        hintStyle: StyleText(color: colors.outlineVariant),
+                        hintStyle: TextStyle(color: colors.outlineVariant),
                         enabledBorder: UnderlineInputBorder(
                           borderSide: BorderSide(color: colors.outlineVariant),
                         ),
@@ -491,8 +488,8 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
               child: SurveyField(SurveyRecord.init(updatedQuestion), (_) {}),
             ),
             Positioned.fill(child: InkWell(onTap: mainNode.requestFocus)),
-            if (showButtons || mobileEditing) ...[
-              if (mobileEditing) const Positioned.fill(child: ColoredBox(color: Colors.white38)),
+            if (showButtons || editing) ...[
+              if (editing) const Positioned.fill(child: ColoredBox(color: Colors.white38)),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -530,7 +527,7 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
             );
           }
         }
-        if (mobileEditing) {
+        if (editing) {
           content = Padding(
             padding: const EdgeInsets.only(bottom: SurveyEditDivider.height / 2),
             child: content,
@@ -618,7 +615,7 @@ class QuestionTypeIcon extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(5, 0, 5, 3),
             child: Text(
               'text',
-              style: StyleText(size: 12, color: colors.onSurface.withAlpha(0xcc)),
+              style: TextStyle(size: 12, color: colors.onSurface.withAlpha(0xcc)),
             ),
           ),
         );

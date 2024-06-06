@@ -1,12 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/surveys/edit_survey/survey_editor.dart';
 import 'package:thc/home/surveys/manage_surveys/survey_responses.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
 import 'package:thc/home/surveys/take_survey/survey_theme.dart';
-import 'package:thc/utils/bloc.dart';
-import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 
 class ManageSurveys extends StatelessWidget {
   const ManageSurveys({super.key});
@@ -45,6 +41,31 @@ class CustomSurveyButtons extends HookWidget {
     final survey = useState(ThcSurvey.introSurvey);
     final ThcSurvey surveyType = survey.value;
 
+    final buttons = <Widget>[
+      ElevatedButton(
+        onPressed: () async {
+          final questions = await surveyType.getQuestions();
+          return navigator.push(SurveyScreen(questions, surveyType: surveyType));
+        },
+        child: const Text('view'),
+      ),
+      ElevatedButton(
+        onPressed: () async {
+          final proceed = await navigator.showDialog(
+            const Dialog.confirm(
+              titleText: 'Heads-up!',
+              bodyText: 'If you edit this survey, previous responses will be discarded.',
+            ),
+          );
+          if (proceed == null) return;
+
+          final questions = await surveyType.getQuestions();
+          navigator.push(SurveyEditor(surveyType, questions));
+        },
+        child: const Text('edit'),
+      ),
+    ];
+
     return DecoratedBox(
       decoration: BoxDecoration(
         color: ThcColors.dullBlue.withAlpha(0x40),
@@ -65,47 +86,10 @@ class CustomSurveyButtons extends HookWidget {
               onChanged: survey.update,
             ),
             const SizedBox(width: 25),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ElevatedButton(
-                  onPressed: () async {
-                    final questions = await surveyType.getQuestions();
-                    return navigator.push(SurveyScreen(questions, surveyType: surveyType));
-                  },
-                  child: const Text('view'),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                    final proceed = await navigator.showDialog(const _SurveyEditWarning());
-                    if (proceed == null) return;
-
-                    final questions = await surveyType.getQuestions();
-                    navigator.push(SurveyEditor(surveyType, questions));
-                  },
-                  child: const Text('edit'),
-                ),
-              ],
-            ),
+            Column(mainAxisSize: MainAxisSize.min, children: buttons),
           ],
         ),
       ),
-    );
-  }
-}
-
-class _SurveyEditWarning extends StatelessWidget {
-  const _SurveyEditWarning();
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      title: const Text('Heads-up!'),
-      content: const Text('If you edit this survey, previous responses will be discarded.'),
-      actions: [
-        TextButton(onPressed: navigator.pop, child: const Text('back')),
-        TextButton(onPressed: () => navigator.pop(true), child: const Text('continue')),
-      ],
     );
   }
 }

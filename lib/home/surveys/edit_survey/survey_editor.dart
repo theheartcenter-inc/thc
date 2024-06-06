@@ -1,11 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/surveys/edit_survey/survey_field_editor.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
-import 'package:thc/utils/app_config.dart';
-import 'package:thc/utils/bloc.dart';
-import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 
 /// {@macro ValidSurveyQuestions}
 extension ValidChoices on List<String> {
@@ -147,7 +142,7 @@ class _SurveyEditorState extends State<SurveyEditor> {
           duplicate: () => setState(() => keyedQuestions.insert(i + 1, record.copy())),
           yeet: () {
             setState(() => keyedQuestions.removeAt(i));
-            if (keyedQuestions.isEmpty) context.read<MobileEditing>().value = false;
+            if (keyedQuestions.isEmpty) context.read<Editing>().value = false;
           },
           validate: () => questionNames.validChoice(i),
           divider: divider(i),
@@ -156,9 +151,13 @@ class _SurveyEditorState extends State<SurveyEditor> {
 
     Widget? editButton;
     if (mobileDevice && keyedQuestions.isNotEmpty) {
+      final editing = context.watch<Editing>();
       editButton = IconButton.filled(
-        icon: Icon(context.watch<MobileEditing>().icon, color: Colors.black87),
-        onPressed: context.read<MobileEditing>().toggle,
+        icon: Icon(
+          editing.value ? Icons.done : Icons.calendar_view_day,
+          color: Colors.black87,
+        ),
+        onPressed: editing.toggle,
       );
     }
     return Scaffold(
@@ -166,7 +165,7 @@ class _SurveyEditorState extends State<SurveyEditor> {
         title: const Text('Survey Editor'),
         actions: [
           IconButton(
-            onPressed: context.watch<MobileEditing>().value ? null : validate,
+            onPressed: context.watch<Editing>().value ? null : validate,
             icon: const Icon(Icons.save),
           ),
         ],
@@ -223,7 +222,7 @@ class SurveyEditDivider extends HookWidget {
     final focus = useState(false);
     final hover = useState(false);
 
-    if (context.watch<MobileEditing>().value) {
+    if (context.watch<Editing>().value) {
       return const SizedBox(height: SurveyEditDivider.height / 2);
     }
     final Widget button;
@@ -293,17 +292,6 @@ class SurveyEditDivider extends HookWidget {
       child: child,
     );
   }
-}
-
-/// You can see options for duplicating, deleting, and reordering survey questions
-/// when you hover your mouse over the question.
-///
-/// Mobile devices don't have mouse cursors,
-/// so instead there's a button that uses this BLoC to show/hide the extra options.
-class MobileEditing extends Cubit<bool> {
-  MobileEditing() : super(false);
-
-  IconData get icon => value ? Icons.done : Icons.calendar_view_day;
 }
 
 /// {@template ValidSurveyQuestions}

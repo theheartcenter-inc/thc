@@ -1,11 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
-import 'package:thc/utils/app_config.dart';
-import 'package:thc/utils/local_storage.dart';
-import 'package:thc/utils/navigator.dart';
+import 'package:thc/the_good_stuff.dart';
 
 extension EmailSyntax on String {
   String get emailValidated {

@@ -1,9 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:thc/start/start.dart';
-import 'package:thc/utils/bloc.dart';
-import 'package:thc/utils/local_storage.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 
 /// {@template ThemeModePicker}
 /// An animated button shown in the [StartScreen] used to set the [ThemeMode].
@@ -74,7 +71,7 @@ class ThemeModePicker extends HookWidget {
                       softWrap: false,
                       textAlign: TextAlign.center,
                       overflow: TextOverflow.fade,
-                      style: StyleText(weight: 600, color: foreground),
+                      style: TextStyle(weight: 600, color: foreground),
                     ),
                   ),
                 ),

@@ -1,9 +1,8 @@
 import 'dart:math' as math;
-import 'dart:ui';
+import 'dart:ui' show lerpDouble;
 
-import 'package:flutter/material.dart';
 import 'package:thc/start/src/za_hando.dart';
-import 'package:thc/utils/bloc.dart';
+import 'package:thc/the_good_stuff.dart';
 
 class Sunflower extends HookWidget {
   const Sunflower({

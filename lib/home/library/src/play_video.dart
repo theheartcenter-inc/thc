@@ -1,6 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:thc/home/library/src/video_controller_hook.dart';
-import 'package:thc/utils/bloc.dart';
+import 'package:thc/the_good_stuff.dart';
 
 class PlayVideo extends HookWidget {
   const PlayVideo({super.key, required this.videoURL, required this.videoName});
