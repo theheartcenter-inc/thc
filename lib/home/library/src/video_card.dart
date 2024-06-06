@@ -52,6 +52,8 @@ class VideoCard extends StatelessWidget {
         'thumbnail': thumbnail,
       };
 
+  Future<void> upload() => Firestore.streams.doc(firestoreId).set(json);
+
   static const _margin = EdgeInsets.symmetric(vertical: 8.0);
 
   static const blank = Card(
@@ -120,11 +122,41 @@ class VideoCard extends StatelessWidget {
   }
 
   Future<void> delete() async {
-    final loading = navKey.currentContext!.read<Loading>();
-    if (loading.value) return;
+    final shouldDelete = await navigator.showDialog(
+      Dialog.confirm(
+        titleText: 'Delete Video',
+        body: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text('Do you want to delete the following video?'),
+            const SizedBox(height: 16),
+            Text(
+              'title: $title\n' 'director: $director\n' 'category: $category',
+              style: const TextStyle(size: 13, weight: 600),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (shouldDelete == null) return;
 
+    final loading = navigator.context.read<Loading>();
     loading.value = true;
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      final doc = Firestore.streams.doc(firestoreId);
+      final docSnapshot = await doc.get();
+      if (docSnapshot.exists) {
+        final Json json = docSnapshot.data()!;
+        final Reference ref = FirebaseStorage.instance.ref().child(json['storage_path']);
+        await Future.wait([
+          doc.delete(),
+          ref.delete(),
+        ]);
+      }
+      navigator.snackbarMessage('Video successfully deleted!');
+    } catch (e) {
+      navigator.snackbarMessage('Failed to delete video!');
+    }
     loading.value = false;
   }
 

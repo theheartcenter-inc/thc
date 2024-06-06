@@ -1,5 +1,8 @@
 import 'dart:math' as math;
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/library/src/all_videos.dart';
 import 'package:thc/home/library/src/video_card.dart';
@@ -105,6 +108,31 @@ class _LibraryEditor extends StatelessWidget {
 
   final Widget body;
 
+  static Future<void> uploadVideo() async {
+    void cancelMessage() => navigator.snackbarMessage('Video upload cancelled.');
+
+    final FilePickerResult? result = await FilePicker.platform.pickFiles();
+    if (result == null) return cancelMessage();
+    final PlatformFile file = result.files.first;
+    try {
+      final newVideo = await navigator.showDialog<VideoCard>(const _VideoUploadInfo());
+      if (newVideo == null) return cancelMessage();
+
+      final Cubit<bool> loading = navigator.context.read<Loading>();
+      loading.value = true;
+      final ref = FirebaseStorage.instance.ref(file.name);
+      final TaskSnapshot task = await ref.putData(file.bytes!);
+      if (task.state != TaskState.success) {
+        return navigator.showDialog(const ErrorDialog('File upload failed.'));
+      }
+      await newVideo.upload();
+      loading.value = false;
+      navigator.context.read<ThcVideos>().data.add(newVideo);
+    } catch (e) {
+      return navigator.showDialog(ErrorDialog('Error uploading file.\n\n$e'));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final bool loading = Loading.of(context);
@@ -146,16 +174,57 @@ class _LibraryEditor extends StatelessWidget {
             SizedBox.expand(
               child: BlocProvider(create: (_) => Editing(true), child: body),
             ),
-            _LibraryButton(
-              icon: Icons.upload,
-              onPressed: () {
-                // upload video
-              },
-            ),
+            const _LibraryButton(icon: Icons.upload, onPressed: uploadVideo),
             const NavBar(belowPage: true),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _VideoUploadInfo extends HookWidget {
+  const _VideoUploadInfo();
+
+  @override
+  Widget build(BuildContext context) {
+    final category = useState('');
+    final director = useState('');
+    final title = useState('');
+    final items = <String, Cubit>{
+      'Category': category,
+      'Director': director,
+      'Title': title,
+    };
+
+    return Dialog.confirm(
+      titleText: 'Upload Details',
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final MapEntry(key: label, value: cubit) in items.entries) ...[
+            TextField(
+              decoration: InputDecoration(labelText: label),
+              onChanged: cubit.update,
+            ),
+            const SizedBox(height: 8),
+          ],
+        ],
+      ),
+      actionText: ('cancel', 'upload'),
+      onConfirm: () {
+        final id = FirestoreID.create(Firestore.streams);
+        final newVideo = VideoCard(
+          id: id,
+          title: title.value,
+          timestamp: Timestamp.now(),
+          director: director.value,
+          category: category.value,
+          path: 'gs://the-heart-center-app.appspot.com/${id.value}',
+        );
+
+        navigator.pop(newVideo);
+      },
     );
   }
 }
