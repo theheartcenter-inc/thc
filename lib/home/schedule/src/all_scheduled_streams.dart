@@ -1,5 +1,6 @@
 import 'package:thc/firebase/firebase_bloc.dart';
 import 'package:thc/home/schedule/schedule.dart';
+import 'package:thc/home/schedule/scheduled_stream_card.dart';
 import 'package:thc/the_good_stuff.dart';
 
 typedef StreamSchedule = List<ScheduledStreamCard>;
