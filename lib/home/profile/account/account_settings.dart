@@ -18,8 +18,27 @@ class _AccountSettingsState extends State<AccountSettings> {
     AccountField.reset();
   }
 
+  Future<void> _updateProfilePicture(ThcUser user) async {
+    try {
+      await user.updateProfilePicture();
+      setState(() {});
+      navigator.snackbarMessage('Profile picture updated successfully');
+    } catch (e) {
+      navigator.snackbarMessage('Failed to update profile picture: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<ThcUser?>(context);
+
+    if (user == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Account')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     final saveButton = Padding(
       padding: const EdgeInsets.symmetric(vertical: 20),
       child: FilledButton(
@@ -40,7 +59,16 @@ class _AccountSettingsState extends State<AccountSettings> {
         body: ProfileListView(
           itemCount: 4,
           itemBuilder: (_, index) => switch (index) {
-            0 => Column(children: [...AccountField.values, saveButton]),
+            0 => Column(children: [
+                ...AccountField.values,
+                saveButton,
+                if (user.canLivestream)
+                  ListTile(
+                    leading: const Icon(Icons.image),
+                    title: const Text('Change Profile Picture'),
+                    onTap: () => _updateProfilePicture(user),
+                  ),
+              ]),
             1 => ListTile(
                 leading: const Icon(Icons.lock_outline),
                 title: const Text('change password'),

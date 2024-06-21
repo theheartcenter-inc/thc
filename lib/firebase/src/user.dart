@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:meta/meta.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/utils/app_config.dart';
@@ -19,6 +22,7 @@ sealed class ThcUser {
     String? id,
     String? email,
     bool registered = true,
+    String? profilePictureUrl,
   }) {
     assert((id ?? email) != null);
 
@@ -34,12 +38,14 @@ sealed class ThcUser {
           id: id,
           email: email,
           registered: registered,
+          profilePictureUrl: profilePictureUrl,
         ),
       UserType.admin => Admin(
           name: name,
           id: id,
           email: email,
           registered: registered,
+          profilePictureUrl: profilePictureUrl,
         ),
     };
   }
@@ -51,6 +57,7 @@ sealed class ThcUser {
     this.id,
     this.email,
     this.registered = true,
+    this.profilePictureUrl,
   }) : assert((id ?? email) != null);
 
   /// {@macro ThcUser}
@@ -61,6 +68,7 @@ sealed class ThcUser {
       type: UserType.fromJson(json),
       id: json['id'],
       email: json['email'],
+      profilePictureUrl: json['profilePictureUrl'],
     );
   }
 
@@ -69,6 +77,7 @@ sealed class ThcUser {
   final String? id;
   final String? email;
   final bool registered;
+  final String? profilePictureUrl;
 
   static const _collection = Firestore.users;
   static ThcUser? instance;
@@ -99,13 +108,43 @@ sealed class ThcUser {
           _collection.doc(firestoreId).delete(),
       ]);
 
+  /// Update the profile picture URL for the user.
+  Future<void> updateProfilePicture() async {
+    if (type == UserType.director || type == UserType.admin) {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+      if (pickedFile != null) {
+        final File image = File(pickedFile.path);
+        final String downloadUrl = await _uploadProfilePicture(id!, image);
+
+        // Update the user's profile picture URL in Firestore
+        await _collection.doc(firestoreId).update({'profilePictureUrl': downloadUrl});
+
+        // Update local profilePictureUrl
+        copyWith(profilePictureUrl: downloadUrl);
+      }
+    } else {
+      throw Exception('Only admins and directors can update profile pictures.');
+    }
+  }
+
+  Future<String> _uploadProfilePicture(String userId, File image) async {
+    final storageRef = FirebaseStorage.instance.ref();
+    final profilePicRef = storageRef.child('profile_pics/$userId.jpg');
+
+    await profilePicRef.putFile(image);
+
+    return await profilePicRef.getDownloadURL();
+  }
+
   /// {@macro ThcUser}
   ThcUser copyWith({
     UserType? type,
     String? id,
     String? name,
     String? email,
-    String? phone,
+    String? profilePictureUrl,
     bool? registered,
   }) {
     return ThcUser(
@@ -114,6 +153,7 @@ sealed class ThcUser {
       name: name ?? this.name,
       email: email ?? this.email,
       registered: registered ?? this.registered,
+      profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
     );
   }
 
@@ -126,6 +166,7 @@ sealed class ThcUser {
         if (id != null) 'id': id,
         if (email != null) 'email': email,
         if (!registered) 'registered': false,
+        if (profilePictureUrl != null) 'profilePictureUrl': profilePictureUrl,
       };
 
   bool get canLivestream => switch (type) {
@@ -144,11 +185,12 @@ sealed class ThcUser {
         other.id == id &&
         other.name == name &&
         other.email == email &&
+        other.profilePictureUrl == profilePictureUrl &&
         other.registered == registered;
   }
 
   @override
-  int get hashCode => Object.hash(id, name, email, registered);
+  int get hashCode => Object.hash(id, name, email, profilePictureUrl, registered);
 }
 
 class Participant extends ThcUser {
@@ -157,7 +199,7 @@ class Participant extends ThcUser {
     required super.name,
     super.email,
     super.registered = true,
-  }) : super._(type: UserType.participant);
+  }) : super._(type: UserType.participant, profilePictureUrl: null);
 }
 
 class Director extends ThcUser {
@@ -166,6 +208,7 @@ class Director extends ThcUser {
     required super.name,
     super.email,
     super.registered = true,
+    super.profilePictureUrl,
   }) : super._(type: UserType.director);
 }
 
@@ -175,5 +218,6 @@ class Admin extends ThcUser {
     required super.name,
     super.email,
     super.registered = true,
+    super.profilePictureUrl,
   }) : super._(type: UserType.admin);
 }
