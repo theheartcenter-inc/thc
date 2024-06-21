@@ -27,7 +27,6 @@ sealed class ThcUser {
           id: id,
           email: email,
           registered: registered,
-          profilePictureUrl: profilePictureUrl,
         ),
       UserType.director => Director(
           name: name,
@@ -198,7 +197,8 @@ class Participant extends ThcUser {
     super.email,
     super.registered = true,
     super.profilePictureUrl,
-  }) : super._(type: UserType.participant);
+ }) : super._(type: UserType.participant);
+}) : super._(type: UserType.participant, profilePictureUrl: null);
 }
 
 class Director extends ThcUser {
