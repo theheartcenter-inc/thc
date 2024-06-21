@@ -1,23 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:thc/firebase/firebase.dart';
-import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/theme.dart';
-import 'package:thc/utils/widgets/error_dialog.dart';
+import 'package:thc/the_good_stuff.dart';
 
-class Permissions extends StatefulWidget {
+class Permissions extends HookWidget {
   const Permissions(this.user, {super.key});
   final ThcUser user;
 
   @override
-  State<Permissions> createState() => _RadioGroupState();
-}
-
-class _RadioGroupState extends State<Permissions> {
-  late final user = widget.user;
-  late UserType selected = user.type;
-
-  @override
   Widget build(BuildContext context) {
+    final selection = useState(user.type);
+
     return Scaffold(
       appBar: AppBar(title: Text(user.name)),
       body: Column(
@@ -26,7 +16,7 @@ class _RadioGroupState extends State<Permissions> {
             padding: EdgeInsets.all(16.0),
             child: Text(
               'User Permissions',
-              style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+              style: TextStyle(size: 16.0, weight: 700),
             ),
           ),
           for (final userType in UserType.values)
@@ -41,12 +31,10 @@ class _RadioGroupState extends State<Permissions> {
                 style: const TextStyle(color: ThcColors.gray),
               ),
               value: userType,
-              groupValue: selected,
+              groupValue: selection.value,
               onChanged: (newValue) {
-                if (newValue != null) {
-                  setState(() => selected = newValue);
-                  updatePermissions(user.id ?? user.email!, newValue);
-                }
+                selection.value = newValue!;
+                updatePermissions(user.id ?? user.email!, newValue);
               },
             ),
         ],

@@ -3,14 +3,10 @@
 import 'dart:math' as math;
 
 import 'package:email_validator/email_validator.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/firebase/firebase_auth.dart' as auth;
 import 'package:thc/start/src/bottom_stuff.dart';
 import 'package:thc/start/src/login_fields.dart';
-import 'package:thc/utils/bloc.dart';
-import 'package:thc/utils/local_storage.dart';
+import 'package:thc/the_good_stuff.dart';
 
 /// {@template LoginLabels}
 /// Stores [LoginField] hint text & [BottomStuff] labels,
@@ -200,7 +196,16 @@ final class LoginProgressTracker extends Cubit<LoginProgress> {
   /// This makes retrieving the state from the current [BuildContext] slightly more concise.
   static LoginProgress of(BuildContext context) => context.watch<LoginProgressTracker>().value;
 
-  /// Causes the tracker to [emit] a new progress state.
+  static LoginLabels labelsOf(BuildContext context) {
+    LoginLabels labels(LoginProgressTracker tracker) => tracker.value.labels;
+    return context.select<LoginProgressTracker, LoginLabels>(labels);
+  }
+
+  static bool pressedStart(BuildContext context) => context.select<LoginProgressTracker, bool>(
+        (tracker) => tracker.value.animation >= AnimationProgress.pressStart,
+      );
+
+  /// Updates the tracker to a new progress [value].
   ///
   /// And it's accessible without needing a [BuildContext]!
   static void update({

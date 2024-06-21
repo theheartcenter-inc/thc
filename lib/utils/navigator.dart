@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:thc/main.dart';
+import 'package:thc/start/src/login_progress.dart';
+import 'package:thc/utils/bloc.dart';
 import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/widgets/lerpy_hero/lerpy_hero.dart';
 
@@ -17,7 +20,7 @@ import 'package:thc/utils/widgets/lerpy_hero/lerpy_hero.dart';
 /// ```
 ///
 /// For times when you want to configure the page route,
-/// you can still use `Navigator.of(context)`.
+/// you can use `navigator.currentState`.
 /// {@endtemplate}
 GlobalKey<NavigatorState> navKey = GlobalKey<NavigatorState>();
 
@@ -44,6 +47,11 @@ Nav get navigator => Nav(navKey.currentState!);
 /// ```
 /// {@endtemplate}
 extension type Nav(NavigatorState currentState) {
+  /// This is the context of the app's [Navigator] widget.
+  ///
+  /// We can use it to access the app-wide [Bloc]s!
+  BuildContext get context => currentState.context;
+
   /// Adds a new screen to the route.
   ///
   /// {@macro navigator_example}
@@ -109,5 +117,18 @@ extension type Nav(NavigatorState currentState) {
   Future<void> showSnackBar(SnackBar snackBar) =>
       ScaffoldMessenger.of(currentState.context).showSnackBar(snackBar).closed;
 
+  /// Shows a fun little bar of text at the bottom of the screen.
+  Future<void> snackbarMessage(String text) => showSnackBar(SnackBar(content: Text(text)));
+
   Future<void> logout() => resetLocalStorage().then(App.relaunch);
+}
+
+void addKeyboardShortcuts() {
+  HardwareKeyboard.instance.addHandler((event) {
+    if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape) {
+      LocalStorage.loggedIn() ? navigator.pop() : LoginProgressTracker.pop();
+      return true;
+    }
+    return false;
+  });
 }

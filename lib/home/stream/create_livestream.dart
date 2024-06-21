@@ -1,9 +1,7 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
 import 'package:thc/agora/livestream_button.dart';
-import 'package:thc/utils/style_text.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 
 class CreateLivestream extends StatelessWidget {
   const CreateLivestream({super.key});
@@ -25,7 +23,7 @@ class CreateLivestream extends StatelessWidget {
           const Spacer(flex: 2),
           const LivestreamButton(color: ThcColors.teal),
           const Spacer(flex: 2),
-          Text('$numberInLobby $people waiting', style: const StyleText(weight: 600)),
+          Text('$numberInLobby $people waiting', style: const TextStyle(weight: 600)),
           const Spacer(),
         ],
       ),

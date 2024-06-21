@@ -8,6 +8,11 @@ import 'package:thc/firebase/firebase.dart';
 import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/local_storage.dart';
 
+/// {@template ThcUser}
+/// We can't just call this class `User`, since that's one of the Firebase classes.
+/// {@endtemplate}
+///
+/// {@macro sealed_class}
 @immutable
 sealed class ThcUser {
   /// {@macro ThcUser}
@@ -106,17 +111,15 @@ sealed class ThcUser {
   /// Update the profile picture URL for the user.
   Future<void> updateProfilePicture() async {
     if (type == UserType.director || type == UserType.admin) {
-      final ImagePicker picker = ImagePicker();
+      final picker = ImagePicker();
       final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
       if (pickedFile != null) {
-        File image = File(pickedFile.path);
-        String downloadUrl = await _uploadProfilePicture(id!, image);
+        final File image = File(pickedFile.path);
+        final String downloadUrl = await _uploadProfilePicture(id!, image);
 
         // Update the user's profile picture URL in Firestore
-        await _collection.doc(firestoreId).update({
-          'profilePictureUrl': downloadUrl,
-        });
+        await _collection.doc(firestoreId).update({'profilePictureUrl': downloadUrl});
 
         // Update local profilePictureUrl
         copyWith(profilePictureUrl: downloadUrl);
@@ -196,9 +199,7 @@ class Participant extends ThcUser {
     required super.name,
     super.email,
     super.registered = true,
-    super.profilePictureUrl,
- }) : super._(type: UserType.participant);
-}) : super._(type: UserType.participant, profilePictureUrl: null);
+  }) : super._(type: UserType.participant, profilePictureUrl: null);
 }
 
 class Director extends ThcUser {

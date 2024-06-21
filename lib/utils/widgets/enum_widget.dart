@@ -8,21 +8,9 @@
 /// {@endtemplate}
 library;
 
-import 'package:flutter/material.dart';
+import 'package:thc/the_good_stuff.dart';
 
 // ignore_for_file: type_annotate_public_apis, no_logic_in_create_state
-
-/// Enums can implement other classes and use mixins, but they can't extend a class.
-/// This makes the enum widget implementation kinda messy,
-/// hence the need for the ignores and additional classes.
-class _StatelessEnum extends StatelessWidget {
-  const _StatelessEnum(this._build);
-
-  final WidgetBuilder _build;
-
-  @override
-  Widget build(BuildContext context) => _build(context);
-}
 
 /// Allows an enum to act as a widget.
 ///
@@ -44,34 +32,32 @@ class _StatelessEnum extends StatelessWidget {
 /// ```
 ///
 /// {@macro enum_widget}
-mixin StatelessEnum on Enum implements StatelessWidget {
-  _StatelessEnum get _statefulEnum => _StatelessEnum(build);
+mixin EnumStatelessWidgetMixin on Enum implements StatelessWidget {
+  Widget get _widget => Builder(builder: build);
 
   @override
-  Key? get key => null;
+  get key => Key(name);
 
   @override
-  Widget build(BuildContext context);
+  toString({minLevel = DiagnosticLevel.off}) => _widget.toString(minLevel: minLevel);
 
   @override
-  toString({minLevel = DiagnosticLevel.off}) => _statefulEnum.toString(minLevel: minLevel);
+  debugDescribeChildren() => const <DiagnosticsNode>[];
 
   @override
-  debugDescribeChildren() => _statefulEnum.debugDescribeChildren();
+  toDiagnosticsNode({name, style}) =>
+      DiagnosticableTreeNode(name: this.name, value: this, style: style);
 
   @override
-  toDiagnosticsNode({name, style}) => _statefulEnum.toDiagnosticsNode(name: name, style: style);
-
-  @override
-  toStringShort() => name;
+  toStringShort() => '$runtimeType-$key';
 
   @override
   toStringShallow({joiner = ', ', minLevel = DiagnosticLevel.debug}) =>
-      _statefulEnum.toStringShallow(joiner: joiner, minLevel: minLevel);
+      _widget.toStringShallow(joiner: joiner, minLevel: minLevel);
 
   @override
   toStringDeep({prefixLineOne = '', prefixOtherLines, minLevel = DiagnosticLevel.debug}) {
-    return _statefulEnum.toStringDeep(
+    return toDiagnosticsNode().toStringDeep(
       prefixLineOne: prefixLineOne,
       prefixOtherLines: prefixOtherLines,
       minLevel: minLevel,
@@ -82,7 +68,47 @@ mixin StatelessEnum on Enum implements StatelessWidget {
   createElement() => StatelessElement(this);
 
   @override
-  void debugFillProperties(properties) => _statefulEnum.debugFillProperties(properties);
+  void debugFillProperties(properties) => _widget.debugFillProperties(properties);
+}
+
+/// {@macro enum_widget}
+mixin EnumHookWidgetMixin on Enum implements HookWidget {
+  HookWidget get _widget => HookBuilder(builder: build);
+
+  @override
+  get key => Key(name);
+
+  @override
+  toString({minLevel = DiagnosticLevel.off}) => _widget.toString(minLevel: minLevel);
+
+  @override
+  debugDescribeChildren() => const <DiagnosticsNode>[];
+
+  @override
+  toDiagnosticsNode({name, style}) =>
+      DiagnosticableTreeNode(name: this.name, value: this, style: style);
+
+  @override
+  toStringShort() => '$runtimeType-$key';
+
+  @override
+  toStringShallow({joiner = ', ', minLevel = DiagnosticLevel.debug}) =>
+      _widget.toStringShallow(joiner: joiner, minLevel: minLevel);
+
+  @override
+  toStringDeep({prefixLineOne = '', prefixOtherLines, minLevel = DiagnosticLevel.debug}) {
+    return toDiagnosticsNode().toStringDeep(
+      prefixLineOne: prefixLineOne,
+      prefixOtherLines: prefixOtherLines,
+      minLevel: minLevel,
+    );
+  }
+
+  @override
+  createElement() => _widget.createElement();
+
+  @override
+  void debugFillProperties(properties) => _widget.debugFillProperties(properties);
 }
 
 class _StatefulEnum extends StatefulWidget {
@@ -119,14 +145,11 @@ class _StatefulEnum extends StatefulWidget {
 /// ```
 ///
 /// {@macro enum_widget}
-mixin StatefulEnum on Enum implements StatefulWidget {
+mixin EnumStatefulWidgetMixin on Enum implements StatefulWidget {
   _StatefulEnum get _statefulEnum => _StatefulEnum(createState);
 
   @override
-  Key? get key => null;
-
-  @override
-  State<StatefulEnum> createState();
+  get key => Key(name);
 
   @override
   toString({minLevel = DiagnosticLevel.off}) => _statefulEnum.toString(minLevel: minLevel);

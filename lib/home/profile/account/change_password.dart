@@ -1,8 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:thc/utils/local_storage.dart';
-import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/style_text.dart';
+import 'package:thc/the_good_stuff.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -12,111 +9,78 @@ class ChangePasswordScreen extends StatefulWidget {
 }
 
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
-  final TextEditingController _currentPasswordController = TextEditingController();
-  final TextEditingController _newPasswordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
-  bool _isCurrentPasswordCorrect = false;
-  bool _isCurrentPasswordVerified = false;
-  String _verificationMessage = '';
-  Color? _messageColor;
-  String _passwordError = '';
-  bool _isPasswordValid = false;
-
-  @override
-  void dispose() {
-    _currentPasswordController.dispose();
-    _newPasswordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
-  }
+  String _currentPassword = '';
+  String _newPassword = '';
+  String _confirmPassword = '';
+  bool? _passwordCorrect;
 
   void _validateCurrentPassword() async {
     final user = FirebaseAuth.instance.currentUser;
     final cred = EmailAuthProvider.credential(
       email: user?.email! ?? LocalStorage.email()!,
-      password: _currentPasswordController.text,
+      password: _currentPassword,
     );
 
     try {
       await user?.reauthenticateWithCredential(cred) ??
           FirebaseAuth.instance.signInWithCredential(cred);
-      setState(() {
-        _isCurrentPasswordCorrect = true;
-        _isCurrentPasswordVerified = true;
-        _verificationMessage = 'Verification successful';
-        _messageColor = Colors.green;
-      });
+      LocalStorage.password.save(_currentPassword);
+      setState(() => _passwordCorrect = true);
     } catch (e) {
-      setState(() {
-        _isCurrentPasswordCorrect = false;
-        _isCurrentPasswordVerified = true;
-        _verificationMessage = 'Verification failed';
-        _messageColor = Colors.red;
-      });
+      setState(() => _passwordCorrect = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final ColorScheme colors = ThcColors.of(context);
+    final bool validLength = _newPassword.length >= 8;
+    final bool passwordsMatch = _confirmPassword == _newPassword;
+    final bool canChange = (_passwordCorrect ?? false) && passwordsMatch && validLength;
+
     final content = <Widget>[
       TextField(
-        controller: _currentPasswordController,
         obscureText: true,
         decoration: const InputDecoration(labelText: 'Current Password'),
+        onChanged: (value) => _currentPassword = value,
       ),
       const SizedBox(height: 8),
       ElevatedButton(
         onPressed: _validateCurrentPassword,
         child: const Text('Verify Current Password'),
       ),
-      if (_isCurrentPasswordVerified)
+      if (_passwordCorrect case final correct?)
         Text(
-          _verificationMessage,
-          style: StyleText(color: _messageColor, weight: 700),
+          correct ? 'Verification success!' : 'Check your password and try again.',
+          style: TextStyle(color: correct ? colors.primary : colors.error, weight: 700),
         ),
       const SizedBox(height: 30),
       TextField(
-        controller: _newPasswordController,
         obscureText: true,
-        enabled: _isCurrentPasswordVerified && _isCurrentPasswordCorrect,
+        enabled: _passwordCorrect ?? false,
         decoration: InputDecoration(
           labelText: 'New Password',
-          errorText:
-              _newPasswordController.text.length < 8 && _newPasswordController.text.isNotEmpty
-                  ? 'Password must be at least 8 characters'
-                  : null,
+          errorText: _newPassword.isEmpty || validLength
+              ? null
+              : 'Password must be at least 8 characters',
         ),
-        onChanged: (value) {
-          setState(() {
-            _isPasswordValid = value.length >= 8;
-            _passwordError =
-                value != _confirmPasswordController.text ? 'Passwords do not match' : '';
-          });
-        },
+        onChanged: (value) => setState(() => _newPassword = value),
       ),
       const SizedBox(height: 16),
       TextField(
-        controller: _confirmPasswordController,
         obscureText: true,
-        enabled: _isCurrentPasswordVerified && _isCurrentPasswordCorrect && _isPasswordValid,
+        enabled: (_passwordCorrect ?? false) && validLength,
         decoration: InputDecoration(
           labelText: 'Confirm New Password',
-          errorText: _passwordError,
+          errorText: _confirmPassword.isEmpty || _confirmPassword == _newPassword
+              ? null
+              : 'Passwords do not match',
         ),
-        onChanged: (value) {
-          setState(() {
-            _passwordError = value != _newPasswordController.text ? 'Passwords do not match' : '';
-          });
-        },
+        onChanged: (value) => setState(() => _confirmPassword = value),
       ),
       const SizedBox(height: 16),
       ElevatedButton(
-        onPressed: (_isCurrentPasswordVerified &&
-                _isCurrentPasswordCorrect &&
-                _newPasswordController.text == _confirmPasswordController.text &&
-                _isPasswordValid)
-            ? _changePassword
-            : null,
+        onPressed: canChange ? _changePassword : null,
         child: const Text('Change Password'),
       ),
     ];
@@ -140,56 +104,15 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   }
 
   void _changePassword() async {
-    if (_newPasswordController.text == _currentPasswordController.text) {
-      _showPasswordSameDialog();
-      return;
-    }
-
-    final User? user = FirebaseAuth.instance.currentUser;
-    final String newPassword = _newPasswordController.text;
-
     try {
-      await user?.updatePassword(newPassword);
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Password Changed'),
-            content: const Text('Your password has been successfully changed.'),
-            actions: <Widget>[
-              TextButton(onPressed: navigator.pop, child: const Text('OK')),
-            ],
-          );
-        },
-      );
+      await FirebaseAuth.instance.currentUser!.updatePassword(_newPassword);
     } catch (e) {
-      showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Failed to Change Password'),
-            content: Text('Failed to change password: $e'),
-            actions: <Widget>[
-              TextButton(onPressed: navigator.pop, child: const Text('OK')),
-            ],
-          );
-        },
-      );
+      navigator.snackbarMessage('${e.runtimeType} occurred: $e');
     }
-  }
-
-  void _showPasswordSameDialog() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Change Password Error'),
-          content: const Text('The new password cannot be the same as your current password.'),
-          actions: <Widget>[
-            TextButton(onPressed: navigator.pop, child: const Text('OK')),
-          ],
-        );
-      },
-    );
+    LocalStorage.password.save(_newPassword);
+    navigator.showDialog(const Dialog(
+      titleText: 'Password Changed',
+      bodyText: 'Your password has been successfully changed.',
+    ));
   }
 }

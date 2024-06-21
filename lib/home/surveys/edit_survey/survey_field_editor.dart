@@ -1,12 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'package:thc/home/surveys/edit_survey/survey_editor.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
 import 'package:thc/home/surveys/take_survey/survey_field.dart';
-import 'package:thc/utils/app_config.dart';
-import 'package:thc/utils/style_text.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 
 /// Shows a preview of a [SurveyField] that you can tap to edit.
 class SurveyFieldEditor extends StatefulWidget {
@@ -80,7 +76,7 @@ class ChoiceText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final text = TextField(
+    final textField = TextField(
       controller: data.controller,
       focusNode: data.node,
       decoration: InputDecoration(errorText: data.errorText),
@@ -89,7 +85,7 @@ class ChoiceText extends StatelessWidget {
       onTapOutside: (_) => mainNode.requestFocus(),
     );
 
-    if (!plural) return text;
+    if (!plural) return textField;
 
     final bool? useDataIcon = switch (icon) {
       _ when data.showIcons => true,
@@ -114,7 +110,7 @@ class ChoiceText extends StatelessWidget {
             icon: Icon((useDataIcon ?? true) ? Icons.do_not_disturb_on_outlined : icon!),
           ),
         ),
-        Expanded(child: text),
+        Expanded(child: textField),
         ReorderableDragStartListener(
           index: index,
           child: Opacity(
@@ -306,7 +302,7 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
     // when nothing in this editor is focused, we should return to "view" mode.
     mainNode.addListener(() {
       if (mode == EditorMode.collapsed) return;
-      final newState = EditorMode.update(mainNode);
+      final EditorMode newState = EditorMode.update(mainNode);
       if (mode != newState) {
         setState(() {
           mode = newState;
@@ -341,16 +337,15 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = ThcColors.of(context);
-    final translucent = colors.outlineVariant;
+    final ColorScheme colors = ThcColors.of(context);
     final pluralChoices = choices.length > 1;
 
-    final choiceNames = [for (final choice in choices) choice.text];
+    final choiceNames = <String>[for (final choice in choices) choice.text];
     const choicePadding = EdgeInsets.fromLTRB(48, 0, 36, 16);
 
-    final validating = context.watch<ValidSurveyQuestions>().value;
-    final mobileEditing = context.watch<MobileEditing>().value;
-    if (mobileEditing) stopEditing();
+    final bool validating = context.watch<ValidSurveyQuestions>().value;
+    final bool editing = Editing.of(context);
+    if (editing) stopEditing();
 
     Widget? content;
     switch (mode) {
@@ -433,9 +428,9 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
                     TextField(
                       decoration: InputDecoration(
                         hintText: 'add…',
-                        hintStyle: StyleText(color: translucent),
+                        hintStyle: TextStyle(color: colors.outlineVariant),
                         enabledBorder: UnderlineInputBorder(
-                          borderSide: BorderSide(color: translucent),
+                          borderSide: BorderSide(color: colors.outlineVariant),
                         ),
                       ),
                     ),
@@ -493,8 +488,8 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
               child: SurveyField(SurveyRecord.init(updatedQuestion), (_) {}),
             ),
             Positioned.fill(child: InkWell(onTap: mainNode.requestFocus)),
-            if (showButtons || mobileEditing) ...[
-              if (mobileEditing) const Positioned.fill(child: ColoredBox(color: Colors.white38)),
+            if (showButtons || editing) ...[
+              if (editing) const Positioned.fill(child: ColoredBox(color: Colors.white38)),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -532,7 +527,7 @@ class _SurveyFieldEditorState extends State<SurveyFieldEditor> {
             );
           }
         }
-        if (mobileEditing) {
+        if (editing) {
           content = Padding(
             padding: const EdgeInsets.only(bottom: SurveyEditDivider.height / 2),
             child: content,
@@ -582,15 +577,13 @@ class QuestionTypeIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = ThcColors.of(context);
-    final foregroundColor = colors.onSurface;
-    final backgroundColor = colors.surface;
+    final ColorScheme colors = ThcColors.of(context);
     final Widget graphic;
     switch (question) {
       case YesNoQuestion():
         graphic = DecoratedBox(
           decoration: BoxDecoration(
-            color: foregroundColor.withAlpha(0x80),
+            color: colors.onSurface.withAlpha(0x80),
             borderRadius: BorderRadius.circular(50),
           ),
           child: Row(
@@ -598,15 +591,15 @@ class QuestionTypeIcon extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(5, 3, 3.5, 3),
-                child: Icon(Icons.check, color: backgroundColor),
+                child: Icon(Icons.check, color: colors.surface),
               ),
               ColoredBox(
-                color: backgroundColor,
+                color: colors.surface,
                 child: const SizedBox(width: 1, height: 20),
               ),
               Padding(
                 padding: const EdgeInsets.fromLTRB(3, 3, 5, 3),
-                child: Icon(Icons.close, color: backgroundColor),
+                child: Icon(Icons.close, color: colors.surface),
               ),
             ],
           ),
@@ -614,15 +607,15 @@ class QuestionTypeIcon extends StatelessWidget {
       case TextPromptQuestion():
         graphic = DecoratedBox(
           decoration: BoxDecoration(
-            color: backgroundColor,
-            border: Border.all(color: foregroundColor),
+            color: colors.surface,
+            border: Border.all(color: colors.onSurface),
             borderRadius: BorderRadius.circular(5),
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(5, 0, 5, 3),
             child: Text(
               'text',
-              style: StyleText(size: 12, color: foregroundColor.withAlpha(0xcc)),
+              style: TextStyle(size: 12, color: colors.onSurface.withAlpha(0xcc)),
             ),
           ),
         );
@@ -647,7 +640,7 @@ class QuestionTypeIcon extends StatelessWidget {
                 size: size,
                 child: DecoratedBox(
                   decoration: BoxDecoration(
-                    color: foregroundColor,
+                    color: colors.onSurface,
                     borderRadius: BorderRadius.circular(10),
                     boxShadow: switch (colors.brightness) {
                       Brightness.light => null,
@@ -661,7 +654,7 @@ class QuestionTypeIcon extends StatelessWidget {
     }
     return Theme(
       data: Theme.of(context).copyWith(
-        iconTheme: IconThemeData(size: 12, color: foregroundColor),
+        iconTheme: IconThemeData(size: 12, color: colors.onSurface),
       ),
       child: SizedBox(
         height: 50,
@@ -669,7 +662,7 @@ class QuestionTypeIcon extends StatelessWidget {
           decoration: BoxDecoration(
             border: question is ScaleQuestion
                 ? null // no border on the far right side
-                : Border(right: BorderSide(color: foregroundColor.withOpacity(0.25))),
+                : Border(right: BorderSide(color: colors.onSurface.withOpacity(0.25))),
           ),
           child: Align(
             child: Padding(
