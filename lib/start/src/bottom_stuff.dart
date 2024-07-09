@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart' as material;
 import 'package:thc/start/src/login_progress.dart';
 import 'package:thc/the_good_stuff.dart';
 import 'package:thc/utils/widgets/clip_height.dart';
@@ -40,8 +41,15 @@ class BottomStuff extends HookWidget {
     if (shouldShow != forwardOrComplete) controller.toggle(shouldReverse: !shouldShow);
     if (shouldShow && labels != loginLabels.value) loginLabels.value = labels;
 
+    final screenSize = MediaQuery.of(context).size;
+    final double bottomPadding = screenSize.height * 0.01;
+    final double fontSize = math.min(screenSize.width * 0.03, 600 * 0.03);
+
     return DefaultTextStyle(
-      style: TextStyle(weight: 600, color: colors.outline.withOpacity(0.875)),
+      style: material.TextStyle(
+          fontSize: fontSize,
+          fontWeight: FontWeight.w600,
+          color: colors.outline.withOpacity(0.875)),
       textAlign: TextAlign.center,
       child: AnimatedBuilder(
         animation: controller,
@@ -50,9 +58,11 @@ class BottomStuff extends HookWidget {
           final double t = controller.value;
 
           final tColumns = (t - 1) * (forwardOrComplete ? 2 : 1) + 1;
-          final tSeparator = forwardOrComplete
-              ? curve.transform(math.min(t * 2, 1))
-              : 1 - curve.transform(1 - t);
+          final tSeparator = math.max(
+              forwardOrComplete
+                  ? curve.transform(math.min(t * 2, 1))
+                  : 1 - curve.transform(1 - t),
+              0.0);
 
           const timeOffsetRatio = 7 / 8;
           late final tTitle = math.min(tColumns / timeOffsetRatio, 1.0);
@@ -68,12 +78,13 @@ class BottomStuff extends HookWidget {
               onPressed: LoginLabels.goto(target),
               child: SizedBox(
                 width: double.infinity,
-                child: Text(text, style: spaced, textAlign: TextAlign.center),
+                child: Text(text,
+                    style: spaced.copyWith(fontSize: fontSize), textAlign: TextAlign.center),
               ),
             );
 
             Widget buttonStuff = Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
+              padding: EdgeInsets.symmetric(vertical: bottomPadding),
               child: Column(
                 children: [
                   fadeSlide(tTitle, child: Text(label)),
@@ -94,7 +105,7 @@ class BottomStuff extends HookWidget {
           return Padding(
             padding: EdgeInsets.only(top: 20 * tSeparator),
             child: SizedBox(
-              height: 88 * tSeparator,
+              height: math.max(88 * tSeparator, 0.0),
               child: Row(children: [button(button1), child!, button(button2)]),
             ),
           );
