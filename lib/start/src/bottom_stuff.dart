@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart' as material;
 import 'package:thc/start/src/login_progress.dart';
 import 'package:thc/the_good_stuff.dart';
 import 'package:thc/utils/widgets/clip_height.dart';
@@ -40,73 +41,83 @@ class BottomStuff extends HookWidget {
     if (shouldShow != forwardOrComplete) controller.toggle(shouldReverse: !shouldShow);
     if (shouldShow && labels != loginLabels.value) loginLabels.value = labels;
 
-    return DefaultTextStyle(
-      style: TextStyle(weight: 600, color: colors.outline.withOpacity(0.875)),
-      textAlign: TextAlign.center,
-      child: AnimatedBuilder(
-        animation: controller,
-        builder: (context, child) {
-          final bool forwardOrComplete = controller.isForwardOrCompleted;
-          final double t = controller.value;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final double buttonWidth = constraints.maxWidth * 0.4;
+        final double fontSize = constraints.maxWidth * 0.03;
 
-          final tColumns = (t - 1) * (forwardOrComplete ? 2 : 1) + 1;
-          final tSeparator = forwardOrComplete
-              ? curve.transform(math.min(t * 2, 1))
-              : 1 - curve.transform(1 - t);
+        return DefaultTextStyle(
+          style: TextStyle(size: fontSize, weight: 600, color: colors.outline.withOpacity(0.875)),
+          textAlign: TextAlign.center,
+          child: AnimatedBuilder(
+            animation: controller,
+            builder: (context, child) {
+              final bool forwardOrComplete = controller.isForwardOrCompleted;
+              final double t = controller.value;
 
-          const timeOffsetRatio = 7 / 8;
-          late final tTitle = math.min(tColumns / timeOffsetRatio, 1.0);
-          late final tButton = math.max((tColumns - 1) / timeOffsetRatio + 1, 0.0);
+              final tColumns = (t - 1) * (forwardOrComplete ? 2 : 1) + 1;
+              final tSeparator = forwardOrComplete
+                    ? curve.transform(math.min(t * 2, 1))
+                    : 1 - curve.transform(1 - t);
 
-          Widget button(LoginLabels? target) {
-            if (tColumns <= 0 || target == null) return const Spacer();
+              const timeOffsetRatio = 7 / 8;
+              late final tTitle = math.min(tColumns / timeOffsetRatio, 1.0);
+              late final tButton = math.max((tColumns - 1) / timeOffsetRatio + 1, 0.0);
 
-            final (:label, :text) = target.buttonData!;
+              Widget button(LoginLabels? target) {
+                if (tColumns <= 0 || target == null) return const Spacer();
 
-            const spaced = TextStyle(letterSpacing: 1 / 3);
-            final button = FilledButton(
-              onPressed: LoginLabels.goto(target),
-              child: SizedBox(
-                width: double.infinity,
-                child: Text(text, style: spaced, textAlign: TextAlign.center),
+                final (:label, :text) = target.buttonData!;
+
+                final button = FilledButton(
+                  onPressed: LoginLabels.goto(target),
+                  child: SizedBox(
+                    width: buttonWidth,
+                    child: Text(
+                      text,
+                      style: TextStyle(letterSpacing: 1 / 3, size: fontSize),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                );
+
+                Widget buttonStuff = Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Column(
+                    children: [
+                      fadeSlide(tTitle, child: Text(label)),
+                      const Spacer(),
+                      fadeSlide(tButton, child: button),
+                    ],
+                  ),
+                );
+
+                if (!forwardOrComplete) {
+                  buttonStuff = ClipHeight(childHeight: 88, child: buttonStuff);
+                }
+                return Expanded(child: buttonStuff);
+              }
+
+              final (button1, button2) = loginLabels.value.otherOptions!;
+
+              return Padding(
+                padding: EdgeInsets.only(top: 20 * tSeparator),
+                child: SizedBox(
+                  height: 88 * tSeparator,
+                  child: Row(children: [button(button1), child!, button(button2)]),
+                ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              child: ColoredBox(
+                color: colors.onSurfaceVariant,
+                child: const SizedBox(width: 1, height: double.infinity),
               ),
-            );
-
-            Widget buttonStuff = Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: Column(
-                children: [
-                  fadeSlide(tTitle, child: Text(label)),
-                  const Spacer(),
-                  fadeSlide(tButton, child: button),
-                ],
-              ),
-            );
-
-            if (!forwardOrComplete) {
-              buttonStuff = ClipHeight(childHeight: 88, child: buttonStuff);
-            }
-            return Expanded(child: buttonStuff);
-          }
-
-          final (button1, button2) = loginLabels.value.otherOptions!;
-
-          return Padding(
-            padding: EdgeInsets.only(top: 20 * tSeparator),
-            child: SizedBox(
-              height: 88 * tSeparator,
-              child: Row(children: [button(button1), child!, button(button2)]),
             ),
-          );
-        },
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          child: ColoredBox(
-            color: colors.onSurfaceVariant,
-            child: const SizedBox(width: 1, height: double.infinity),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
