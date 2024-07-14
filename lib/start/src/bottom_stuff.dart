@@ -56,11 +56,9 @@ class BottomStuff extends HookWidget {
               final double t = controller.value;
 
               final tColumns = (t - 1) * (forwardOrComplete ? 2 : 1) + 1;
-              final tSeparator = math.max(
-                  forwardOrComplete
-                      ? curve.transform(math.min(t * 2, 1))
-                      : 1 - curve.transform(1 - t),
-                  0.0);
+              final tSeparator = forwardOrComplete
+                    ? curve.transform(math.min(t * 2, 1))
+                    : 1 - curve.transform(1 - t);
 
               const timeOffsetRatio = 7 / 8;
               late final tTitle = math.min(tColumns / timeOffsetRatio, 1.0);
@@ -71,13 +69,15 @@ class BottomStuff extends HookWidget {
 
                 final (:label, :text) = target.buttonData!;
 
-                const spaced = TextStyle(letterSpacing: 1 / 3);
                 final button = FilledButton(
                   onPressed: LoginLabels.goto(target),
                   child: SizedBox(
                     width: buttonWidth,
-                    child: Text(text,
-                        style: spaced.copyWith(fontSize: fontSize), textAlign: TextAlign.center),
+                    child: Text(
+                      text,
+                      style: TextStyle(letterSpacing: 1 / 3, size: fontSize),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
                 );
 
