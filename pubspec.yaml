@@ -33,6 +33,9 @@ dependencies:
   dio: ^5.4.0
   universal_html: ^2.2.4
   file_picker: ^8.0.3
+  agora_rtc_engine: ^6.3.2
+  cloud_functions: ^4.7.6
+  flutter_dotenv: ^5.1.0
 
 dev_dependencies:
   flutter_test:

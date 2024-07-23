@@ -1,7 +1,9 @@
 import 'dart:math' as math;
 
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
-import 'package:thc/agora/broadcast_stream.dart';
+import 'package:thc/agora/broadcasting/broadcast_stream.dart';
+import 'package:thc/agora/channel/create_channel.dart';
+import 'package:thc/agora/join_active_stream.dart';
 import 'package:thc/agora/livestream_button.dart';
 import 'package:thc/agora/livestream_overlay.dart';
 import 'package:thc/home/home_screen.dart';
@@ -73,7 +75,7 @@ class _ActiveStreamState extends State<ActiveStream> {
             children: [
               LivestreamButton.backdrop(),
               LivestreamOverlay(whenHidden: 0.25, child: _ViewCount()),
-              LivestreamOverlay(whenHidden: 0.0, child: _StreamingCamera()),
+              _StreamingCamera(),
               NavBar(belowPage: true),
             ],
           ),
@@ -94,7 +96,6 @@ class _StreamingCamera extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final stream = NavBarSelection.streaming(context);
-    ClientRoleType userType;
     // final enjoying = NavBarSelection.streaming(context) ? 'filming': 'enjoying';
 
     // return Center(
@@ -106,12 +107,10 @@ class _StreamingCamera extends StatelessWidget {
 
     switch (stream) {
       case true:
-        userType = ClientRoleType.clientRoleBroadcaster;
+        return const CreateChannelPage();
       case false:
-        userType = ClientRoleType.clientRoleAudience;
+        return const JoinActiveStream();
     }
-
-    return BroadcastStream(userType: userType);
     // // return const BroadcastStream();
   }
 }
