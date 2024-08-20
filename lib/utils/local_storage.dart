@@ -41,7 +41,8 @@ enum LocalStorage {
   themeMode,
   navBarSelection,
   adminWatchLive,
-  adminStream;
+  adminStream,
+  notify;
 
   /// {@macro StorageKeys}
   dynamic get initial => switch (this) {
@@ -51,6 +52,7 @@ enum LocalStorage {
         themeMode => ThemeMode.system.index,
         navBarSelection => 0,
         adminWatchLive || adminStream => false,
+        notify => null
       };
 
   /// {@macro StorageKeys}
@@ -70,6 +72,7 @@ enum LocalStorage {
       themeMode => ThemeMode.values[value],
       navBarSelection => NavBarButton.values[value],
       adminWatchLive || adminStream => value,
+      notify => value
     };
   }
 

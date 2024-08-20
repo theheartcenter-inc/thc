@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/utils/local_storage.dart';
 import 'package:thc/utils/style_text.dart';
@@ -11,6 +12,7 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
       body: Center(
@@ -25,6 +27,8 @@ class SettingsScreen extends StatelessWidget {
               NavBarSwitch(LocalStorage.adminWatchLive),
               NavBarSwitch(LocalStorage.adminStream),
             ],
+            const SizedBox(height: 50),
+            const NotificationSwitch(LocalStorage.notify),
           ],
         ),
       ),
@@ -54,6 +58,42 @@ class _NavBarSwitchState extends State<NavBarSwitch> {
         setState(() => value = newValue);
         widget.storageKey.save(newValue);
         context.read<NavBarSelection>().refresh();
+      },
+    );
+  }
+}
+
+class NotificationSwitch extends StatefulWidget {
+  const NotificationSwitch(this.storageKey, {super.key});
+  final LocalStorage storageKey;
+
+  @override
+  State<NotificationSwitch> createState() => _NotificationSwitchState();
+}
+
+class _NotificationSwitchState extends State<NotificationSwitch> {
+  @override
+  Future<void> _updateUserPreference(bool? value) async {
+    await Firestore.users.doc(user.id ?? user.email!).update({'notify': value});
+    if(value == true){
+      await FirebaseMessaging.instance.subscribeToTopic("livestream_notifications");
+    }
+    if(value == false){
+      await FirebaseMessaging.instance.unsubscribeFromTopic("livestream_notifications");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    late bool value = widget.storageKey() ?? user.notify ?? false;
+    return SwitchListTile(
+      title: const Text('Enable Livestream Notifications'),
+      value: value,
+      onChanged: (bool newValue) {
+        setState(() => value = newValue);
+        widget.storageKey.save(value);
+        context.read<NavBarSelection>().refresh();
+        _updateUserPreference(value);
       },
     );
   }
