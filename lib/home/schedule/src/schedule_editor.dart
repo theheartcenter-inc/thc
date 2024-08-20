@@ -26,7 +26,7 @@ class _ScheduleEditorState extends State<ScheduleEditor> {
   CalendarFormat _calendarFormat = CalendarFormat.month;
   DateTime _focusedDay = DateTime.now();
 
-  final eventsCollection = FirebaseFirestore.instance.collection('events');
+  final eventsCollection = FirebaseFirestore.instance.collection('scheduled_streams');
 
   @override
   void initState() {
