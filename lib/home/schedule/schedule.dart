@@ -126,3 +126,16 @@ class Schedule extends StatelessWidget {
     );
   }
 }
+class ScheduledStreams {
+  final CollectionReference collection =
+      FirebaseFirestore.instance.collection('scheduled_streams');
+
+  Stream<QuerySnapshot> getStream() {
+    return collection.snapshots();
+  }
+
+  static ScheduledStreams of(BuildContext context) {
+  
+    return ScheduledStreams();
+  }
+}
