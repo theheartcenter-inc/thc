@@ -1,13 +1,8 @@
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:thc/start/src/bottom_stuff.dart';
 import 'package:thc/start/src/login_progress.dart';
 import 'package:thc/start/src/za_hando.dart';
-import 'package:thc/utils/app_config.dart';
-import 'package:thc/utils/style_text.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 import 'package:thc/utils/widgets/clip_height.dart';
-import 'package:thc/utils/widgets/enum_widget.dart';
 
 /// We could have done something like
 ///
@@ -27,7 +22,7 @@ extension LoginFieldStuff<T> on (T, T) {
 
 /// Holds UI/state management data for the username & password fields
 /// (or whatever the currently applicable [LoginLabels] are).
-enum LoginField with StatelessEnum {
+enum LoginField with EnumStatelessWidgetMixin {
   top,
   bottom;
 
@@ -75,7 +70,7 @@ enum LoginField with StatelessEnum {
             bottom.node.requestFocus();
           };
 
-    final colors = ThcColors.of(context);
+    final ColorScheme colors = ThcColors.of(context);
     final focused = focusedField == this;
     final cursorColor = context.lightDark(ThcColors.green67, Colors.black);
     final blackHint = focused && colors.brightness == Brightness.dark;
@@ -95,7 +90,7 @@ enum LoginField with StatelessEnum {
             : Colors.transparent,
         filled: true,
         hintText: hintText,
-        hintStyle: StyleText(color: blackHint ? Colors.black : colors.outline),
+        hintStyle: TextStyle(color: blackHint ? Colors.black : colors.outline),
       ),
       obscureText: !(this == top && showPassword) && (hintText?.contains('password') ?? false),
       onChanged: newVal,
@@ -132,7 +127,7 @@ class LoginFields extends StatelessWidget {
       :errorMessage,
     ) = LoginProgressTracker.of(context);
 
-    final colors = ThcColors.of(context);
+    final ColorScheme colors = ThcColors.of(context);
 
     final expandText = animation >= AnimationProgress.collapseHand;
     final showBottom = animation >= AnimationProgress.showBottom;
@@ -147,7 +142,7 @@ class LoginFields extends StatelessWidget {
             padding: EdgeInsets.only(bottom: 3),
             child: Text(
               'start',
-              style: StyleText(size: 22, weight: 600, color: ThcColors.green),
+              style: TextStyle(size: 22, weight: 600, color: ThcColors.green),
             ),
           ),
         ),
@@ -194,13 +189,13 @@ class LoginFields extends StatelessWidget {
             ? errorMessage
             : 'check the above field${labels.just1field ? "" : "s"} and try again.',
         textAlign: TextAlign.center,
-        style: const StyleText(size: 12, weight: 600, color: Color(0xffc00000)),
+        style: const TextStyle(size: 12, weight: 600, color: Color(0xffc00000)),
       );
     } else if (labels == LoginLabels.recovery) {
       helpText = Text(
         "If you don't have a connected email,\ncontact the person who provided your user ID.",
         textAlign: TextAlign.center,
-        style: StyleText(size: 12, weight: 550, color: colors.onSurface),
+        style: TextStyle(size: 12, weight: 550, color: colors.onSurface),
       );
     } else {
       helpText = const SizedBox(width: double.infinity);
@@ -287,8 +282,8 @@ class _TextFieldButton extends StatelessWidget {
       passwordVisibility ? showPassword : onPressed != null,
     );
 
-    final justUseTheDangColor = passwordVisibility && showPassword;
-    final iconfg = switch ((brightness, focused)) {
+    final bool justUseTheDangColor = passwordVisibility && showPassword;
+    final Color iconfg = switch ((brightness, focused)) {
       (Brightness.light, true || false) when onPressed != null => Colors.white,
       (Brightness.light, true) => Colors.white,
       (Brightness.light, false) => const Color(0xffd6e2ec),
@@ -303,7 +298,7 @@ class _TextFieldButton extends StatelessWidget {
       children: [
         DecoratedBox(
           decoration: BoxDecoration(color: iconbg, shape: BoxShape.circle),
-          child: const SizedBox(width: 33, height: 33),
+          child: const SizedBox.square(dimension: 33),
         ),
         IconButton(
           focusNode: node,
@@ -331,11 +326,9 @@ class GoBack extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final LoginProgress(:labels) = LoginProgressTracker.of(context);
-    final target = labels.back;
-    return SizedBox(
-      width: 48,
-      height: 48,
+    final target = LoginProgressTracker.labelsOf(context).back;
+    return SizedBox.square(
+      dimension: 48,
       child: AnimatedSlide(
         offset: target == null ? const Offset(-1.5, 0) : Offset.zero,
         duration: Durations.medium1,

@@ -1,11 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:thc/home/home_screen.dart';
-import 'package:thc/utils/local_storage.dart';
-import 'package:thc/utils/style_text.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -19,7 +15,7 @@ class SettingsScreen extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Dark theme?', style: StyleText(size: 20)),
+            const Text('Dark theme?', style: TextStyle(size: 20)),
             const SizedBox(height: 20),
             const _ThemePicker(),
             if (user.isAdmin) ...const [
@@ -36,27 +32,23 @@ class SettingsScreen extends StatelessWidget {
   }
 }
 
-class NavBarSwitch extends StatefulWidget {
+class NavBarSwitch extends HookWidget {
   const NavBarSwitch(this.storageKey, {super.key});
   final LocalStorage storageKey;
 
   @override
-  State<NavBarSwitch> createState() => _NavBarSwitchState();
-}
-
-class _NavBarSwitchState extends State<NavBarSwitch> {
-  late bool value = widget.storageKey();
-  @override
   Widget build(BuildContext context) {
+    final state = useState<bool>(storageKey());
+
     return SwitchListTile.adaptive(
-      title: Text(switch (widget.storageKey) {
+      title: Text(switch (storageKey) {
         LocalStorage.adminWatchLive => 'show "watch live"',
         LocalStorage.adminStream || _ => 'show "stream"',
       }),
-      value: value,
+      value: state.value,
       onChanged: (newValue) {
-        setState(() => value = newValue);
-        widget.storageKey.save(newValue);
+        state.toggle();
+        storageKey.save(newValue);
         context.read<NavBarSelection>().refresh();
       },
     );
@@ -104,7 +96,6 @@ class _ThemePicker extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final themeMode = context.watch<AppTheme>().value;
     return SegmentedButton<ThemeMode>(
       showSelectedIcon: false,
       segments: [
@@ -117,7 +108,7 @@ class _ThemePicker extends StatelessWidget {
             ),
           ),
       ],
-      selected: {themeMode},
+      selected: {context.watch<AppTheme>().value},
       onSelectionChanged: (selection) => context.read<AppTheme>().newThemeMode(selection.first),
     );
   }

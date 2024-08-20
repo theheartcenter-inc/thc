@@ -1,14 +1,12 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import 'package:thc/credentials/credentials.dart';
-import 'package:thc/firebase/firebase.dart';
-import 'package:thc/utils/local_storage.dart';
+import 'package:thc/the_good_stuff.dart';
 
 /// If there's an error here, check out the
 /// [Private Credentials wiki page](https://github.com/theheartcenter-one/thc/wiki/Private-Credentials)
 /// for a solution.
 Future<void> initFirebase() async {
-  final options = switch (defaultTargetPlatform) {
+  final FirebaseOptions options = switch (defaultTargetPlatform) {
     TargetPlatform() when kIsWeb => FirebaseCredentials.web,
     TargetPlatform.android => FirebaseCredentials.android,
     TargetPlatform.iOS => FirebaseCredentials.ios,
@@ -20,7 +18,7 @@ Future<void> initFirebase() async {
   await Firebase.initializeApp(options: options);
 }
 
-void loadUser() {
+Future<void> loadUser() async {
   if (!LocalStorage.loggedIn()) return;
 
   final String name = LocalStorage.firstLastName();
@@ -42,13 +40,10 @@ void loadUser() {
     id ??= 'test_participant';
   }
 
-  ThcUser.instance = ThcUser(name: name, type: type, id: id, email: email);
-
-  if (id == null) return;
-
   try {
-    ThcUser.download(id).then((user) => ThcUser.instance = user);
+    user = await ThcUser.download();
   } catch (e) {
     assert(false, e.toString());
+    user = ThcUser(name: name, type: type, id: id, email: email);
   }
 }

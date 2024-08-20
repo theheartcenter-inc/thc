@@ -70,7 +70,7 @@ enum LocalStorage {
       userType when value == null => null,
       userType => UserType.values[value],
       themeMode => ThemeMode.values[value],
-      navBarSelection => NavBarButton.values[value],
+      navBarSelection => NavBarButton.fromStorageIndex(value),
       adminWatchLive || adminStream => value,
       notify => value
     };

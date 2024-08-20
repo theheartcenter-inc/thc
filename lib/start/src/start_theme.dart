@@ -1,5 +1,4 @@
-import 'package:flutter/material.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 
 class StartTheme extends StatelessWidget {
   /// Wraps any widget with the "start theme".

@@ -1,12 +1,8 @@
-import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart';
 import 'package:thc/agora/active_stream.dart';
 import 'package:thc/agora/livestream_button.dart';
-import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/style_text.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 import 'package:thc/utils/widgets/placeholders.dart';
 
 class WatchLive extends StatelessWidget {
@@ -20,15 +16,15 @@ class WatchLive extends StatelessWidget {
         child: Column(
           children: [
             const Spacer(flex: 2),
-            const Text('Daily Breathing Meditation', style: StyleText(size: 24)),
+            const Text('Daily Breathing Meditation', style: TextStyle(size: 24)),
             const SizedBox(height: 10),
-            const Text('Bob Long', style: StyleText(size: 18)),
+            const Text('Bob Long', style: TextStyle(size: 18)),
             const Spacer(),
             const PlaceholderImage(width: 200),
             const Spacer(),
             Text(
               active ? 'active now!' : 'starting soon!',
-              style: const StyleText(weight: 550),
+              style: const TextStyle(weight: 550),
             ),
             const SizedBox(height: 18),
             if (active)
@@ -38,7 +34,7 @@ class WatchLive extends StatelessWidget {
                 onPressed: () => navigator.push(const LobbyScreen()),
                 child: const Padding(
                   padding: EdgeInsets.all(18),
-                  child: Text('Enter Lobby', style: StyleText(size: 18)),
+                  child: Text('Enter Lobby', style: TextStyle(size: 18)),
                 ),
               ),
             const Spacer(),
@@ -53,35 +49,17 @@ class WatchLive extends StatelessWidget {
 /// participants are directed to this screen and can wait for it to start.
 ///
 /// Will redirect to [ActiveStream] once the director is ready.
-class LobbyScreen extends StatefulWidget {
+class LobbyScreen extends HookWidget {
   const LobbyScreen({super.key});
 
-  @override
-  State<LobbyScreen> createState() => _LobbyScreenState();
-}
-
-class _LobbyScreenState extends State<LobbyScreen> {
   /// Eventually, we'll connect with Firebase and Agora…
-  /// for now, it's set up to show the [ActiveStream] after 5 seconds.
-  late final Timer timer;
-
-  @override
-  void initState() {
-    super.initState();
-    timer = Timer(
-      const Duration(seconds: 5),
-      () => navigator.currentState.pushReplacement(ActiveStream.route),
-    );
-  }
-
-  @override
-  void dispose() {
-    timer.cancel();
-    super.dispose();
-  }
+  /// for now, we're set up to show the [ActiveStream] after 5 seconds.
+  static void goToStream() => navigator.currentState.pushReplacement(ActiveStream.route);
 
   @override
   Widget build(BuildContext context) {
+    useTimer(const Duration(seconds: 5), goToStream);
+
     return Scaffold(
       appBar: AppBar(title: const Text('Lobby')),
       body: Center(

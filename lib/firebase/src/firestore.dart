@@ -1,9 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
-import 'package:thc/utils/app_config.dart';
-import 'package:thc/utils/navigator.dart';
+import 'package:thc/the_good_stuff.dart';
 
 typedef Json = Map<String, dynamic>;
 
@@ -54,7 +51,7 @@ extension GetData on DocumentReference<Json> {
     }
     if (result == null) return null;
     assert(result.exists, "$path doesn't exist");
-    final data = result.data();
+    final Json? data = result.data();
     backendPrint('data: $data');
     return data;
   }
@@ -75,7 +72,7 @@ enum ThcSurvey with CollectionName {
       _doc.collection('responses').add(answerJson);
 
   Future<void> yeetResponses() async {
-    final responseDocs = await _doc.collection('responses').get();
+    final QuerySnapshot<Json> responseDocs = await _doc.collection('responses').get();
     await Future.wait([
       for (final item in responseDocs.docs) item.reference.delete(),
     ]);
@@ -83,7 +80,7 @@ enum ThcSurvey with CollectionName {
 
   /// The number of questions in the survey.
   Future<int> getLength() async {
-    final json = (await _doc.getData())!;
+    final Json json = (await _doc.getData())!;
     return json['question count'];
   }
 
@@ -91,20 +88,28 @@ enum ThcSurvey with CollectionName {
     if (kDebugMode && !(await _doc.get()).exists) {
       const message = 'tried to set the length for a non-existent survey';
       assert(false, message);
-      await navigator.showSnackBar(const SnackBar(content: Text(message)));
+      await navigator.snackbarMessage(message);
       return _doc.set({'question count': length});
     }
     return _doc.update({'question count': length});
   }
 
   Future<List<SurveyQuestion>> getQuestions() async {
-    final length = await getLength();
+    final int length = await getLength();
 
     Future<SurveyQuestion> getQuestion(int i) async {
-      final json = await doc(i).getData();
-      return SurveyQuestion.fromJson(json!);
+      final Json json = (await doc(i).getData())!;
+      return SurveyQuestion.fromJson(json);
     }
 
     return Future.wait<SurveyQuestion>([for (int i = 0; i < length; i++) getQuestion(i)]);
   }
+}
+
+class FirestoreID extends ValueKey<String> {
+  const FirestoreID(super.id);
+
+  FirestoreID.doc(DocumentReference doc) : this(doc.id);
+
+  FirestoreID.create(Firestore collection) : this.doc(collection.doc());
 }

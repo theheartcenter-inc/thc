@@ -1,12 +1,7 @@
-import 'package:flutter/material.dart';
-import 'package:thc/firebase/firebase.dart';
-import 'package:thc/utils/bloc.dart';
-import 'package:thc/utils/style_text.dart';
-import 'package:thc/utils/theme.dart';
-import 'package:thc/utils/widgets/enum_widget.dart';
+import 'package:thc/the_good_stuff.dart';
 
 /// A [TextField] with a name that matches a [ThcUser.json] key.
-enum AccountField with StatefulEnum {
+enum AccountField with EnumStatefulWidgetMixin {
   /// The user's first & last name (cannot be deleted).
   name,
 
@@ -29,7 +24,7 @@ enum AccountField with StatefulEnum {
   ///
   /// Set to `null` if it's empty or if it's unchanged.
   String? get updated {
-    final text = textValues[index];
+    final String text = textValues[index];
     return text.isNotEmpty && text != current ? text : null;
   }
 
@@ -70,9 +65,9 @@ class _AccountFieldState extends State<AccountField> {
 
   @override
   Widget build(BuildContext context) {
-    final colors = ThcColors.of(context);
+    final ColorScheme colors = ThcColors.of(context);
 
-    final style = WidgetStateTextStyle.resolveWith((states) => StyleText(
+    final style = WidgetStateTextStyle.resolveWith((states) => TextStyle(
           color: colors.onSurface.withOpacity(states.isFocused ? 1.0 : 0.5),
         ));
     final decoration = InputDecoration(
@@ -141,7 +136,7 @@ class AccountFields extends Cubit<ThcUser?> {
   }
 
   Future<void> yeet(AccountField field) async {
-    final data = user.json..remove(field.name);
+    final Json data = user.json..remove(field.name);
     await save(ThcUser.fromJson(data));
   }
 }

@@ -1,333 +1,292 @@
+import 'dart:math' as math;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:thc/firebase/firebase.dart';
-import 'package:thc/home/library/play_video.dart';
-import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/style_text.dart';
-import 'package:thc/utils/theme.dart';
-import 'package:intl/intl.dart';
-import 'package:dio/dio.dart';
-import 'package:universal_html/html.dart' as html;
+import 'package:thc/home/home_screen.dart';
+import 'package:thc/home/library/src/all_videos.dart';
+import 'package:thc/home/library/src/video_card.dart';
+import 'package:thc/the_good_stuff.dart';
 
-class FavoriteIconButton extends StatelessWidget {
-  const FavoriteIconButton({
-    super.key,
-    required this.isPinned,
-    required this.onFavoriteToggle,
-  });
-  final bool isPinned;
-  final VoidCallback onFavoriteToggle;
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      icon: Icon(isPinned ? Icons.star : Icons.star_border),
-      color: isPinned ? Colors.orange : Colors.grey,
-      onPressed: onFavoriteToggle,
-    );
-  }
-}
-
-class VideoCard extends StatelessWidget {
-  const VideoCard({
-    super.key,
-    required this.title,
-    required this.timestamp,
-    required this.director,
-    required this.category,
-    required this.id,
-    required this.path,
-    this.thumbnail,
-    this.isPinned = false,
-    required this.onFavoriteToggle,
-  });
-
-  final String title;
-  final Timestamp timestamp;
-  final String director;
-  final String category;
-  final String id;
-  final String path;
-  final String? thumbnail;
-  final bool isPinned;
-  final VoidCallback onFavoriteToggle;
-
-  Future<String?> playVideo() async {
-    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.windows) {
-      return 'not supported on Windows';
-    }
-
-    String? url;
-    try {
-      final storageReference = FirebaseStorage.instance.ref().child(path);
-      url = await storageReference.getDownloadURL();
-    } catch (e) {
-      return '${e.runtimeType} has occurred: $e';
-    }
-    navigator.push(PlayVideo(videoURL: url, videoName: title));
-    return null;
-  }
-
-  // Add a method to toggle the pinned status
-  Future<void> togglePinnedStatus() async {
-    final userDoc = FirebaseFirestore.instance.collection('users').doc('test_participant');
-    final streamDoc = userDoc.collection('streams').doc(id);
-
-    // Get the current pinned status
-    final docSnapshot = await streamDoc.get();
-    if (docSnapshot.exists) {
-      final currentPinnedStatus = docSnapshot.data()?['pinned'] ?? false;
-      // Update the pinned status to the opposite value
-      await streamDoc.update({'pinned': !currentPinnedStatus});
-    }
-  }
-
-  // Add a method to download the video
-  Future<void> downloadVideo() async {
-    try {
-      // Retrieve the download URL from Firebase Storage
-      final storageReference = FirebaseStorage.instance.ref().child(path);
-      final url = await storageReference.getDownloadURL();
-
-      if (kIsWeb) {
-        // Handle download for web environment
-        html.AnchorElement(href: url)
-          ..setAttribute('downloadVideo', title)
-          ..click();
-      } else {
-        // Handle download for non-web environment
-        final dio = Dio();
-        final savePath = './download_video/$title.mp4';
-
-        await dio.download(url, savePath, onReceiveProgress: (received, total) {});
-        navigator.showSnackBar(
-          SnackBar(content: Text('Download completed: $savePath')),
-        );
-      }
-    } on DioException catch (e) {
-      navigator.showSnackBar(
-        SnackBar(content: Text('Failed to download video: ${e.message}')),
-      );
-    } catch (e) {
-      navigator.showSnackBar(
-        SnackBar(content: Text('An error occurred: $e')),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final Image image;
-    if (thumbnail == null) {
-      image = Image.asset(
-        'assets/thc_thumbnail.jpg',
-        width: 100,
-        height: 100,
-      );
-    } else {
-      // Will likely change how we get thumbnails in the future
-      image = Image.network(thumbnail!);
-    }
-    final format = DateFormat('yyyy-MM-dd hh:mm a');
-    final DateTime date = DateTime.parse(timestamp.toDate().toString());
-    final formatedDate = format.format(date);
-
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      margin: const EdgeInsets.all(10),
-      color: Colors.white,
-      child: ListTile(
-        title: Text(
-          title,
-          style: const StyleText(weight: 650, color: Colors.black),
-        ),
-        subtitle: Text(
-          '$director • $formatedDate',
-          style: const StyleText(color: Colors.black),
-        ),
-        onTap: () async {
-          if (await playVideo() case final errorMessage?) {
-            navigator.showSnackBar(SnackBar(content: Text('$errorMessage :(')));
-          }
-        },
-        hoverColor: ThcColors.dullBlue.withOpacity(1 / 8),
-        leading: image,
-        // Add a trailing favorite icon button
-        // Add a download button
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Existing favorite icon button
-            FavoriteIconButton(
-              isPinned: isPinned,
-              onFavoriteToggle: onFavoriteToggle,
-            ),
-            // New download icon button
-            IconButton(
-              icon: const Icon(Icons.download),
-              onPressed: downloadVideo,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class VideoLibrary extends StatefulWidget {
+class VideoLibrary extends HookWidget {
   const VideoLibrary({super.key});
 
   @override
-  State<VideoLibrary> createState() => _VideoLibraryState();
+  Widget build(BuildContext context) {
+    final category = useState('All');
+    final search = useState('');
+
+    final (:videos, :categories) = ThcVideos.of(context, category.value, search.value);
+
+    if (videos == null) return const Center(child: CircularProgressIndicator());
+
+    final bool isAdmin = user.isAdmin;
+
+    const decoration = InputDecoration(prefixIcon: Icon(Icons.search), hintText: 'Search');
+    final dropdownButton = DropdownButton<String>(
+      focusColor: Colors.transparent,
+      value: category.value,
+      onChanged: category.update,
+      underline: const SizedBox.shrink(),
+      padding: const EdgeInsets.only(left: 8, right: 4),
+      items: [
+        for (final String category in categories)
+          DropdownMenuItem(value: category, child: Text(category)),
+      ],
+    );
+    final bool oneField = MediaQuery.sizeOf(context).width > 600;
+    Widget textField = TextField(
+      decoration: decoration.copyWith(suffixIcon: oneField ? dropdownButton : null),
+      onChanged: (text) => search.value = text.toLowerCase(),
+    );
+    if (isAdmin) {
+      textField = Hero(
+        tag: 'search box',
+        child: Material(type: MaterialType.transparency, child: textField),
+      );
+    }
+
+    final Widget searchBox = oneField
+        ? Padding(padding: const EdgeInsets.only(bottom: 8), child: textField)
+        : Column(mainAxisSize: MainAxisSize.min, children: [textField, dropdownButton]);
+
+    Widget listView = ListView.builder(
+      itemCount: videos.length,
+      itemBuilder: (context, index) => videos[index],
+      prototypeItem: VideoCard.blank,
+    );
+
+    if (isAdmin) {
+      listView = Hero(tag: 'list view', child: listView);
+    }
+
+    final body = Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(children: [searchBox, Expanded(child: listView)]),
+    );
+
+    if (!isAdmin) return body;
+
+    return Stack(
+      children: [
+        const _HeroBackground(),
+        SizedBox.expand(child: body),
+        _LibraryButton(
+          icon: Icons.edit,
+          onPressed: () => navigator.push(_LibraryEditor(body)),
+        ),
+        _AppBarHero.aboveScreen,
+      ],
+    );
+  }
 }
 
-class _VideoLibraryState extends State<VideoLibrary> {
-  final TextEditingController controller = TextEditingController();
-  String selectedCategory = 'All';
-  List<VideoCard> allVideos = [];
-  List<VideoCard> videos = [];
-  Set<String> ids = {};
+class _LibraryButton extends StatelessWidget {
+  const _LibraryButton({required this.icon, required this.onPressed});
+
+  final IconData icon;
+  final VoidCallback? onPressed;
 
   @override
-  void initState() {
-    super.initState();
-    fetchDocuments();
+  Widget build(BuildContext context) {
+    final button = Hero(
+      tag: 'button',
+      child: SizedBox.square(
+        dimension: 48,
+        child: IconButton.filled(
+          icon: Icon(icon),
+          onPressed: onPressed,
+        ),
+      ),
+    );
+    return Positioned(bottom: 16, right: 16, child: button);
   }
+}
 
-  Future<void> fetchDocuments() async {
-    final QuerySnapshot snapshot = await Firestore.streams.get();
-    final userStreamData = await user.streamData.get();
-    final pinnedIds = {
-      for (final doc in userStreamData.docs)
-        if (doc.data()['pinned']) doc.id,
-    };
-    setState(() {
-      videos = allVideos = [
-        for (final document in snapshot.docs)
-          VideoCard(
-            id: document.id,
-            title: document['title'],
-            category: document['category'],
-            director: document['director'],
-            path: document['storage_path'],
-            timestamp: document['date'],
-            isPinned: pinnedIds.contains(document.id),
-            onFavoriteToggle: () => toggleFavorite(document.id),
-          ),
-      ];
-    });
-  }
+class _LibraryEditor extends StatelessWidget {
+  const _LibraryEditor(this.body);
 
-  void toggleFavorite(String videoId) async {
-    final docRef = user.streamData.doc(videoId);
-    final data = await docRef.getData();
-    final bool isCurrentlyPinned = data?['pinned'] ?? false;
+  final Widget body;
 
-    await docRef.update({'pinned': !isCurrentlyPinned});
-    fetchDocuments(); // Refresh the list after updating
-  }
+  static Future<void> uploadVideo() async {
+    void cancelMessage() => navigator.snackbarMessage('Video upload cancelled.');
 
-  List<String> get categories {
-    final categories = {
-      'All',
-      'Pinned',
-      for (final video in allVideos) video.category,
-    };
-    return categories.toList()..sort();
-  }
+    final FilePickerResult? result = await FilePicker.platform.pickFiles();
+    if (result == null) return cancelMessage();
+    final PlatformFile file = result.files.first;
+    try {
+      final newVideo = await navigator.showDialog<VideoCard>(const _VideoUploadInfo());
+      if (newVideo == null) return cancelMessage();
 
-  void searchVideo(String query) {
-    filterVideos();
-    setState(() {
-      if (query.isNotEmpty) {
-        videos = videos.where((video) {
-          if (ids.contains(video.id)) return false;
-
-          final videoTitle = video.title.toLowerCase();
-          final input = query.toLowerCase();
-          ids.add(video.id);
-          return videoTitle.contains(input);
-        }).toList();
+      final Cubit<bool> loading = navigator.context.read<Loading>();
+      loading.value = true;
+      final ref = FirebaseStorage.instance.ref(file.name);
+      final TaskSnapshot task = await ref.putData(file.bytes!);
+      if (task.state != TaskState.success) {
+        return navigator.showDialog(const ErrorDialog('File upload failed.'));
       }
-      ids = {};
-    });
-  }
-
-  void filterVideos() {
-    setState(() {
-      videos = switch (selectedCategory) {
-        'All' => allVideos,
-        'Pinned' => videos = allVideos.where((video) => video.isPinned).toList(),
-        _ => allVideos.where((video) => video.category == selectedCategory).toList(),
-      };
-    });
+      await newVideo.upload();
+      loading.value = false;
+      navigator.context.read<ThcVideos>().data.add(newVideo);
+    } catch (e) {
+      return navigator.showDialog(ErrorDialog('Error uploading file.\n\n$e'));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (allVideos.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    final bool loading = Loading.of(context);
+    final (text, opacity, duration, curve, icon) = loading
+        ? (
+            'saving...',
+            1.0,
+            Durations.medium1,
+            Curves.ease,
+            const _Spinny(),
+          )
+        : (
+            'saved!',
+            0.0,
+            Durations.extralong4,
+            Curves.easeIn,
+            const Icon(Icons.done),
+          );
 
-    const Widget blankCard = Card(
-      clipBehavior: Clip.antiAlias,
-      margin: EdgeInsets.all(10),
-      color: Colors.white,
-      child: ListTile(
-        title: ColoredBox(
-          color: Color(0xffbbbbbb),
-          child: SizedBox(width: 100, height: 20),
+    return PopScope(
+      canPop: !loading,
+      child: Scaffold(
+        appBar: _AppBarHero(
+          actions: [
+            for (final item in [SizedBox(width: 66, child: Text(text)), icon])
+              AnimatedOpacity(
+                opacity: opacity,
+                duration: duration,
+                curve: curve,
+                child: item,
+              ),
+            const SizedBox(width: 16),
+          ],
         ),
-        subtitle: ColoredBox(
-          color: Color(0xffeeeeee),
-          child: SizedBox(width: 150, height: 20),
-        ),
-        leading: ColoredBox(
-          color: Color(0xffbbbbbb),
-          child: SizedBox(width: 100, height: 100),
+        body: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            const _HeroBackground(),
+            SizedBox.expand(
+              child: BlocProvider(create: (_) => Editing(true), child: body),
+            ),
+            const _LibraryButton(icon: Icons.upload, onPressed: uploadVideo),
+            const NavBar(belowPage: true),
+          ],
         ),
       ),
     );
+  }
+}
 
-    return Column(
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-          child: TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.search),
-              hintText: 'Search here',
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+class _VideoUploadInfo extends HookWidget {
+  const _VideoUploadInfo();
+
+  @override
+  Widget build(BuildContext context) {
+    final category = useState('');
+    final director = useState('');
+    final title = useState('');
+    final items = <String, Cubit>{
+      'Category': category,
+      'Director': director,
+      'Title': title,
+    };
+
+    return Dialog.confirm(
+      titleText: 'Upload Details',
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final MapEntry(key: label, value: cubit) in items.entries) ...[
+            TextField(
+              decoration: InputDecoration(labelText: label),
+              onChanged: cubit.update,
             ),
-            onChanged: searchVideo,
-          ),
-        ),
-        DropdownButton<String>(
-          value: selectedCategory,
-          onChanged: (newValue) {
-            setState(() {
-              selectedCategory = newValue!;
-              filterVideos();
-            });
-          },
-          items: [
-            for (final category in categories)
-              DropdownMenuItem<String>(value: category, child: Text(category)),
+            const SizedBox(height: 8),
           ],
+        ],
+      ),
+      actionText: ('cancel', 'upload'),
+      onConfirm: () {
+        final id = FirestoreID.create(Firestore.streams);
+        final newVideo = VideoCard(
+          id: id,
+          title: title.value,
+          timestamp: Timestamp.now(),
+          director: director.value,
+          category: category.value,
+          path: 'gs://the-heart-center-app.appspot.com/${id.value}',
+        );
+
+        navigator.pop(newVideo);
+      },
+    );
+  }
+}
+
+class _Spinny extends HookWidget {
+  const _Spinny();
+
+  static const duration = Durations.extralong1;
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = useAnimationController(duration: duration, upperBound: math.pi);
+    final rotation = useAnimation(controller);
+    useOnce(controller.repeat);
+
+    return Transform.rotate(angle: -rotation, child: const Icon(Icons.sync));
+  }
+}
+
+class _AppBarHero extends StatelessWidget implements PreferredSizeWidget {
+  const _AppBarHero({this.actions});
+
+  final List<Widget>? actions;
+
+  static const aboveScreen = FractionalTranslation(
+    translation: Offset(0, -1),
+    child: _AppBarHero(),
+  );
+
+  @override
+  final preferredSize = const Size.fromHeight(kToolbarHeight);
+
+  @override
+  Widget build(BuildContext context) {
+    final ColorScheme colors = ThcColors.of(context);
+    final bool loading = Loading.of(context);
+
+    return Hero(
+      tag: 'app bar',
+      child: AppBar(
+        backgroundColor: colors.primary,
+        foregroundColor: colors.onPrimary,
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: loading ? null : navigator.pop,
         ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: videos.length,
-            itemBuilder: (context, index) => videos[index],
-            prototypeItem: blankCard,
-          ),
-        ),
-      ],
+        title: const Text('Editing Video Library'),
+        actions: actions,
+      ),
+    );
+  }
+}
+
+class _HeroBackground extends StatelessWidget {
+  const _HeroBackground();
+
+  @override
+  Widget build(BuildContext context) {
+    final color = ThcColors.of(context).surface;
+    return Hero(
+      tag: 'background',
+      child: SizedBox.expand(child: ColoredBox(color: color)),
     );
   }
 }

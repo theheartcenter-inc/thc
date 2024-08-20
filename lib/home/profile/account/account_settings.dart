@@ -1,12 +1,8 @@
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/profile/account/account_field.dart';
 import 'package:thc/home/profile/account/change_password.dart';
 import 'package:thc/home/profile/account/close_account.dart';
 import 'package:thc/home/profile/profile.dart';
-import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/style_text.dart';
+import 'package:thc/the_good_stuff.dart';
 
 class AccountSettings extends StatefulWidget {
   const AccountSettings({super.key});
@@ -22,8 +18,27 @@ class _AccountSettingsState extends State<AccountSettings> {
     AccountField.reset();
   }
 
+  Future<void> _updateProfilePicture(ThcUser user) async {
+    try {
+      await user.updateProfilePicture();
+      setState(() {});
+      navigator.snackbarMessage('Profile picture updated successfully');
+    } catch (e) {
+      navigator.snackbarMessage('Failed to update profile picture: $e');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<ThcUser?>(context);
+
+    if (user == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Account')),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     final saveButton = Padding(
       padding: const EdgeInsets.symmetric(vertical: 20),
       child: FilledButton(
@@ -33,7 +48,7 @@ class _AccountSettingsState extends State<AccountSettings> {
                 setState(AccountField.reset);
               }
             : null,
-        child: const Text('save changes', style: StyleText(weight: 520)),
+        child: const Text('save changes', style: TextStyle(weight: 520)),
       ),
     );
 
@@ -44,7 +59,16 @@ class _AccountSettingsState extends State<AccountSettings> {
         body: ProfileListView(
           itemCount: 4,
           itemBuilder: (_, index) => switch (index) {
-            0 => Column(children: [...AccountField.values, saveButton]),
+            0 => Column(children: [
+                ...AccountField.values,
+                saveButton,
+                if (user.canLivestream)
+                  ListTile(
+                    leading: const Icon(Icons.image),
+                    title: const Text('Change Profile Picture'),
+                    onTap: () => _updateProfilePicture(user),
+                  ),
+              ]),
             1 => ListTile(
                 leading: const Icon(Icons.lock_outline),
                 title: const Text('change password'),
@@ -53,20 +77,19 @@ class _AccountSettingsState extends State<AccountSettings> {
             2 => ListTile(
                 leading: const Icon(Icons.logout),
                 title: const Text('sign out'),
-                onTap: () => navigator.showDialog(
-                  AlertDialog.adaptive(
-                    title: const Text('sign out'),
-                    content: const Text(
-                      'Are you sure you want to sign out?\n'
-                      "You'll need to enter your email & password to sign back in.",
+                onTap: () async {
+                  final signOut = await navigator.showDialog(
+                    const Dialog.confirm(
+                      titleText: 'sign out',
+                      bodyText: 'Are you sure you want to sign out?\n'
+                          "You'll need to enter your email & password to sign back in.",
+                      actionText: ('back', 'sign out'),
+                      actionsAlignment: MainAxisAlignment.spaceEvenly,
                     ),
-                    actions: [
-                      ElevatedButton(onPressed: navigator.pop, child: const Text('back')),
-                      ElevatedButton(onPressed: navigator.logout, child: const Text('sign out')),
-                    ],
-                    actionsAlignment: MainAxisAlignment.spaceEvenly,
-                  ),
-                ),
+                  );
+
+                  if (signOut) navigator.logout();
+                },
               ),
             _ => ListTile(
                 leading: const Icon(Icons.person_off_outlined),

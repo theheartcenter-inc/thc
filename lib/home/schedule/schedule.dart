@@ -1,34 +1,36 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/home_screen.dart';
-import 'package:thc/home/schedule/edit_schedule/schedule_editor.dart';
-import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/style_text.dart';
-import 'package:thc/utils/theme.dart';
-import 'package:thc/utils/widgets/state_async.dart';
+import 'package:thc/home/schedule/src/all_scheduled_streams.dart';
+import 'package:thc/home/schedule/src/schedule_editor.dart';
+import 'package:thc/the_good_stuff.dart';
 
 class ScheduledStreamCard extends StatelessWidget {
   const ScheduledStreamCard({
-    super.key,
+    required FirestoreID id,
     required this.title,
     required this.timestamp,
-    required this.director,
     required this.active,
-  });
+    required this.director,
+  }) : super(key: id);
+
+  ScheduledStreamCard.fromJson(Json json, FirestoreID id)
+      : this(
+          id: id,
+          title: json['title'] ?? '[title not found]',
+          timestamp: json['timestamp'] ?? Timestamp.now(),
+          active: json['active'] ?? false,
+          director: json['director'] ?? '[director not found]',
+        );
 
   final String title;
   final Timestamp timestamp;
-  final String director;
   final bool active;
+  final String director;
 
   @override
   Widget build(BuildContext context) {
-    final format = DateFormat('yyyy-MM-dd hh:mm a');
-    final DateTime date = DateTime.parse(timestamp.toDate().toString());
-    final formatedDate = format.format(date);
+    final String date = DateFormat('yyyy-MM-dd hh:mm a').format(timestamp.toDate());
 
     if (active) {
       return Card(
@@ -43,11 +45,11 @@ class ScheduledStreamCard extends StatelessWidget {
           leading: const FlutterLogo(size: 56.0),
           title: Text(
             title,
-            style: const StyleText(color: Colors.black),
+            style: const TextStyle(color: Colors.black),
           ),
           subtitle: Text(
-            formatedDate,
-            style: const StyleText(color: Colors.black),
+            date,
+            style: const TextStyle(color: Colors.black),
           ),
         ),
       );
@@ -59,11 +61,11 @@ class ScheduledStreamCard extends StatelessWidget {
           leading: const FlutterLogo(size: 56.0),
           title: Text(
             title,
-            style: const StyleText(color: Colors.black),
+            style: const TextStyle(color: Colors.black),
           ),
           subtitle: Text(
-            formatedDate,
-            style: const StyleText(color: Colors.black),
+            date,
+            style: const TextStyle(color: Colors.black),
           ),
         ),
       );
@@ -71,49 +73,13 @@ class ScheduledStreamCard extends StatelessWidget {
   }
 }
 
-class Schedule extends StatefulWidget {
+class Schedule extends StatelessWidget {
   const Schedule({super.key});
 
   @override
-  State<Schedule> createState() => _ScheduleState();
-}
-
-class _ScheduleState extends StateAsync<Schedule> {
-  final List<Widget> activeScheduledStreams = [];
-  final List<Widget> inactiveScheduledStreams = [];
-
-  @override
-  void initState() {
-    super.initState();
-    fetchDocuments();
-  }
-
-  Future<void> fetchDocuments() async {
-    final QuerySnapshot snapshot = await Firestore.scheduled_streams.get();
-    safeState(() {
-      for (final document in snapshot.docs) {
-        if (document['active']) {
-          activeScheduledStreams.add(ScheduledStreamCard(
-            title: document['title'],
-            timestamp: document['date'],
-            director: document['director'],
-            active: document['active'],
-          ));
-        } else {
-          inactiveScheduledStreams.add(ScheduledStreamCard(
-            title: document['title'],
-            timestamp: document['date'],
-            director: document['director'],
-            active: document['active'],
-          ));
-        }
-      }
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final colors = ThcColors.of(context);
+    final (:active, :scheduled) = ScheduledStreams.of(context);
+    final ColorScheme colors = ThcColors.of(context);
 
     Widget? editButton;
     if (user.isAdmin) {
@@ -129,28 +95,31 @@ class _ScheduleState extends StateAsync<Schedule> {
             padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
             child: Text(
               'Active Livestream',
-              style: StyleText(
+              style: TextStyle(
                 size: 24.0,
                 color: colors.inverseSurface,
-                weight: FontWeight.bold,
+                weight: 700,
               ),
             ),
           ),
-          if (activeScheduledStreams.isEmpty) const Center(child: CircularProgressIndicator()),
-          ...activeScheduledStreams,
+          if (active.isEmpty) const Center(child: CircularProgressIndicator()),
+          ...active,
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
               'Upcoming Livestreams',
-              style: StyleText(
+              style: TextStyle(
                 size: 24.0,
                 color: colors.inverseSurface,
-                weight: FontWeight.bold,
+                weight: 700,
               ),
             ),
           ),
-          if (inactiveScheduledStreams.isEmpty) const Center(child: CircularProgressIndicator()),
-          Expanded(child: ListView(children: inactiveScheduledStreams)),
+          Expanded(
+            child: scheduled.isEmpty
+                ? const Center(child: CircularProgressIndicator())
+                : ListView(children: scheduled),
+          ),
         ],
       ),
       floatingActionButton: editButton,

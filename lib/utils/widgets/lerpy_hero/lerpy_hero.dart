@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:thc/the_good_stuff.dart';
 import 'package:thc/utils/widgets/lerpy_hero/data_widget.dart';
 
 /// The [T] type can be as simple as a [Color] (using [Color.lerp]),
@@ -51,8 +51,8 @@ abstract class LerpyHero<T> extends Widget {
     return Hero(
       tag: tag ?? '$LerpyHero<$T>',
       flightShuttleBuilder: (_, animation, direction, context1, context2) {
-        final lerpy1 = DataWidget.read<T>(context1);
-        final lerpy2 = DataWidget.read<T>(context2);
+        final T lerpy1 = DataWidget.read<T>(context1);
+        final T lerpy2 = DataWidget.read<T>(context2);
         final (from, to) = switch (direction) {
           HeroFlightDirection.push => (lerpy1, lerpy2),
           HeroFlightDirection.pop => (lerpy2, lerpy1),

@@ -1,11 +1,6 @@
-import 'package:flutter/material.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/home/surveys/edit_survey/survey_field_editor.dart';
 import 'package:thc/home/surveys/survey_questions.dart';
-import 'package:thc/utils/app_config.dart';
-import 'package:thc/utils/bloc.dart';
-import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/theme.dart';
+import 'package:thc/the_good_stuff.dart';
 
 /// {@macro ValidSurveyQuestions}
 extension ValidChoices on List<String> {
@@ -102,9 +97,9 @@ class _SurveyEditorState extends State<SurveyEditor> {
       );
 
   void validate() async {
-    final checks = [
+    final checks = <bool>[
       questionNames.valid,
-      for (final record in keyedQuestions)
+      for (final KeyedQuestion record in keyedQuestions)
         switch (record.question) {
           YesNoQuestion() || TextPromptQuestion() => true,
           final MultipleChoice q => q.choices.valid,
@@ -118,18 +113,18 @@ class _SurveyEditorState extends State<SurveyEditor> {
       return;
     }
 
-    final survey = widget.surveyType;
+    final ThcSurvey survey = widget.surveyType;
     try {
       await Future.wait([
         survey.yeetResponses(),
         survey.newLength(keyedQuestions.length),
         for (final (i, q) in keyedQuestions.indexed) survey.doc(i).set(q.question.json),
       ]);
-      navigator.showSnackBar(const SnackBar(content: Text('saved!')));
+      navigator.snackbarMessage('saved!');
       validation.value = false;
       navigator.pop();
     } catch (e) {
-      navigator.showSnackBar(SnackBar(content: Text('[error] $e')));
+      navigator.snackbarMessage('[error] $e');
     }
   }
 
@@ -147,7 +142,7 @@ class _SurveyEditorState extends State<SurveyEditor> {
           duplicate: () => setState(() => keyedQuestions.insert(i + 1, record.copy())),
           yeet: () {
             setState(() => keyedQuestions.removeAt(i));
-            if (keyedQuestions.isEmpty) context.read<MobileEditing>().value = false;
+            if (keyedQuestions.isEmpty) context.read<Editing>().value = false;
           },
           validate: () => questionNames.validChoice(i),
           divider: divider(i),
@@ -156,9 +151,13 @@ class _SurveyEditorState extends State<SurveyEditor> {
 
     Widget? editButton;
     if (mobileDevice && keyedQuestions.isNotEmpty) {
+      final editing = context.watch<Editing>();
       editButton = IconButton.filled(
-        icon: Icon(context.watch<MobileEditing>().icon, color: Colors.black87),
-        onPressed: context.read<MobileEditing>().toggle,
+        icon: Icon(
+          editing.value ? Icons.done : Icons.calendar_view_day,
+          color: Colors.black87,
+        ),
+        onPressed: editing.toggle,
       );
     }
     return Scaffold(
@@ -166,7 +165,7 @@ class _SurveyEditorState extends State<SurveyEditor> {
         title: const Text('Survey Editor'),
         actions: [
           IconButton(
-            onPressed: context.watch<MobileEditing>().value ? null : validate,
+            onPressed: context.watch<Editing>().value ? null : validate,
             icon: const Icon(Icons.save),
           ),
         ],
@@ -202,32 +201,12 @@ class _SurveyEditorState extends State<SurveyEditor> {
 ///
 /// You can press the button to insert a new question.
 /// {@endtemplate}
-class SurveyEditDivider extends StatefulWidget {
+class SurveyEditDivider extends HookWidget {
   /// {@macro edit_survey.divider}
   const SurveyEditDivider(this.addQuestion, {super.key});
   final void Function(SurveyQuestion) addQuestion;
 
   static const height = 60.0;
-
-  @override
-  State<SurveyEditDivider> createState() => _SurveyEditDividerState();
-}
-
-class _SurveyEditDividerState extends State<SurveyEditDivider> {
-  final node = FocusNode();
-  bool hovered = false, focused = false;
-
-  @override
-  void initState() {
-    super.initState();
-    node.addListener(() => setState(() => focused = node.hasPrimaryFocus));
-  }
-
-  @override
-  void dispose() {
-    node.dispose();
-    super.dispose();
-  }
 
   static const presets = [
     YesNoQuestion('[question]'),
@@ -239,45 +218,44 @@ class _SurveyEditDividerState extends State<SurveyEditDivider> {
 
   @override
   Widget build(BuildContext context) {
-    if (context.watch<MobileEditing>().value) {
+    final node = useFocusNode();
+    final focus = useState(false);
+    final hover = useState(false);
+
+    if (context.watch<Editing>().value) {
       return const SizedBox(height: SurveyEditDivider.height / 2);
     }
     final Widget button;
-    if (focused) {
-      button = Focus(
-        focusNode: node,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (final question in presets) ...[
-              InkWell(
-                onTap: () {
-                  widget.addQuestion(question);
-                  node.unfocus();
-                },
-                child: QuestionTypeIcon(question),
-              ),
-            ],
-          ],
-        ),
+    if (focus.value) {
+      button = Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final SurveyQuestion question in presets)
+            InkWell(
+              onTap: () {
+                addQuestion(question);
+                node.unfocus();
+              },
+              child: QuestionTypeIcon(question),
+            ),
+        ],
       );
     } else {
       button = InkWell(
         splashColor: Colors.transparent,
         focusColor: Colors.transparent,
-        focusNode: node,
         onTap: node.requestFocus,
         child: Padding(
-          padding: EdgeInsets.all(hovered ? 8 : 2),
+          padding: EdgeInsets.all(hover.value ? 8 : 2),
           child: Opacity(
-            opacity: hovered ? 1 : 0.5,
+            opacity: hover.value ? 1 : 0.5,
             child: const Icon(Icons.add),
           ),
         ),
       );
     }
 
-    final bool expanded = mobileDevice || hovered || focused;
+    final bool expanded = mobileDevice || hover.value || focus.value;
 
     final child = SizedBox(
       height: SurveyEditDivider.height,
@@ -285,14 +263,21 @@ class _SurveyEditDividerState extends State<SurveyEditDivider> {
         alignment: Alignment.center,
         children: [
           const Divider(),
-          Card(
-            clipBehavior: Clip.antiAlias,
-            color: expanded ? null : ThcColors.of(context).surface,
-            elevation: expanded ? null : 0,
-            child: AnimatedSize(
-              duration: Durations.medium1,
-              curve: Curves.ease,
-              child: button,
+          Focus(
+            focusNode: node,
+            onFocusChange: focus.update,
+            child: TapRegion(
+              onTapOutside: (_) => node.unfocus(),
+              child: Card(
+                clipBehavior: Clip.antiAlias,
+                color: expanded ? null : ThcColors.of(context).surface,
+                elevation: expanded ? null : 0,
+                child: AnimatedSize(
+                  duration: Durations.medium1,
+                  curve: Curves.ease,
+                  child: button,
+                ),
+              ),
             ),
           ),
         ],
@@ -302,24 +287,11 @@ class _SurveyEditDividerState extends State<SurveyEditDivider> {
     if (mobileDevice) return child;
 
     return MouseRegion(
-      onEnter: (_) => setState(() => hovered = true),
-      onExit: (_) => setState(() => hovered = false),
+      onEnter: (_) => hover.value = true,
+      onExit: (_) => hover.value = false,
       child: child,
     );
   }
-}
-
-/// You can see options for duplicating, deleting, and reordering survey questions
-/// when you hover your mouse over the question.
-///
-/// Mobile devices don't have mouse cursors,
-/// so instead there's a button that uses this BLoC to show/hide the extra options.
-class MobileEditing extends Cubit<bool> {
-  MobileEditing() : super(false);
-
-  IconData get icon => value ? Icons.done : Icons.calendar_view_day;
-
-  void toggle() => value = !value;
 }
 
 /// {@template ValidSurveyQuestions}

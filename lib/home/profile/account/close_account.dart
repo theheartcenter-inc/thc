@@ -1,40 +1,33 @@
-import 'package:flutter/material.dart';
-import 'package:thc/firebase/firebase.dart';
 import 'package:thc/firebase/firebase_auth.dart' as auth;
-import 'package:thc/utils/bloc.dart';
-import 'package:thc/utils/local_storage.dart';
-import 'package:thc/utils/navigator.dart';
-import 'package:thc/utils/style_text.dart';
-import 'package:thc/utils/widgets/state_async.dart';
+import 'package:thc/the_good_stuff.dart';
 
 enum _Progress { notStarted, loading, done }
 
-class CloseAccount extends StatefulWidget {
+class CloseAccount extends StatelessWidget {
   const CloseAccount({super.key});
 
   @override
-  State<CloseAccount> createState() => _CloseAccountState();
-}
+  Widget build(BuildContext context) {
+    return BlocProvider(create: _Deleting.new, child: HookBuilder(builder: hookBuilder));
+  }
 
-class _CloseAccountState extends StateAsync<CloseAccount> {
-  String password = '';
-  String? errorText;
-  bool obscureText = true;
+  Widget hookBuilder(BuildContext context) {
+    final password = useState('');
+    final error = useState<String?>(null);
+    final obscureText = useState(true);
 
-  Widget builder(BuildContext context, _) {
-    final progress = context.watch<_Deleting>().value;
-    final delete = errorText != null || password.isEmpty
+    final _Progress progress = context.watch<_Deleting>().value;
+    final delete = error.value != null || password.value.isEmpty
         ? null
         : ([_]) async {
             await LocalStorage.password.save(password);
-            if (await auth.signIn() case final error?) {
-              return safeState(() {
-                errorText =
-                    error.isEmpty ? 'please double-check your password and try again.' : error;
-              });
-            }
+            final String? errorMessage = await auth.signIn();
+            if (!context.mounted) return;
+            if (errorMessage == null) return context.read<_Deleting>().delete();
 
-            if (mounted) await context.read<_Deleting>().delete();
+            error.value = errorMessage.isEmpty
+                ? 'please double-check your password and try again.'
+                : errorMessage;
           };
 
     final textFieldContent = Column(
@@ -43,29 +36,28 @@ class _CloseAccountState extends StateAsync<CloseAccount> {
       children: [
         const Text(
           'To confirm deletion, please type your password in the field below and tap "Confirm".',
-          style: StyleText(size: 16),
+          style: TextStyle(size: 16),
         ),
         TextField(
-          obscureText: obscureText,
+          obscureText: obscureText.value,
           onChanged: (value) {
-            setState(() {
-              errorText = null;
-              password = value;
-            });
+            error.value = null;
+            password.value = value;
           },
           onSubmitted: delete,
           decoration: InputDecoration(
             hintText: 'Enter your password',
-            errorText: errorText,
+            errorText: error.value,
             suffixIcon: IconButton(
-              icon: Icon(obscureText ? Icons.visibility : Icons.visibility_off),
-              onPressed: () => setState(() => obscureText = !obscureText),
+              icon: Icon(obscureText.value ? Icons.visibility : Icons.visibility_off),
+              onPressed: obscureText.toggle,
             ),
           ),
         ),
       ],
     );
 
+    // ignore: deprecated_member_use_from_same_package
     final dialog = AlertDialog(
       title: const Text('Close Account'),
       content: AnimatedSize(
@@ -92,11 +84,6 @@ class _CloseAccountState extends StateAsync<CloseAccount> {
       child: SizedBox.expand(child: Center(child: dialog)),
     );
   }
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocProvider(create: (_) => _Deleting(), builder: builder);
-  }
 }
 
 class _ConfirmButton extends StatelessWidget {
@@ -107,13 +94,11 @@ class _ConfirmButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final onPressed = switch (context.watch<_Deleting>().value) {
-      _Progress.notStarted || _Progress.done => this.onPressed,
-      _Progress.loading => null,
-    };
-
     return ElevatedButton(
-      onPressed: onPressed,
+      onPressed: switch (context.watch<_Deleting>().value) {
+        _Progress.notStarted || _Progress.done => onPressed,
+        _Progress.loading => null,
+      },
       child: AnimatedSize(duration: Durations.medium1, curve: Curves.ease, child: Text(text)),
     );
   }
@@ -138,7 +123,7 @@ class _Loading extends StatelessWidget {
 }
 
 class _Deleting extends Cubit<_Progress> {
-  _Deleting() : super(_Progress.notStarted);
+  _Deleting(_) : super(_Progress.notStarted);
 
   Future<void> delete() async {
     value = _Progress.loading;

@@ -1,72 +1,49 @@
-import 'dart:async';
+import 'package:thc/firebase/firebase_bloc.dart';
+import 'package:thc/the_good_stuff.dart';
 
-import 'package:cloud_firestore/cloud_firestore.dart' show QuerySnapshot;
-import 'package:flutter/widgets.dart';
-import 'package:thc/firebase/firebase.dart';
-import 'package:thc/utils/app_config.dart';
-import 'package:thc/utils/bloc.dart';
+class ThcUsers extends FirebaseBloc<List<ThcUser>> {
+  ThcUsers() : super(Firestore.users.snapshots, data: [], onData: _onData);
 
-/// Same as `List<ThcUser>`, but you have the option to use the user ID or email
-/// in place of the index.
-extension type ThcUsers.fromList(List<ThcUser> users) implements Iterable<ThcUser> {
-  ThcUsers() : this.fromList([]);
-
-  factory ThcUsers.of(BuildContext context) => context.watch<AllUsers>().users;
-
-  int index(Object key) {
-    return switch (key) {
-      int() when key >= 0 && key < users.length => key,
-      int() => -1,
-      ThcUser() => users.indexOf(key),
-      String() => users.indexWhere((user) => user.matches(key)),
-      _ => throw ArgumentError('not sure how to handle ${key.runtimeType}'),
-    };
-  }
-
-  ThcUser operator [](Object key) => users[index(key)];
-
-  void operator []=(dynamic key, ThcUser updated) {
-    final i = index(key);
-    backendPrint('index: $i, key: $key (type ${key.runtimeType})');
-    if (i.isNegative) {
-      users.add(updated);
+  static void _onData(List<ThcUser> current, SnapshotDoc doc) {
+    if (doc.data() case final json?) {
+      final newUser = ThcUser.fromJson(json);
+      final int index = current.indexWhere((user) {
+        int matches = 0;
+        if (user.name == newUser.name) matches++;
+        if ((user.id, newUser.id) case (final p0?, final p1?) when p0 == p1) matches++;
+        if ((user.email, newUser.email) case (final p0?, final p1?) when p0 == p1) matches++;
+        return matches > 1;
+      });
+      if (index == -1) {
+        current.add(newUser);
+      } else {
+        current[index] = user;
+      }
     } else {
-      users[i] = updated;
+      current.removeWhere((user) => user.firestoreId == doc.id);
     }
   }
 
-  dynamic yeet(dynamic key) {
-    return switch (key) {
-      ThcUser() => users.remove(key),
-      String() => users.removeWhere((user) => user.matches(key)),
-      int() => users.removeAt(key),
-      _ => throw ArgumentError('not sure how to handle ${key.runtimeType}'),
+  @override
+  ValueGetter<List<ThcUser>> isolateCallback(List<ThcUser> current, SnapshotDocs docs) {
+    return () {
+      for (final SnapshotDoc doc in docs) {
+        _onData(current, doc);
+      }
+      return current;
     };
   }
-}
 
-class AllUsers with Bloc {
-  AllUsers() {
-    subscription = stream.listen((event) {
-      for (final newStuff in event.docChanges) {
-        final doc = newStuff.doc;
-        if (doc.data() case final json?) {
-          users[doc.id] = ThcUser.fromJson(json);
-        } else {
-          users.yeet(doc.id);
-        }
-      }
-      notifyListeners();
-    }, onError: backendPrint);
-  }
+  static List<ThcUser> of(BuildContext context, {String? filter}) {
+    final users = context.watch<ThcUsers>().data;
+    if (filter == null) return users;
 
-  final users = ThcUsers();
-  final stream = Firestore.users.snapshots();
-  late final StreamSubscription<QuerySnapshot<Json>> subscription;
-
-  @override
-  void dispose() {
-    subscription.cancel();
-    super.dispose();
+    filter = filter.toLowerCase();
+    return [
+      for (final ThcUser user in users)
+        if (user.name.toLowerCase().contains(filter) ||
+            user.firestoreId.toLowerCase().contains(filter))
+          user,
+    ];
   }
 }
