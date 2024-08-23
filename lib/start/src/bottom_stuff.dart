@@ -37,7 +37,7 @@ class BottomStuff extends HookWidget {
     };
 
     final bool forwardOrComplete = controller.isForwardOrCompleted;
-    if (shouldShow != forwardOrComplete) controller.toggle(shouldReverse: !shouldShow);
+    if (shouldShow != forwardOrComplete) controller.toggle();
     if (shouldShow && labels != loginLabels.value) loginLabels.value = labels;
 
     return LayoutBuilder(
