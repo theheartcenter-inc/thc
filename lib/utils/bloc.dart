@@ -45,21 +45,6 @@ class Loading extends Cubit<bool> {
   static bool of(BuildContext context) => context.watch<Loading>().value;
 }
 
-extension ToggleController on Animation {
-  bool get isForwardOrCompleted => switch (status) {
-        AnimationStatus.forward || AnimationStatus.completed => true,
-        AnimationStatus.reverse || AnimationStatus.dismissed => false,
-      };
-
-  TickerFuture toggle({bool? shouldReverse, double? from}) {
-    final animation = this;
-    if (animation is! AnimationController) throw UnimplementedError();
-    return (shouldReverse ?? isForwardOrCompleted)
-        ? animation.reverse(from: from)
-        : animation.forward(from: from);
-  }
-}
-
 extension Powers<T extends num> on T {
   T get squared => this * this as T;
   T get cubed => this * this * this as T;

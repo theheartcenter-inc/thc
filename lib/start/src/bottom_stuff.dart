@@ -1,6 +1,5 @@
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart' as material;
 import 'package:thc/start/src/login_progress.dart';
 import 'package:thc/the_good_stuff.dart';
 import 'package:thc/utils/widgets/clip_height.dart';
@@ -38,7 +37,7 @@ class BottomStuff extends HookWidget {
     };
 
     final bool forwardOrComplete = controller.isForwardOrCompleted;
-    if (shouldShow != forwardOrComplete) controller.toggle(shouldReverse: !shouldShow);
+    if (shouldShow != forwardOrComplete) controller.toggle();
     if (shouldShow && labels != loginLabels.value) loginLabels.value = labels;
 
     return LayoutBuilder(
@@ -57,8 +56,8 @@ class BottomStuff extends HookWidget {
 
               final tColumns = (t - 1) * (forwardOrComplete ? 2 : 1) + 1;
               final tSeparator = forwardOrComplete
-                    ? curve.transform(math.min(t * 2, 1))
-                    : 1 - curve.transform(1 - t);
+                  ? curve.transform(math.min(t * 2, 1))
+                  : 1 - curve.transform(1 - t);
 
               const timeOffsetRatio = 7 / 8;
               late final tTitle = math.min(tColumns / timeOffsetRatio, 1.0);

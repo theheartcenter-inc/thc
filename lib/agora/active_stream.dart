@@ -46,7 +46,7 @@ class _ActiveStreamState extends State<ActiveStream> {
   /// If the user was creating the livestream, we go back to the [HomeScreen].
   ///
   /// If the user was watching, we show some post-stream survey questions!
-  void endStream([_]) async {
+  void endStream([_, __]) async {
     context.read<OverlayBloc>().value = false;
     if (streaming) return navigator.pop();
 
@@ -63,7 +63,7 @@ class _ActiveStreamState extends State<ActiveStream> {
 
     return PopScope(
       canPop: NavBarSelection.streaming(context),
-      onPopInvoked: endStream,
+      onPopInvokedWithResult: endStream,
       child: Scaffold(
         body: const OverlayController(
           child: Stack(

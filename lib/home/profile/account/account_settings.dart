@@ -53,7 +53,7 @@ class _AccountSettingsState extends State<AccountSettings> {
     );
 
     return PopScope(
-      onPopInvoked: (_) => context.read<AccountFields>().value = user,
+      onPopInvokedWithResult: (_, __) => context.read<AccountFields>().value = user,
       child: Scaffold(
         appBar: AppBar(title: const Text('Account')),
         body: ProfileListView(
