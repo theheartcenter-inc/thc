@@ -49,7 +49,7 @@ exports.sendEventNotifications = functions.pubsub.schedule('every 60 minutes').o
               const message = {
                 notification: {
                   title: event.title,
-                  body: `Your event is starting in 1 hour!`,
+                  body: `Your event is starting soon!`,
                 },
                 token: fcmToken,
               };
