@@ -67,10 +67,14 @@ class _NotificationSwitchState extends State<NotificationSwitch> {
   @override
   Future<void> _updateUserPreference(bool? value) async {
     await Firestore.users.doc(user.id ?? user.email!).update({'notify': value});
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    String? token = await messaging.getToken();
     if(value == true){
+      await Firestore.users.doc(user.id ?? user.email!).update({'fcmToken': token});
       await FirebaseMessaging.instance.subscribeToTopic("livestream_notifications");
     }
     if(value == false){
+      await Firestore.users.doc(user.id ?? user.email!).update({'fcmToken': ''});
       await FirebaseMessaging.instance.unsubscribeFromTopic("livestream_notifications");
     }
   }
