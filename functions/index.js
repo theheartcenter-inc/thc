@@ -15,7 +15,7 @@ const db = admin.firestore();
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started
 
-exports.sendEventNotifications = functions.pubsub.schedule('every 60 minutes').onRun(async (context) => {
+exports.sendEventNotifications = functions.pubsub.schedule('every 10 minutes').onRun(async (context) => {
       const now = admin.firestore.Timestamp.now();
       const oneHourLater = new Date(now.toDate().getTime() + 60 * 60 * 1000);
       const eventsRef = db.collection('scheduled_streams');
@@ -39,22 +39,27 @@ exports.sendEventNotifications = functions.pubsub.schedule('every 60 minutes').o
 
     if(!signupSnapshot.empty){
         signupSnapshot.forEach(async userDoc => {
+            const signupData = userDoc.data();
+            const notified = signupData.notified;
             const signupId = userDoc.id;
             const userRef = db.collection('users').doc(signupId);
             const userSnapshot = await userRef.get();
           if (!userSnapshot.empty) {
             const fcmToken = userSnapshot.data().fcmToken;
             const notify = userSnapshot.data().notify;
-            if (fcmToken && notify === true) {
+            if (fcmToken && notify === true && (notified === false || notified === undefined)) {
               const message = {
                 notification: {
                   title: event.title,
-                  body: `Your event is starting soon!`,
+                  body: `Your event is starting in 1 hour!`,
                 },
                 token: fcmToken,
               };
               messages.push(admin.messaging().send(message));
             }
+            await signupsRef.doc(signupId).update({
+                notified: true
+            });
           } else {
               console.log("No such user found!");
           }
