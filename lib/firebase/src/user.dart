@@ -22,6 +22,7 @@ sealed class ThcUser {
     String? id,
     String? email,
     bool registered = true,
+    bool? notify,
     String? profilePictureUrl,
   }) {
     assert((id ?? email) != null);
@@ -32,12 +33,14 @@ sealed class ThcUser {
           id: id,
           email: email,
           registered: registered,
+          notify: notify,
         ),
       UserType.director => Director(
           name: name,
           id: id,
           email: email,
           registered: registered,
+          notify: notify,
           profilePictureUrl: profilePictureUrl,
         ),
       UserType.admin => Admin(
@@ -45,6 +48,7 @@ sealed class ThcUser {
           id: id,
           email: email,
           registered: registered,
+          notify: notify,
           profilePictureUrl: profilePictureUrl,
         ),
     };
@@ -56,6 +60,7 @@ sealed class ThcUser {
     required this.type,
     this.id,
     this.email,
+    this.notify,
     this.registered = true,
     this.profilePictureUrl,
   }) : assert((id ?? email) != null);
@@ -68,6 +73,7 @@ sealed class ThcUser {
       type: UserType.fromJson(json),
       id: json['id'],
       email: json['email'],
+      notify: json['notify'],
       profilePictureUrl: json['profilePictureUrl'],
     );
   }
@@ -77,6 +83,7 @@ sealed class ThcUser {
   final String? id;
   final String? email;
   final bool registered;
+  final bool? notify;
   final String? profilePictureUrl;
 
   static const _collection = Firestore.users;
@@ -146,12 +153,14 @@ sealed class ThcUser {
     String? email,
     String? profilePictureUrl,
     bool? registered,
+    bool? notify,
   }) {
     return ThcUser(
       type: type ?? this.type,
       id: id ?? this.id,
       name: name ?? this.name,
       email: email ?? this.email,
+      notify: notify ?? this.notify,
       registered: registered ?? this.registered,
       profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
     );
@@ -162,6 +171,7 @@ sealed class ThcUser {
 
   Json get json => {
         'name': name,
+        'notify': notify,
         'type': '$type',
         if (id != null) 'id': id,
         if (email != null) 'email': email,
@@ -199,6 +209,7 @@ class Participant extends ThcUser {
     required super.name,
     super.email,
     super.registered = true,
+    super.notify,
   }) : super._(type: UserType.participant, profilePictureUrl: null);
 }
 
@@ -208,6 +219,7 @@ class Director extends ThcUser {
     required super.name,
     super.email,
     super.registered = true,
+    super.notify,
     super.profilePictureUrl,
   }) : super._(type: UserType.director);
 }
@@ -218,6 +230,7 @@ class Admin extends ThcUser {
     required super.name,
     super.email,
     super.registered = true,
+    super.notify,
     super.profilePictureUrl,
   }) : super._(type: UserType.admin);
 }
