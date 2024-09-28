@@ -99,8 +99,7 @@ class _TimerHookState extends HookState<Timer, _TimerHook> {
 FormKey useFormKey() => useMemoized(FormKey.new);
 
 extension type FormKey._(GlobalKey<FormState> _globalKey) implements Key {
-  FormKey([String? debugLabel]) : this._(GlobalKey<FormState>(debugLabel: debugLabel));
-  FormKey.value(Object value) : this._(GlobalObjectKey<FormState>(value));
+  FormKey([String? debugLabel]) : _globalKey = GlobalKey<FormState>(debugLabel: debugLabel);
 
   FormState get _form => _globalKey.currentState!;
 
