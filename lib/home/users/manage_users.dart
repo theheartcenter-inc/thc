@@ -9,8 +9,32 @@ class ManageUsers extends HookWidget {
   Widget build(BuildContext context) {
     final search = useState('');
     final users = ThcUsers.of(context, filter: search.value);
+    final ScrollController _scrollController = ScrollController();
 
     if (users.isEmpty) return const Center(child: CircularProgressIndicator());
+
+    // Function to delete a user
+    Future<void> deleteUser(String firestoreId) async {
+      try {
+        await deleteUserFromBackend(firestoreId);  // Replace with backend deletion call
+        await FirebaseAuth.instance.currentUser!.delete();  // Firebase deletion
+        print('User deleted successfully');
+      } catch (e) {
+        print('Error deleting user: $e');
+      }
+    }
+
+    // Infinite scrolling logic
+    void _onScroll() {
+      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+        
+      }
+    }
+
+    useEffect(() {
+      _scrollController.addListener(_onScroll);
+      return () => _scrollController.removeListener(_onScroll);
+    }, []);
 
     return Scaffold(
       body: Column(
@@ -29,6 +53,7 @@ class ManageUsers extends HookWidget {
           Expanded(
             child: LayoutBuilder(
               builder: (context, constraints) => SingleChildScrollView(
+                controller: _scrollController,  // Attach scroll controller
                 child: SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: ConstrainedBox(
@@ -49,9 +74,23 @@ class ManageUsers extends HookWidget {
                               DataCell(Text(user.firestoreId)),
                               DataCell(Text(user.name)),
                               DataCell(Text(user.type.toString())),
-                              DataCell(IconButton.filled(
-                                icon: const Icon(Icons.edit),
-                                onPressed: () => navigator.push(Permissions(user)),
+                              DataCell(Row(
+                                children: [
+                                  IconButton.filled(
+                                    icon: const Icon(Icons.edit),
+                                    onPressed: () => navigator.push(Permissions(user)),
+                                  ),
+                                  IconButton.filled(
+                                    icon: const Icon(Icons.delete),
+                                    onPressed: () async {
+                                      await deleteUser(user.firestoreId);  // Delete user
+                                     
+                                      setState(() {
+                                        users.remove(user);
+                                      });
+                                    },
+                                  ),
+                                ],
                               )),
                             ]),
                         ],
