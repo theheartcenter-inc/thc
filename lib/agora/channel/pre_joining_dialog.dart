@@ -6,6 +6,7 @@ import 'package:thc/agora/broadcasting/broadcast_stream.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:thc/credentials/credentials.dart';
+import 'package:thc/utils/navigator.dart';
 
 class PreJoiningDialog extends StatefulWidget {
   const PreJoiningDialog({
@@ -61,17 +62,14 @@ class _PreJoiningDialogState extends State<PreJoiningDialog> {
     }
     setState(() => _isJoining = false);
     if (context.mounted) {
-      Navigator.of(context).pop();
-      await Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => BroadcastStream(
-            appId: appId,
-            token: widget.token,
-            channelName: widget.channelName,
-            isMicEnabled: _isMicEnabled,
-            isVideoEnabled: _isCameraEnabled,
-            director: true,
-          ),
+    navigator.pushReplacement(
+        BroadcastStream(
+          appId: appId,
+          token: widget.token,
+          channelName: widget.channelName,
+          isMicEnabled: _isMicEnabled,
+          isVideoEnabled: _isCameraEnabled,
+          director: true,
         ),
       );
     }
@@ -104,7 +102,7 @@ class _PreJoiningDialogState extends State<PreJoiningDialog> {
               ),
               const SizedBox(height: 8.0),
               const Text(
-                'You are about to join a video call. Please set you mic and camera preferences.',
+                'You are about to join a video call. Please set your mic and camera preferences.',
               ),
               const SizedBox(height: 16.0),
               Row(

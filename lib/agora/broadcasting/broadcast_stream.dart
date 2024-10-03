@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 import 'package:agora_rtc_engine/agora_rtc_engine.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -34,8 +33,8 @@ class _BroadcastStreamState extends State<BroadcastStream> {
   int? _remoteUid; // The UID of the remote user
   bool _localUserJoined = false; // Indicates whether the local user has joined the channel
   late RtcEngine _engine; // The RtcEngine instances
-  late final _users = <AgoraUser>{};
-  late final _directors = <AgoraUser>{};
+  late final _users = <ThcUser>{};
+  late final _directors = <Director>{};
   late double _viewAspectRatio;
 
   int? _currentUid;
@@ -49,15 +48,10 @@ class _BroadcastStreamState extends State<BroadcastStream> {
   }
 
   Future<void> initAgora() async {
-    // await [Permission.microphone, Permission.camera].request();
-    // Set aspect ratio for video according to platform
-    if (kIsWeb) {
-      _viewAspectRatio = 3 / 2;
-    } else if (Platform.isAndroid || Platform.isIOS) {
-      _viewAspectRatio = 2 / 3;
-    } else {
-      _viewAspectRatio = 3 / 2;
-    }
+    _viewAspectRatio = switch (defaultTargetPlatform) {
+      TargetPlatform.android || TargetPlatform.iOS when !kIsWeb => 2 / 3,
+      _ => 3 / 2,
+    };
 
     setState(() {
       _isMicEnabled = widget.isMicEnabled;
@@ -76,25 +70,28 @@ class _BroadcastStreamState extends State<BroadcastStream> {
     _engine.registerEventHandler(
       RtcEngineEventHandler(
         // Occurs when the local user joins the channel successfully
+
         onJoinChannelSuccess: (connection, elapsed) {
           debugPrint('local user ${connection.localUid} joined');
           setState(() {
             _localUserJoined = true;
             _currentUid = connection.localUid;
+            user = ThcUser.download(_currentUid.toString()) as ThcUser?;
             _users.add(
-              AgoraUser(
-                uid: connection.localUid!,
+              ThcUser(
+                id: _currentUid.toString(),
+                name: user.name,
                 isAudioEnabled: _isMicEnabled,
                 isVideoEnabled: _isVideoEnabled,
               ),
             );
             if (widget.director) {
               _directors.add(
-                AgoraUser(
-                  uid: connection.localUid!,
+                Director(
+                  id: _currentUid.toString(),
+                  name: user.name,
                   isAudioEnabled: _isMicEnabled,
                   isVideoEnabled: _isVideoEnabled,
-                  director: true,
                 ),
               );
             }
@@ -138,8 +135,8 @@ class _BroadcastStreamState extends State<BroadcastStream> {
       } else {
         _engine.disableAudio();
       }
-      for (AgoraUser user in _directors) {
-        if (user.uid == _currentUid) {
+      for (Director user in _directors) {
+        if (user.id == _currentUid) {
           user.isAudioEnabled = _isMicEnabled;
         }
       }
@@ -155,8 +152,8 @@ class _BroadcastStreamState extends State<BroadcastStream> {
       } else {
         _engine.disableVideo();
       }
-      for (AgoraUser director in _directors) {
-        if (director.uid == _currentUid) {
+      for (Director director in _directors) {
+        if (director.id == _currentUid) {
           setState(() => director.isVideoEnabled = _isVideoEnabled);
         }
       }
@@ -308,14 +305,14 @@ class _BroadcastStreamState extends State<BroadcastStream> {
 class AgoraVideoLayout extends StatelessWidget {
   const AgoraVideoLayout({
     super.key,
-    required Set<AgoraUser> directors,
+    required Set<Director> directors,
     required List<int> views,
     required double viewAspectRatio,
   })  : _directors = directors,
         _views = views,
         _viewAspectRatio = viewAspectRatio;
 
-  final Set<AgoraUser> _directors;
+  final Set<Director> _directors;
   final List<int> _views;
   final double _viewAspectRatio;
 
@@ -363,12 +360,12 @@ class AgoraVideoView extends StatelessWidget {
   const AgoraVideoView({
     super.key,
     required double viewAspectRatio,
-    required AgoraUser user,
+    required ThcUser user,
   })  : _viewAspectRatio = viewAspectRatio,
         _user = user;
 
   final double _viewAspectRatio;
-  final AgoraUser _user;
+  final ThcUser _user;
 
   @override
   Widget build(BuildContext context) {

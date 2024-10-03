@@ -17,16 +17,10 @@ class JoinActiveStream extends StatefulWidget {
 }
 
 class _JoinActiveStreamState extends State<JoinActiveStream> {
-  late final FocusNode _unfocusNode;
+final FocusNode _unfocusNode = FocusNode();
   String? channelName;
 
   bool _isCreatingChannel = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _unfocusNode = FocusNode();
-  }
 
   @override
   void dispose() {
@@ -42,28 +36,19 @@ class _JoinActiveStreamState extends State<JoinActiveStream> {
     );
   }
 
-  getActiveStreams() {
-    final (:active, :scheduled) = ScheduledStreams.of(context);
-    var stream;
-    final List<Widget> activeStreams = [];
-    for (stream in active) {
-      final activeStream = stream;
-      activeStreams.add(
-        Padding(
-          padding: const EdgeInsets.all(1),
-          child: Container(
-              child: TextButton(
-            onPressed: () => setState(() {
-              channelName = activeStream.title;
-              debugPrint(channelName);
-            }),
-            child: activeStream,
-          )),
-        ),
-      );
-    }
-    return activeStreams;
-  }
+  List<Widget> getActiveStreams() => [
+        for (final activeStream in ScheduledStreams.of(context).active)
+          Padding(
+            padding: const EdgeInsets.all(1),
+            child: TextButton(
+              onPressed: () => setState(() {
+                channelName = activeStream.title;
+                debugPrint(channelName);
+              }),
+              child: activeStream,
+            ),
+          ),
+      ];
 
   Future<void> _joinCall(channelName, token) async {
     const appId = AgoraCredentials.appId;

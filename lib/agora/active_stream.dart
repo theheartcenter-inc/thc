@@ -74,13 +74,10 @@ class _StreamingCamera extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final stream = NavBarSelection.streaming(context);
-    switch (stream) {
-      case true:
-        return const CreateChannelPage();
-      case false:
-        return const JoinActiveStream();
+    if (NavBarSelection.streaming(context)) {
+      return const CreateChannelPage();
     }
+    return const JoinActiveStream();
   }
 }
 
