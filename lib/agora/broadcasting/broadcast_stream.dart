@@ -48,7 +48,7 @@ class _BroadcastStreamState extends State<BroadcastStream> {
   }
 
   Future<void> initAgora() async {
-    _viewAspectRatio = switch (defaultTargetPlatform) {
+      _viewAspectRatio = switch (defaultTargetPlatform) {
       TargetPlatform.android || TargetPlatform.iOS when !kIsWeb => 2 / 3,
       _ => 3 / 2,
     };
@@ -70,7 +70,7 @@ class _BroadcastStreamState extends State<BroadcastStream> {
     _engine.registerEventHandler(
       RtcEngineEventHandler(
         // Occurs when the local user joins the channel successfully
-
+        
         onJoinChannelSuccess: (connection, elapsed) {
           debugPrint('local user ${connection.localUid} joined');
           setState(() {
@@ -87,12 +87,12 @@ class _BroadcastStreamState extends State<BroadcastStream> {
             );
             if (widget.director) {
               _directors.add(
-                Director(
-                  id: _currentUid.toString(),
-                  name: user.name,
-                  isAudioEnabled: _isMicEnabled,
-                  isVideoEnabled: _isVideoEnabled,
-                ),
+              Director(
+                id: _currentUid.toString(),
+                name: user.name,
+                isAudioEnabled: _isMicEnabled,
+                isVideoEnabled: _isVideoEnabled,
+              ),
               );
             }
           });
