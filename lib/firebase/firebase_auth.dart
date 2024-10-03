@@ -1,3 +1,4 @@
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/home/surveys/take_survey/survey.dart';
@@ -105,4 +106,8 @@ Future<String?> resetPassword() async {
       _ => 'Error: ${e.code}',
     };
   }
+}
+
+Future<HttpsCallableResult<String?>> generateToken(Json input) {
+  return FirebaseFunctions.instance.httpsCallable('generateToken').call(input);
 }

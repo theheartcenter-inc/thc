@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:thc/agora/active_stream.dart';
+import 'package:thc/agora/join_active_stream.dart';
 import 'package:thc/agora/livestream_button.dart';
 import 'package:thc/the_good_stuff.dart';
 import 'package:thc/utils/widgets/placeholders.dart';
