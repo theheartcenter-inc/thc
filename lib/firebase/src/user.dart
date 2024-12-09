@@ -3,10 +3,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:meta/meta.dart';
 import 'package:thc/firebase/firebase.dart';
 import 'package:thc/utils/app_config.dart';
 import 'package:thc/utils/local_storage.dart';
+import 'package:flutter/material.dart';
 
 /// {@template ThcUser}
 /// We can't just call this class `User`, since that's one of the Firebase classes.
@@ -24,6 +24,9 @@ sealed class ThcUser {
     bool registered = true,
     bool? notify,
     String? profilePictureUrl,
+    Widget? view,
+    bool? isAudioEnabled,
+    bool? isVideoEnabled,
   }) {
     assert((id ?? email) != null);
 
@@ -42,6 +45,9 @@ sealed class ThcUser {
           registered: registered,
           notify: notify,
           profilePictureUrl: profilePictureUrl,
+          isAudioEnabled: isAudioEnabled,
+          isVideoEnabled: isVideoEnabled,
+          view: view,
         ),
       UserType.admin => Admin(
           name: name,
@@ -50,12 +56,15 @@ sealed class ThcUser {
           registered: registered,
           notify: notify,
           profilePictureUrl: profilePictureUrl,
+          isAudioEnabled: isAudioEnabled,
+          isVideoEnabled: isVideoEnabled,
+          view: view,
         ),
     };
   }
 
   /// {@macro ThcUser}
-  const ThcUser._({
+  ThcUser._({
     required this.name,
     required this.type,
     this.id,
@@ -63,6 +72,9 @@ sealed class ThcUser {
     this.notify,
     this.registered = true,
     this.profilePictureUrl,
+    this.isAudioEnabled,
+    this.isVideoEnabled,
+    this.view,
   }) : assert((id ?? email) != null);
 
   /// {@macro ThcUser}
@@ -75,6 +87,9 @@ sealed class ThcUser {
       email: json['email'],
       notify: json['notify'],
       profilePictureUrl: json['profilePictureUrl'],
+      isAudioEnabled: json['isAudioEnabled'],
+      isVideoEnabled: json['isVideoEnabled'],
+      view: json['view'],
     );
   }
 
@@ -85,6 +100,9 @@ sealed class ThcUser {
   final bool registered;
   final bool? notify;
   final String? profilePictureUrl;
+  bool? isAudioEnabled;
+  bool? isVideoEnabled;
+  final Widget? view;
 
   static const _collection = Firestore.users;
   static ThcUser? instance;
@@ -152,6 +170,9 @@ sealed class ThcUser {
     String? name,
     String? email,
     String? profilePictureUrl,
+    bool? isAudioEnabled,
+    Widget? view,
+    bool? isVideoEnabled,
     bool? registered,
     bool? notify,
   }) {
@@ -163,6 +184,9 @@ sealed class ThcUser {
       notify: notify ?? this.notify,
       registered: registered ?? this.registered,
       profilePictureUrl: profilePictureUrl ?? this.profilePictureUrl,
+      isAudioEnabled: isAudioEnabled ?? this.isAudioEnabled,
+      isVideoEnabled: isVideoEnabled ?? this.isVideoEnabled,
+      view: view ?? this.view,
     );
   }
 
@@ -177,6 +201,9 @@ sealed class ThcUser {
         if (email != null) 'email': email,
         if (!registered) 'registered': false,
         if (profilePictureUrl != null) 'profilePictureUrl': profilePictureUrl,
+        if (isAudioEnabled != isAudioEnabled) 'isAudioEnabled': isAudioEnabled,
+        if (isVideoEnabled != isVideoEnabled) 'isVideoEnabled': isVideoEnabled,
+        if (view != view) 'view' : view,
       };
 
   bool get canLivestream => switch (type) {
@@ -196,15 +223,19 @@ sealed class ThcUser {
         other.name == name &&
         other.email == email &&
         other.profilePictureUrl == profilePictureUrl &&
+        other.isAudioEnabled == isAudioEnabled &&
+        other.isVideoEnabled == isVideoEnabled &&
+        other.view == view &&
         other.registered == registered;
   }
 
   @override
-  int get hashCode => Object.hash(id, name, email, profilePictureUrl, registered);
+  int get hashCode =>
+      Object.hash(id, name, email, profilePictureUrl, registered, isAudioEnabled, isVideoEnabled, view);
 }
 
 class Participant extends ThcUser {
-  const Participant({
+  Participant({
     required super.id,
     required super.name,
     super.email,
@@ -214,23 +245,29 @@ class Participant extends ThcUser {
 }
 
 class Director extends ThcUser {
-  const Director({
+  Director({
     required super.id,
     required super.name,
     super.email,
     super.registered = true,
     super.notify,
     super.profilePictureUrl,
+    super.isAudioEnabled,
+    super.isVideoEnabled,
+    super.view,
   }) : super._(type: UserType.director);
 }
 
 class Admin extends ThcUser {
-  const Admin({
+  Admin({
     required super.id,
     required super.name,
     super.email,
     super.registered = true,
     super.notify,
     super.profilePictureUrl,
+    super.isAudioEnabled,
+    super.isVideoEnabled,
+    super.view,
   }) : super._(type: UserType.admin);
 }

@@ -1,5 +1,9 @@
 import 'dart:math' as math;
 
+import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:thc/agora/broadcasting/broadcast_stream.dart';
+import 'package:thc/agora/channel/create_channel.dart';
+import 'package:thc/agora/join_active_stream.dart';
 import 'package:thc/agora/livestream_button.dart';
 import 'package:thc/agora/livestream_overlay.dart';
 import 'package:thc/home/home_screen.dart';
@@ -59,30 +63,9 @@ class _ActiveStreamState extends State<ActiveStream> {
 
   @override
   Widget build(BuildContext context) {
-    useTimer(const Duration(seconds: 10), endOnTime);
+    useTimer(const Duration(seconds: 500), endOnTime);
 
-    return PopScope(
-      canPop: NavBarSelection.streaming(context),
-      onPopInvokedWithResult: endStream,
-      child: Scaffold(
-        body: const OverlayController(
-          child: Stack(
-            alignment: Alignment.bottomRight,
-            children: [
-              LivestreamButton.backdrop(),
-              LivestreamOverlay(whenHidden: 0.25, child: _ViewCount()),
-              LivestreamOverlay(whenHidden: 0.0, child: _StreamingCamera()),
-              NavBar(belowPage: true),
-            ],
-          ),
-        ),
-        floatingActionButton: LivestreamOverlay(
-          whenHidden: const Offset(0, 2),
-          child: _EndButton(onPressed: endStream),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      ),
-    );
+    return const _StreamingCamera();
   }
 }
 
@@ -91,14 +74,10 @@ class _StreamingCamera extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final enjoying = NavBarSelection.streaming(context) ? 'filming' : 'watching';
-
-    return Center(
-      child: Text(
-        "(pretend you're $enjoying a very cool livestream)",
-        style: const TextStyle(color: Colors.white70),
-      ),
-    );
+    if (NavBarSelection.streaming(context)) {
+      return const CreateChannelPage();
+    }
+    return const JoinActiveStream();
   }
 }
 
