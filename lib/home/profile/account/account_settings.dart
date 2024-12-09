@@ -1,11 +1,13 @@
 import 'package:thc/home/profile/account/account_field.dart';
 import 'package:thc/home/profile/account/change_password.dart';
 import 'package:thc/home/profile/account/close_account.dart';
+import 'package:thc/home/profile/account/delete_account.dart'; 
 import 'package:thc/home/profile/profile.dart';
 import 'package:thc/the_good_stuff.dart';
 
 class AccountSettings extends StatefulWidget {
   const AccountSettings({super.key});
+
 
   @override
   State<AccountSettings> createState() => _AccountSettingsState();
@@ -71,19 +73,19 @@ class _AccountSettingsState extends State<AccountSettings> {
               ]),
             1 => ListTile(
                 leading: const Icon(Icons.lock_outline),
-                title: const Text('change password'),
+                title: const Text('Change Password'),
                 onTap: () => navigator.push(const ChangePasswordScreen()),
               ),
             2 => ListTile(
                 leading: const Icon(Icons.logout),
-                title: const Text('sign out'),
+                title: const Text('Sign Out'),
                 onTap: () async {
                   final signOut = await navigator.showDialog(
                     const Dialog.confirm(
-                      titleText: 'sign out',
+                      titleText: 'Sign Out',
                       bodyText: 'Are you sure you want to sign out?\n'
                           "You'll need to enter your email & password to sign back in.",
-                      actionText: ('back', 'sign out'),
+                      actionText: ('Back', 'Sign Out'),
                       actionsAlignment: MainAxisAlignment.spaceEvenly,
                     ),
                   );
@@ -93,8 +95,11 @@ class _AccountSettingsState extends State<AccountSettings> {
               ),
             _ => ListTile(
                 leading: const Icon(Icons.person_off_outlined),
-                title: const Text('close account'),
-                onTap: () => navigator.showDialog(const CloseAccount()),
+                title: const Text('Close Account'),
+                onTap: () => showDialog(
+                  context: context,
+                  builder: (context) => const DeleteAccountDialog(), 
+                ),
               ),
           },
         ),
