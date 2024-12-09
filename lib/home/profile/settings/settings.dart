@@ -1,4 +1,3 @@
-import 'package:thc/firebase/firebase.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:thc/home/home_screen.dart';
 import 'package:thc/the_good_stuff.dart';
@@ -63,18 +62,16 @@ class NotificationSwitch extends StatefulWidget {
 }
 
 class _NotificationSwitchState extends State<NotificationSwitch> {
-  @override
-  Future<void> _updateUserPreference(bool? value) async {
+  Future<void> _updateUserPreference(bool value) async {
     await Firestore.users.doc(user.id ?? user.email!).update({'notify': value});
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
-    String? token = await messaging.getToken();
-    if(value == true){
+    final FirebaseMessaging messaging = FirebaseMessaging.instance;
+    final String? token = await messaging.getToken();
+    if (value) {
       await Firestore.users.doc(user.id ?? user.email!).update({'fcmToken': token});
-      await FirebaseMessaging.instance.subscribeToTopic("livestream_notifications");
-    }
-    if(value == false){
+      await FirebaseMessaging.instance.subscribeToTopic('livestream_notifications');
+    } else {
       await Firestore.users.doc(user.id ?? user.email!).update({'fcmToken': ''});
-      await FirebaseMessaging.instance.unsubscribeFromTopic("livestream_notifications");
+      await FirebaseMessaging.instance.unsubscribeFromTopic('livestream_notifications');
     }
   }
 
@@ -84,7 +81,7 @@ class _NotificationSwitchState extends State<NotificationSwitch> {
     return SwitchListTile(
       title: const Text('Enable Livestream Notifications'),
       value: value,
-      onChanged: (bool newValue) {
+      onChanged: (newValue) {
         setState(() => value = newValue);
         widget.storageKey.save(value);
         context.read<NavBarSelection>().refresh();
